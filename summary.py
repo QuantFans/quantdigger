@@ -17,4 +17,6 @@ def tradeinfo(fname, n=10, intraday=False):
     plt.show()
 
 if __name__ == '__main__':
-    pass
+    tradeinfo("_djtrend2_IF000")
+    print "ok" 
+

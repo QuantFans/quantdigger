@@ -4,7 +4,7 @@ import numpy as np
 import os
 import datetime as dt
 
-home = "D:\\stock\\" 
+home = os.getcwd() + "\\data\\" 
 
 def set_dir(dname):
     '''docstring for set_dir''' 
@@ -261,6 +261,8 @@ def load_datas(n, intraday, *fnames):
         name, ext =  os.path.splitext(os.path.basename(fname))
         name = os.path.dirname(fname) + name + "_" + ext
         names.append(path_name(name))
+        print "***************" 
+        print names
 
         tradeinfo = pd.concat([csv2frame(name) for name in names])
         tradeinfo = tradeinfo.sort_index()
