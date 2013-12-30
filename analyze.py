@@ -10,6 +10,7 @@ import pandas as pd
 from stock_plot import *
 from data import *
 
+
 def summary(data):
     '''docstring for plot_table''' 
     data_win = data[data.exit_profit>0]

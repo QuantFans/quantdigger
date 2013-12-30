@@ -11,6 +11,7 @@ def set_dir(dname):
     global home
     home = dname
 
+
 def csv2frame(fname):
     ''' 读取CSV文件到DataFrame '''
     try:
@@ -21,6 +22,7 @@ def csv2frame(fname):
         data = None
     assert data.index.is_unique
     return data
+
 
 class Record(object):
     """Represents a record."""
@@ -83,6 +85,7 @@ def load_records(fnames):
     data = data.sort_index()
     return frame2records(data), data
 
+
 def max_return(nbarprice, islong):
     '''docstring for maxreturn''' 
     high = -1000000
@@ -108,6 +111,7 @@ def max_return(nbarprice, islong):
                 high = ith_price
                 maxdiffs.append(high-low)
         return max(maxdiffs) if maxdiffs else 0
+
 
 def simple_deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
     print "Loaded File: %s" % pricefname
@@ -153,6 +157,7 @@ def simple_deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
     print "Data Preprocessing Done!"
     data.to_csv("d:\\rst.csv")
     return data
+
 
 def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
     print "Loaded File: %s" % pricefname
@@ -249,6 +254,7 @@ def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
     #data.to_csv("d:\\rst.csv")
     return data
 
+
 def load_datas(n, intraday, *fnames):
     '''''' 
     def path_name(fname):
@@ -274,6 +280,7 @@ def load_datas(n, intraday, *fnames):
         datas.append(data)
     return tuple(datas)
 
+
 def load_tradeinfo(fname):
     '''''' 
     def path_name(fname):
@@ -295,21 +302,22 @@ def symbolfromtradefname(fname, prefixnum=2):
     '''docstring for symbolfromfname''' 
     return fname.split('_')[prefixnum]
 
+
 def pricefname_from_tradefname(fname, prefixnum=2):
     '''docstring for pricefname_from_tradefname''' 
     return '_' + symbolfromtradefname(fname, prefixnum) + '.csv'
 
+
 def simple_load_data(fname, n, intraday):
     entryinfo = pd.read_csv("%strace\\%s.csv"%(home, fname), index_col=0, parse_dates=True)
     assert entryinfo.index.is_unique
-
-    print entryinfo
     #print entryinfo.islong
     print "Loaded File: %s"%home + fname + ".csv"
     pricefname = pricefname_from_tradefname(fname, 1)
     stock_dir= home + "stock_data\\"
     pricefname = stock_dir + pricefname
     return simple_deal_tradeinfo(entryinfo, pricefname, n, intraday)
+
 
 def load_wavedata(*fnames):
     '''
@@ -339,6 +347,7 @@ def load_wavedata(*fnames):
             if not ispre and not issep:
                 after_en_wave.append(line)
         return [index, pre_en_wave, after_en_wave]
+
     rst = []
     for fname in fnames:
         # code...

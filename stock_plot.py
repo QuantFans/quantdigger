@@ -9,6 +9,7 @@ import numpy as np
 import operator
 import pandas as pd
 
+
 def accumulate(iterable, func=operator.add):
     'Return running totals'
     # accumulate([1,2,3,4,5]) --> 1 3 6 10 15
@@ -23,6 +24,7 @@ def accumulate(iterable, func=operator.add):
 
 font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=8) 
 font_big = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=14) 
+
 
 class EventHandler(object):
     """docstring for EventHandler"""
@@ -47,8 +49,6 @@ class EventHandler(object):
                 c = pd.to_datetime(self.data.index[i]).strftime("%Y-%m-%d %H:%M:%S") + "\n" + "hh" 
                 self.fig.axes[2].set_xlabel(c)
                 self.pre_x = i
-
-
 
 
 def plot_simple_entry(fig, entry_nbar_best, entry_nbar_worst, nbar):
@@ -230,8 +230,6 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
     plot_contribution(ax12, bins, exit_profit, 'bo--')
     ax12.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
     #ax12.set_yscale('log')
-
-
 
     # MAE
     MAE = entry_worst.reindex(exit_profit[exit_profit>0].index)
@@ -593,11 +591,7 @@ def candlestick2(ax, opens, closes, highs, lows, width=4,
 
     delta = width/2.
     barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(xrange(len(opens)), opens, closes) if open != -1 and close!=-1 ]
-
     rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(xrange(len(lows)), lows, highs) if low != -1 ]
-
-
-
     r,g,b = colorConverter.to_rgb(colorup)
     colorup = r,g,b,alpha
     r,g,b = colorConverter.to_rgb(colordown)
@@ -609,7 +603,6 @@ def candlestick2(ax, opens, closes, highs, lows, width=4,
     assert(len(barVerts)==len(rangeSegments))
     useAA = 0,  # use tuple here
     lw = 0.5,   # and here
-
     r,g,b = colorConverter.to_rgb(lc)
     linecolor = r,g,b,alpha
     rangeCollection = LineCollection(rangeSegments,
@@ -626,15 +619,12 @@ def candlestick2(ax, opens, closes, highs, lows, width=4,
                                    linewidths   = lw,
                                    zorder = 1,
                                    )
-
     minx, maxx = 0, len(rangeSegments)
     miny = min([low for low in lows if low !=-1])
     maxy = max([high for high in highs if high != -1])
-
     corners = (minx, miny), (maxx, maxy)
     ax.update_datalim(corners)
     ax.autoscale_view()
-
     # add these last
     ax.add_collection(barCollection)
     ax.add_collection(rangeCollection)
