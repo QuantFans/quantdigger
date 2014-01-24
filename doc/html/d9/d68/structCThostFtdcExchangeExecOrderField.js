@@ -1,0 +1,26 @@
+var structCThostFtdcExchangeExecOrderField =
+[
+    [ "BusinessUnit", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a90d36786aa8299d223f3f370f6f290b0", null ],
+    [ "CancelTime", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a214599c7f1af453d8c7e33c9873634a4", null ],
+    [ "ClearingPartID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a8609659861f9e2b70c490f257de4b354", null ],
+    [ "ClientID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#aa65503537c207996242404115fb7f581", null ],
+    [ "ExchangeID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a240432091d0149b4be7bf50a76a806df", null ],
+    [ "ExchangeInstID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a7916771f8766b039f721480c03837b93", null ],
+    [ "ExecOrderLocalID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a225a444006d9d029b93a8f94724751f8", null ],
+    [ "ExecOrderSysID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#acffd6e3b10ceeccf96323eb3061e3488", null ],
+    [ "ExecResult", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a3d880a40c84b6e78947fb8a4b45a00ae", null ],
+    [ "HedgeFlag", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a48152180d4f1c757ba303b255251dc0f", null ],
+    [ "InsertDate", "d9/d68/structCThostFtdcExchangeExecOrderField.html#acdeb144fc6238f63a4d986a49b86fd1d", null ],
+    [ "InsertTime", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a98d1a70cc8b18c6a4e939a4bfcd14a32", null ],
+    [ "InstallID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#ad542f0961040d449c684f5ac45b1ea5c", null ],
+    [ "NotifySequence", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a19a90554838a1c10dd41c81ca8534825", null ],
+    [ "OffsetFlag", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a2002a5416620386203638c878c5a547c", null ],
+    [ "OrderSubmitStatus", "d9/d68/structCThostFtdcExchangeExecOrderField.html#aeed9f5cf3a1cb9b3d43cf5dd0a0c0fff", null ],
+    [ "ParticipantID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a1332c37a47fbdfacf1f62dd27657fc6d", null ],
+    [ "RequestID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a1ff6fb21f2553b114814f6b3b5dc6cf6", null ],
+    [ "SequenceNo", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a127ea71b3225a588ce9e88b4fe46610c", null ],
+    [ "SettlementID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#a35e3ea2a971bf98d6b5c2f739323b3d0", null ],
+    [ "TraderID", "d9/d68/structCThostFtdcExchangeExecOrderField.html#ab536350ab521c3362b22d52a28ff264e", null ],
+    [ "TradingDay", "d9/d68/structCThostFtdcExchangeExecOrderField.html#aa03a39505a6eda151b0cebdfbed0ea2d", null ],
+    [ "Volume", "d9/d68/structCThostFtdcExchangeExecOrderField.html#ad892a85a947897eaebe6ac241e2bc3f5", null ]
+];

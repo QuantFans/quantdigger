@@ -1,0 +1,28 @@
+var structCThostFtdcErrOrderField =
+[
+    [ "BrokerID", "d2/d92/structCThostFtdcErrOrderField.html#ac19beccac3adc4db97c2d29715793b38", null ],
+    [ "BusinessUnit", "d2/d92/structCThostFtdcErrOrderField.html#a9b057f79ca52b3b136278c848fdb16c6", null ],
+    [ "CombHedgeFlag", "d2/d92/structCThostFtdcErrOrderField.html#ae08cf451415ab812b5d198f964e6d103", null ],
+    [ "CombOffsetFlag", "d2/d92/structCThostFtdcErrOrderField.html#ab2f6567f31fc27ffd9aa50d6ee778c10", null ],
+    [ "ContingentCondition", "d2/d92/structCThostFtdcErrOrderField.html#a4ffe666283bfdd0cfd4b38cf8b5263b5", null ],
+    [ "Direction", "d2/d92/structCThostFtdcErrOrderField.html#a5a88cbdea06564aeb5ddcd898866c47d", null ],
+    [ "ErrorID", "d2/d92/structCThostFtdcErrOrderField.html#a989c9474fdbcd7307a368a94c67a3a1e", null ],
+    [ "ErrorMsg", "d2/d92/structCThostFtdcErrOrderField.html#ac4fdc354628209237495c8a81bd83b20", null ],
+    [ "ForceCloseReason", "d2/d92/structCThostFtdcErrOrderField.html#ab82c48aae6e41b6dffa6e5a25f0081aa", null ],
+    [ "GTDDate", "d2/d92/structCThostFtdcErrOrderField.html#a3304962596b1794ac07ab93aab611153", null ],
+    [ "InstrumentID", "d2/d92/structCThostFtdcErrOrderField.html#a29f0f10467f3b23ea92d2b4251b75cf5", null ],
+    [ "InvestorID", "d2/d92/structCThostFtdcErrOrderField.html#a5889f16327b04a85b47abf54cca68b6f", null ],
+    [ "IsAutoSuspend", "d2/d92/structCThostFtdcErrOrderField.html#a2216aa60f23f3055d7f1c339ccae14aa", null ],
+    [ "IsSwapOrder", "d2/d92/structCThostFtdcErrOrderField.html#a4c9d38441ab151444014d8b5d5aa741c", null ],
+    [ "LimitPrice", "d2/d92/structCThostFtdcErrOrderField.html#adad5c3da9292f42cf1ca3db006c43f8a", null ],
+    [ "MinVolume", "d2/d92/structCThostFtdcErrOrderField.html#a9d64c361e5b8c052896d2115f2a2fe54", null ],
+    [ "OrderPriceType", "d2/d92/structCThostFtdcErrOrderField.html#a4047f1807ed2bff91c006222b5868247", null ],
+    [ "OrderRef", "d2/d92/structCThostFtdcErrOrderField.html#aa70a69e8db6ddb2dfc0d562355079e8d", null ],
+    [ "RequestID", "d2/d92/structCThostFtdcErrOrderField.html#a42a515928056b430a7e58e0fa69d3dfc", null ],
+    [ "StopPrice", "d2/d92/structCThostFtdcErrOrderField.html#af44abbde30f77261730780004489eb30", null ],
+    [ "TimeCondition", "d2/d92/structCThostFtdcErrOrderField.html#a4bdee9fcfe8dc9e5e969015c939fd589", null ],
+    [ "UserForceClose", "d2/d92/structCThostFtdcErrOrderField.html#a986420eb94782fecc5d733205f54f99e", null ],
+    [ "UserID", "d2/d92/structCThostFtdcErrOrderField.html#a1af04b812beedbe8a6809648dfa7be7b", null ],
+    [ "VolumeCondition", "d2/d92/structCThostFtdcErrOrderField.html#aefabd3b481351d5fa9ba6c22c50c98c4", null ],
+    [ "VolumeTotalOriginal", "d2/d92/structCThostFtdcErrOrderField.html#ad1dd5a6da85bdd966c13aa6a2868b318", null ]
+];

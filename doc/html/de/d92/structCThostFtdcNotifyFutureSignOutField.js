@@ -1,0 +1,26 @@
+var structCThostFtdcNotifyFutureSignOutField =
+[
+    [ "BankBranchID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#afcb21d9462d0287a40dd5905941010fe", null ],
+    [ "BankID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#af3fa1e6c52b196ecf3cfe45c14678920", null ],
+    [ "BankSerial", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#adadabf110aa6eaeb0946be2bd466b40e", null ],
+    [ "BrokerBranchID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a99e48e6d8d99654d8ca977d61bde990f", null ],
+    [ "BrokerID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a2dcd9c7b8ce59d9c962906bc8a083cb0", null ],
+    [ "BrokerIDByBank", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#ac69a7a932c1430accb2a393865b199c3", null ],
+    [ "CurrencyID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a6f54477d35067e070c0f38bb6c2add97", null ],
+    [ "DeviceID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a9d9e347f3cfad1bc5eac7dbfb44ce4c6", null ],
+    [ "Digest", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#ae27eebf36a7213784d93f126ae632d0a", null ],
+    [ "ErrorID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a52e98e821b3399ea70b35b0f4bcdeae9", null ],
+    [ "ErrorMsg", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a14cf1df237b44e0807442592c39390fe", null ],
+    [ "InstallID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#aa92a75c338370abc9b0e94e6619977a1", null ],
+    [ "LastFragment", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a87d94e8bf3ae099dbe023b2a3ed71a26", null ],
+    [ "OperNo", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a0ec3d87f2a6d15bdcd830b0dcad550da", null ],
+    [ "PlateSerial", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a3c98a2017991eabd24ebd2a25f5023f8", null ],
+    [ "RequestID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#ada597c1649701b435b321c436a83fcdc", null ],
+    [ "SessionID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a1ed71b09df30a20f564add3522ae14d7", null ],
+    [ "TID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a272a3783c89fab7197f86a570ade75fd", null ],
+    [ "TradeCode", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a6289a5aa3f8919c30d77d8b6736a0350", null ],
+    [ "TradeDate", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#ad1b5fa2892e3a38276134d6bc278c625", null ],
+    [ "TradeTime", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#a1702b786fb2b3fc4333054a3bccf74a1", null ],
+    [ "TradingDay", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#afa946b95ffe5f1aabd69c9f77b9f4d57", null ],
+    [ "UserID", "de/d92/structCThostFtdcNotifyFutureSignOutField.html#ac9ac6c52bf95b46e52dac37534ae4ae8", null ]
+];

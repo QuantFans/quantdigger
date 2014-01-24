@@ -1,0 +1,1 @@
+/home/wondereamer/stock/ktrader/build/ctp_demo/CMakeFiles/main.dir

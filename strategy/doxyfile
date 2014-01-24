@@ -1,0 +1,26 @@
+
+PROJECT_NAME           =
+OUTPUT_DIRECTORY       = ./Doc
+RECURSIVE              = NO
+INPUT               =
+DOXYFILE_ENCODING      = UTF-8
+OUTPUT_LANGUAGE        = English
+GENERATE_LATEX           = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
+
+REFERENCED_BY_RELATION = NO 
+
+REFERENCES_RELATION    = YES
+SOURCE_BROWSER         = NO
+INLINE_SOURCES         = NO
+
+
+CALLER_GRAPH           = YES
+CALL_GRAPH             = YES
+HAVE_DOT           = YES
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_METHODS  = YES
+
