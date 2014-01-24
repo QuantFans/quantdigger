@@ -1,7 +1,0 @@
-digraph "strategy/" {
-  bgcolor=transparent;
-  compound=true
-  node [ fontsize="10", fontname="FreeSans"];
-  edge [ labelfontsize="10", labelfontname="FreeSans"];
-  dir_a974bd797aec674cf3748ad59a7acb61 [shape=box, label="strategy", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_a974bd797aec674cf3748ad59a7acb61.html"];
-}

@@ -1,7 +1,0 @@
-digraph "data_analyzer/" {
-  bgcolor=transparent;
-  compound=true
-  node [ fontsize="10", fontname="FreeSans"];
-  edge [ labelfontsize="10", labelfontname="FreeSans"];
-  dir_c8b58f5f58248253db535d86a446e4d3 [shape=box, label="data_analyzer", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_c8b58f5f58248253db535d86a446e4d3.html"];
-}
