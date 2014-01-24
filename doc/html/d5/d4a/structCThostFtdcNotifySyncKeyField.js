@@ -1,0 +1,25 @@
+var structCThostFtdcNotifySyncKeyField =
+[
+    [ "BankBranchID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a2ca7c29f68f7f0194374d0207919e52e", null ],
+    [ "BankID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a222653a0dc246352546b94b8195c248f", null ],
+    [ "BankSerial", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a5d7527292935aa1a1cee342292e50337", null ],
+    [ "BrokerBranchID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a0ff4dc2b7bb3df99564e81d408a87b19", null ],
+    [ "BrokerID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#ad778f3c5c66fb258d3427322df619fab", null ],
+    [ "BrokerIDByBank", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a089d4fe69347d2f9c3b6969a4aea1ba7", null ],
+    [ "DeviceID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#ad6f702b02ea2b08591d33828f03c3dc2", null ],
+    [ "ErrorID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a52284fb5b060b9fdbf3da3bff9fbfd38", null ],
+    [ "ErrorMsg", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a3d32d19610f6a1855a0b6b8121389769", null ],
+    [ "InstallID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a08545a51141e91aa1f8cdc8ab1d297c8", null ],
+    [ "LastFragment", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a4ebe74880c5bbfb42eaf04f467d3c045", null ],
+    [ "Message", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#ad78c3968808b70394e5736797c0b0c9d", null ],
+    [ "OperNo", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#ae2a95593112f120f425859e6348fc2d5", null ],
+    [ "PlateSerial", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a301da718bedac1757b2efb43deba1ad7", null ],
+    [ "RequestID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a3b83c69a18ac488671d0dbe7161f5f07", null ],
+    [ "SessionID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a4ea568fc81c2fed7570421cd37cca67d", null ],
+    [ "TID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a31a32da526206f5aefafb844e946bdee", null ],
+    [ "TradeCode", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a68abe9e56f5011fb838e165a505a7041", null ],
+    [ "TradeDate", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a5dbcd605eb2049d93384f29ce00f309d", null ],
+    [ "TradeTime", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#a3423ee4264a01abcb6e2cc05f16cabf5", null ],
+    [ "TradingDay", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#aae4e4cdb07540780efebdff6f07b358f", null ],
+    [ "UserID", "d5/d4a/structCThostFtdcNotifySyncKeyField.html#acba6ee07b41d3179a45322b2b394653f", null ]
+];
