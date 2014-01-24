@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/main.dir/Main.cpp.o CMakeFiles/main.dir/CSem.cpp.o CMakeFiles/main.dir/CtpTraderSpi.cpp.o  -o main -rdynamic -L/home/wondereamer/stock/ktrader/lib -lthostmduserapi -lthosttraderapi -Wl,-rpath,/home/wondereamer/stock/ktrader/lib 
