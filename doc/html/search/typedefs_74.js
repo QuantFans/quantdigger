@@ -1,5 +1,7 @@
 var searchData=
 [
+  ['tickdata',['TickData',['../d9/d0d/namespaceEasyQuant.html#abf529b50b828bc18d944209b33b68996',1,'EasyQuant']]],
+  ['time',['Time',['../d9/d0d/namespaceEasyQuant.html#a56819f657ee3f390f8da77dc62ab9e33',1,'EasyQuant::Time()'],['../d2/db7/namespaceEQLanguage.html#a3b48893e47629cb8497a35a5cd4d8b35',1,'EQLanguage::Time()']]],
   ['tthostftdcaccountidtype',['TThostFtdcAccountIDType',['../d4/d23/ThostFtdcUserApiDataType_8h.html#abe89795469c20b82c8c8aa342bdbc4b4',1,'ThostFtdcUserApiDataType.h']]],
   ['tthostftdcaccountsourcetypetype',['TThostFtdcAccountSourceTypeType',['../d4/d23/ThostFtdcUserApiDataType_8h.html#aab8120ec7d13705200638eccd0a0fc1e',1,'ThostFtdcUserApiDataType.h']]],
   ['tthostftdcactionflagtype',['TThostFtdcActionFlagType',['../d4/d23/ThostFtdcUserApiDataType_8h.html#a5ec1a8d5e12d2ded655934a98cd9b6c6',1,'ThostFtdcUserApiDataType.h']]],

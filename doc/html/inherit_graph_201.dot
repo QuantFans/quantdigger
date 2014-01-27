@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcSettlementInfo\lConfirmField",height=0.2,width=0.4,color="black",URL="$db/db6/structCThostFtdcSettlementInfoConfirmField.html",tooltip="Í¶×ÊÕß½áËã½á¹ûÈ·ÈÏĞÅÏ¢"];
+  Node1 [label="CThostFtdcRspTransferField",height=0.2,width=0.4,color="black",URL="$dc/d24/structCThostFtdcRspTransferField.html",tooltip="é“¶è¡Œå‘èµ·é“¶è¡Œèµ„é‡‘è½¬æœŸè´§å“åº”"];
 }

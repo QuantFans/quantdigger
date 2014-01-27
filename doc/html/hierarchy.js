@@ -1,6 +1,12 @@
 var hierarchy =
 [
+    [ "EasyQuant::AlgorithmSimulator", "df/db2/classEasyQuant_1_1AlgorithmSimulator.html", null ],
+    [ "analyze.AnalyzeFrame", "d1/da8/classanalyze_1_1AnalyzeFrame.html", null ],
+    [ "Blotter", "db/dae/classBlotter.html", null ],
+    [ "widgets.CandleWindow", "d0/d7c/classwidgets_1_1CandleWindow.html", null ],
     [ "CSem", "d1/d9c/classCSem.html", null ],
+    [ "EasyQuant::CSVIterator", "de/dfb/classEasyQuant_1_1CSVIterator.html", null ],
+    [ "EasyQuant::CSVRow", "d6/d79/classEasyQuant_1_1CSVRow.html", null ],
     [ "CThostFtdcAccountregisterField", "d7/d3a/structCThostFtdcAccountregisterField.html", null ],
     [ "CThostFtdcAuthenticationInfoField", "df/d66/structCThostFtdcAuthenticationInfoField.html", null ],
     [ "CThostFtdcBrokerDepositField", "dc/dc6/structCThostFtdcBrokerDepositField.html", null ],
@@ -252,5 +258,17 @@ var hierarchy =
     [ "CThostFtdcVerifyFuturePasswordAndCustInfoField", "d5/d0c/structCThostFtdcVerifyFuturePasswordAndCustInfoField.html", null ],
     [ "CThostFtdcVerifyFuturePasswordField", "d0/d6e/structCThostFtdcVerifyFuturePasswordField.html", null ],
     [ "CThostFtdcVerifyInvestorPasswordField", "db/da5/structCThostFtdcVerifyInvestorPasswordField.html", null ],
-    [ "semun", "df/d90/unionsemun.html", null ]
+    [ "EasyQuant::DataSource", "de/d66/classEasyQuant_1_1DataSource.html", null ],
+    [ "stock_plot.EventHandler", "d2/db1/classstock__plot_1_1EventHandler.html", null ],
+    [ "EasyQuant::HistoryData", "de/de8/structEasyQuant_1_1HistoryData.html", null ],
+    [ "EasyQuant::Order", "db/db9/classEasyQuant_1_1Order.html", null ],
+    [ "EasyQuant::OrderSignal", "d5/d19/structEasyQuant_1_1OrderSignal.html", null ],
+    [ "data.Record", "d3/d9b/classdata_1_1Record.html", null ],
+    [ "semun", "df/d90/unionsemun.html", null ],
+    [ "EQLanguage::Series< T >", "d6/d1b/classEQLanguage_1_1Series.html", null ],
+    [ "widgets.SignalWindow", "da/db2/classwidgets_1_1SignalWindow.html", null ],
+    [ "widgets.Slider", "d1/d84/classwidgets_1_1Slider.html", null ],
+    [ "EasyQuant::TradingAlgorithm", "db/dcb/classEasyQuant_1_1TradingAlgorithm.html", [
+      [ "EasyQuant::TAlgo", "db/d00/classEasyQuant_1_1TAlgo.html", null ]
+    ] ]
 ];

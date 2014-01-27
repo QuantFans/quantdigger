@@ -5,5 +5,5 @@ digraph "ThostFtdcUserApiDataType.h"
   node [fontname="FreeSans",fontsize="10",shape=record];
   Node1 [label="ThostFtdcUserApiDataType.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
   Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
-  Node2 [label="ThostFtdcUserApiStruct.h",height=0.2,width=0.4,color="red",URL="$d9/d90/ThostFtdcUserApiStruct_8h.html",tooltip="¶¨ÒåÁË¿Í»§¶Ë½Ó¿ÚÊ¹ÓÃµÄÒµÎñÊı¾İ½á¹¹  20060106 ÕÔºèê» ´´½¨¸ÃÎÄ¼ş"];
+  Node2 [label="ThostFtdcUserApiStruct.h",height=0.2,width=0.4,color="red",URL="$d9/d90/ThostFtdcUserApiStruct_8h.html",tooltip="å®šä¹‰äº†å®¢æˆ·ç«¯æ¥å£ä½¿ç”¨çš„ä¸šåŠ¡æ•°æ®ç»“æ„  20060106 èµµé¸¿æ˜Š åˆ›å»ºè¯¥æ–‡ä»¶"];
 }

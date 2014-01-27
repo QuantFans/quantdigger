@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcLoadSettlement\lInfoField",height=0.2,width=0.4,color="black",URL="$d5/de8/structCThostFtdcLoadSettlementInfoField.html",tooltip="װ�ؽ�����Ϣ"];
+  Node1 [label="CThostFtdcInvestorWithdraw\lAlgorithmField",height=0.2,width=0.4,color="black",URL="$dd/dec/structCThostFtdcInvestorWithdrawAlgorithmField.html",tooltip="经纪公司可提资金算法表"];
 }

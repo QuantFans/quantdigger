@@ -1,21 +1,50 @@
 var files =
 [
-    [ "AlgorithmSimulator.h", "d3/d7b/AlgorithmSimulator_8h.html", null ],
+    [ "3d.py", "dc/d94/3d_8py.html", "dc/d94/3d_8py" ],
+    [ "algorithmsimulator.cpp", "d3/d37/algorithmsimulator_8cpp.html", null ],
+    [ "algorithmsimulator.h", "d0/db8/algorithmsimulator_8h.html", [
+      [ "AlgorithmSimulator", "df/db2/classEasyQuant_1_1AlgorithmSimulator.html", "df/db2/classEasyQuant_1_1AlgorithmSimulator" ]
+    ] ],
+    [ "analyze.py", "d2/d6e/analyze_8py.html", "d2/d6e/analyze_8py" ],
+    [ "average.cpp", "d8/de0/average_8cpp.html", "d8/de0/average_8cpp" ],
+    [ "blotter.h", "d0/de7/blotter_8h.html", [
+      [ "Blotter", "db/dae/classBlotter.html", "db/dae/classBlotter" ]
+    ] ],
+    [ "CMakeCCompilerId.c", "d9/d4b/CMakeCCompilerId_8c.html", "d9/d4b/CMakeCCompilerId_8c" ],
+    [ "CMakeCXXCompilerId.cpp", "d6/d83/CMakeCXXCompilerId_8cpp.html", "d6/d83/CMakeCXXCompilerId_8cpp" ],
     [ "CSem.cpp", "de/df5/CSem_8cpp.html", "de/df5/CSem_8cpp" ],
     [ "CSem.h", "d5/d22/CSem_8h.html", [
       [ "CSem", "d1/d9c/classCSem.html", "d1/d9c/classCSem" ]
     ] ],
+    [ "csv.cpp", "d2/d9a/csv_8cpp.html", "d2/d9a/csv_8cpp" ],
+    [ "csv.h", "d3/d8e/csv_8h.html", "d3/d8e/csv_8h" ],
     [ "CtpTraderSpi.cpp", "dc/d76/CtpTraderSpi_8cpp.html", "dc/d76/CtpTraderSpi_8cpp" ],
     [ "CtpTraderSpi.h", "d1/d52/CtpTraderSpi_8h.html", [
       [ "CtpTraderSpi", "dc/db9/classCtpTraderSpi.html", "dc/db9/classCtpTraderSpi" ]
     ] ],
-    [ "DataSource.h", "dc/d54/DataSource_8h.html", null ],
-    [ "Event.h", "d6/d8d/Event_8h.html", null ],
+    [ "data.py", "d8/d12/data_8py.html", "d8/d12/data_8py" ],
+    [ "datasource.cpp", "da/d94/datasource_8cpp.html", "da/d94/datasource_8cpp" ],
+    [ "datasource.h", "da/d1e/datasource_8h.html", "da/d1e/datasource_8h" ],
+    [ "datatype.h", "d1/d3c/datatype_8h.html", "d1/d3c/datatype_8h" ],
+    [ "definition.h", "df/da1/definition_8h.html", "df/da1/definition_8h" ],
+    [ "entry_3d.py", "d3/df0/entry__3d_8py.html", "d3/df0/entry__3d_8py" ],
+    [ "event.h", "dd/d20/event_8h.html", null ],
+    [ "function.h", "dd/d67/function_8h.html", "dd/d67/function_8h" ],
+    [ "k.py", "d5/d9e/k_8py.html", "d5/d9e/k_8py" ],
+    [ "main.cpp", "df/d0a/main_8cpp.html", "df/d0a/main_8cpp" ],
     [ "Main.cpp", "d5/de0/Main_8cpp.html", "d5/de0/Main_8cpp" ],
-    [ "Order.h", "d3/d2c/Order_8h.html", "d3/d2c/Order_8h" ],
-    [ "PerformanceTracker.h", "d8/dac/PerformanceTracker_8h.html", null ],
-    [ "Period.h", "d3/de6/Period_8h.html", null ],
-    [ "Slippage.h", "d2/dc7/Slippage_8h.html", null ],
+    [ "order.h", "d1/d58/order_8h.html", "d1/d58/order_8h" ],
+    [ "performancetracker.h", "d6/d68/performancetracker_8h.html", null ],
+    [ "period.h", "d7/d20/period_8h.html", null ],
+    [ "slippage.h", "dc/da8/slippage_8h.html", null ],
+    [ "stock_plot.py", "dc/d00/stock__plot_8py.html", "dc/d00/stock__plot_8py" ],
+    [ "summary.py", "d2/d81/summary_8py.html", "d2/d81/summary_8py" ],
+    [ "talgo.cpp", "d0/de3/talgo_8cpp.html", null ],
+    [ "talgo.h", "d1/d6f/talgo_8h.html", [
+      [ "TAlgo", "db/d00/classEasyQuant_1_1TAlgo.html", "db/d00/classEasyQuant_1_1TAlgo" ]
+    ] ],
+    [ "strategy/test.cpp", "d8/d25/strategy_2test_8cpp.html", "d8/d25/strategy_2test_8cpp" ],
+    [ "util/test.cpp", "d5/daf/util_2test_8cpp.html", "d5/daf/util_2test_8cpp" ],
     [ "ThostFtdcMdApi.h", "da/da7/ThostFtdcMdApi_8h.html", "da/da7/ThostFtdcMdApi_8h" ],
     [ "ThostFtdcTraderApi.h", "d4/d8a/ThostFtdcTraderApi_8h.html", "d4/d8a/ThostFtdcTraderApi_8h" ],
     [ "ThostFtdcUserApiDataType.h", "d4/d23/ThostFtdcUserApiDataType_8h.html", "d4/d23/ThostFtdcUserApiDataType_8h" ],
@@ -266,8 +295,16 @@ var files =
       [ "CThostFtdcBrokerUserRightAssignField", "d5/d79/structCThostFtdcBrokerUserRightAssignField.html", "d5/d79/structCThostFtdcBrokerUserRightAssignField" ],
       [ "CThostFtdcDRTransferField", "dd/d4b/structCThostFtdcDRTransferField.html", "dd/d4b/structCThostFtdcDRTransferField" ]
     ] ],
-    [ "TradingAlgorithm.h", "d8/d51/TradingAlgorithm_8h.html", null ],
-    [ "TradingEnvironment.h", "d6/d23/TradingEnvironment_8h.html", null ],
-    [ "Transaction.h", "da/db8/Transaction_8h.html", null ],
-    [ "Util.h", "d1/dc8/Util_8h.html", null ]
+    [ "trading_environment.h", "d2/d61/trading__environment_8h.html", null ],
+    [ "tradingalgorithm.cpp", "d9/dc5/tradingalgorithm_8cpp.html", null ],
+    [ "tradingalgorithm.h", "d1/dea/tradingalgorithm_8h.html", [
+      [ "TradingAlgorithm", "db/dcb/classEasyQuant_1_1TradingAlgorithm.html", "db/dcb/classEasyQuant_1_1TradingAlgorithm" ]
+    ] ],
+    [ "transaction.h", "d0/db6/transaction_8h.html", null ],
+    [ "util.h", "d8/d3c/util_8h.html", null ],
+    [ "widgets.py", "d9/d5b/widgets_8py.html", [
+      [ "Slider", "d1/d84/classwidgets_1_1Slider.html", "d1/d84/classwidgets_1_1Slider" ],
+      [ "CandleWindow", "d0/d7c/classwidgets_1_1CandleWindow.html", "d0/d7c/classwidgets_1_1CandleWindow" ],
+      [ "SignalWindow", "da/db2/classwidgets_1_1SignalWindow.html", "da/db2/classwidgets_1_1SignalWindow" ]
+    ] ]
 ];

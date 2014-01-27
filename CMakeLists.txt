@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(EasyTrader)
+PROJECT(KTrader)
 
 ADD_DEFINITIONS("-std=c++11 -Winline")
 SET(LIBS "${CMAKE_SOURCE_DIR}/lib")
@@ -7,6 +7,10 @@ IF(debug_mode)
     ADD_DEFINITIONS(-DDEBUG)
 ENDIF()
 ADD_SUBDIRECTORY(ctpdemo)
+ADD_SUBDIRECTORY(util)
+ADD_SUBDIRECTORY(strategy)
+ADD_SUBDIRECTORY(technical)
+ADD_SUBDIRECTORY(engine)
 
 
 #set(CMAKE_C_COMPILER   "/usr/bin/gcc-4.7")

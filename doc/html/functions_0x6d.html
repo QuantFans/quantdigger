@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>KTrader: Class Members</title>
+<title>EasyQuant: Class Members</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -27,7 +27,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">KTrader
+   <div id="projectname">EasyQuant
    &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
@@ -43,6 +43,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -76,6 +78,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li class="current"><a href="functions.html"><span>All</span></a></li>
       <li><a href="functions_func.html"><span>Functions</span></a></li>
       <li><a href="functions_vars.html"><span>Variables</span></a></li>
+      <li><a href="functions_type.html"><span>Typedefs</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -103,6 +106,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions_0x75.html#index_u"><span>u</span></a></li>
       <li><a href="functions_0x76.html#index_v"><span>v</span></a></li>
       <li><a href="functions_0x77.html#index_w"><span>w</span></a></li>
+      <li><a href="functions_0x78.html#index_x"><span>x</span></a></li>
       <li><a href="functions_0x79.html#index_y"><span>y</span></a></li>
       <li><a href="functions_0x7a.html#index_z"><span>z</span></a></li>
       <li><a href="functions_0x7e.html#index_0x7e"><span>~</span></a></li>
@@ -128,7 +132,7 @@ $(document).ready(function(){initNavTree('functions_0x6d.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Macros</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -222,12 +226,15 @@ $(document).ready(function(){initNavTree('functions_0x6d.html','');});
 , <a class="el" href="d5/d1a/structCThostFtdcRspSyncKeyField.html#adb02cf3fe638cf02cc9f4ac4899f871f">CThostFtdcRspSyncKeyField</a>
 , <a class="el" href="d5/d4a/structCThostFtdcNotifySyncKeyField.html#ad78c3968808b70394e5736797c0b0c9d">CThostFtdcNotifySyncKeyField</a>
 </li>
+<li>min_wdlength
+: <a class="el" href="d0/d7c/classwidgets_1_1CandleWindow.html#a46ea95b3800bdadd5938e2d6c3786702">widgets.CandleWindow</a>
+</li>
 <li>MinGuarantee
 : <a class="el" href="d5/d23/structCThostFtdcOptionInstrMiniGuaranteeField.html#a8662486377232508699c0d8f4de352ba">CThostFtdcOptionInstrMiniGuaranteeField</a>
 </li>
 <li>MinLimitOrderVolume
-: <a class="el" href="da/d2b/structCThostFtdcInstrumentField.html#ad5353449f1026f26a1485de19e83388c">CThostFtdcInstrumentField</a>
-, <a class="el" href="d9/daf/structCThostFtdcProductField.html#a1d47b83e244a3f4b5f5884778bf85412">CThostFtdcProductField</a>
+: <a class="el" href="d9/daf/structCThostFtdcProductField.html#a1d47b83e244a3f4b5f5884778bf85412">CThostFtdcProductField</a>
+, <a class="el" href="da/d2b/structCThostFtdcInstrumentField.html#ad5353449f1026f26a1485de19e83388c">CThostFtdcInstrumentField</a>
 </li>
 <li>MinMargin
 : <a class="el" href="d6/d5e/structCThostFtdcOptionInstrMiniMarginField.html#a6b8c30690838e57f42c419d8357cbf48">CThostFtdcOptionInstrMiniMarginField</a>
@@ -237,12 +244,12 @@ $(document).ready(function(){initNavTree('functions_0x6d.html','');});
 , <a class="el" href="da/d2b/structCThostFtdcInstrumentField.html#afe18b116ecc3a3e39751d51d213aaa4f">CThostFtdcInstrumentField</a>
 </li>
 <li>MinVolume
-: <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#aa5817591235a2d959e47f26f7237ff57">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#aa97150752b6c37c3335ada8ebc95835e">CThostFtdcOrderField</a>
-, <a class="el" href="d5/dda/structCThostFtdcParkedOrderField.html#a8db50db753ad79ce550dbb0114bdebf6">CThostFtdcParkedOrderField</a>
-, <a class="el" href="d0/d5b/structCThostFtdcInputOrderField.html#ae72e9dbb1cffbd0badca4d72d9bd94dd">CThostFtdcInputOrderField</a>
+: <a class="el" href="d0/d5b/structCThostFtdcInputOrderField.html#ae72e9dbb1cffbd0badca4d72d9bd94dd">CThostFtdcInputOrderField</a>
 , <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#a9d64c361e5b8c052896d2115f2a2fe54">CThostFtdcErrOrderField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#aa97150752b6c37c3335ada8ebc95835e">CThostFtdcOrderField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#aa5817591235a2d959e47f26f7237ff57">CThostFtdcErrorConditionalOrderField</a>
 , <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#afe3ca7e6edc0108fe0cfa17df3350286">CThostFtdcExchangeOrderField</a>
+, <a class="el" href="d5/dda/structCThostFtdcParkedOrderField.html#a8db50db753ad79ce550dbb0114bdebf6">CThostFtdcParkedOrderField</a>
 </li>
 <li>Mobile
 : <a class="el" href="d2/da7/structCThostFtdcInvestorField.html#aa8ad4bc216c7bf2c703cf7cc05c700db">CThostFtdcInvestorField</a>
@@ -250,19 +257,19 @@ $(document).ready(function(){initNavTree('functions_0x6d.html','');});
 </li>
 <li>MobilePhone
 : <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a5bc118f4d0300a18b980cbdb99b4faa4">CThostFtdcChangeAccountField</a>
-, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a3eb4699dafc91fc1af786c015330c95e">CThostFtdcCancelAccountField</a>
 , <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#a43c79bcd949abf929a3969b0595d66ad">CThostFtdcReqCancelAccountField</a>
-, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#a45abe2407176fe0fbac0313e1e7a5f3f">CThostFtdcReqChangeAccountField</a>
-, <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a11dab2e0d0b5b973e1293e9f79a02b9b">CThostFtdcReqOpenAccountField</a>
+, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a3eb4699dafc91fc1af786c015330c95e">CThostFtdcCancelAccountField</a>
 , <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#a8d5f267e97e14f1b0b23c09c7ee4cdfa">CThostFtdcOpenAccountField</a>
+, <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a11dab2e0d0b5b973e1293e9f79a02b9b">CThostFtdcReqOpenAccountField</a>
+, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#a45abe2407176fe0fbac0313e1e7a5f3f">CThostFtdcReqChangeAccountField</a>
 </li>
 <li>MoneyAccountStatus
-: <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#a7e1c09881845f91cbd6b860814b4dfb5">CThostFtdcReqChangeAccountField</a>
-, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ac3ef01267a88987064b70e67aa0d1cfb">CThostFtdcCancelAccountField</a>
-, <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#ab09ac8d1c9d566450963bf52ee1a6cd9">CThostFtdcOpenAccountField</a>
-, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a6365499c387409608bd7a98b7cc44364">CThostFtdcChangeAccountField</a>
+: <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#ab09ac8d1c9d566450963bf52ee1a6cd9">CThostFtdcOpenAccountField</a>
 , <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a8a899ba221a0186079e7f5cff8c79ee9">CThostFtdcReqOpenAccountField</a>
 , <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#a609a3c44ebf0c3888cbe2532d6011d58">CThostFtdcReqCancelAccountField</a>
+, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a6365499c387409608bd7a98b7cc44364">CThostFtdcChangeAccountField</a>
+, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#a7e1c09881845f91cbd6b860814b4dfb5">CThostFtdcReqChangeAccountField</a>
+, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ac3ef01267a88987064b70e67aa0d1cfb">CThostFtdcCancelAccountField</a>
 </li>
 <li>Mortgage
 : <a class="el" href="da/d3d/structCThostFtdcSyncingTradingAccountField.html#af2ba4fcf756f5d615214beff3b4b63b8">CThostFtdcSyncingTradingAccountField</a>
@@ -274,7 +281,7 @@ $(document).ready(function(){initNavTree('functions_0x6d.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Jan 24 2014 09:37:54 for KTrader by
+    <li class="footer">Generated on Sun Jan 26 2014 15:50:27 for EasyQuant by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.1.2 </li>
   </ul>

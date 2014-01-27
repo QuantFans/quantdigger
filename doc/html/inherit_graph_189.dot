@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcReqUserLoginField",height=0.2,width=0.4,color="black",URL="$db/d52/structCThostFtdcReqUserLoginField.html",tooltip="�û���¼����"];
+  Node1 [label="CThostFtdcReqSyncKeyField",height=0.2,width=0.4,color="black",URL="$dc/d8a/structCThostFtdcReqSyncKeyField.html",tooltip="交易核心向银期报盘发出密钥同步请求"];
 }

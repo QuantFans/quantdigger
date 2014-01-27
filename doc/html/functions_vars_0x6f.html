@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>KTrader: Class Members - Variables</title>
+<title>EasyQuant: Class Members - Variables</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -27,7 +27,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">KTrader
+   <div id="projectname">EasyQuant
    &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
@@ -43,6 +43,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -76,6 +78,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>All</span></a></li>
       <li><a href="functions_func.html"><span>Functions</span></a></li>
       <li class="current"><a href="functions_vars.html"><span>Variables</span></a></li>
+      <li><a href="functions_type.html"><span>Typedefs</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -102,6 +105,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions_vars_0x75.html#index_u"><span>u</span></a></li>
       <li><a href="functions_vars_0x76.html#index_v"><span>v</span></a></li>
       <li><a href="functions_vars_0x77.html#index_w"><span>w</span></a></li>
+      <li><a href="functions_vars_0x78.html#index_x"><span>x</span></a></li>
       <li><a href="functions_vars_0x79.html#index_y"><span>y</span></a></li>
       <li><a href="functions_vars_0x7a.html#index_z"><span>z</span></a></li>
     </ul>
@@ -126,7 +130,7 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Macros</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -139,15 +143,19 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 &#160;
 
 <h3><a class="anchor" id="index_o"></a>- o -</h3><ul>
+<li>observers
+: <a class="el" href="d1/d84/classwidgets_1_1Slider.html#a42cf361b0fd9610986b037c3ad1cc394">widgets.Slider</a>
+, <a class="el" href="d0/d7c/classwidgets_1_1CandleWindow.html#a7fa7077a11e808a823066ee041ac6124">widgets.CandleWindow</a>
+</li>
 <li>OffsetFlag
-: <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#ac55f044f91878b01f6262562c4d94ff4">CThostFtdcExchangeTradeField</a>
-, <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a87882fee9cc99899eb88c97d554aa2d4">CThostFtdcTradeField</a>
-, <a class="el" href="d2/df2/structCThostFtdcInputExecOrderField.html#aba3d9799f82329f708b3769ab114b8ea">CThostFtdcInputExecOrderField</a>
-, <a class="el" href="de/d34/structCThostFtdcQueryMaxOrderVolumeWithPriceField.html#a9a494f15732177fb6334b841fd1c25cd">CThostFtdcQueryMaxOrderVolumeWithPriceField</a>
-, <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#a35dbe7ea9d612f71cd5055e564c8c253">CThostFtdcExecOrderField</a>
-, <a class="el" href="d4/d1e/structCThostFtdcQueryMaxOrderVolumeField.html#a74136d4386a016ed4741d46003ca3416">CThostFtdcQueryMaxOrderVolumeField</a>
+: <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a87882fee9cc99899eb88c97d554aa2d4">CThostFtdcTradeField</a>
 , <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#a2002a5416620386203638c878c5a547c">CThostFtdcExchangeExecOrderField</a>
 , <a class="el" href="d5/d1b/structCThostFtdcErrExecOrderField.html#a412706b528b39e48ccff0e760334c3e2">CThostFtdcErrExecOrderField</a>
+, <a class="el" href="d4/d1e/structCThostFtdcQueryMaxOrderVolumeField.html#a74136d4386a016ed4741d46003ca3416">CThostFtdcQueryMaxOrderVolumeField</a>
+, <a class="el" href="de/d34/structCThostFtdcQueryMaxOrderVolumeWithPriceField.html#a9a494f15732177fb6334b841fd1c25cd">CThostFtdcQueryMaxOrderVolumeWithPriceField</a>
+, <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#ac55f044f91878b01f6262562c4d94ff4">CThostFtdcExchangeTradeField</a>
+, <a class="el" href="d2/df2/structCThostFtdcInputExecOrderField.html#aba3d9799f82329f708b3769ab114b8ea">CThostFtdcInputExecOrderField</a>
+, <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#a35dbe7ea9d612f71cd5055e564c8c253">CThostFtdcExecOrderField</a>
 </li>
 <li>OldPassword
 : <a class="el" href="dc/d67/structCThostFtdcUserPasswordUpdateField.html#a61058d31846692c9052b8bbe44c6a3fb">CThostFtdcUserPasswordUpdateField</a>
@@ -157,6 +165,10 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 <li>OneTimePassword
 : <a class="el" href="db/d52/structCThostFtdcReqUserLoginField.html#a762bd671218d7218562165f8bace9752">CThostFtdcReqUserLoginField</a>
 , <a class="el" href="df/d79/structCThostFtdcLoginInfoField.html#ac85c886a7a8ab4b64d044e25fa4daa20">CThostFtdcLoginInfoField</a>
+</li>
+<li>open
+: <a class="el" href="de/de8/structEasyQuant_1_1HistoryData.html#aebc638ea33bc98438284d6cc8847377f">EasyQuant::HistoryData</a>
+, <a class="el" href="db/dcb/classEasyQuant_1_1TradingAlgorithm.html#a84c3440ab11afc5fbe95d310bd8073a2">EasyQuant::TradingAlgorithm</a>
 </li>
 <li>OpenAmount
 : <a class="el" href="d0/d07/structCThostFtdcInvestorPositionField.html#a18956f72190f4c2ce9ca8f76af06ebe2">CThostFtdcInvestorPositionField</a>
@@ -182,15 +194,15 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 : <a class="el" href="d7/d3a/structCThostFtdcAccountregisterField.html#afde638442e91407b7306b45d58729dcd">CThostFtdcAccountregisterField</a>
 </li>
 <li>OpenPrice
-: <a class="el" href="d0/dba/structCThostFtdcDepthMarketDataField.html#a381d1ef8d9670107a34ce1428063f8e6">CThostFtdcDepthMarketDataField</a>
-, <a class="el" href="dd/de7/structCThostFtdcMarketDataField.html#aa622f4c165df21ff119c25f6d4e61761">CThostFtdcMarketDataField</a>
+: <a class="el" href="dd/de7/structCThostFtdcMarketDataField.html#aa622f4c165df21ff119c25f6d4e61761">CThostFtdcMarketDataField</a>
 , <a class="el" href="de/d07/structCThostFtdcMarketDataStaticField.html#a7b26d1101add328f59315be4829625ad">CThostFtdcMarketDataStaticField</a>
 , <a class="el" href="d5/dee/structCThostFtdcInvestorPositionDetailField.html#a2cbb9884db47d58d0958c33e786bbcfb">CThostFtdcInvestorPositionDetailField</a>
+, <a class="el" href="d0/dba/structCThostFtdcDepthMarketDataField.html#a381d1ef8d9670107a34ce1428063f8e6">CThostFtdcDepthMarketDataField</a>
 </li>
 <li>OpenRatioByMoney
-: <a class="el" href="d7/d6a/structCThostFtdcSyncingInstrumentCommissionRateField.html#a064d148b407297f19bdce47c6f7d507d">CThostFtdcSyncingInstrumentCommissionRateField</a>
+: <a class="el" href="d1/d16/structCThostFtdcInstrumentCommissionRateField.html#afe64567677d7397b0ca6ba70f5d40ce8">CThostFtdcInstrumentCommissionRateField</a>
+, <a class="el" href="d7/d6a/structCThostFtdcSyncingInstrumentCommissionRateField.html#a064d148b407297f19bdce47c6f7d507d">CThostFtdcSyncingInstrumentCommissionRateField</a>
 , <a class="el" href="da/dd2/structCThostFtdcOptionInstrCommRateField.html#a00e456a117cbba84068f93cf8a1e26e6">CThostFtdcOptionInstrCommRateField</a>
-, <a class="el" href="d1/d16/structCThostFtdcInstrumentCommissionRateField.html#afe64567677d7397b0ca6ba70f5d40ce8">CThostFtdcInstrumentCommissionRateField</a>
 </li>
 <li>OpenRatioByVolume
 : <a class="el" href="d1/d16/structCThostFtdcInstrumentCommissionRateField.html#a295c61919de3d4419e21ee3d0e8dbb9f">CThostFtdcInstrumentCommissionRateField</a>
@@ -205,7 +217,8 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 : <a class="el" href="d4/d07/structCThostFtdcTransferSerialField.html#a5cf3f6410b45bea03db6c8bfdb741763">CThostFtdcTransferSerialField</a>
 </li>
 <li>OperNo
-: <a class="el" href="d3/d49/structCThostFtdcTransferHeaderField.html#aeda18f0597f03cdddb50aeccd0ca9c72">CThostFtdcTransferHeaderField</a>
+: <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ac95d0443558fa0ba61fce50f4e1e95a7">CThostFtdcCancelAccountField</a>
+, <a class="el" href="d3/d49/structCThostFtdcTransferHeaderField.html#aeda18f0597f03cdddb50aeccd0ca9c72">CThostFtdcTransferHeaderField</a>
 , <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a6de365f209d123dce35fcb2b8ea6b46a">CThostFtdcReqOpenAccountField</a>
 , <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#a87cf6938c1e30c3c6ddba595e0136b79">CThostFtdcReqCancelAccountField</a>
 , <a class="el" href="d6/d75/structCThostFtdcReqTransferField.html#acd81a05b22a116c3c674aa68456ba220">CThostFtdcReqTransferField</a>
@@ -225,7 +238,6 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 , <a class="el" href="de/d92/structCThostFtdcNotifyFutureSignOutField.html#a0ec3d87f2a6d15bdcd830b0dcad550da">CThostFtdcNotifyFutureSignOutField</a>
 , <a class="el" href="d5/d4a/structCThostFtdcNotifySyncKeyField.html#ae2a95593112f120f425859e6348fc2d5">CThostFtdcNotifySyncKeyField</a>
 , <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#a7ba37a5637d664cf517e38d79efaca55">CThostFtdcOpenAccountField</a>
-, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ac95d0443558fa0ba61fce50f4e1e95a7">CThostFtdcCancelAccountField</a>
 </li>
 <li>OptionCloseProfit
 : <a class="el" href="d7/de0/structCThostFtdcTradingAccountField.html#a593e3c7f42496921b66e25754bda5f93">CThostFtdcTradingAccountField</a>
@@ -234,6 +246,9 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 <li>OptionsType
 : <a class="el" href="da/d2b/structCThostFtdcInstrumentField.html#ac759f709d06292b061e1b7f884ed213d">CThostFtdcInstrumentField</a>
 </li>
+<li>order_signals_
+: <a class="el" href="de/d66/classEasyQuant_1_1DataSource.html#abf35dc870622ae6ff60c76b99fd3c676">EasyQuant::DataSource</a>
+</li>
 <li>OrderActionRef
 : <a class="el" href="d7/d90/structCThostFtdcInputOrderActionField.html#ae32b07bf8d5446e8557c54e89fe7abd5">CThostFtdcInputOrderActionField</a>
 , <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#a60bac37271496a38f4a3bc0611c8d5f9">CThostFtdcOrderActionField</a>
@@ -241,82 +256,82 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 , <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#af2adc8e13f8353858c15fbadc8777634">CThostFtdcErrOrderActionField</a>
 </li>
 <li>OrderActionStatus
-: <a class="el" href="d8/d6c/structCThostFtdcExchangeExecOrderActionField.html#a4ea3470a12e282027bfd61542af7d953">CThostFtdcExchangeExecOrderActionField</a>
+: <a class="el" href="dd/d38/structCThostFtdcExecOrderActionField.html#af850241b449d9c796ba8db0522a1e46e">CThostFtdcExecOrderActionField</a>
 , <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#a4a54dfe2bbc54004a3c1dcf59cf5d562">CThostFtdcOrderActionField</a>
 , <a class="el" href="d5/d74/structCThostFtdcExchangeOrderActionField.html#a0b9d4ed3a099c747306f8464caa2c62d">CThostFtdcExchangeOrderActionField</a>
-, <a class="el" href="dd/d38/structCThostFtdcExecOrderActionField.html#af850241b449d9c796ba8db0522a1e46e">CThostFtdcExecOrderActionField</a>
+, <a class="el" href="d8/d6c/structCThostFtdcExchangeExecOrderActionField.html#a4ea3470a12e282027bfd61542af7d953">CThostFtdcExchangeExecOrderActionField</a>
 , <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#adff8b8463139b3038df16d726269826b">CThostFtdcErrOrderActionField</a>
 </li>
 <li>OrderLocalID
 : <a class="el" href="d8/d93/structCThostFtdcTraderOfferField.html#a8057aadbcd1912249279a589fe689930">CThostFtdcTraderOfferField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#ab7c4521962dccc109f31e59b15acaa4f">CThostFtdcOrderField</a>
+, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a135f08943d476ede855d528704a6bdb1">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="de/df2/structCThostFtdcExchangeOrderInsertErrorField.html#a2ea634fb282423071884c26d4f79c191">CThostFtdcExchangeOrderInsertErrorField</a>
 , <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#acc94452163c8c7cacbe6f7a48737e51b">CThostFtdcOrderActionField</a>
 , <a class="el" href="d5/d74/structCThostFtdcExchangeOrderActionField.html#a6c895e4a0cfcfe8abbd11c692481bd12">CThostFtdcExchangeOrderActionField</a>
+, <a class="el" href="d2/d38/structCThostFtdcExchangeOrderActionErrorField.html#afed6aca27e6c412288e900130b5eb23d">CThostFtdcExchangeOrderActionErrorField</a>
 , <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#ac7f4666dae448b07ea89ef883328e784">CThostFtdcExchangeTradeField</a>
 , <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a7e69506872c90136bf4a145ac534b86c">CThostFtdcTradeField</a>
-, <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#a335cccb8529c134dea1670ced761a130">CThostFtdcMDTraderOfferField</a>
 , <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#aef567dba1db9e99c2b64d8f4e540e39f">CThostFtdcErrorConditionalOrderField</a>
 , <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#ac106992f0a83c690ef15d7e5177aaea1">CThostFtdcErrOrderActionField</a>
-, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a135f08943d476ede855d528704a6bdb1">CThostFtdcExchangeOrderField</a>
-, <a class="el" href="d2/d38/structCThostFtdcExchangeOrderActionErrorField.html#afed6aca27e6c412288e900130b5eb23d">CThostFtdcExchangeOrderActionErrorField</a>
+, <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#a335cccb8529c134dea1670ced761a130">CThostFtdcMDTraderOfferField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#ab7c4521962dccc109f31e59b15acaa4f">CThostFtdcOrderField</a>
 </li>
 <li>OrderPriceType
 : <a class="el" href="d0/d5b/structCThostFtdcInputOrderField.html#a1b90c5a80d82e81fb406b453901db9b9">CThostFtdcInputOrderField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a6db133eeb8be9e010c958df8bb4d4144">CThostFtdcOrderField</a>
+, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ad07e34ef98aec76437a26bceef4133b2">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="d5/dda/structCThostFtdcParkedOrderField.html#a3e82d292b235d3664f74f509e6cd6c12">CThostFtdcParkedOrderField</a>
 , <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#a4047f1807ed2bff91c006222b5868247">CThostFtdcErrOrderField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a6db133eeb8be9e010c958df8bb4d4144">CThostFtdcOrderField</a>
 , <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a352c8ca3750096c330a1fe747bea1a1b">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ad07e34ef98aec76437a26bceef4133b2">CThostFtdcExchangeOrderField</a>
 </li>
 <li>OrderRef
-: <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a4af50f9f10c14e917b9d643c2f985f8e">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a3aef7345ea4d926373f0113ed63bd6e1">CThostFtdcTradeField</a>
-, <a class="el" href="d7/d90/structCThostFtdcInputOrderActionField.html#a0ed8b4fafc80ea520ee1aba55ce7a5a1">CThostFtdcInputOrderActionField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a73b44b20c2cce13a295a6c4eedfe7e2e">CThostFtdcOrderField</a>
-, <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#aceac8d2c5182a5d4518894405958f829">CThostFtdcOrderActionField</a>
+: <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#aceac8d2c5182a5d4518894405958f829">CThostFtdcOrderActionField</a>
+, <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#af9d1567861b38a5a77a6574220916212">CThostFtdcErrOrderActionField</a>
 , <a class="el" href="d5/dda/structCThostFtdcParkedOrderField.html#a89e2c7a9b334e4606d62a69d655d8ae5">CThostFtdcParkedOrderField</a>
 , <a class="el" href="db/d39/structCThostFtdcParkedOrderActionField.html#a5a1fe407c45074755c2e30c192084c90">CThostFtdcParkedOrderActionField</a>
-, <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#aa70a69e8db6ddb2dfc0d562355079e8d">CThostFtdcErrOrderField</a>
-, <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#af9d1567861b38a5a77a6574220916212">CThostFtdcErrOrderActionField</a>
 , <a class="el" href="d0/d5b/structCThostFtdcInputOrderField.html#af7430d4ee8f7b914b224abfdd969c41f">CThostFtdcInputOrderField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a73b44b20c2cce13a295a6c4eedfe7e2e">CThostFtdcOrderField</a>
+, <a class="el" href="d7/d90/structCThostFtdcInputOrderActionField.html#a0ed8b4fafc80ea520ee1aba55ce7a5a1">CThostFtdcInputOrderActionField</a>
+, <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a3aef7345ea4d926373f0113ed63bd6e1">CThostFtdcTradeField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a4af50f9f10c14e917b9d643c2f985f8e">CThostFtdcErrorConditionalOrderField</a>
+, <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#aa70a69e8db6ddb2dfc0d562355079e8d">CThostFtdcErrOrderField</a>
 </li>
 <li>OrderSource
-: <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#ac714ab287010c4661a0f3d2d85178f80">CThostFtdcErrorConditionalOrderField</a>
+: <a class="el" href="d7/d28/structCThostFtdcOrderField.html#af061c58fbb64b325df3dec692349f074">CThostFtdcOrderField</a>
 , <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a6edb6638fd266bba004abaaa1f1d61c6">CThostFtdcExchangeOrderField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#af061c58fbb64b325df3dec692349f074">CThostFtdcOrderField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#ac714ab287010c4661a0f3d2d85178f80">CThostFtdcErrorConditionalOrderField</a>
 </li>
 <li>OrderStatus
 : <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a6117f97c7a6827f69eb76fbc3d2420a3">CThostFtdcExchangeOrderField</a>
-, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a588093a2d5788c2530a326b2d6313bbc">CThostFtdcErrorConditionalOrderField</a>
 , <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a2ac40907aed41f47ac2c6fc24ac664e6">CThostFtdcOrderField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a588093a2d5788c2530a326b2d6313bbc">CThostFtdcErrorConditionalOrderField</a>
 </li>
 <li>OrderSubmitStatus
 : <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#a0c4e49ba86eb33542155f5c38c827c64">CThostFtdcExecOrderField</a>
-, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a0f04985bec422a70c5c9e2b653cf5195">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#acad11fc1e1d1f80526f5f98081b0064e">CThostFtdcOrderField</a>
 , <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#aeed9f5cf3a1cb9b3d43cf5dd0a0c0fff">CThostFtdcExchangeExecOrderField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#acad11fc1e1d1f80526f5f98081b0064e">CThostFtdcOrderField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a0f04985bec422a70c5c9e2b653cf5195">CThostFtdcErrorConditionalOrderField</a>
 , <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a5eff6345698cb4c220c8cda17860ddbc">CThostFtdcExchangeOrderField</a>
 </li>
 <li>OrderSysID
-: <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ad93a7eb7a96609b191465f9346852a2d">CThostFtdcExchangeOrderField</a>
+: <a class="el" href="d5/d23/structCThostFtdcQryHisOrderField.html#a2feab3d874ff64e9c0201992a078033f">CThostFtdcQryHisOrderField</a>
+, <a class="el" href="db/d39/structCThostFtdcParkedOrderActionField.html#a291c63a1e35c77e28dea4049dafc185b">CThostFtdcParkedOrderActionField</a>
 , <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#af80ec1684d3c59c7dde4ce038f1cd7cd">CThostFtdcTradeField</a>
-, <a class="el" href="d5/d74/structCThostFtdcExchangeOrderActionField.html#a4f8d631a0b20b505c0069939536baa94">CThostFtdcExchangeOrderActionField</a>
+, <a class="el" href="d1/da5/structCThostFtdcQryOrderField.html#a1de5acbd822de32b31c8c2856b6e208b">CThostFtdcQryOrderField</a>
+, <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#abfea7f364307f5660406f5e8e448abdf">CThostFtdcErrOrderActionField</a>
 , <a class="el" href="d7/d90/structCThostFtdcInputOrderActionField.html#a508f194cb2091229ec8ce5520d7a2605">CThostFtdcInputOrderActionField</a>
 , <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a65f68a6d83f4d6f5997ce2a9bbb10559">CThostFtdcOrderField</a>
-, <a class="el" href="d1/da5/structCThostFtdcQryOrderField.html#a1de5acbd822de32b31c8c2856b6e208b">CThostFtdcQryOrderField</a>
-, <a class="el" href="db/d39/structCThostFtdcParkedOrderActionField.html#a291c63a1e35c77e28dea4049dafc185b">CThostFtdcParkedOrderActionField</a>
+, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ad93a7eb7a96609b191465f9346852a2d">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#a362591fc0f3fdb8d08c4aa851c417495">CThostFtdcExchangeTradeField</a>
-, <a class="el" href="d2/d38/structCThostFtdcExchangeOrderActionErrorField.html#aae8a9b0b54bd053ef2a1e6bf5f847ba3">CThostFtdcExchangeOrderActionErrorField</a>
-, <a class="el" href="d5/d23/structCThostFtdcQryHisOrderField.html#a2feab3d874ff64e9c0201992a078033f">CThostFtdcQryHisOrderField</a>
-, <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#a172c65cca97d83bd2da7d36266deac4b">CThostFtdcOrderActionField</a>
-, <a class="el" href="d0/d39/structCThostFtdcErrOrderActionField.html#abfea7f364307f5660406f5e8e448abdf">CThostFtdcErrOrderActionField</a>
+, <a class="el" href="d5/d74/structCThostFtdcExchangeOrderActionField.html#a4f8d631a0b20b505c0069939536baa94">CThostFtdcExchangeOrderActionField</a>
 , <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#adcbd87596d35f0b95d15a5a2db55847d">CThostFtdcErrorConditionalOrderField</a>
+, <a class="el" href="d4/ddc/structCThostFtdcOrderActionField.html#a172c65cca97d83bd2da7d36266deac4b">CThostFtdcOrderActionField</a>
+, <a class="el" href="d2/d38/structCThostFtdcExchangeOrderActionErrorField.html#aae8a9b0b54bd053ef2a1e6bf5f847ba3">CThostFtdcExchangeOrderActionErrorField</a>
 </li>
 <li>OrderType
 : <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a2e7d6c7d7d769dce5dd70203a1abefe4">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ad1563e6b51ae0ad3a08300a06861542d">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a436d840eb5adc09f498271bba133971a">CThostFtdcOrderField</a>
+, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ad1563e6b51ae0ad3a08300a06861542d">CThostFtdcExchangeOrderField</a>
 </li>
 <li>OrigBrokerID
 : <a class="el" href="dd/d4b/structCThostFtdcDRTransferField.html#ae91a6b66e3f2c1daeb9ec28b6018558f">CThostFtdcDRTransferField</a>
@@ -346,7 +361,7 @@ $(document).ready(function(){initNavTree('functions_vars_0x6f.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Jan 24 2014 09:37:54 for KTrader by
+    <li class="footer">Generated on Sun Jan 26 2014 15:50:27 for EasyQuant by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.1.2 </li>
   </ul>

@@ -1,5 +1,16 @@
 var annotated =
 [
+    [ "3d", "db/d8c/namespace3d.html", null ],
+    [ "analyze", "db/dff/namespaceanalyze.html", "db/dff/namespaceanalyze" ],
+    [ "data", "d9/da0/namespacedata.html", "d9/da0/namespacedata" ],
+    [ "EasyQuant", "d9/d0d/namespaceEasyQuant.html", "d9/d0d/namespaceEasyQuant" ],
+    [ "entry_3d", "de/def/namespaceentry__3d.html", null ],
+    [ "EQLanguage", "d2/db7/namespaceEQLanguage.html", "d2/db7/namespaceEQLanguage" ],
+    [ "k", "d9/d83/namespacek.html", null ],
+    [ "stock_plot", "dd/d35/namespacestock__plot.html", "dd/d35/namespacestock__plot" ],
+    [ "summary", "db/de4/namespacesummary.html", null ],
+    [ "widgets", "dd/d27/namespacewidgets.html", "dd/d27/namespacewidgets" ],
+    [ "Blotter", "db/dae/classBlotter.html", "db/dae/classBlotter" ],
     [ "CSem", "d1/d9c/classCSem.html", "d1/d9c/classCSem" ],
     [ "CThostFtdcAccountregisterField", "d7/d3a/structCThostFtdcAccountregisterField.html", "d7/d3a/structCThostFtdcAccountregisterField" ],
     [ "CThostFtdcAuthenticationInfoField", "df/d66/structCThostFtdcAuthenticationInfoField.html", "df/d66/structCThostFtdcAuthenticationInfoField" ],

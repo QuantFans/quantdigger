@@ -1,5 +1,7 @@
 var searchData=
 [
+  ['radio',['radio',['../d1/da8/classanalyze_1_1AnalyzeFrame.html#ac835f6c8b37260f50261eb7530367cb5',1,'analyze::AnalyzeFrame']]],
+  ['rax',['rax',['../d1/da8/classanalyze_1_1AnalyzeFrame.html#a9e7bb43a2a6f1f8ad03331e90584c140',1,'analyze::AnalyzeFrame']]],
   ['recordnum',['RecordNum',['../d3/d49/structCThostFtdcTransferHeaderField.html#a73bcbe2b43ebba96058748c110001f71',1,'CThostFtdcTransferHeaderField']]],
   ['reference',['Reference',['../d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a52f2dee0065b2ae7be896789ba375ee8',1,'CThostFtdcReqQueryTradeResultBySerialField::Reference()'],['../df/d44/structCThostFtdcRspQueryTradeResultBySerialField.html#a8a86c38bad174e9681c354c22247008f',1,'CThostFtdcRspQueryTradeResultBySerialField::Reference()']]],
   ['refrenceissure',['RefrenceIssure',['../d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a1e616c649afc776da69f5faa6827d5f6',1,'CThostFtdcReqQueryTradeResultBySerialField::RefrenceIssure()'],['../df/d44/structCThostFtdcRspQueryTradeResultBySerialField.html#a983129f09135536659be72d55c74b27b',1,'CThostFtdcRspQueryTradeResultBySerialField::RefrenceIssure()']]],
@@ -13,5 +15,6 @@ var searchData=
   ['retcode',['RetCode',['../dd/de9/structCThostFtdcTransferBankToFutureRspField.html#a2160efc3d6351b8b07dc21a24aecff01',1,'CThostFtdcTransferBankToFutureRspField::RetCode()'],['../d8/d73/structCThostFtdcTransferFutureToBankRspField.html#a3cb3bcc22005a6486836a556847aeec6',1,'CThostFtdcTransferFutureToBankRspField::RetCode()'],['../df/dd9/structCThostFtdcTransferQryBankRspField.html#a67d2e5e8003fc4debd9744b9bd64d9ad',1,'CThostFtdcTransferQryBankRspField::RetCode()']]],
   ['retinfo',['RetInfo',['../dd/de9/structCThostFtdcTransferBankToFutureRspField.html#a20e2e4feed0d6ef8d8404252ea1ebcb4',1,'CThostFtdcTransferBankToFutureRspField::RetInfo()'],['../d8/d73/structCThostFtdcTransferFutureToBankRspField.html#a0dff868c64268da9259c50b6eaccb590',1,'CThostFtdcTransferFutureToBankRspField::RetInfo()'],['../df/dd9/structCThostFtdcTransferQryBankRspField.html#a38c400f386deed300c6a1218d9df2902',1,'CThostFtdcTransferQryBankRspField::RetInfo()']]],
   ['returncode',['ReturnCode',['../d0/d2b/structCThostFtdcReturnResultField.html#a2b8bb43180a80c78148a172a9cfcd881',1,'CThostFtdcReturnResultField::ReturnCode()'],['../d6/d1c/structCThostFtdcDepositResultInformField.html#a0f8cfe8e10a3189b75b166cf5a0e9372',1,'CThostFtdcDepositResultInformField::ReturnCode()']]],
+  ['row_5f',['row_',['../de/dfb/classEasyQuant_1_1CSVIterator.html#a78228b635d7bacc7494e624d957f7797',1,'EasyQuant::CSVIterator']]],
   ['royalty',['Royalty',['../d6/d85/structCThostFtdcOptionInstrTradeCostField.html#adcf5cb4fd477d610b70ffb17bb4d64fb',1,'CThostFtdcOptionInstrTradeCostField']]]
 ];

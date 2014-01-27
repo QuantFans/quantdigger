@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcQueryMaxOrderVolume\lWithPriceField",height=0.2,width=0.4,color="black",URL="$de/d34/structCThostFtdcQueryMaxOrderVolumeWithPriceField.html",tooltip="根据价格查询最大报单数量"];
+  Node1 [label="CThostFtdcQueryBrokerDeposit\lField",height=0.2,width=0.4,color="black",URL="$d6/de7/structCThostFtdcQueryBrokerDepositField.html",tooltip="鏌ヨ缁忕邯鍏徃璧勯噾"];
 }

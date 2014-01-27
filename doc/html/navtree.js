@@ -1,14 +1,27 @@
 var NAVTREE =
 [
-  [ "KTrader", "index.html", [
+  [ "EasyQuant", "index.html", [
+    [ "Todo List", "dd/da0/todo.html", null ],
+    [ "Namespaces", null, [
+      [ "Namespace List", "namespaces.html", "namespaces" ],
+      [ "Namespace Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Functions", "namespacemembers_func.html", null ],
+        [ "Variables", "namespacemembers_vars.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ],
+        [ "Enumerations", "namespacemembers_enum.html", null ],
+        [ "Enumerator", "namespacemembers_eval.html", null ]
+      ] ]
+    ] ],
     [ "Classes", null, [
       [ "Class List", "annotated.html", "annotated" ],
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", "functions_vars" ]
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
+        [ "Typedefs", "functions_type.html", null ]
       ] ]
     ] ],
     [ "Files", null, [
@@ -29,24 +42,26 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d1/d1b/structCThostFtdcQryExchangeOrderField.html",
-"d3/d2e/structCThostFtdcExchangeSequenceField.html",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a090f2fcb88d3500470a4b7157a307860",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a3836ae39a1839a571d3c566a6aa8cbf2",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a5e17e1bd9ff466c499a840a5688e50c5",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a84df4fa8cea074924d2ae4c78017865d",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#aaee34a30c85b72ba4ce3384ffd44fcc6",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#ad7c23c9eff50ceab77b4211b4ddf1120",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#aff702193fd9743290ad52293375d0373",
-"d5/d53/classCThostFtdcMdApi.html#abb564ef685515d2174e305c4437d8a95",
-"d6/d75/structCThostFtdcReqTransferField.html#a3687559511c89dc20975b4df2df24c3b",
-"d7/dc7/structCThostFtdcRspFutureSignInField.html#a7750b3fed254426296801f7be0631c5e",
-"d8/dee/structCThostFtdcRspRepealField.html#ad9ee73e0efc0d57df4e5168145e3f361",
-"da/d29/structCThostFtdcReqRepealField.html#ac9e8a166f9c6cdaac08f16d6e92dd99c",
-"db/d7a/structCThostFtdcQrySuperUserField.html",
-"dc/da4/structCThostFtdcQryOrderActionField.html#a944635c85c7a5de5703450f039228ea3",
-"dd/dd0/structCThostFtdcEWarrantOffsetField.html#ac37d5b8bb0327f4838d9beeb55868d97",
-"de/dbd/structCThostFtdcMarketDataBestPriceField.html#af32124b7ee066a0d4328aac126ce26a0"
+"d1/d04/structCThostFtdcReqOpenAccountField.html#aa1e982b944eb192c311aa5496fe7d68a",
+"d2/d6e/analyze_8py.html#ad989f82fa0a348b5614f3f294c367bf6",
+"d3/dd5/structCThostFtdcRspFutureSignOutField.html#a1e8fa86e289395ea0aacbcae049a8e19",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a20dab7d8db40c4a1df872a99ad2d5725",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a4bb7898f9e0819803870367718cafba1",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a6fcff70b9b623f8dcaf78350a8de9304",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a9ad21094817dc7194e34e9db269bd27f",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#ac42777ab78dd64941ea38c231b0b3bad",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#aedbedd48b93cdddba65238835e5947f9",
+"d5/d15/structCThostFtdcRspUserLoginField.html#a8640a623eb47af6861520f56e7e71892",
+"d5/dda/structCThostFtdcParkedOrderField.html#ade0f7048695850addd63dd1ae1dea292",
+"d6/db0/structCThostFtdcExchangeTradeField.html#affb9725a717246618f98f29b9d60c218",
+"d8/d12/data_8py.html#aa3aba8fe9c496da53d75c31158b19c47",
+"d9/d1f/structCThostFtdcTradeField.html#a910244684cc20a6a5d210bf630044e67",
+"da/d2b/structCThostFtdcInstrumentField.html#aa320f736408e18c0f27cb853b1598c13",
+"db/d95/structCThostFtdcBrokerWithdrawAlgorithmField.html#a921787eb9b3669439af13844e52972c6",
+"dc/d83/structCThostFtdcSyncingInvestorField.html#af673d179e618354870e9b59f4041eb25",
+"dd/db1/structCThostFtdcSyncingInvestorPositionField.html",
+"de/d85/structCThostFtdcExchangeMarginRateAdjustField.html#a96423b011bc0e77c9074dcf210513cde",
+"df/da6/structCThostFtdcCommPhaseField.html#a1b0a3f67c3c77486f89d34c0cf2d8ef8"
 ];
 
 var navTreeSubIndices = new Array();

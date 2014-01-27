@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>KTrader: Class Members</title>
+<title>EasyQuant: Class Members</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -27,7 +27,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">KTrader
+   <div id="projectname">EasyQuant
    &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
@@ -43,6 +43,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -76,6 +78,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li class="current"><a href="functions.html"><span>All</span></a></li>
       <li><a href="functions_func.html"><span>Functions</span></a></li>
       <li><a href="functions_vars.html"><span>Variables</span></a></li>
+      <li><a href="functions_type.html"><span>Typedefs</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -103,6 +106,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions_0x75.html#index_u"><span>u</span></a></li>
       <li><a href="functions_0x76.html#index_v"><span>v</span></a></li>
       <li><a href="functions_0x77.html#index_w"><span>w</span></a></li>
+      <li><a href="functions_0x78.html#index_x"><span>x</span></a></li>
       <li><a href="functions_0x79.html#index_y"><span>y</span></a></li>
       <li><a href="functions_0x7a.html#index_z"><span>z</span></a></li>
       <li><a href="functions_0x7e.html#index_0x7e"><span>~</span></a></li>
@@ -128,7 +132,7 @@ $(document).ready(function(){initNavTree('functions_0x68.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Macros</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -144,36 +148,52 @@ $(document).ready(function(){initNavTree('functions_0x68.html','');});
 <li>HandlePositionAlgoID
 : <a class="el" href="db/d68/structCThostFtdcBrokerTradingAlgosField.html#a4492483fcb51e6ddd15120579606ff0a">CThostFtdcBrokerTradingAlgosField</a>
 </li>
+<li>HandleTickData()
+: <a class="el" href="db/dcb/classEasyQuant_1_1TradingAlgorithm.html#acf8b85ff12bddbef0204ba205f49b7ae">EasyQuant::TradingAlgorithm</a>
+</li>
 <li>HandleTradingAccountAlgoID
 : <a class="el" href="db/d68/structCThostFtdcBrokerTradingAlgosField.html#a62b0dd511069203de60a8679e0679b8d">CThostFtdcBrokerTradingAlgosField</a>
 </li>
 <li>HedgeFlag
-: <a class="el" href="db/d9c/structCThostFtdcInstrumentMarginRateField.html#acf4e9856f4ca63f747dba89884b548d7">CThostFtdcInstrumentMarginRateField</a>
-, <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#a6b8add51196b45ca399d904f2b7381e6">CThostFtdcExchangeTradeField</a>
+: <a class="el" href="d0/d07/structCThostFtdcInvestorPositionField.html#ab9c5554a3241ad3f928dd67ce443b2eb">CThostFtdcInvestorPositionField</a>
+, <a class="el" href="de/d85/structCThostFtdcExchangeMarginRateAdjustField.html#a80cdcaeecdd52a24d0a68c7876c75eb9">CThostFtdcExchangeMarginRateAdjustField</a>
+, <a class="el" href="df/d6f/structCThostFtdcQryOptionInstrTradeCostField.html#a122901f2910b77059d81963c69554f1c">CThostFtdcQryOptionInstrTradeCostField</a>
 , <a class="el" href="d2/df2/structCThostFtdcInputExecOrderField.html#a09b5347b29a96d785e3951f80724cd14">CThostFtdcInputExecOrderField</a>
+, <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#a6b8add51196b45ca399d904f2b7381e6">CThostFtdcExchangeTradeField</a>
 , <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#aa80935b21efa44447ed142baca276ab2">CThostFtdcExecOrderField</a>
-, <a class="el" href="dd/dd0/structCThostFtdcEWarrantOffsetField.html#ac37d5b8bb0327f4838d9beeb55868d97">CThostFtdcEWarrantOffsetField</a>
+, <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#a48152180d4f1c757ba303b255251dc0f">CThostFtdcExchangeExecOrderField</a>
+, <a class="el" href="db/d9c/structCThostFtdcInstrumentMarginRateField.html#acf4e9856f4ca63f747dba89884b548d7">CThostFtdcInstrumentMarginRateField</a>
+, <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a7badd6e683c4ab0023552444fbcf9234">CThostFtdcTradeField</a>
 , <a class="el" href="de/d34/structCThostFtdcQueryMaxOrderVolumeWithPriceField.html#a54e9ed2997c722e2f8ac9898037ab0c1">CThostFtdcQueryMaxOrderVolumeWithPriceField</a>
 , <a class="el" href="d8/df7/structCThostFtdcInvestorPositionCombineDetailField.html#a78f48f17bd2626139cd5ee82500c4a07">CThostFtdcInvestorPositionCombineDetailField</a>
-, <a class="el" href="d5/dee/structCThostFtdcInvestorPositionDetailField.html#a8bb18c8153a00ed7024628a764ead739">CThostFtdcInvestorPositionDetailField</a>
-, <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a7badd6e683c4ab0023552444fbcf9234">CThostFtdcTradeField</a>
-, <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#a48152180d4f1c757ba303b255251dc0f">CThostFtdcExchangeExecOrderField</a>
 , <a class="el" href="d5/d1b/structCThostFtdcErrExecOrderField.html#a7f4743807f423852c970672cb12bad6b">CThostFtdcErrExecOrderField</a>
+, <a class="el" href="d5/dee/structCThostFtdcInvestorPositionDetailField.html#a8bb18c8153a00ed7024628a764ead739">CThostFtdcInvestorPositionDetailField</a>
+, <a class="el" href="d4/d1e/structCThostFtdcQueryMaxOrderVolumeField.html#aa1159c9f258e3f992ebaebfd36cd8bd1">CThostFtdcQueryMaxOrderVolumeField</a>
 , <a class="el" href="d0/da3/structCThostFtdcInstrumentMarginRateAdjustField.html#ab8ffb55fde0f551dd0a75c9d25cce837">CThostFtdcInstrumentMarginRateAdjustField</a>
-, <a class="el" href="df/d6f/structCThostFtdcQryOptionInstrTradeCostField.html#a122901f2910b77059d81963c69554f1c">CThostFtdcQryOptionInstrTradeCostField</a>
+, <a class="el" href="dd/db1/structCThostFtdcSyncingInvestorPositionField.html#ae1cd1b367ba3c0561bef344cdc4ad029">CThostFtdcSyncingInvestorPositionField</a>
+, <a class="el" href="dd/dd0/structCThostFtdcEWarrantOffsetField.html#ac37d5b8bb0327f4838d9beeb55868d97">CThostFtdcEWarrantOffsetField</a>
 , <a class="el" href="d6/d85/structCThostFtdcOptionInstrTradeCostField.html#a1bd59de081334652aae827560b838c9a">CThostFtdcOptionInstrTradeCostField</a>
 , <a class="el" href="da/d4f/structCThostFtdcQryInstrumentMarginRateField.html#afb2e0f007e3186f1d9d99e7ad2877b9d">CThostFtdcQryInstrumentMarginRateField</a>
 , <a class="el" href="d8/d7e/structCThostFtdcSyncingInstrumentMarginRateField.html#aeb63364fef9ee9ebebf2969269c985d6">CThostFtdcSyncingInstrumentMarginRateField</a>
-, <a class="el" href="d4/d1e/structCThostFtdcQueryMaxOrderVolumeField.html#aa1159c9f258e3f992ebaebfd36cd8bd1">CThostFtdcQueryMaxOrderVolumeField</a>
-, <a class="el" href="dd/db1/structCThostFtdcSyncingInvestorPositionField.html#ae1cd1b367ba3c0561bef344cdc4ad029">CThostFtdcSyncingInvestorPositionField</a>
-, <a class="el" href="d0/d07/structCThostFtdcInvestorPositionField.html#ab9c5554a3241ad3f928dd67ce443b2eb">CThostFtdcInvestorPositionField</a>
 , <a class="el" href="d1/d67/structCThostFtdcExchangeMarginRateField.html#ae5a6f55940c5cce741fb2f9da1f7fb44">CThostFtdcExchangeMarginRateField</a>
-, <a class="el" href="de/d85/structCThostFtdcExchangeMarginRateAdjustField.html#a80cdcaeecdd52a24d0a68c7876c75eb9">CThostFtdcExchangeMarginRateAdjustField</a>
+</li>
+<li>high
+: <a class="el" href="db/dcb/classEasyQuant_1_1TradingAlgorithm.html#ae53e48de7c2b635a091dd1dc7152f41b">EasyQuant::TradingAlgorithm</a>
+, <a class="el" href="de/de8/structEasyQuant_1_1HistoryData.html#aa49347f1f0feae17fb79d1746b31ebf1">EasyQuant::HistoryData</a>
+</li>
+<li>high_profit
+: <a class="el" href="d3/d9b/classdata_1_1Record.html#a94befb721fa67fd38f60c7b3b14aac92">data.Record</a>
 </li>
 <li>HighestPrice
-: <a class="el" href="dd/de7/structCThostFtdcMarketDataField.html#a8503f1557b84be44cfd209f8f1ed41da">CThostFtdcMarketDataField</a>
+: <a class="el" href="d0/dba/structCThostFtdcDepthMarketDataField.html#a26ddf7435182e05d791afac16f36bd89">CThostFtdcDepthMarketDataField</a>
+, <a class="el" href="dd/de7/structCThostFtdcMarketDataField.html#a8503f1557b84be44cfd209f8f1ed41da">CThostFtdcMarketDataField</a>
 , <a class="el" href="de/d07/structCThostFtdcMarketDataStaticField.html#a022083a2d5bee2b4a5e2f82ed53a6a4b">CThostFtdcMarketDataStaticField</a>
-, <a class="el" href="d0/dba/structCThostFtdcDepthMarketDataField.html#a26ddf7435182e05d791afac16f36bd89">CThostFtdcDepthMarketDataField</a>
+</li>
+<li>history_data()
+: <a class="el" href="de/d66/classEasyQuant_1_1DataSource.html#a3c7ce692d2e048ab82fe71ed17c86b86">EasyQuant::DataSource</a>
+</li>
+<li>history_data_
+: <a class="el" href="de/d66/classEasyQuant_1_1DataSource.html#a7a9c205632151dfd8e0f6ffc0fe32424">EasyQuant::DataSource</a>
 </li>
 <li>HShortMarginRatioByMoney
 : <a class="el" href="dd/d10/structCThostFtdcOptionInstrMarginAdjustField.html#a727d1af2cfae10628916f5da6292e490">CThostFtdcOptionInstrMarginAdjustField</a>
@@ -187,7 +207,7 @@ $(document).ready(function(){initNavTree('functions_0x68.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Jan 24 2014 09:37:54 for KTrader by
+    <li class="footer">Generated on Sun Jan 26 2014 15:50:27 for EasyQuant by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.1.2 </li>
   </ul>

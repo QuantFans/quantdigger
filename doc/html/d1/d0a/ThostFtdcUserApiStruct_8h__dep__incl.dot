@@ -5,7 +5,7 @@ digraph "ThostFtdcUserApiStruct.h"
   node [fontname="FreeSans",fontsize="10",shape=record];
   Node1 [label="ThostFtdcUserApiStruct.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
   Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
-  Node2 [label="ThostFtdcTraderApi.h",height=0.2,width=0.4,color="red",URL="$d4/d8a/ThostFtdcTraderApi_8h.html",tooltip="定义了客户端接口  20060106 赵鸿昊 创建该文件"];
+  Node2 [label="ThostFtdcMdApi.h",height=0.2,width=0.4,color="black",URL="$da/da7/ThostFtdcMdApi_8h.html",tooltip="定义了客户端接口  20060106 赵鸿昊 创建该文件"];
   Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
-  Node3 [label="ThostFtdcMdApi.h",height=0.2,width=0.4,color="black",URL="$da/da7/ThostFtdcMdApi_8h.html",tooltip="�����˿ͻ��˽ӿ�  20060106 �Ժ�� �������ļ�"];
+  Node3 [label="ThostFtdcTraderApi.h",height=0.2,width=0.4,color="red",URL="$d4/d8a/ThostFtdcTraderApi_8h.html",tooltip="定义了客户端接口  20060106 赵鸿昊 创建该文件"];
 }
