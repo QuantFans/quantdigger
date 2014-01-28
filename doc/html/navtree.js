@@ -21,7 +21,10 @@ var NAVTREE =
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", "functions_func" ],
         [ "Variables", "functions_vars.html", "functions_vars" ],
-        [ "Typedefs", "functions_type.html", null ]
+        [ "Typedefs", "functions_type.html", null ],
+        [ "Enumerations", "functions_enum.html", null ],
+        [ "Enumerator", "functions_eval.html", null ],
+        [ "Related Functions", "functions_rela.html", null ]
       ] ]
     ] ],
     [ "Files", null, [
@@ -42,26 +45,27 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d1/d04/structCThostFtdcReqOpenAccountField.html#aa1e982b944eb192c311aa5496fe7d68a",
-"d2/d6e/analyze_8py.html#ad989f82fa0a348b5614f3f294c367bf6",
-"d3/dd5/structCThostFtdcRspFutureSignOutField.html#a1e8fa86e289395ea0aacbcae049a8e19",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a20dab7d8db40c4a1df872a99ad2d5725",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a4bb7898f9e0819803870367718cafba1",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a6fcff70b9b623f8dcaf78350a8de9304",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#a9ad21094817dc7194e34e9db269bd27f",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#ac42777ab78dd64941ea38c231b0b3bad",
-"d4/d23/ThostFtdcUserApiDataType_8h.html#aedbedd48b93cdddba65238835e5947f9",
-"d5/d15/structCThostFtdcRspUserLoginField.html#a8640a623eb47af6861520f56e7e71892",
-"d5/dda/structCThostFtdcParkedOrderField.html#ade0f7048695850addd63dd1ae1dea292",
-"d6/db0/structCThostFtdcExchangeTradeField.html#affb9725a717246618f98f29b9d60c218",
-"d8/d12/data_8py.html#aa3aba8fe9c496da53d75c31158b19c47",
-"d9/d1f/structCThostFtdcTradeField.html#a910244684cc20a6a5d210bf630044e67",
-"da/d2b/structCThostFtdcInstrumentField.html#aa320f736408e18c0f27cb853b1598c13",
-"db/d95/structCThostFtdcBrokerWithdrawAlgorithmField.html#a921787eb9b3669439af13844e52972c6",
-"dc/d83/structCThostFtdcSyncingInvestorField.html#af673d179e618354870e9b59f4041eb25",
-"dd/db1/structCThostFtdcSyncingInvestorPositionField.html",
-"de/d85/structCThostFtdcExchangeMarginRateAdjustField.html#a96423b011bc0e77c9074dcf210513cde",
-"df/da6/structCThostFtdcCommPhaseField.html#a1b0a3f67c3c77486f89d34c0cf2d8ef8"
+"d1/d04/structCThostFtdcReqOpenAccountField.html#a9d4178df684cd2d2e7b284878123f7ff",
+"d2/d38/structCThostFtdcExchangeOrderActionErrorField.html#aadda1edce34c50a95cbb6251774374de",
+"d3/d9b/classdata_1_1Record.html#a4cede13ca11d8b5814506a4e6a7a90eb",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a1c21cd8608b7fba1043e000a2659c296",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a4745edc13adb460d40651ee1976c55c8",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a6bf066747f4ecd1614ce13d424efe700",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#a9511d8b9eb11ac8db20efbabb307fe79",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#abffdb0132f2fc06d57690782d2bc1e98",
+"d4/d23/ThostFtdcUserApiDataType_8h.html#ae8d554a9e0b600296586e20116d41928",
+"d4/ddc/structCThostFtdcOrderActionField.html#a985bbbb232d74bfdb3ec9b0882e4517b",
+"d5/dd1/structCThostFtdcCancelAccountField.html#ac95d0443558fa0ba61fce50f4e1e95a7",
+"d6/d75/structCThostFtdcReqTransferField.html#a38b64d05821ee07d053e31aa671ac6d9",
+"d7/d90/structCThostFtdcInputOrderActionField.html#a918c766ab894502efb7060c9cea846e5",
+"d8/d93/structCThostFtdcTraderOfferField.html#ac16cc0633f84d039fb73607b25dd0eaf",
+"d9/dd8/structCThostFtdcReqCancelAccountField.html#a5889d87657a2d1d310bce139cadd5e96",
+"da/daa/structCThostFtdcTraderField.html#a674d396691c43275e1c57f990273909e",
+"db/de4/classCThostFtdcTraderSpi.html#a771fdc1e310d473a9f818040bf819249",
+"dd/d10/structCThostFtdcOptionInstrMarginAdjustField.html#a5b295fc56d2c20f086e60f21a1af0825",
+"dd/dec/structCThostFtdcInvestorWithdrawAlgorithmField.html#aa41a28f256fd9c43c3cddcc81a2e0cca",
+"de/df2/structCThostFtdcExchangeOrderInsertErrorField.html#aa4cd458f29aad01c0028c81359157671",
+"functions_vars_0x74.html"
 ];
 
 var navTreeSubIndices = new Array();

@@ -2,8 +2,17 @@ var hierarchy =
 [
     [ "EasyQuant::AlgorithmSimulator", "df/db2/classEasyQuant_1_1AlgorithmSimulator.html", null ],
     [ "analyze.AnalyzeFrame", "d1/da8/classanalyze_1_1AnalyzeFrame.html", null ],
-    [ "Blotter", "db/dae/classBlotter.html", null ],
+    [ "opencog::Logger::Base", "d5/d89/classopencog_1_1Logger_1_1Base.html", [
+      [ "opencog::Logger::Debug", "de/d94/classopencog_1_1Logger_1_1Debug.html", null ],
+      [ "opencog::Logger::Error", "d8/d1e/classopencog_1_1Logger_1_1Error.html", null ],
+      [ "opencog::Logger::Fine", "dd/da2/classopencog_1_1Logger_1_1Fine.html", null ],
+      [ "opencog::Logger::Info", "d6/da0/classopencog_1_1Logger_1_1Info.html", null ],
+      [ "opencog::Logger::Warn", "d2/da1/classopencog_1_1Logger_1_1Warn.html", null ]
+    ] ],
+    [ "EasyQuant::Blotter", "d6/d14/classEasyQuant_1_1Blotter.html", null ],
+    [ "concurrent_queue< Data >::Canceled", "d8/da1/structconcurrent__queue_1_1Canceled.html", null ],
     [ "widgets.CandleWindow", "d0/d7c/classwidgets_1_1CandleWindow.html", null ],
+    [ "concurrent_queue< Data >", "d1/dd8/classconcurrent__queue.html", null ],
     [ "CSem", "d1/d9c/classCSem.html", null ],
     [ "EasyQuant::CSVIterator", "de/dfb/classEasyQuant_1_1CSVIterator.html", null ],
     [ "EasyQuant::CSVRow", "d6/d79/classEasyQuant_1_1CSVRow.html", null ],
@@ -261,11 +270,12 @@ var hierarchy =
     [ "EasyQuant::DataSource", "de/d66/classEasyQuant_1_1DataSource.html", null ],
     [ "stock_plot.EventHandler", "d2/db1/classstock__plot_1_1EventHandler.html", null ],
     [ "EasyQuant::HistoryData", "de/de8/structEasyQuant_1_1HistoryData.html", null ],
+    [ "opencog::Logger", "d6/d41/classopencog_1_1Logger.html", null ],
     [ "EasyQuant::Order", "db/db9/classEasyQuant_1_1Order.html", null ],
     [ "EasyQuant::OrderSignal", "d5/d19/structEasyQuant_1_1OrderSignal.html", null ],
     [ "data.Record", "d3/d9b/classdata_1_1Record.html", null ],
     [ "semun", "df/d90/unionsemun.html", null ],
-    [ "EQLanguage::Series< T >", "d6/d1b/classEQLanguage_1_1Series.html", null ],
+    [ "EasyQuant::Series< T >", "db/dd1/classEasyQuant_1_1Series.html", null ],
     [ "widgets.SignalWindow", "da/db2/classwidgets_1_1SignalWindow.html", null ],
     [ "widgets.Slider", "d1/d84/classwidgets_1_1Slider.html", null ],
     [ "EasyQuant::TradingAlgorithm", "db/dcb/classEasyQuant_1_1TradingAlgorithm.html", [

@@ -1,8 +1,10 @@
 var searchData=
 [
+  ['warn',['warn',['../d6/d41/classopencog_1_1Logger.html#af63261d07d7282ba2ec00cdf084344b8',1,'opencog::Logger']]],
   ['wdlength',['wdlength',['../d0/d7c/classwidgets_1_1CandleWindow.html#aa881c5514972da29162a5e3a324df15f',1,'widgets::CandleWindow']]],
   ['width',['width',['../d1/d84/classwidgets_1_1Slider.html#aa6afabbb0f7d716e9ca6b31ff41ad7fb',1,'widgets::Slider']]],
   ['withdraw',['Withdraw',['../d7/de0/structCThostFtdcTradingAccountField.html#ab0b7369ec8a5b5dc02cc6c96e9ddace6',1,'CThostFtdcTradingAccountField::Withdraw()'],['../da/d3d/structCThostFtdcSyncingTradingAccountField.html#aa1a5c2a9ceb9dd5a0f29a6bc6cebc862',1,'CThostFtdcSyncingTradingAccountField::Withdraw()'],['../dc/dc6/structCThostFtdcBrokerDepositField.html#ac5e15400bc1bfd913548ebe2e789a270',1,'CThostFtdcBrokerDepositField::Withdraw()']]],
   ['withdrawalgorithm',['WithdrawAlgorithm',['../db/d95/structCThostFtdcBrokerWithdrawAlgorithmField.html#a3ee5c8fbc43a7eed807ea1e669243e05',1,'CThostFtdcBrokerWithdrawAlgorithmField']]],
-  ['withdrawquota',['WithdrawQuota',['../d7/de0/structCThostFtdcTradingAccountField.html#a40619ef1f23b38061f5a6d18f31ffacd',1,'CThostFtdcTradingAccountField::WithdrawQuota()'],['../da/d3d/structCThostFtdcSyncingTradingAccountField.html#a49bbddefff4a6ac2a2812bb98a85f460',1,'CThostFtdcSyncingTradingAccountField::WithdrawQuota()']]]
+  ['withdrawquota',['WithdrawQuota',['../d7/de0/structCThostFtdcTradingAccountField.html#a40619ef1f23b38061f5a6d18f31ffacd',1,'CThostFtdcTradingAccountField::WithdrawQuota()'],['../da/d3d/structCThostFtdcSyncingTradingAccountField.html#a49bbddefff4a6ac2a2812bb98a85f460',1,'CThostFtdcSyncingTradingAccountField::WithdrawQuota()']]],
+  ['writingloopactive',['writingLoopActive',['../d6/d41/classopencog_1_1Logger.html#afcf63b07800eb860a44789a756de04ad',1,'opencog::Logger']]]
 ];

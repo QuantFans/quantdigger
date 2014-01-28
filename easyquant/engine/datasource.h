@@ -1,6 +1,6 @@
-#ifndef ENGINE_DATASOURCE_H
+#ifndef EASYQUANT_ENGINE_DATASOURCE_H
 
-#define ENGINE_DATASOURCE_H
+#define EASYQUANT_ENGINE_DATASOURCE_H
 #include <string>
 #include <vector>
 #include <iostream>
@@ -77,4 +77,4 @@ class DataSource {
 
 
 }; /* EasyQuant */
-#endif /* end of include guard: ENGINE_DATASOURCE_H */
+#endif /* end of include guard: EASYQUANT_ENGINE_DATASOURCE_H */

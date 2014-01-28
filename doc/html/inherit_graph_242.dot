@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcUserIPField",height=0.2,width=0.4,color="black",URL="$d4/dc0/structCThostFtdcUserIPField.html",tooltip="用户IP"];
+  Node1 [label="CThostFtdcTransferSerial\lField",height=0.2,width=0.4,color="black",URL="$d4/d07/structCThostFtdcTransferSerialField.html",tooltip="银期转账交易流水表"];
 }

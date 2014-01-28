@@ -79,6 +79,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions_func.html"><span>Functions</span></a></li>
       <li><a href="functions_vars.html"><span>Variables</span></a></li>
       <li><a href="functions_type.html"><span>Typedefs</span></a></li>
+      <li><a href="functions_enum.html"><span>Enumerations</span></a></li>
+      <li><a href="functions_eval.html"><span>Enumerator</span></a></li>
+      <li><a href="functions_rela.html"><span>Related&#160;Functions</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -132,7 +135,7 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Friends</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(11)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -153,17 +156,32 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 , <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#a9965a40fc2e3c74438ad254b1178dc2d">CThostFtdcReqChangeAccountField</a>
 , <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a7b19b65cd83216a537ca7014e7143a48">CThostFtdcChangeAccountField</a>
 </li>
+<li>getBackTraceLevel()
+: <a class="el" href="d6/d41/classopencog_1_1Logger.html#a08f9fec0d9a0739c0233df32a23dc71a">opencog::Logger</a>
+</li>
+<li>getFilename()
+: <a class="el" href="d6/d41/classopencog_1_1Logger.html#ad3a72cda0db5f8fd1653bfeecc779570">opencog::Logger</a>
+</li>
+<li>getLevel()
+: <a class="el" href="d6/d41/classopencog_1_1Logger.html#a3c0e2fe9cc051f18456e32edc0fc8f39">opencog::Logger</a>
+</li>
+<li>getLevelFromString()
+: <a class="el" href="d6/d41/classopencog_1_1Logger.html#a7a6587d2e441b8512845eeec7a8e8150">opencog::Logger</a>
+</li>
+<li>getLevelString()
+: <a class="el" href="d6/d41/classopencog_1_1Logger.html#a626c2b8fd46694bd3367944b6f6f3428">opencog::Logger</a>
+</li>
 <li>GetTradingDay()
-: <a class="el" href="d1/db0/classCThostFtdcTraderApi.html#a8953a62e7fe138f31824f32724f58662">CThostFtdcTraderApi</a>
-, <a class="el" href="d5/d53/classCThostFtdcMdApi.html#a8b95ce97cf7868ea14d8699e7a83a61c">CThostFtdcMdApi</a>
+: <a class="el" href="d5/d53/classCThostFtdcMdApi.html#a8b95ce97cf7868ea14d8699e7a83a61c">CThostFtdcMdApi</a>
+, <a class="el" href="d1/db0/classCThostFtdcTraderApi.html#a8953a62e7fe138f31824f32724f58662">CThostFtdcTraderApi</a>
 </li>
 <li>GTDDate
 : <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a313db569337a50015b1fced233957502">CThostFtdcOrderField</a>
-, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ae7a64108167476912e770ba7a43b2646">CThostFtdcExchangeOrderField</a>
-, <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#a3304962596b1794ac07ab93aab611153">CThostFtdcErrOrderField</a>
 , <a class="el" href="d5/dda/structCThostFtdcParkedOrderField.html#a98a42c8bbf8fddbbc84e8e719f208ca3">CThostFtdcParkedOrderField</a>
-, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#afe36544b56ba8114a36be60035ab52a9">CThostFtdcErrorConditionalOrderField</a>
+, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ae7a64108167476912e770ba7a43b2646">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="d0/d5b/structCThostFtdcInputOrderField.html#aeb6e65a8b26b3b1177f624bda458a398">CThostFtdcInputOrderField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#afe36544b56ba8114a36be60035ab52a9">CThostFtdcErrorConditionalOrderField</a>
+, <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#a3304962596b1794ac07ab93aab611153">CThostFtdcErrOrderField</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -171,7 +189,7 @@ $(document).ready(function(){initNavTree('functions_0x67.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jan 26 2014 15:50:27 for EasyQuant by
+    <li class="footer">Generated on Mon Jan 27 2014 17:02:14 for EasyQuant by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.1.2 </li>
   </ul>

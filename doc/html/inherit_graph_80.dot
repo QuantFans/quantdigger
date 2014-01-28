@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcMarketDataBase\lField",height=0.2,width=0.4,color="black",URL="$d7/d4a/structCThostFtdcMarketDataBaseField.html",tooltip="行情基础属性"];
+  Node1 [label="CThostFtdcMarketDataAverage\lPriceField",height=0.2,width=0.4,color="black",URL="$d8/dfa/structCThostFtdcMarketDataAveragePriceField.html",tooltip="成交均价"];
 }

@@ -1,6 +1,6 @@
-#ifndef ENGINE_ORDER_H
+#ifndef EASYQUANT_ENGINE_ORDER_H
 
-#define ENGINE_ORDER_H
+#define EASYQUANT_ENGINE_ORDER_H
 #include <string>
 namespace EasyQuant {
     
@@ -32,4 +32,4 @@ class Order {
 
 
 } /* EasyQuant */
-#endif /* end of include guard: ENGINE_ORDER_H */
+#endif /* end of include guard: EASYQUANT_ENGINE_ORDER_H */

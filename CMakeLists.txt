@@ -6,11 +6,7 @@ SET(LIBS "${CMAKE_SOURCE_DIR}/lib")
 IF(debug_mode)
     ADD_DEFINITIONS(-DDEBUG)
 ENDIF()
-ADD_SUBDIRECTORY(ctpdemo)
-ADD_SUBDIRECTORY(util)
-ADD_SUBDIRECTORY(strategy)
-ADD_SUBDIRECTORY(technical)
-ADD_SUBDIRECTORY(engine)
+ADD_SUBDIRECTORY(easyquant)
 
 
 #set(CMAKE_C_COMPILER   "/usr/bin/gcc-4.7")

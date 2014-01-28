@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcOptionInstrMini\lGuaranteeField",height=0.2,width=0.4,color="black",URL="$d5/d23/structCThostFtdcOptionInstrMiniGuaranteeField.html",tooltip="当前期权合约最小保障系数"];
+  Node1 [label="CThostFtdcOptionInstrMargin\lAdjustField",height=0.2,width=0.4,color="black",URL="$dd/d10/structCThostFtdcOptionInstrMarginAdjustField.html",tooltip="当前期权合约保证金调整系数"];
 }

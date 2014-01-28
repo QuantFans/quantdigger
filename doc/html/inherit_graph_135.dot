@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcQryExecOrderField",height=0.2,width=0.4,color="black",URL="$df/d26/structCThostFtdcQryExecOrderField.html",tooltip="执行宣告查询"];
+  Node1 [label="CThostFtdcQryExecOrderAction\lField",height=0.2,width=0.4,color="black",URL="$dc/dbb/structCThostFtdcQryExecOrderActionField.html",tooltip="执行宣告操作查询"];
 }

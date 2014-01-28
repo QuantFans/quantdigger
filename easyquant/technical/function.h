@@ -1,7 +1,7 @@
 #ifndef TECHNICAL_FUNCTION_H
 
 #define TECHNICAL_FUNCTION_H
-#include <eqlanguage/definition.h>
+#include <easyquant/eqlanguage/definition.h>
 
 namespace EasyQuant {
 using namespace EQLanguage;

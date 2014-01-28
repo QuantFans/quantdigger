@@ -1,13 +1,13 @@
 #include "talgo.h" 
 #include <iostream>
-#include <technical/function.h>
-#include <eqlanguage/definition.h>
+#include <easyquant/technical/function.h>
+#include <easyquant/eqlanguage/definition.h>
 using namespace std;
 namespace EasyQuant {
 using namespace EQLanguage;
 
 void TAlgo::ExcuteAlgorithm() {
-    cout<<open[0]<<"*";
+    cout<<open + 1<<"*";
     if (curbar != 0) {
         cout<<average(open, 2);
     }

@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcRspUserLoginField",height=0.2,width=0.4,color="black",URL="$d5/d15/structCThostFtdcRspUserLoginField.html",tooltip="用户登录应答"];
+  Node1 [label="CThostFtdcRspTransferField",height=0.2,width=0.4,color="black",URL="$dc/d24/structCThostFtdcRspTransferField.html",tooltip="银行发起银行资金转期货响应"];
 }

@@ -1,6 +1,6 @@
-#ifndef ENGINE_DATATYPE_H
+#ifndef EASYQUANT_ENGINE_DATATYPE_H
 
-#define ENGINE_DATATYPE_H
+#define EASYQUANT_ENGINE_DATATYPE_H
 
 #include <map>
 #include <string>
@@ -17,4 +17,4 @@ typedef float Price;
 
 } /* EasyQuant */
 
-#endif /* end of include guard: ENGINE_DATATYPE_H */
+#endif /* end of include guard: EASYQUANT_ENGINE_DATATYPE_H */

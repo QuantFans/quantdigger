@@ -1,6 +1,6 @@
-#ifndef ENGINE_BLOTTER_H
+#ifndef EASYQUANT_ENGINE_BLOTTER_H
 
-#define ENGINE_BLOTTER_H
+#define EASYQUANT_ENGINE_BLOTTER_H
 #include "datatype.h" 
 #include <vector>
 #include <string>
@@ -30,4 +30,4 @@ class Blotter {
 };
 
 } /* EasyQuant */
-#endif /* end of include guard: ENGINE_BLOTTER_H */
+#endif /* end of include guard: EASYQUANT_ENGINE_BLOTTER_H */

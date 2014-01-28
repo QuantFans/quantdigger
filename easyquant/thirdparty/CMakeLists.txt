@@ -4,7 +4,7 @@ FILE(GLOB source
     "*.cpp"
 )
 
-ADD_LIBRARY (util ${source})
+ADD_LIBRARY (thirdparty ${source})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 #LINK_DIRECTORIES("/usr/lib")
 

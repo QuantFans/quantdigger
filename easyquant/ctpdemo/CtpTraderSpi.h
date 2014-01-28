@@ -1,7 +1,7 @@
 #ifndef CTP_TRADERSPI_H_
 #define CTP_TRADERSPI_H_
 
-#include "ctp/ThostFtdcTraderApi.h"
+#include <easyquant/ctp/ThostFtdcTraderApi.h>
 
 class CtpTraderSpi : public CThostFtdcTraderSpi
 {

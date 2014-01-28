@@ -2,10 +2,12 @@ var searchData=
 [
   ['data',['data',['../d2/db1/classstock__plot_1_1EventHandler.html#aa3ed90b979f12bf012a840c54c1b74be',1,'stock_plot.EventHandler.data()'],['../d0/d7c/classwidgets_1_1CandleWindow.html#a5f400576c0e0027120569ab6d05bad1b',1,'widgets.CandleWindow.data()']]],
   ['data2',['data2',['../db/d8c/namespace3d.html#a83a8fddabf3c619a000bc5b8d81bf6be',1,'3d.data2()'],['../de/def/namespaceentry__3d.html#a827614fb9a7604a967df404937cfec9d',1,'entry_3d.data2()']]],
-  ['data_5f',['data_',['../d6/d1b/classEQLanguage_1_1Series.html#aecf61d9877dee60a3840c06ea05afa67',1,'EQLanguage::Series::data_()'],['../d6/d79/classEasyQuant_1_1CSVRow.html#a7cf3e3da8b689b4b891001a2c7730e00',1,'EasyQuant::CSVRow::data_()']]],
+  ['data_5f',['data_',['../db/dd1/classEasyQuant_1_1Series.html#a686f2cebcea5cedbb87e6ab925051bf8',1,'EasyQuant::Series::data_()'],['../d6/d79/classEasyQuant_1_1CSVRow.html#a7cf3e3da8b689b4b891001a2c7730e00',1,'EasyQuant::CSVRow::data_()']]],
   ['datasyncstatus',['DataSyncStatus',['../d8/dbf/structCThostFtdcSyncStatusField.html#ae86ef7d7e8e200d87cee4fced23d936a',1,'CThostFtdcSyncStatusField']]],
   ['datetime',['datetime',['../db/dcb/classEasyQuant_1_1TradingAlgorithm.html#a311ce5a3768a18e93fe41c689161cb72',1,'EasyQuant::TradingAlgorithm']]],
+  ['datetime_5f',['datetime_',['../d6/d14/classEasyQuant_1_1Blotter.html#ade0e54a8b0976f1a5fc17977e5bed34a',1,'EasyQuant::Blotter::datetime_()'],['../db/dcb/classEasyQuant_1_1TradingAlgorithm.html#ae47713892cdbf3651a0e3c17fce78ca5',1,'EasyQuant::TradingAlgorithm::datetime_()']]],
   ['dcetime',['DCETime',['../d5/d15/structCThostFtdcRspUserLoginField.html#ae200fccf26310da1099f061c54062591',1,'CThostFtdcRspUserLoginField::DCETime()'],['../df/d79/structCThostFtdcLoginInfoField.html#abc02e2e5c4a37d50f7a3e76925a19df4',1,'CThostFtdcLoginInfoField::DCETime()']]],
+  ['debug',['debug',['../d6/d41/classopencog_1_1Logger.html#a4d1c91a0596e67a5382bef286d25a8fd',1,'opencog::Logger']]],
   ['deliverymargin',['DeliveryMargin',['../d7/de0/structCThostFtdcTradingAccountField.html#a0cf4c034c6effc99362e32aef2dd7379',1,'CThostFtdcTradingAccountField::DeliveryMargin()'],['../da/d3d/structCThostFtdcSyncingTradingAccountField.html#a83aeb4461e61bf79b68ffbb9f3810ed5',1,'CThostFtdcSyncingTradingAccountField::DeliveryMargin()']]],
   ['deliverymonth',['DeliveryMonth',['../da/d2b/structCThostFtdcInstrumentField.html#ac0fccce9f9828e77bae7bb33ad661e98',1,'CThostFtdcInstrumentField']]],
   ['deliveryyear',['DeliveryYear',['../da/d2b/structCThostFtdcInstrumentField.html#a2d72d507017308f666e29c9bb0290568',1,'CThostFtdcInstrumentField']]],

@@ -23,6 +23,7 @@ var searchData=
   ['slidermax',['slidermax',['../d1/d84/classwidgets_1_1Slider.html#a4793a50f41cfe5dae7d8f61a03367881',1,'widgets::Slider']]],
   ['slidermin',['slidermin',['../d1/d84/classwidgets_1_1Slider.html#ade54d9c5b16ac0af6dbc4d8437179432',1,'widgets::Slider']]],
   ['slw',['slw',['../d9/d83/namespacek.html#a6bf6bb1c9bd609d150de12c2b1ea45a8',1,'k']]],
+  ['ss',['ss',['../d5/d89/classopencog_1_1Logger_1_1Base.html#a87fec70e1eb4873eeead7a9d6cdadcc1',1,'opencog::Logger::Base']]],
   ['sshortmarginratiobymoney',['SShortMarginRatioByMoney',['../dd/d10/structCThostFtdcOptionInstrMarginAdjustField.html#aba7354cf825c6e7f2c1e0c3d414dd0e8',1,'CThostFtdcOptionInstrMarginAdjustField']]],
   ['sshortmarginratiobyvolume',['SShortMarginRatioByVolume',['../dd/d10/structCThostFtdcOptionInstrMarginAdjustField.html#a5b295fc56d2c20f086e60f21a1af0825',1,'CThostFtdcOptionInstrMarginAdjustField']]],
   ['startdate',['StartDate',['../d8/d93/structCThostFtdcTraderOfferField.html#a6038d4843b305fbee9f6e22510ca08c6',1,'CThostFtdcTraderOfferField::StartDate()'],['../dd/d4f/structCThostFtdcMDTraderOfferField.html#ad8478c21738a3d69730cc1be3ac57ec2',1,'CThostFtdcMDTraderOfferField::StartDate()']]],

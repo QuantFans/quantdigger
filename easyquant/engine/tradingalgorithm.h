@@ -1,8 +1,8 @@
-#ifndef ENGINE_TRADINGALGORITHM_H
-#define ENGINE_TRADINGALGORITHM_H
+#ifndef EASYQUANT_ENGINE_TRADINGALGORITHM_H
+#define EASYQUANT_ENGINE_TRADINGALGORITHM_H
 
 #include "datasource.h"
-#include <eqlanguage/definition.h>
+#include <easyquant/eqlanguage/definition.h>
 #include "datatype.h"
 
 
@@ -69,4 +69,4 @@ class TradingAlgorithm {
 
 } /* EasyQuant */
 
-#endif /* end of include guard: ENGINE_TRADINGALGORITHM_H */
+#endif /* end of include guard: EASYQUANT_ENGINE_TRADINGALGORITHM_H */

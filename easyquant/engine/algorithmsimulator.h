@@ -1,6 +1,6 @@
-#ifndef ENGINE_ALGORITHMSIMULATOR_H
+#ifndef EASYQUANT_ENGINE_ALGORITHMSIMULATOR_H
 
-#define ENGINE_ALGORITHMSIMULATOR_H
+#define EASYQUANT_ENGINE_ALGORITHMSIMULATOR_H
 #include <vector>
 #include <string>
 
@@ -25,4 +25,4 @@ class AlgorithmSimulator {
 };
 
 } /* EasyQuant */
-#endif /* end of include guard: ENGINE_ALGORITHMSIMULATOR_H */
+#endif /* end of include guard: EASYQUANT_ENGINE_ALGORITHMSIMULATOR_H */

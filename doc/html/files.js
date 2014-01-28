@@ -8,10 +8,14 @@ var files =
     [ "analyze.py", "d2/d6e/analyze_8py.html", "d2/d6e/analyze_8py" ],
     [ "average.cpp", "d8/de0/average_8cpp.html", "d8/de0/average_8cpp" ],
     [ "blotter.h", "d0/de7/blotter_8h.html", [
-      [ "Blotter", "db/dae/classBlotter.html", "db/dae/classBlotter" ]
+      [ "Blotter", "d6/d14/classEasyQuant_1_1Blotter.html", "d6/d14/classEasyQuant_1_1Blotter" ]
     ] ],
     [ "CMakeCCompilerId.c", "d9/d4b/CMakeCCompilerId_8c.html", "d9/d4b/CMakeCCompilerId_8c" ],
     [ "CMakeCXXCompilerId.cpp", "d6/d83/CMakeCXXCompilerId_8cpp.html", "d6/d83/CMakeCXXCompilerId_8cpp" ],
+    [ "concurrent_queue.h", "d0/d21/concurrent__queue_8h.html", [
+      [ "concurrent_queue", "d1/dd8/classconcurrent__queue.html", "d1/dd8/classconcurrent__queue" ],
+      [ "Canceled", "d8/da1/structconcurrent__queue_1_1Canceled.html", null ]
+    ] ],
     [ "CSem.cpp", "de/df5/CSem_8cpp.html", "de/df5/CSem_8cpp" ],
     [ "CSem.h", "d5/d22/CSem_8h.html", [
       [ "CSem", "d1/d9c/classCSem.html", "d1/d9c/classCSem" ]
@@ -31,11 +35,17 @@ var files =
     [ "event.h", "dd/d20/event_8h.html", null ],
     [ "function.h", "dd/d67/function_8h.html", "dd/d67/function_8h" ],
     [ "k.py", "d5/d9e/k_8py.html", "d5/d9e/k_8py" ],
+    [ "Logger.cpp", "d9/df5/Logger_8cpp.html", "d9/df5/Logger_8cpp" ],
+    [ "Logger.h", "dd/da4/Logger_8h.html", "dd/da4/Logger_8h" ],
+    [ "macro_define.h", "d7/dbb/macro__define_8h.html", "d7/dbb/macro__define_8h" ],
     [ "main.cpp", "df/d0a/main_8cpp.html", "df/d0a/main_8cpp" ],
     [ "Main.cpp", "d5/de0/Main_8cpp.html", "d5/de0/Main_8cpp" ],
     [ "order.h", "d1/d58/order_8h.html", "d1/d58/order_8h" ],
     [ "performancetracker.h", "d6/d68/performancetracker_8h.html", null ],
     [ "period.h", "d7/d20/period_8h.html", null ],
+    [ "series.h", "da/d29/series_8h.html", [
+      [ "Series", "db/dd1/classEasyQuant_1_1Series.html", "db/dd1/classEasyQuant_1_1Series" ]
+    ] ],
     [ "slippage.h", "dc/da8/slippage_8h.html", null ],
     [ "stock_plot.py", "dc/d00/stock__plot_8py.html", "dc/d00/stock__plot_8py" ],
     [ "summary.py", "d2/d81/summary_8py.html", "d2/d81/summary_8py" ],

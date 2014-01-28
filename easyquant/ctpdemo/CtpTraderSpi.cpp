@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "ctp/ThostFtdcTraderApi.h"
+#include <easyquant/ctp/ThostFtdcTraderApi.h>
 #include "CtpTraderSpi.h"
 #include "CSem.h"
 

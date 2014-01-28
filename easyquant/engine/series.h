@@ -1,27 +1,16 @@
-#ifndef EQLANGUAG_DEFINITION_H
+#ifndef EASYQUANT_ENGINE_SERIES_H
 
-#define EQLANGUAG_DEFINITION_H
+#define EASYQUANT_ENGINE_SERIES_H
 
-#include <vector>
-#include <string>
-#include <iostream>
-#include <engine/datatype.h>
-namespace EQLanguage {
-//class TradingAlgorithm;
-typedef float Number;
-typedef int Int;
-typedef float Price;
-typedef EasyQuant::DateTime DateTime;
-typedef EasyQuant::Time  Time;
-typedef std::string Period;
-typedef std::vector<Number> NumberList;
-typedef std::vector<DateTime> DateTimeList;
-
+namespace EasyQuant {
+class TradingAlgorithm;
+    
 template <typename T>
 class Series {
 
  public:
 //    friend TradingAlgorithm;
+    inline operator T() { return data_[curindex_]; }
 
     /**
      * @brief 返回给定偏移的元素。
@@ -41,8 +30,9 @@ class Series {
         return data_[index]; 
     }
 
- public:
+ private:
     /// @todo 让TradingAlgorithm成为友员, 私有化部份接口
+    friend class TradingAlgorithm;
     void push_back(T d){ data_.push_back(d); }
     int size() const { return data_.size(); }
     void set_curindex(int index) { curindex_ = index; }
@@ -53,10 +43,5 @@ class Series {
     std::vector<T> data_;
     int curindex_;
 };
-typedef Series<Number> NumberSeries;
-typedef const Series<Number>& NumberSeriesReference;
-typedef Series<DateTime> DateTimeSeries;
-typedef Series<DateTime>& DateTimeSeriesReference;
-
-} /* EQLanguage */
-#endif /* end of include guard: EQLANGUAG_DEFINITION_H */
+} /* EasyQuant */
+#endif /* end of include guard: EASYQUANT_ENGINE_SERIES_H */

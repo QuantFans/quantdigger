@@ -4,5 +4,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
   node [fontname="FreeSans",fontsize="10",shape=record];
   rankdir="LR";
-  Node1 [label="CThostFtdcPositionProfit\lAlgorithmField",height=0.2,width=0.4,color="black",URL="$d3/d3d/structCThostFtdcPositionProfitAlgorithmField.html",tooltip="浮动盈亏算法"];
+  Node1 [label="CThostFtdcPartBrokerField",height=0.2,width=0.4,color="black",URL="$d3/d6d/structCThostFtdcPartBrokerField.html",tooltip="会员编码和经纪公司编码对照表"];
 }

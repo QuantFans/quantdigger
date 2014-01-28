@@ -8,9 +8,12 @@ var searchData=
   ['plot_5fsimple_5fentry',['plot_simple_entry',['../dd/d35/namespacestock__plot.html#a254cde1204652382ddc673c6996d6955',1,'stock_plot']]],
   ['plot_5fsummary',['plot_summary',['../dd/d35/namespacestock__plot.html#a3078ba483f3e7afe4c656c3600e01816',1,'stock_plot']]],
   ['plot_5fsummary2',['plot_summary2',['../dd/d35/namespacestock__plot.html#acc2370d53c9e5759ead2d8d404b08f5e',1,'stock_plot']]],
+  ['pop',['pop',['../d1/dd8/classconcurrent__queue.html#abf577e5d3e401af1952d9ef56939f6c0',1,'concurrent_queue']]],
   ['pricefname_5ffrom_5ftradefname',['pricefname_from_tradefname',['../d9/da0/namespacedata.html#aa38e800c1b1a6e580fa68c5a1a637cb2',1,'data']]],
   ['printorders',['PrintOrders',['../dc/db9/classCtpTraderSpi.html#aaa7ee44b148c490cf7eaa9e10f14bd4e',1,'CtpTraderSpi']]],
   ['printtrades',['PrintTrades',['../dc/db9/classCtpTraderSpi.html#a6259da645ef18721b2015a5e578b2c4e',1,'CtpTraderSpi']]],
   ['process',['process',['../de/def/namespaceentry__3d.html#ae99a58c42b2585171c5a2e8ab5be80f1',1,'entry_3d']]],
-  ['push_5fback',['push_back',['../d6/d1b/classEQLanguage_1_1Series.html#a47cae9b8ffc16206a7f485a5480515f1',1,'EQLanguage::Series']]]
+  ['prt_5fbacktrace',['prt_backtrace',['../d9/df5/Logger_8cpp.html#a4627aef6bd97401615c14b997e964b7d',1,'Logger.cpp']]],
+  ['push',['push',['../d1/dd8/classconcurrent__queue.html#a591819d8ffaff5282f15c5737aa86145',1,'concurrent_queue']]],
+  ['push_5fback',['push_back',['../db/dd1/classEasyQuant_1_1Series.html#a75df81cf31b6427093a5b5e0fd499c65',1,'EasyQuant::Series']]]
 ];

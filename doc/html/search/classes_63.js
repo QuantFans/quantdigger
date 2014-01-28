@@ -1,6 +1,9 @@
 var searchData=
 [
+  ['canceled',['Canceled',['../d8/da1/structconcurrent__queue_1_1Canceled.html',1,'concurrent_queue']]],
   ['candlewindow',['CandleWindow',['../d0/d7c/classwidgets_1_1CandleWindow.html',1,'widgets']]],
+  ['concurrent_5fqueue',['concurrent_queue',['../d1/dd8/classconcurrent__queue.html',1,'']]],
+  ['concurrent_5fqueue_3c_20std_3a_3astring_20_2a_20_3e',['concurrent_queue&lt; std::string * &gt;',['../d1/dd8/classconcurrent__queue.html',1,'']]],
   ['csem',['CSem',['../d1/d9c/classCSem.html',1,'']]],
   ['csviterator',['CSVIterator',['../de/dfb/classEasyQuant_1_1CSVIterator.html',1,'EasyQuant']]],
   ['csvrow',['CSVRow',['../d6/d79/classEasyQuant_1_1CSVRow.html',1,'EasyQuant']]],

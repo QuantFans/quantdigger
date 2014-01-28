@@ -1,7 +1,7 @@
-#ifndef STRATEGY_TALGO_H
+#ifndef EASYQUANT_STRATEGY_TALGO_H
 
-#define STRATEGY_TALGO_H
-#include <engine/tradingalgorithm.h>
+#define EASYQUANT_STRATEGY_TALGO_H
+#include <easyquant/engine/tradingalgorithm.h>
 namespace EasyQuant {
     
 /**
@@ -21,4 +21,4 @@ class TAlgo : public TradingAlgorithm {
 
 
 } /* EasyQuant */
-#endif /* end of include guard: STRATEGY_TALGO_H */
+#endif /* end of include guard: EASYQUANT_STRATEGY_TALGO_H */

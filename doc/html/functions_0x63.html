@@ -79,6 +79,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions_func.html"><span>Functions</span></a></li>
       <li><a href="functions_vars.html"><span>Variables</span></a></li>
       <li><a href="functions_type.html"><span>Typedefs</span></a></li>
+      <li><a href="functions_enum.html"><span>Enumerations</span></a></li>
+      <li><a href="functions_eval.html"><span>Enumerator</span></a></li>
+      <li><a href="functions_rela.html"><span>Related&#160;Functions</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -132,7 +135,7 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Friends</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(10)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(11)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -145,18 +148,24 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 <div class="textblock">Here is a list of all class members with links to the classes they belong to:</div>
 
 <h3><a class="anchor" id="index_c"></a>- c -</h3><ul>
+<li>cancel()
+: <a class="el" href="d1/dd8/classconcurrent__queue.html#afb5934af9e5fe4f0251845ee2c447ec4">concurrent_queue&lt; Data &gt;</a>
+</li>
+<li>cancel_reset()
+: <a class="el" href="d1/dd8/classconcurrent__queue.html#ad6676eba7b67f374310188e5b46fc43d">concurrent_queue&lt; Data &gt;</a>
+</li>
 <li>CancelTime
-: <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a7ba5a29776909c9f58980a552f98c176">CThostFtdcOrderField</a>
-, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a1a234a8b15656e97e3abf4afb44c1ea4">CThostFtdcExchangeOrderField</a>
+: <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a1a234a8b15656e97e3abf4afb44c1ea4">CThostFtdcExchangeOrderField</a>
+, <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#acbf85322dab9b5dee08265c1e8806318">CThostFtdcExecOrderField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a7ba5a29776909c9f58980a552f98c176">CThostFtdcOrderField</a>
 , <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#a214599c7f1af453d8c7e33c9873634a4">CThostFtdcExchangeExecOrderField</a>
 , <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a8c2859df5222b4175d458bea9f30d500">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#acbf85322dab9b5dee08265c1e8806318">CThostFtdcExecOrderField</a>
 </li>
 <li>CashExchangeCode
-: <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#a8aa3878b765f3151f8fe3413a1bc5ba7">CThostFtdcOpenAccountField</a>
-, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a33340cad66fa20019c27d68ddbee7538">CThostFtdcCancelAccountField</a>
-, <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#afc0d2ddfed389195ad0a7709fc03daed">CThostFtdcReqOpenAccountField</a>
+: <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#afc0d2ddfed389195ad0a7709fc03daed">CThostFtdcReqOpenAccountField</a>
 , <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#aa80381c6b80b0dcdea2e13bb207aafa5">CThostFtdcReqCancelAccountField</a>
+, <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#a8aa3878b765f3151f8fe3413a1bc5ba7">CThostFtdcOpenAccountField</a>
+, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a33340cad66fa20019c27d68ddbee7538">CThostFtdcCancelAccountField</a>
 </li>
 <li>CashIn
 : <a class="el" href="d7/de0/structCThostFtdcTradingAccountField.html#aa58910e45d847364c178a46c911ededc">CThostFtdcTradingAccountField</a>
@@ -168,16 +177,18 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 : <a class="el" href="db/ddd/structCThostFtdcTransferQryDetailRspField.html#aa05cdbb9bce9a178ce887fd729ccb9c2">CThostFtdcTransferQryDetailRspField</a>
 </li>
 <li>ClearingPartID
-: <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ae6b7e6e2061ff6e1079d16f50d30919f">CThostFtdcExchangeOrderField</a>
+: <a class="el" href="d7/d28/structCThostFtdcOrderField.html#ae6549ad42af26c417c0662de8356436c">CThostFtdcOrderField</a>
+, <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#ae6b7e6e2061ff6e1079d16f50d30919f">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#a1fd552db35bb2f3551d1482dee2775d2">CThostFtdcExchangeTradeField</a>
 , <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#aec31d40b7888ab2e323fbbfdd001d0d6">CThostFtdcTradeField</a>
 , <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#a737db9739e434b57c9047ce2feda4b5f">CThostFtdcExecOrderField</a>
 , <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#a8609659861f9e2b70c490f257de4b354">CThostFtdcExchangeExecOrderField</a>
 , <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#a936b57229def357676c691c42492904e">CThostFtdcErrorConditionalOrderField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#ae6549ad42af26c417c0662de8356436c">CThostFtdcOrderField</a>
 </li>
 <li>ClientID
-: <a class="el" href="d7/dcb/structCThostFtdcQryExchangeOrderActionField.html#a946418f094cfb153e9d404ab9d5d7137">CThostFtdcQryExchangeOrderActionField</a>
+: <a class="el" href="db/d7e/structCThostFtdcQryTradingCodeField.html#a5e5978abd3458a9b90712b2103b17442">CThostFtdcQryTradingCodeField</a>
+, <a class="el" href="d1/d1b/structCThostFtdcQryExchangeOrderField.html#a8e24439177c96e70fa6c3265784f6ffe">CThostFtdcQryExchangeOrderField</a>
+, <a class="el" href="d7/dcb/structCThostFtdcQryExchangeOrderActionField.html#a946418f094cfb153e9d404ab9d5d7137">CThostFtdcQryExchangeOrderActionField</a>
 , <a class="el" href="d8/d43/structCThostFtdcExecOrderField.html#aefb200f4fa1f3c317c26173411bc80eb">CThostFtdcExecOrderField</a>
 , <a class="el" href="dd/d38/structCThostFtdcExecOrderActionField.html#a98efdf87d9e5bc1ce8889e0292982e31">CThostFtdcExecOrderActionField</a>
 , <a class="el" href="d9/d68/structCThostFtdcExchangeExecOrderField.html#aa65503537c207996242404115fb7f581">CThostFtdcExchangeExecOrderField</a>
@@ -194,8 +205,6 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 , <a class="el" href="d6/db0/structCThostFtdcExchangeTradeField.html#a2932eaee8ea67e0c579fa0fbc3ed3518">CThostFtdcExchangeTradeField</a>
 , <a class="el" href="d9/d1f/structCThostFtdcTradeField.html#a4000935c3b19d291fcb648c7580f44c2">CThostFtdcTradeField</a>
 , <a class="el" href="d7/d8c/structCThostFtdcSyncingTradingCodeField.html#a5bc25bf079efd5863d2357e588e0af1f">CThostFtdcSyncingTradingCodeField</a>
-, <a class="el" href="db/d7e/structCThostFtdcQryTradingCodeField.html#a5e5978abd3458a9b90712b2103b17442">CThostFtdcQryTradingCodeField</a>
-, <a class="el" href="d1/d1b/structCThostFtdcQryExchangeOrderField.html#a8e24439177c96e70fa6c3265784f6ffe">CThostFtdcQryExchangeOrderField</a>
 </li>
 <li>ClientIDType
 : <a class="el" href="d4/d28/structCThostFtdcTradingCodeField.html#a9c221026d3857823332042d9080e57de">CThostFtdcTradingCodeField</a>
@@ -237,9 +246,9 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 , <a class="el" href="dc/dc6/structCThostFtdcBrokerDepositField.html#ac19f997dee7602e358bb1a4f00d1aa3b">CThostFtdcBrokerDepositField</a>
 </li>
 <li>CloseProfitByDate
-: <a class="el" href="d5/dee/structCThostFtdcInvestorPositionDetailField.html#ad653fcdcf211432cc766719ece404cef">CThostFtdcInvestorPositionDetailField</a>
-, <a class="el" href="d0/d07/structCThostFtdcInvestorPositionField.html#a0543d5339387ae9c24820aca208e2778">CThostFtdcInvestorPositionField</a>
+: <a class="el" href="d0/d07/structCThostFtdcInvestorPositionField.html#a0543d5339387ae9c24820aca208e2778">CThostFtdcInvestorPositionField</a>
 , <a class="el" href="dd/db1/structCThostFtdcSyncingInvestorPositionField.html#a96699590b01adeaaeecc80ad40168dde">CThostFtdcSyncingInvestorPositionField</a>
+, <a class="el" href="d5/dee/structCThostFtdcInvestorPositionDetailField.html#ad653fcdcf211432cc766719ece404cef">CThostFtdcInvestorPositionDetailField</a>
 </li>
 <li>CloseProfitByTrade
 : <a class="el" href="d0/d07/structCThostFtdcInvestorPositionField.html#ae9f75c8f6c15ef2834cb089d0e4e7722">CThostFtdcInvestorPositionField</a>
@@ -331,6 +340,9 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 <li>ComTradeID
 : <a class="el" href="d8/df7/structCThostFtdcInvestorPositionCombineDetailField.html#ad33d845ea5923d898b8f1dd9ed11a4e6">CThostFtdcInvestorPositionCombineDetailField</a>
 </li>
+<li>concurrent_queue()
+: <a class="el" href="d1/dd8/classconcurrent__queue.html#a1d962ac2eb31c81c0fc033d7a4b01225">concurrent_queue&lt; Data &gt;</a>
+</li>
 <li>ConfirmDate
 : <a class="el" href="db/db6/structCThostFtdcSettlementInfoConfirmField.html#a90a1f7b9a1906f9e88c2660d31a1f6a2">CThostFtdcSettlementInfoConfirmField</a>
 </li>
@@ -342,16 +354,16 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 , <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#a2ae2e62222bb812c48151b246b4853cc">CThostFtdcMDTraderOfferField</a>
 </li>
 <li>ConnectRequestDate
-: <a class="el" href="d8/d93/structCThostFtdcTraderOfferField.html#ac16cc0633f84d039fb73607b25dd0eaf">CThostFtdcTraderOfferField</a>
-, <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#aa123b074c1d6db4f75339e5dcada99fe">CThostFtdcMDTraderOfferField</a>
+: <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#aa123b074c1d6db4f75339e5dcada99fe">CThostFtdcMDTraderOfferField</a>
+, <a class="el" href="d8/d93/structCThostFtdcTraderOfferField.html#ac16cc0633f84d039fb73607b25dd0eaf">CThostFtdcTraderOfferField</a>
 </li>
 <li>ConnectRequestTime
 : <a class="el" href="d8/d93/structCThostFtdcTraderOfferField.html#a295631ac21036ebcebc85723aab8ad69">CThostFtdcTraderOfferField</a>
 , <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#a911e1f7ec2b56e869a03f242cf195c2f">CThostFtdcMDTraderOfferField</a>
 </li>
 <li>ConnectTime
-: <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#a3cda313a9a4d4719e2e736731a5b68f5">CThostFtdcMDTraderOfferField</a>
-, <a class="el" href="d8/d93/structCThostFtdcTraderOfferField.html#af642cac964e1f90d6d2b83872e01f85b">CThostFtdcTraderOfferField</a>
+: <a class="el" href="d8/d93/structCThostFtdcTraderOfferField.html#af642cac964e1f90d6d2b83872e01f85b">CThostFtdcTraderOfferField</a>
+, <a class="el" href="dd/d4f/structCThostFtdcMDTraderOfferField.html#a3cda313a9a4d4719e2e736731a5b68f5">CThostFtdcMDTraderOfferField</a>
 </li>
 <li>Content
 : <a class="el" href="dd/d44/structCThostFtdcSettlementInfoField.html#a8f92cb524afc921c54f9e381edd92a33">CThostFtdcSettlementInfoField</a>
@@ -359,23 +371,23 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 </li>
 <li>ContingentCondition
 : <a class="el" href="d0/d5b/structCThostFtdcInputOrderField.html#a1fcfc6c1ee86aa555f1346da59f8b144">CThostFtdcInputOrderField</a>
-, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a628e2428e96e5cbc769ddbdd7b222bc1">CThostFtdcOrderField</a>
 , <a class="el" href="d8/d83/structCThostFtdcExchangeOrderField.html#a6b544822bf1f1f3f461d0f9ab5add1d7">CThostFtdcExchangeOrderField</a>
 , <a class="el" href="d5/dda/structCThostFtdcParkedOrderField.html#a63799c7cfeb1ce4d53cebafe4dfd8bfe">CThostFtdcParkedOrderField</a>
-, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#ac5900189a50ed3860142747a7727fe02">CThostFtdcErrorConditionalOrderField</a>
 , <a class="el" href="d2/d92/structCThostFtdcErrOrderField.html#a4ffe666283bfdd0cfd4b38cf8b5263b5">CThostFtdcErrOrderField</a>
+, <a class="el" href="d5/dfc/structCThostFtdcErrorConditionalOrderField.html#ac5900189a50ed3860142747a7727fe02">CThostFtdcErrorConditionalOrderField</a>
+, <a class="el" href="d7/d28/structCThostFtdcOrderField.html#a628e2428e96e5cbc769ddbdd7b222bc1">CThostFtdcOrderField</a>
 </li>
 <li>CountryCode
 : <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a44ee60c68ad9fd77d89cfeaf6adbd6e8">CThostFtdcReqOpenAccountField</a>
 , <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#abe3a0d04e87370a7c765a9b36d34a5be">CThostFtdcReqCancelAccountField</a>
-, <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#abb26b805957d0118ad19d8b79ca9f8d0">CThostFtdcOpenAccountField</a>
+, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#acb7a1ff4667675a07c2ab5e4c6202a97">CThostFtdcReqChangeAccountField</a>
 , <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ae8d9fcce028ab7a62492806131902222">CThostFtdcCancelAccountField</a>
 , <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#afc62467ba5dc1b3e473f4754628c58a5">CThostFtdcChangeAccountField</a>
-, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#acb7a1ff4667675a07c2ab5e4c6202a97">CThostFtdcReqChangeAccountField</a>
+, <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#abb26b805957d0118ad19d8b79ca9f8d0">CThostFtdcOpenAccountField</a>
 </li>
 <li>CreateDate
-: <a class="el" href="da/dc6/structCThostFtdcCFMMCBrokerKeyField.html#a59b3cd6391d5621d3ec6b5dcccad871d">CThostFtdcCFMMCBrokerKeyField</a>
-, <a class="el" href="da/d2b/structCThostFtdcInstrumentField.html#ac49ca25bb2578cf778bebd316b8957ea">CThostFtdcInstrumentField</a>
+: <a class="el" href="da/d2b/structCThostFtdcInstrumentField.html#ac49ca25bb2578cf778bebd316b8957ea">CThostFtdcInstrumentField</a>
+, <a class="el" href="da/dc6/structCThostFtdcCFMMCBrokerKeyField.html#a59b3cd6391d5621d3ec6b5dcccad871d">CThostFtdcCFMMCBrokerKeyField</a>
 </li>
 <li>CreateFtdcMdApi()
 : <a class="el" href="d5/d53/classCThostFtdcMdApi.html#a679b1ad8493d04cbefdb2a7223292cb5">CThostFtdcMdApi</a>
@@ -387,14 +399,14 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 : <a class="el" href="da/dc6/structCThostFtdcCFMMCBrokerKeyField.html#a5a2d4c9c7b41c3f3a48fb9ac08accdd0">CThostFtdcCFMMCBrokerKeyField</a>
 </li>
 <li>Credit
-: <a class="el" href="d7/de0/structCThostFtdcTradingAccountField.html#a92cf2f1a847c36cebecdac88deccbc39">CThostFtdcTradingAccountField</a>
-, <a class="el" href="da/d3d/structCThostFtdcSyncingTradingAccountField.html#a3dea3920bc52a4094db527391ab542e3">CThostFtdcSyncingTradingAccountField</a>
+: <a class="el" href="da/d3d/structCThostFtdcSyncingTradingAccountField.html#a3dea3920bc52a4094db527391ab542e3">CThostFtdcSyncingTradingAccountField</a>
+, <a class="el" href="d7/de0/structCThostFtdcTradingAccountField.html#a92cf2f1a847c36cebecdac88deccbc39">CThostFtdcTradingAccountField</a>
 </li>
 <li>CSem()
 : <a class="el" href="d1/d9c/classCSem.html#a485a932d278bbf5de3bc259440a8b9a4">CSem</a>
 </li>
 <li>CSVIterator()
-: <a class="el" href="de/dfb/classEasyQuant_1_1CSVIterator.html#a6b8cf8b67577a0b10c8fbe4804c5d190">EasyQuant::CSVIterator</a>
+: <a class="el" href="de/dfb/classEasyQuant_1_1CSVIterator.html#a8c92b093a86f6a605b3d1ae2f9889be6">EasyQuant::CSVIterator</a>
 </li>
 <li>CtpTraderSpi()
 : <a class="el" href="dc/db9/classCtpTraderSpi.html#a9b88a488ef68d6e778137b4d2396d9b9">CtpTraderSpi</a>
@@ -403,61 +415,64 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 : <a class="el" href="db/dcb/classEasyQuant_1_1TradingAlgorithm.html#ae14f4ea31cd6ed7b878a7ff534a3c30c">EasyQuant::TradingAlgorithm</a>
 </li>
 <li>curindex()
-: <a class="el" href="d6/d1b/classEQLanguage_1_1Series.html#a10c3081fd181780376218cbb8df8570e">EQLanguage::Series&lt; T &gt;</a>
+: <a class="el" href="db/dd1/classEasyQuant_1_1Series.html#ae3954a7d678831ab6141ad9133a7b99a">EasyQuant::Series&lt; T &gt;</a>
 </li>
 <li>curindex_
-: <a class="el" href="d6/d1b/classEQLanguage_1_1Series.html#a32ac5110759b187a7d9120337ce86428">EQLanguage::Series&lt; T &gt;</a>
+: <a class="el" href="db/dd1/classEasyQuant_1_1Series.html#add35bd36795038cee3665521753a7452">EasyQuant::Series&lt; T &gt;</a>
 </li>
 <li>CurrDate
 : <a class="el" href="da/da5/structCThostFtdcCurrentTimeField.html#a7c30a02b3b22db4d07f288b64289ab8a">CThostFtdcCurrentTimeField</a>
 </li>
 <li>CurrDelta
 : <a class="el" href="d0/dba/structCThostFtdcDepthMarketDataField.html#ad9cb3cecf6b5c84bdf339bdb73cc1f62">CThostFtdcDepthMarketDataField</a>
-, <a class="el" href="de/d07/structCThostFtdcMarketDataStaticField.html#aedda8f13609291a61701b9d2e1ba0143">CThostFtdcMarketDataStaticField</a>
 , <a class="el" href="dd/de7/structCThostFtdcMarketDataField.html#a968d58e0d23621b1ede52c0dbffcdf03">CThostFtdcMarketDataField</a>
+, <a class="el" href="de/d07/structCThostFtdcMarketDataStaticField.html#aedda8f13609291a61701b9d2e1ba0143">CThostFtdcMarketDataStaticField</a>
 </li>
 <li>CurrencyCode
-: <a class="el" href="db/ddd/structCThostFtdcTransferQryDetailRspField.html#a331bce9ba0701a5593b085e9ab5582f0">CThostFtdcTransferQryDetailRspField</a>
+: <a class="el" href="df/dd9/structCThostFtdcTransferQryBankRspField.html#af762bc09ebb4362da1495d9e30850be7">CThostFtdcTransferQryBankRspField</a>
 , <a class="el" href="d7/dcd/structCThostFtdcTransferBankToFutureReqField.html#af1004a4f7e8e28f42537abc50940c36b">CThostFtdcTransferBankToFutureReqField</a>
 , <a class="el" href="dd/de9/structCThostFtdcTransferBankToFutureRspField.html#aaf3ed1e7025c845b6ad3382da22e5894">CThostFtdcTransferBankToFutureRspField</a>
-, <a class="el" href="d8/d73/structCThostFtdcTransferFutureToBankRspField.html#ab3bef208ae41f00a1b20a5661e203f88">CThostFtdcTransferFutureToBankRspField</a>
-, <a class="el" href="d9/d81/structCThostFtdcTransferQryBankReqField.html#a5b09b5dcdc038fa18b93f596bdd8bdb9">CThostFtdcTransferQryBankReqField</a>
-, <a class="el" href="df/dd9/structCThostFtdcTransferQryBankRspField.html#af762bc09ebb4362da1495d9e30850be7">CThostFtdcTransferQryBankRspField</a>
 , <a class="el" href="d6/d72/structCThostFtdcTransferFutureToBankReqField.html#acee57e855457e82d3915cd748914bc98">CThostFtdcTransferFutureToBankReqField</a>
+, <a class="el" href="d9/d81/structCThostFtdcTransferQryBankReqField.html#a5b09b5dcdc038fa18b93f596bdd8bdb9">CThostFtdcTransferQryBankReqField</a>
+, <a class="el" href="db/ddd/structCThostFtdcTransferQryDetailRspField.html#a331bce9ba0701a5593b085e9ab5582f0">CThostFtdcTransferQryDetailRspField</a>
+, <a class="el" href="d8/d73/structCThostFtdcTransferFutureToBankRspField.html#ab3bef208ae41f00a1b20a5661e203f88">CThostFtdcTransferFutureToBankRspField</a>
 </li>
 <li>CurrencyID
-: <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#aa6bf21ccd238899610a4eef7c34cb93e">CThostFtdcReqChangeAccountField</a>
-, <a class="el" href="de/d56/structCThostFtdcNotifyQueryAccountField.html#ab3c9974931cecfdc90b785754bb5ee51">CThostFtdcNotifyQueryAccountField</a>
-, <a class="el" href="d3/d86/structCThostFtdcReqQueryAccountField.html#a8f4a9d14f0912aed4ea689c4b90a1174">CThostFtdcReqQueryAccountField</a>
-, <a class="el" href="d7/dc7/structCThostFtdcRspFutureSignInField.html#ad2fee69ba5b325c61ace0755fcee86d3">CThostFtdcRspFutureSignInField</a>
-, <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#a00c92ddccfc9061136c67d5db1c5fe34">CThostFtdcReqRepealField</a>
-, <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#ac69dddd22644e45248e98eef50cf079b">CThostFtdcReqCancelAccountField</a>
-, <a class="el" href="d6/d75/structCThostFtdcReqTransferField.html#aa0fa29adf42624f1e1d38e35071dde8d">CThostFtdcReqTransferField</a>
+: <a class="el" href="df/d44/structCThostFtdcRspQueryTradeResultBySerialField.html#add04cddbd020156da23d3b07c4c08cc2">CThostFtdcRspQueryTradeResultBySerialField</a>
 , <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#ad598ab93c752d2b7acc28d3bfa9398ee">CThostFtdcReqOpenAccountField</a>
+, <a class="el" href="d7/dc7/structCThostFtdcRspFutureSignInField.html#ad2fee69ba5b325c61ace0755fcee86d3">CThostFtdcRspFutureSignInField</a>
+, <a class="el" href="da/d42/structCThostFtdcNotifyFutureSignInField.html#aae33ee77ff2f2dffd3bc8de762282342">CThostFtdcNotifyFutureSignInField</a>
+, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#aa6bf21ccd238899610a4eef7c34cb93e">CThostFtdcReqChangeAccountField</a>
+, <a class="el" href="d3/d86/structCThostFtdcReqQueryAccountField.html#a8f4a9d14f0912aed4ea689c4b90a1174">CThostFtdcReqQueryAccountField</a>
+, <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#ac69dddd22644e45248e98eef50cf079b">CThostFtdcReqCancelAccountField</a>
 , <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a47e162161bafb8623cd873729524b9f7">CThostFtdcRspTransferField</a>
-, <a class="el" href="de/d25/structCThostFtdcRspQueryAccountField.html#a7049a44a195e923a73590b13ee4d1ff2">CThostFtdcRspQueryAccountField</a>
+, <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#a00c92ddccfc9061136c67d5db1c5fe34">CThostFtdcReqRepealField</a>
+, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#a214e55450c9c78d2dde05f239a9ad7cf">CThostFtdcRspRepealField</a>
 , <a class="el" href="de/dec/structCThostFtdcFutureSignIOField.html#a942bd9fd1568a9ebddefa6420952b802">CThostFtdcFutureSignIOField</a>
+, <a class="el" href="d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a870222ddea36a22cec67fbc0d5a2e509">CThostFtdcReqQueryTradeResultBySerialField</a>
+, <a class="el" href="de/d56/structCThostFtdcNotifyQueryAccountField.html#ab3c9974931cecfdc90b785754bb5ee51">CThostFtdcNotifyQueryAccountField</a>
+, <a class="el" href="d6/d75/structCThostFtdcReqTransferField.html#aa0fa29adf42624f1e1d38e35071dde8d">CThostFtdcReqTransferField</a>
+, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ac402d0669344dd7f4064ea8f0c467710">CThostFtdcCancelAccountField</a>
+, <a class="el" href="d7/d3a/structCThostFtdcAccountregisterField.html#ab2667b7ea0c32eb1eaea3db8937e7bdf">CThostFtdcAccountregisterField</a>
+, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a3c84cd787e3d98b0d10933b9b5c244da">CThostFtdcChangeAccountField</a>
+, <a class="el" href="de/d25/structCThostFtdcRspQueryAccountField.html#a7049a44a195e923a73590b13ee4d1ff2">CThostFtdcRspQueryAccountField</a>
+, <a class="el" href="de/db1/structCThostFtdcReqFutureSignOutField.html#a26c17789324c2fb6b6780f2e57960a8d">CThostFtdcReqFutureSignOutField</a>
 , <a class="el" href="d3/dd5/structCThostFtdcRspFutureSignOutField.html#a1e8fa86e289395ea0aacbcae049a8e19">CThostFtdcRspFutureSignOutField</a>
 , <a class="el" href="d4/d07/structCThostFtdcTransferSerialField.html#a4630b0fcefe0c5073a93b6aeee30f8b7">CThostFtdcTransferSerialField</a>
-, <a class="el" href="de/d92/structCThostFtdcNotifyFutureSignOutField.html#a6f54477d35067e070c0f38bb6c2add97">CThostFtdcNotifyFutureSignOutField</a>
 , <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#aa7ac2b9f070ab769cae20e41b7125f14">CThostFtdcOpenAccountField</a>
-, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#a214e55450c9c78d2dde05f239a9ad7cf">CThostFtdcRspRepealField</a>
-, <a class="el" href="d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a870222ddea36a22cec67fbc0d5a2e509">CThostFtdcReqQueryTradeResultBySerialField</a>
-, <a class="el" href="de/db1/structCThostFtdcReqFutureSignOutField.html#a26c17789324c2fb6b6780f2e57960a8d">CThostFtdcReqFutureSignOutField</a>
-, <a class="el" href="df/d44/structCThostFtdcRspQueryTradeResultBySerialField.html#add04cddbd020156da23d3b07c4c08cc2">CThostFtdcRspQueryTradeResultBySerialField</a>
-, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#ac402d0669344dd7f4064ea8f0c467710">CThostFtdcCancelAccountField</a>
-, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a3c84cd787e3d98b0d10933b9b5c244da">CThostFtdcChangeAccountField</a>
-, <a class="el" href="d7/d3a/structCThostFtdcAccountregisterField.html#ab2667b7ea0c32eb1eaea3db8937e7bdf">CThostFtdcAccountregisterField</a>
-, <a class="el" href="da/d42/structCThostFtdcNotifyFutureSignInField.html#aae33ee77ff2f2dffd3bc8de762282342">CThostFtdcNotifyFutureSignInField</a>
+, <a class="el" href="de/d92/structCThostFtdcNotifyFutureSignOutField.html#a6f54477d35067e070c0f38bb6c2add97">CThostFtdcNotifyFutureSignOutField</a>
 </li>
 <li>CurrentKey
-: <a class="el" href="d5/d27/structCThostFtdcCFMMCTradingAccountKeyField.html#ab988f6932e0c82bd1caa14fa34af5337">CThostFtdcCFMMCTradingAccountKeyField</a>
-, <a class="el" href="da/dc6/structCThostFtdcCFMMCBrokerKeyField.html#abd6579e80ca9a8a2e6c415c40be54d32">CThostFtdcCFMMCBrokerKeyField</a>
+: <a class="el" href="da/dc6/structCThostFtdcCFMMCBrokerKeyField.html#abd6579e80ca9a8a2e6c415c40be54d32">CThostFtdcCFMMCBrokerKeyField</a>
+, <a class="el" href="d5/d27/structCThostFtdcCFMMCTradingAccountKeyField.html#ab988f6932e0c82bd1caa14fa34af5337">CThostFtdcCFMMCTradingAccountKeyField</a>
+</li>
+<li>currentLevel
+: <a class="el" href="d6/d41/classopencog_1_1Logger.html#a56752e79d2b7597dd143df2be650f5db">opencog::Logger</a>
 </li>
 <li>CurrMargin
 : <a class="el" href="da/d3d/structCThostFtdcSyncingTradingAccountField.html#a962edef31acaa5186a9c7bac07a90eec">CThostFtdcSyncingTradingAccountField</a>
-, <a class="el" href="d7/de0/structCThostFtdcTradingAccountField.html#a0116e1c5c07be8d7f1ca5beb09692791">CThostFtdcTradingAccountField</a>
 , <a class="el" href="dc/dc6/structCThostFtdcBrokerDepositField.html#a51a3856eff15be3c4577b671842c6001">CThostFtdcBrokerDepositField</a>
+, <a class="el" href="d7/de0/structCThostFtdcTradingAccountField.html#a0116e1c5c07be8d7f1ca5beb09692791">CThostFtdcTradingAccountField</a>
 </li>
 <li>CurrMillisec
 : <a class="el" href="da/da5/structCThostFtdcCurrentTimeField.html#a177abdac363bf3f048dac46daebbdafa">CThostFtdcCurrentTimeField</a>
@@ -470,56 +485,56 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 </li>
 <li>CustFee
 : <a class="el" href="d6/d72/structCThostFtdcTransferFutureToBankReqField.html#a614738efc9c822fb2f975fcc94bf2c38">CThostFtdcTransferFutureToBankReqField</a>
-, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#aaef1c54f52086a3af499d1cc047cd6b8">CThostFtdcRspRepealField</a>
-, <a class="el" href="d7/dcd/structCThostFtdcTransferBankToFutureReqField.html#ae0fb821f71ce36e277e234ca219e0b28">CThostFtdcTransferBankToFutureReqField</a>
-, <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a67245370fe1f00944be90e393f4aca97">CThostFtdcRspTransferField</a>
 , <a class="el" href="dd/de9/structCThostFtdcTransferBankToFutureRspField.html#a14c28985cf4fac9ff6577c26b1d6af24">CThostFtdcTransferBankToFutureRspField</a>
-, <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#ad2e2a733e9fb478b5fb1bb3b3609bd43">CThostFtdcReqRepealField</a>
+, <a class="el" href="d7/dcd/structCThostFtdcTransferBankToFutureReqField.html#ae0fb821f71ce36e277e234ca219e0b28">CThostFtdcTransferBankToFutureReqField</a>
 , <a class="el" href="d6/d75/structCThostFtdcReqTransferField.html#a8e38b7fd637eda36a71cc56ba3a4ba62">CThostFtdcReqTransferField</a>
-, <a class="el" href="d8/d73/structCThostFtdcTransferFutureToBankRspField.html#a711b1383ae80847b41675c251337e0c2">CThostFtdcTransferFutureToBankRspField</a>
+, <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a67245370fe1f00944be90e393f4aca97">CThostFtdcRspTransferField</a>
+, <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#ad2e2a733e9fb478b5fb1bb3b3609bd43">CThostFtdcReqRepealField</a>
+, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#aaef1c54f52086a3af499d1cc047cd6b8">CThostFtdcRspRepealField</a>
 , <a class="el" href="d4/d07/structCThostFtdcTransferSerialField.html#a6e6fd33d56e6402d66bffae3a433beb9">CThostFtdcTransferSerialField</a>
+, <a class="el" href="d8/d73/structCThostFtdcTransferFutureToBankRspField.html#a711b1383ae80847b41675c251337e0c2">CThostFtdcTransferFutureToBankRspField</a>
 </li>
 <li>CustomerName
 : <a class="el" href="d5/d0c/structCThostFtdcVerifyFuturePasswordAndCustInfoField.html#a60f49c883864cfd5ec0933b9b28acd06">CThostFtdcVerifyFuturePasswordAndCustInfoField</a>
-, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#a21a4cbba969b98aea68b6b5a0f567c00">CThostFtdcRspRepealField</a>
 , <a class="el" href="d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a485f2ecc1e65fe2647965ba0916af60a">CThostFtdcReqQueryTradeResultBySerialField</a>
-, <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#a5ccbc8d43002f180a9afdbdb950899c2">CThostFtdcReqRepealField</a>
 , <a class="el" href="d3/d86/structCThostFtdcReqQueryAccountField.html#a4631a27115ee8ab0f747c17c65e03811">CThostFtdcReqQueryAccountField</a>
-, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a273eb4dc87649c8e9192f486b1e93817">CThostFtdcCancelAccountField</a>
-, <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#a7ac79665e1768f6d3862d63e627dbfee">CThostFtdcReqCancelAccountField</a>
 , <a class="el" href="d7/d3a/structCThostFtdcAccountregisterField.html#aee4e02425589ac8829b02d85bb7388ff">CThostFtdcAccountregisterField</a>
-, <a class="el" href="da/d39/structCThostFtdcVerifyCustInfoField.html#ad5e41445f6bb6d5705ece3943d3c5952">CThostFtdcVerifyCustInfoField</a>
-, <a class="el" href="de/d56/structCThostFtdcNotifyQueryAccountField.html#a0e784f3c52b8b95e2238ccdf83d03737">CThostFtdcNotifyQueryAccountField</a>
+, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#a21a4cbba969b98aea68b6b5a0f567c00">CThostFtdcRspRepealField</a>
 , <a class="el" href="d6/d75/structCThostFtdcReqTransferField.html#a310b87499d7bb500d243cc201629b540">CThostFtdcReqTransferField</a>
-, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a0d928ad3a17b7f4e30d155b808ec2bf6">CThostFtdcChangeAccountField</a>
+, <a class="el" href="da/d39/structCThostFtdcVerifyCustInfoField.html#ad5e41445f6bb6d5705ece3943d3c5952">CThostFtdcVerifyCustInfoField</a>
+, <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a273eb4dc87649c8e9192f486b1e93817">CThostFtdcCancelAccountField</a>
+, <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#a5ccbc8d43002f180a9afdbdb950899c2">CThostFtdcReqRepealField</a>
+, <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#a7ac79665e1768f6d3862d63e627dbfee">CThostFtdcReqCancelAccountField</a>
 , <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#afcf974102bc370d1d009d4e5f11ef502">CThostFtdcReqChangeAccountField</a>
-, <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a7079d3c891ee72b2015d8f8beb271ff8">CThostFtdcReqOpenAccountField</a>
-, <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a0f74920fb71b5c8ba11e05d2f4c5b5ce">CThostFtdcRspTransferField</a>
 , <a class="el" href="de/d25/structCThostFtdcRspQueryAccountField.html#a184014d8751a1e4408d90fbb12872708">CThostFtdcRspQueryAccountField</a>
+, <a class="el" href="de/d56/structCThostFtdcNotifyQueryAccountField.html#a0e784f3c52b8b95e2238ccdf83d03737">CThostFtdcNotifyQueryAccountField</a>
+, <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a0f74920fb71b5c8ba11e05d2f4c5b5ce">CThostFtdcRspTransferField</a>
+, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a0d928ad3a17b7f4e30d155b808ec2bf6">CThostFtdcChangeAccountField</a>
 , <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#ac46d8c08c3f159f254a57c4f32fb6134">CThostFtdcOpenAccountField</a>
+, <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#a7079d3c891ee72b2015d8f8beb271ff8">CThostFtdcReqOpenAccountField</a>
 </li>
 <li>CustType
-: <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#abd6b22c2c155c929d5a10d1fce3e0d54">CThostFtdcReqChangeAccountField</a>
-, <a class="el" href="d5/d0c/structCThostFtdcVerifyFuturePasswordAndCustInfoField.html#a10782e0b31cbb94fba5d81292c8b8aee">CThostFtdcVerifyFuturePasswordAndCustInfoField</a>
-, <a class="el" href="d3/d86/structCThostFtdcReqQueryAccountField.html#ac1a5b04a21d649e9317e103554ed71ff">CThostFtdcReqQueryAccountField</a>
+: <a class="el" href="da/d39/structCThostFtdcVerifyCustInfoField.html#a67aa24bb9de6973aaeb15552f0ca0d80">CThostFtdcVerifyCustInfoField</a>
 , <a class="el" href="d5/dd1/structCThostFtdcCancelAccountField.html#a90922b02f1adf904d973f5d693a0ea6e">CThostFtdcCancelAccountField</a>
+, <a class="el" href="d5/d0c/structCThostFtdcVerifyFuturePasswordAndCustInfoField.html#a10782e0b31cbb94fba5d81292c8b8aee">CThostFtdcVerifyFuturePasswordAndCustInfoField</a>
+, <a class="el" href="d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a539033e872c9e154cadd50118ddf7da3">CThostFtdcReqQueryTradeResultBySerialField</a>
+, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a560e2bab297b591f404c9738de9a57b0">CThostFtdcChangeAccountField</a>
+, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#af7f07c273a4746f0b3181fdd8e78a2eb">CThostFtdcRspRepealField</a>
+, <a class="el" href="d3/d80/structCThostFtdcReqChangeAccountField.html#abd6b22c2c155c929d5a10d1fce3e0d54">CThostFtdcReqChangeAccountField</a>
+, <a class="el" href="de/d25/structCThostFtdcRspQueryAccountField.html#abab6635e0ddda1e1706c5a4b6485c201">CThostFtdcRspQueryAccountField</a>
+, <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a872819f3dc52f3af2f5fac723b49990b">CThostFtdcRspTransferField</a>
 , <a class="el" href="da/d29/structCThostFtdcReqRepealField.html#af1c319389938d17138cdec51bb660837">CThostFtdcReqRepealField</a>
 , <a class="el" href="d6/d75/structCThostFtdcReqTransferField.html#a54fc474de792123842896b1f840cd999">CThostFtdcReqTransferField</a>
-, <a class="el" href="d9/d7f/structCThostFtdcChangeAccountField.html#a560e2bab297b591f404c9738de9a57b0">CThostFtdcChangeAccountField</a>
-, <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#a9960b82ce1db50a4fdb68d3b5b22b1e1">CThostFtdcOpenAccountField</a>
-, <a class="el" href="de/d25/structCThostFtdcRspQueryAccountField.html#abab6635e0ddda1e1706c5a4b6485c201">CThostFtdcRspQueryAccountField</a>
+, <a class="el" href="d3/d86/structCThostFtdcReqQueryAccountField.html#ac1a5b04a21d649e9317e103554ed71ff">CThostFtdcReqQueryAccountField</a>
 , <a class="el" href="d7/d3a/structCThostFtdcAccountregisterField.html#a8e604e2e0d3e8cbf25019ffdb57c12d7">CThostFtdcAccountregisterField</a>
 , <a class="el" href="d1/d04/structCThostFtdcReqOpenAccountField.html#ae053a445d091a904b57c15a8bed03560">CThostFtdcReqOpenAccountField</a>
-, <a class="el" href="dc/d24/structCThostFtdcRspTransferField.html#a872819f3dc52f3af2f5fac723b49990b">CThostFtdcRspTransferField</a>
-, <a class="el" href="d4/db2/structCThostFtdcReqQueryTradeResultBySerialField.html#a539033e872c9e154cadd50118ddf7da3">CThostFtdcReqQueryTradeResultBySerialField</a>
 , <a class="el" href="d9/dd8/structCThostFtdcReqCancelAccountField.html#a67a2399c8078f70b7884aea318748a44">CThostFtdcReqCancelAccountField</a>
-, <a class="el" href="d8/dee/structCThostFtdcRspRepealField.html#af7f07c273a4746f0b3181fdd8e78a2eb">CThostFtdcRspRepealField</a>
-, <a class="el" href="da/d39/structCThostFtdcVerifyCustInfoField.html#a67aa24bb9de6973aaeb15552f0ca0d80">CThostFtdcVerifyCustInfoField</a>
 , <a class="el" href="de/d56/structCThostFtdcNotifyQueryAccountField.html#a09a4c988b9c2617f92d83d8dba81c64b">CThostFtdcNotifyQueryAccountField</a>
+, <a class="el" href="dd/d41/structCThostFtdcOpenAccountField.html#a9960b82ce1db50a4fdb68d3b5b22b1e1">CThostFtdcOpenAccountField</a>
 </li>
 <li>CZCETime
-: <a class="el" href="d5/d15/structCThostFtdcRspUserLoginField.html#a322f62b654d14727a93755052ad0ece9">CThostFtdcRspUserLoginField</a>
-, <a class="el" href="df/d79/structCThostFtdcLoginInfoField.html#aff476f3481cb22e5492e065dece9ba55">CThostFtdcLoginInfoField</a>
+: <a class="el" href="df/d79/structCThostFtdcLoginInfoField.html#aff476f3481cb22e5492e065dece9ba55">CThostFtdcLoginInfoField</a>
+, <a class="el" href="d5/d15/structCThostFtdcRspUserLoginField.html#a322f62b654d14727a93755052ad0ece9">CThostFtdcRspUserLoginField</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -527,7 +542,7 @@ $(document).ready(function(){initNavTree('functions_0x63.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jan 26 2014 15:50:27 for EasyQuant by
+    <li class="footer">Generated on Mon Jan 27 2014 17:02:14 for EasyQuant by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.1.2 </li>
   </ul>
