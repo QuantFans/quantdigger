@@ -12,7 +12,9 @@ public:
 	CSem(int);
 	~CSem();
 	
+    //! 获取资源
 	int sem_p();
+    //! 释放资源
 	int sem_v();
 private:
 	int m_SemId;
