@@ -19,10 +19,10 @@ class TradingAlgorithm {
     virtual ~TradingAlgorithm(){ };
 
     /** @brief 基于历史数据的策略入口 */
-    void InitialData();
+    void initialData();
 
     /** @brief 基于实时数据的策略入口 */
-    void HandleTickData(TickData data);
+    void handleTickData(TickData data);
 
     /** @brief 从网络中加载数据 */
     void set_history_data(){ }
@@ -36,13 +36,13 @@ class TradingAlgorithm {
  protected:
 
     /** @brief 更新当前bar的索引 */
-    inline void UpdateBarIndex(int curindex);
+    inline void updateBarIndex(int curindex);
 
     /** @brief tick数据来的时候判断是否需要增加新的Bar */
-    inline bool ToAddNewBar(const DateTime &datetime);
+    inline bool toAddNewBar(const DateTime &datetime);
 
     /** @brief 对单根Bar运行策略 */
-    virtual void ExcuteAlgorithm() = 0;
+    virtual void excuteAlgorithm() = 0;
 
     /**@name 用户策略算法可见:
      * @{ */

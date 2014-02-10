@@ -18,16 +18,15 @@ enum OrderDirection {
 /**
 * @brief 订单信息
 */
-class Order {
+struct Order {
  public:
     Order(){ };
 
- private:
-    int             id_;  ///< 订单编号 
-    std::string     dt_;  ///< 时间 
-    int             instrument_id_; ///< 品种编号 
-    int             amount_;
-    OrderDirection  direction_;
+    int             id;  ///< 订单编号 
+    std::string     dt;  ///< 时间 
+    int             instrument_id; ///< 品种编号 
+    int             amount;
+    OrderDirection  direction;
 };
 
 

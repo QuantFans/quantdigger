@@ -14,7 +14,7 @@ class TAlgo : public TradingAlgorithm {
     virtual ~TAlgo(){ };
 
  private:
-    void ExcuteAlgorithm();
+    void excuteAlgorithm();
 
 };
 

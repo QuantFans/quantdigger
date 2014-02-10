@@ -1,6 +1,6 @@
-#ifndef UTIL_LOGGER_H
+#ifndef EASYQUANT_UTIL_LOGGER_H
 
-#define UTIL_LOGGER_H
+#define EASYQUANT_UTIL_LOGGER_H
 
 #ifndef WINDOWS
 #include <easyquant/thirdparty/Logger.h>
@@ -124,6 +124,12 @@ class Logger {
         logger_.log(level, txt);
 #endif
     }
+
+    void log(const std::string &txt) { 
+#ifndef WINDOWS
+        logger_.log(getLevel(), txt);
+#endif
+    }
     // void error(const std::string &txt);
     // void warn (const std::string &txt);
     // void info (const std::string &txt);
@@ -158,4 +164,4 @@ class Logger {
 Logger& singleton_logger();
 
 } /* EasyQuant */
-#endif /* end of include guard: UTIL_LOGGER_H */
+#endif /* end of include guard: EASYQUANT_UTIL_LOGGER_H */

@@ -15,8 +15,8 @@ using std::string;
 class AlgorithmSimulator {
  public:
     AlgorithmSimulator(){ };
-    void Run();
-    void RegisterAlgorithm(TradingAlgorithm *algo, const string& fname);
+    void run();
+    void registerAlgorithm(TradingAlgorithm *algo, const string& fname);
 
 
  private:

@@ -6,7 +6,7 @@ using namespace std;
 namespace EasyQuant {
 using namespace EQLanguage;
 
-void TAlgo::ExcuteAlgorithm() {
+void TAlgo::excuteAlgorithm() {
     cout<<open + 1<<"*";
     if (curbar != 0) {
         cout<<average(open, 2);

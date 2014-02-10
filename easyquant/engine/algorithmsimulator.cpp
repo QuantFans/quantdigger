@@ -2,15 +2,15 @@
 #include "tradingalgorithm.h"
 namespace EasyQuant {
     
-void AlgorithmSimulator::Run() {
+void AlgorithmSimulator::run() {
     // for every tick
     // foreach algorithm
     for(auto *algo : algorithms_) {
-        algo->InitialData();
+        algo->initialData();
     }
 }
 
-void AlgorithmSimulator::RegisterAlgorithm(TradingAlgorithm *algo, const string& fname) {
+void AlgorithmSimulator::registerAlgorithm(TradingAlgorithm *algo, const string& fname) {
     algo->load_history_data(fname);
 }
 
