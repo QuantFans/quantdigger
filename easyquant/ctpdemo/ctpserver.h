@@ -91,9 +91,6 @@ public:
 	///@remark RegisterNameServer优先于RegisterFront
 	void RegisterNameServer(char *pszNsAddress);
 	
-	///注册回调接口
-	///@param pSpi 派生自回调接口类的实例
-	void RegisterSpi(CThostFtdcMdSpi *pSpi);
 	
 	///订阅行情。
 	///@param ppInstrumentID 合约ID  

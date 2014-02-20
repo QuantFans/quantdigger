@@ -1,23 +1,23 @@
 #include "ctpserver.h"
 #include <iostream>
 
-extern TThostFtdcBrokerIDType appId;		// åº”ç”¨å•å…ƒ
-extern TThostFtdcUserIDType userId;		// æŠ•èµ„è€…ä»£ç 
+extern TThostFtdcBrokerIDType appId;		// Ó¦ÓÃµ¥Ôª
+extern TThostFtdcUserIDType userId;		// Í¶×ÊÕß´úÂë
 
 
 extern int requestId; 
 
-// ä¼šè¯å‚æ•°
-extern int	 frontId;	//å‰ç½®ç¼–å·
-extern int	 sessionId;	//ä¼šè¯ç¼–å·
+// »á»°²ÎÊý
+extern int	 frontId;	//Ç°ÖÃ±àºÅ
+extern int	 sessionId;	//»á»°±àºÅ
 extern char orderRef[13];
 
 namespace EasyQuant {
 using namespace std;
 CtpServer::CtpServer(char *tradeFront) {
         user_ = CThostFtdcMdApi::CreateFtdcMdApi();
-        user_->RegisterSpi(dynamic_cast<CThostFtdcMdSpi*>(this));			// æ³¨å†Œäº‹ä»¶ç±»
-        user_->RegisterFront(tradeFront);							// æ³¨å†Œäº¤æ˜“å‰ç½®åœ°å€
+        user_->RegisterSpi(dynamic_cast<CThostFtdcMdSpi*>(this));			// ×¢²áÊÂ¼þÀà
+        RegisterFront(tradeFront);							// ×¢²á½»Ò×Ç°ÖÃµØÖ·
 };
 
 
@@ -35,7 +35,7 @@ void CtpServer::ReqUserLogin(TThostFtdcBrokerIDType	vAppId,
     strcpy(req.UserID, vUserId);  strcpy(userId, vUserId); 
     strcpy(req.Password, vPasswd);
     int ret = user_->ReqUserLogin(&req, ++requestId);
-    cerr<<" sending | å‘é€ç™»å½•..."<<((ret == 0) ? "æˆåŠŸ" :"å¤±è´¥") << endl;	
+    cerr<<" sending | ·¢ËÍµÇÂ¼..."<<((ret == 0) ? "³É¹¦" :"Ê§°Ü") << endl;	
 }
 
 void CtpServer::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, 
@@ -43,13 +43,16 @@ void CtpServer::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
                                int nRequestID, 
                                bool bIsLast) {
 	if ( !IsErrorRspInfo(pRspInfo) && pRspUserLogin ) {  
-    // ä¿å­˜ä¼šè¯å‚æ•°	
+    // ±£´æ»á»°²ÎÊý	
 		frontId = pRspUserLogin->FrontID;
 		sessionId = pRspUserLogin->SessionID;
 		int nextOrderRef = atoi(pRspUserLogin->MaxOrderRef);
 		sprintf(orderRef, "%d", ++nextOrderRef);
-       cerr<<" å“åº” | ç™»å½•æˆåŠŸ...å½“å‰äº¤æ˜“æ—¥:"
+       cerr<<" ÏìÓ¦ | µÇÂ¼³É¹¦...µ±Ç°½»Ò×ÈÕ:"
        <<pRspUserLogin->TradingDay<<endl;     
+       // Òª½ÓÊÕµÄºÏÔ¼Êý¾Ý
+       char* d[]= { "ru1405" };
+        SubscribeMarketData(d, 1);
   }
 //  if(bIsLast) sem.sem_v();
 }
@@ -66,10 +69,10 @@ void CtpServer::OnRspError(CThostFtdcRspInfoField *pRspInfo,
 
 
 bool CtpServer::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo) {
-	// å¦‚æžœErrorID != 0, è¯´æ˜Žæ”¶åˆ°äº†é”™è¯¯çš„å“åº”
+	// Èç¹ûErrorID != 0, ËµÃ÷ÊÕµ½ÁË´íÎóµÄÏìÓ¦
 	bool ret = ((pRspInfo) && (pRspInfo->ErrorID != 0));
   if (ret){
-    cerr<<" å“åº” | "<<pRspInfo->ErrorMsg<<endl;
+    cerr<<" ÏìÓ¦ | "<<pRspInfo->ErrorMsg<<endl;
   }
 	return ret;
 }
@@ -94,15 +97,21 @@ void CtpServer::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpecifi
 
 
 int CtpServer::SubscribeMarketData(char *ppInstrumentID[], int nCount) {
+    if(0 == user_->SubscribeMarketData(ppInstrumentID, nCount))
+        cout<<"SubscribeMarketData sucess"<<endl;
+    else
+        cout<<"SubscribeMarketData error"<<endl;
 }
 
 void CtpServer::OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument, 
                                    CThostFtdcRspInfoField *pRspInfo, 
                                    int nRequestID, 
                                    bool bIsLast) {
-}
-
-void CtpServer::RegisterSpi(CThostFtdcMdSpi *pSpi) {
+    if (!IsErrorRspInfo(pRspInfo)) {
+        cerr<<"ÏìÓ¦ | ×îÐÂÊý¾Ý£¡"<<endl;
+    } else {
+        cerr<<"************"<<endl;
+    }
 }
 
 
@@ -111,19 +120,22 @@ void CtpServer::RegisterNameServer(char *pszNsAddress) {
 
 
 void CtpServer::RegisterFront(char *pszFrontAddress) {
+    user_->RegisterFront(pszFrontAddress);
+    cerr<<"Á¬½Ó½»Ò×Ç°ÖÃ..."<<endl;
 }
 
 void CtpServer::OnFrontConnected() {
-	cerr<<" è¿žæŽ¥äº¤æ˜“å‰ç½®...æˆåŠŸ"<<endl;
+	cerr<<" Á¬½Ó½»Ò×Ç°ÖÃ...³É¹¦"<<endl;
     ReqUserLogin("1035", "00000071", "123456");
 }
 
 void CtpServer::OnFrontDisconnected(int nReason) {
-	cerr<<" å“åº” | è¿žæŽ¥ä¸­æ–­..." 
+	cerr<<" ÏìÓ¦ | Á¬½ÓÖÐ¶Ï..." 
 	  << " reason=" << nReason << endl;
 }
 
 void CtpServer::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData) {
+    cerr<<pDepthMarketData->LastPrice<<endl;
 }
 
 } /* EasyQuant */

@@ -61,6 +61,9 @@ public:
 	///用户登录请求
 	void ReqUserLogin(TThostFtdcBrokerIDType	appId,
 	        TThostFtdcUserIDType	userId,	TThostFtdcPasswordType	passwd);
+
+	///投资者结算结果查询
+	void ReqQrySettlementInfo(CThostFtdcQrySettlementInfoField *pQrySettlementInfo, int nRequestID);
 	///投资者结算结果确认
 	void ReqSettlementInfoConfirm();
 	///请求查询合约
