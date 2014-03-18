@@ -1,8 +1,0 @@
-digraph "Graphical Class Hierarchy"
-{
-  bgcolor="transparent";
-  edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
-  node [fontname="FreeSans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1 [label="CThostFtdcMarketDataExchange\lField",height=0.2,width=0.4,color="black",URL="$db/d74/structCThostFtdcMarketDataExchangeField.html",tooltip="行情交易所代码属性"];
-}

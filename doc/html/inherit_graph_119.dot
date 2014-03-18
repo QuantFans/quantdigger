@@ -1,8 +1,0 @@
-digraph "Graphical Class Hierarchy"
-{
-  bgcolor="transparent";
-  edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
-  node [fontname="FreeSans",fontsize="10",shape=record];
-  rankdir="LR";
-  Node1 [label="CThostFtdcQryCFMMCTrading\lAccountKeyField",height=0.2,width=0.4,color="black",URL="$d6/d06/structCThostFtdcQryCFMMCTradingAccountKeyField.html",tooltip="请求查询保证金监管系统经纪公司资金账户密钥"];
-}
