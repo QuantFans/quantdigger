@@ -260,9 +260,9 @@ def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
 def load_datas(n, intraday, *fnames):
     '''''' 
     def path_name(fname):
-        return "".join([home, "trace\\", fname, ".csv" ])
+        return "".join([home, "trace/", fname, ".csv" ])
     datas = []
-    stock_dir=home + "stock_data\\"
+    stock_dir=home + "stock_data/"
         
     for fname in fnames:
         names = [path_name(fname)]
@@ -314,12 +314,12 @@ def pricefname_from_tradefname(fname, prefixnum=2):
 
 
 def simple_load_data(fname, n, intraday):
-    entryinfo = pd.read_csv("%strace\\%s.csv"%(home, fname), index_col=0, parse_dates=True)
+    entryinfo = pd.read_csv("%strace/%s.csv"%(home, fname), index_col=0, parse_dates=True)
     assert entryinfo.index.is_unique
     #print entryinfo.islong
     print "Loaded File: %s"%home + fname + ".csv"
     pricefname = pricefname_from_tradefname(fname, 1)
-    stock_dir= home + "stock_data\\"
+    stock_dir= home + "stock_data/"
     pricefname = stock_dir + pricefname
     return simple_deal_tradeinfo(entryinfo, pricefname, n, intraday)
 
@@ -335,7 +335,7 @@ def load_wavedata(*fnames):
         '''
         return entry_wave_info and wave
         ''' 
-        return "".join([home, "trace\\", fname,"_trade_wave.txt"]), "".join([home, "trace\\", fname, "_wave.txt"])
+        return "".join([home, "trace/", fname,"_trade_wave.txt"]), "".join([home, "trace/", fname, "_wave.txt"])
 
     def process_session(data):
         '''''' 

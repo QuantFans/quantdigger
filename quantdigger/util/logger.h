@@ -76,7 +76,7 @@ class Logger {
         logger_.setFilename(fname);
 #endif
     }
-    const std::string& getFilename() { 
+    std::string getFilename() { 
 #ifndef WINDOWS
         return logger_.getFilename();
 #endif

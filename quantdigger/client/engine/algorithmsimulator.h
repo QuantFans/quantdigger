@@ -19,40 +19,44 @@ class AlgorithmSimulator {
  public:
     AlgorithmSimulator(){ };
 
+    /** @brief 基于历史数据的策略入口 */
     void run();
 
     /** @brief 添加策略，及历史数据 */
     void registerAlgorithm(const string& fname, TradingAlgorithm *algo);
 
-    /** @brief 基于历史数据的策略入口 */
-    void excuteHistoryData();
-
-    /**
-     * @brief 处理tick数据
-     *
-     * 决定是否合成新的bar数据，以及调用注册的策略集
-     * @param data
-     */
     void handleTickData(const vector<TickData> &data);
-
-    /** @brief 更新当前bar的索引 */
-    inline void updateBarIndex(int curindex);
-
-    /** @brief tick数据来的时候判断是否需要增加新的Bar */
-    inline bool toAddNewBar(const DateTime &datetime);
 
     /** @brief 从文件中加载数据 */
     bool loadHistoryData(const string &instrument_period);
     const HistoryData& getHistoryData(const string &instrument_period);
 
  private:
+    /**
+    * @brief 特定周期的合约信息
+    */
+    struct InstrumentPeriodInfo {
+        /**
+         * @brief 处理tick数据
+         *
+         * 决定是否合成新的bar数据，以及调用注册的策略集
+         * @param data
+         */
+        void handleTickData(const TickData& data);
+
+        /** @brief tick数据来的时候判断是否需要增加新的Bar */
+        inline bool toAddNewBar(const DateTime &datetime);
+
+        bool loadHistoryData(const string &src);
+
+        string name;
+        vector<TradingAlgorithm*> algorithms;  ///< 策略集合
+        HistoryData history_data;               ///< 历史数据
+        BarData curbar;                        ///< 当前Bar数据
+    };
 
     vector<TradingAlgorithm*>   algorithms_;
-    hash_map<string, vector<TradingAlgorithm*> > instrument_period2algos_; ///< 特定周期的合约到策略的映射
-    hash_map<string, HistoryData> instrument_period2data_; ///< 特定周期的合约到历史数据的映射
-    hash_map<string, BarData> instrument_period2curbar; ///< 特定周期的合约到当前bar的映射
-
-    
+    hash_map<string, InstrumentPeriodInfo> insp_infos_;
 };
 
 } /* QuantDigger */

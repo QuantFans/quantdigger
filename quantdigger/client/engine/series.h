@@ -20,12 +20,13 @@ class Series {
      */
     inline T operator[](int i) {
         int index = curindex_ - i;
-        if (index<0 or index>=data_.size()) return 0; // 偏移超出范围
+        if (index<0 or index>=data_.size()) return T(); // 偏移超出范围
+        cout<<index<<endl;
         return data_[index]; 
     }
     inline T operator[](int i) const {
         int index = curindex_ - i;
-        if (index<0 or index>=data_.size()) return 0;
+        if (index<0 or index>=data_.size()) return T();
         return data_[index]; 
     }
 
@@ -37,10 +38,16 @@ class Series {
     int size() const { return data_.size(); }
     void set_curindex(int index) { curindex_ = index; }
     int curindex() const { return curindex_; }
+    T at(int index) const {
+        if (index >= 0 && index < data_.size()) {
+            return data_[index]; 
+        } else
+            return T();
+    }
 
-    
  private:
     std::vector<T> data_;
+    // 当前bar的索引，由于它的数据会被共享，
     int curindex_;
 };
 } /* QuantDigger */

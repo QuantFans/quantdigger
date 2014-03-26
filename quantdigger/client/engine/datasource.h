@@ -33,6 +33,20 @@ struct HistoryData {
         low.resize(n);
         vol.resize(n);
     }
+
+    /** @brief 更新当前bar的索引 */
+    void updateBarIndex(int curindex) {
+        dt.set_curindex(curindex);    
+        open.set_curindex(curindex);    
+        close.set_curindex(curindex);    
+        high.set_curindex(curindex);    
+        low.set_curindex(curindex);    
+        vol.set_curindex(curindex);    
+        curbar = curindex;
+    }
+
+    int size() { return open.size(); }
+
     QDLanguage::DateTimeSeries dt;
     QDLanguage::NumberSeries   open; 
     QDLanguage::NumberSeries   close; 

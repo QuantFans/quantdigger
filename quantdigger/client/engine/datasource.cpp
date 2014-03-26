@@ -35,9 +35,9 @@ bool DataSource::load_order_signal(string fname) {
 std::ostream& operator<<(std::ostream& out, const HistoryData& d) {
     cout<<"datetime, open, close, high, low, vol"<<endl;
     for (int i = 0; i < d.dt.size(); i++) {
-        cout<<d.dt[i]<<","<<d.open[i]<<","
-            <<d.close[i]<<","<<d.high[i]<<","
-            <<d.low[i]<<","<<d.vol[i]<<endl;
+        cout<<d.dt.at(i)<<","<<d.open.at(i)<<","
+            <<d.close.at(i)<<","<<d.high.at(i)<<","
+            <<d.low.at(i)<<","<<d.vol.at(i)<<endl;
     }
 }
 

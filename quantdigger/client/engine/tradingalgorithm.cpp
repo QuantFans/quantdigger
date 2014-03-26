@@ -10,7 +10,7 @@ int g_requestId = 0;
 
 
 void TradingAlgorithm::handleTickData(const BarData &data) {
-    excuteAlgorithm();
+//    excuteAlgorithm();
 }
 
 inline void TradingAlgorithm::order(QDLanguage::Number amount,
@@ -18,5 +18,6 @@ inline void TradingAlgorithm::order(QDLanguage::Number amount,
                                     QDLanguage::Number stop_price) {
     blotter->order(amount, limit_price, stop_price);
 }
+
 
 }; /* QuantDigger */

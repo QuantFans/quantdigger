@@ -6,7 +6,7 @@ using namespace std;
 namespace QuantDigger {
 using namespace QDLanguage;
 
-void TAlgo::excuteAlgorithm() {
+void TAlgo::handleCurrentBar() {
     cout<<"open: ";
     cout<<open<<" average(2): ";
     if (curbar != 0) {
