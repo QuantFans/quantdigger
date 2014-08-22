@@ -869,6 +869,7 @@ class MainForm(QtGui.QWidget):
         #
         self._quotation_view = None
         self._k_line_container = None
+        self._menus = list()
         #
         self.init_main_form()
 
@@ -900,6 +901,18 @@ class MainForm(QtGui.QWidget):
         self.init_tab_widget(tab_widget)
         #
         self.init_menu_bar(menu_bar_for_tab_widget)
+        #
+        QtCore.QObject.connect(
+            tab_widget,
+            QtCore.SIGNAL("currentChanged(int)"),
+            self.enable_menu_for_tab
+        )
+
+    def enable_menu_for_tab(self, idx):
+        self._menus[idx].setEnabled(True)
+        for i in range(len(self._menus)):
+            if i != idx:
+                self._menus[i].setEnabled(False)
 
     def init_tab_widget(self, tab_widget):
         #
@@ -931,6 +944,9 @@ class MainForm(QtGui.QWidget):
         # Add menu:
         menu_quotation_list = menu_bar.addMenu("Quotation-List")
         menu_k_line = menu_bar.addMenu("K-Line")
+        menu_k_line.setEnabled(False)
+        self._menus.append(menu_quotation_list)
+        self._menus.append(menu_k_line)
         #
         # Menu 'menu_quotation_list':
         action_list_load = menu_quotation_list.addAction("Load data")
@@ -974,13 +990,17 @@ class MainForm(QtGui.QWidget):
         #
         # Menu 'menu_k_line':
         action_load = menu_k_line.addAction("Load data file")
-        QtCore.QObject.connect(
-            action_load,
-            QtCore.SIGNAL("triggered()"), self.load_k_line
-        )
         menu_k_line.addSeparator()
         action_update = menu_k_line.addAction("Update last k-line")
         action_append = menu_k_line.addAction("Append one k-line")
+        action_update.setEnabled(False)
+        action_append.setEnabled(False)
+        #
+        QtCore.QObject.connect(
+            action_load,
+            QtCore.SIGNAL("triggered()"),
+            lambda x=[action_update, action_append]: self.load_k_line(x)
+        )
         QtCore.QObject.connect(
             action_update,
             QtCore.SIGNAL("triggered()"), self.update_k_line
@@ -1004,7 +1024,7 @@ class MainForm(QtGui.QWidget):
         #
         self._k_line_container.append_k_line(appended_data)
 
-    def load_k_line(self):
+    def load_k_line(self, action_list):
         file_dialog = QtGui.QFileDialog(self)
         file_dialog.setWindowTitle("Load data file")
         file_dialog.setNameFilter("Data files (*.csv)")
@@ -1013,6 +1033,8 @@ class MainForm(QtGui.QWidget):
             data_file = file_dialog.selectedFiles()[0]
             print(">>> Selected file: " + data_file)
             self._k_line_container.load_k_line(data_file)
+            for action in action_list:
+                action.setEnabled(True)
 
     def load_list_data(self, data, horizontal_header_info, action_list):
         self._quotation_view.set_data(data)
