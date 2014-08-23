@@ -6,6 +6,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 import os
 import pandas as pd
+import random
 
 ################################################################################
 # Already copied;
@@ -87,3 +88,19 @@ def get_min_and_max_price(k_line_data):
         if temp_max > the_max:
             the_max = temp_max
     return the_min, the_max
+
+
+def get_random_series_from(data_frame):
+    #
+    size = len(data_frame)
+    random_idx = random.randint(0, size-1)
+    #
+    return data_frame.ix[random_idx]
+
+
+def get_random_series_list_from(data_frame):
+    #
+    size = len(data_frame)
+    random_idx = random.randint(0, size-1)
+    #
+    return data_frame[random_idx:random_idx+1]
