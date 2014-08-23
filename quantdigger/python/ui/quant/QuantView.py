@@ -1256,6 +1256,19 @@ class ContainerView(QtGui.QMainWindow):
     def append_k_line(self, appended_data):
         self._k_line.append_k_line(appended_data)
         self._k_line_slider.setValue(self._k_line.get_curr_offset())
+        #
+        if self._k_line.get_min_offset() < self._k_line.get_max_offset():
+            self._k_line_slider.setMinimum(self._k_line.get_min_offset())
+            self._k_line_slider.setMaximum(self._k_line.get_max_offset())
+            self._k_line_slider.setPageStep(1)
+            self._k_line_slider.setValue(self._k_line.get_curr_offset())
+            self._k_line_slider.setEnabled(True)
+        #
+        self._k_line_size_setter.set_size_min(self._k_line.get_min_setter())
+        self._k_line_size_setter.set_size_max(self._k_line.get_max_setter())
+        self._k_line_size_setter.set_curr_value(
+            self._k_line.get_curr_data_size()
+        )
 
 ################################################################################
 # TODO: my refactoring main form;
