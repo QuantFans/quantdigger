@@ -247,3 +247,78 @@ class QuotationModel(object):
         self._data = data
         self._horizontal_header = horizontal_header
         self._vertical_header = vertical_header
+
+################################################################################
+
+
+class SlicedPixMapModel(object):
+    """
+    """
+
+    def __init__(self, data, from_idx, to_idx):
+        super(SlicedPixMapModel, self).__init__()
+        #
+        self._data = data
+        self._from_idx = from_idx
+        self._to_idx = to_idx
+        #
+        self._pix_map = None
+
+    def set_pix_map(self, pix_map):
+        self._pix_map = pix_map
+
+    def get_pix_map(self):
+        return self._pix_map
+
+    def get_from_idx(self):
+        return self._from_idx
+
+    def get_to_idx(self):
+        return self._to_idx
+
+    def get_data(self):
+        return self._data[self._from_idx:self._to_idx+1]
+
+    def get_size(self):
+        return self._to_idx - self._from_idx + 1
+
+    def get_pix_map_width(self):
+        if not self._pix_map:
+            return 0.0
+        return self._pix_map.width()
+
+    def get_pix_map_height(self):
+        if not self._pix_map:
+            return 0.0
+        return self._pix_map.height()
+
+################################################################################
+
+
+class WindowedPixMapModel(object):
+
+    def __init__(self):
+        super(WindowedPixMapModel, self).__init__()
+        #
+        self._widget_window = QtCore.QRectF()
+        self._pix_map_window = QtCore.QRectF()
+        #
+        self._pix_map = None
+
+    def set_widget_window(self, x, y, width, height):
+        self._widget_window.setRect(x, y, width, height)
+
+    def set_pix_map_window(self, x, y, width, height):
+        self._pix_map_window.setRect(x, y, width, height)
+
+    def set_pix_map(self, pix_map):
+        self._pix_map = pix_map
+
+    def get_widget_window(self):
+        return self._widget_window
+
+    def get_pix_map_window(self):
+        return self._pix_map_window
+
+    def get_pix_map(self):
+        return self._pix_map
