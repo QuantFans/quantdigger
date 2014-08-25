@@ -15,6 +15,8 @@ from QuantUtils import get_random_series_list_from
 from QuantModel import RectLikeLine
 from QuantModel import SlicedPixMapModel
 from QuantModel import WindowedPixMapModel
+from QuantModel import UpdatedSeriesModel
+from QuantModel import AppendedDataFrameModel
 
 from QuantTestData import AllDataForTest
 
@@ -246,7 +248,7 @@ class KLine(QtGui.QWidget):
         self._is_data_loaded = False
 
     def load_data(self, data_file):
-        self._data = get_k_line_data_by_path(data_file)[0: 2500]
+        self._data = get_k_line_data_by_path(data_file)[0: 2000]
         #self._data = get_k_line_data_by_path(data_file)
         #
         data_size = len(self._data)
@@ -550,14 +552,377 @@ class KLine(QtGui.QWidget):
         #
         painter.end()
 
+    def update_the_last_k_line(self, data_frame):
+        # If temp_max OR temp_min is out of self._the_max, self._the_min:
+        #   - re-draw all pix-maps;
+        # If in the range:
+        #   - locate the last pix-map;
+        #   - draw the last k-line;
+        #
+        data = data_frame.get_data_frame()
+        the_last_datum = data.ix[0]
+        self._data.ix[-1] = the_last_datum
+        #
+        temp_min, temp_max = \
+            get_min_and_max_price(data[:1])
+        temp_min -= 5
+        temp_max += 5
+        #
+        if temp_min >= self._the_min and temp_max <= self._the_max:
+            print(">>> Updating scenario: in-range")
+            #
+            x_step = self._CONST_SETTINGS['x_step']
+            y_range = self._CONST_SETTINGS['y_range']
+            rect_width = self._CONST_SETTINGS['rect_width']
+            margin_top = self._CONST_SETTINGS['margin_top']
+            #
+            the_last_sliced_model = self._sliced_models[-1]
+            the_last_pix_map = the_last_sliced_model.get_pix_map()
+            the_last_inside_idx = the_last_sliced_model.get_size() - 1
+            #
+            pix_map_painter = QtGui.QPainter(the_last_pix_map)
+            pix_map_painter.initFrom(self)
+            #
+            # To erase rectangle:
+            #   extend to -1 and +1 to avoid potential erasing problem;
+            erase_rect = QtCore.QRectF(
+                the_last_inside_idx * x_step - 1, 0,
+                x_step + 2, the_last_pix_map.height()
+            )
+            pix_map_painter.eraseRect(erase_rect)
+            #
+            open_price = the_last_datum['open']
+            close_price = the_last_datum['close']
+            high_price = the_last_datum['high']
+            low_price = the_last_datum['low']
+            #
+            x_start = \
+                the_last_inside_idx * x_step + (x_step - rect_width) / 2.0
+            y_start = \
+                margin_top \
+                + abs(max(open_price, close_price) - self._the_max) \
+                / (self._the_max - self._the_min) * y_range
+            y_height = \
+                (max(open_price, close_price) - min(open_price, close_price)) \
+                / (self._the_max - self._the_min) * y_range
+            #
+            curr_rect = QtCore.QRectF()
+            curr_rect_like_line = RectLikeLine()
+            #
+            # High enough: rect
+            if y_height >= 2:
+                curr_rect.setRect(
+                    x_start, y_start, rect_width, y_height
+                )
+            #
+            # Otherwise: line instead of rect
+            else:
+                # TODO: set a min height;
+                y_height = 2
+                curr_rect_like_line.set_line_with_pen_width(
+                    x_start, y_start,
+                    x_start + rect_width, y_start,
+                    y_height
+                )
+            #
+            # The high & low price line:
+            curr_line = QtCore.QLineF(
+                x_start + rect_width / 2.0,
+                margin_top
+                + abs(high_price - self._the_max)
+                / (self._the_max - self._the_min) * y_range,
+                x_start + rect_width / 2.0,
+                margin_top
+                + abs(low_price - self._the_max)
+                / (self._the_max - self._the_min) * y_range
+            )
+            #
+            if close_price > open_price:
+                pix_map_painter.fillRect(curr_rect, QtCore.Qt.red)
+                pen_red = QtGui.QPen(QtCore.Qt.red)
+                pix_map_painter.setPen(pen_red)
+                pix_map_painter.drawRect(curr_rect)
+                pix_map_painter.drawLine(curr_line)
+                #
+                pen_red.setWidth(
+                    curr_rect_like_line.get_pen_width()
+                )
+                pix_map_painter.setPen(pen_red)
+                pix_map_painter.drawLine(
+                    curr_rect_like_line.get_line()
+                )
+            else:
+                pix_map_painter.fillRect(curr_rect, QtCore.Qt.white)
+                pen_white = QtGui.QPen(QtCore.Qt.white)
+                pix_map_painter.setPen(pen_white)
+                pix_map_painter.drawRect(curr_rect)
+                pix_map_painter.drawLine(curr_line)
+                #
+                pen_white.setWidth(
+                    curr_rect_like_line.get_pen_width()
+                )
+                pix_map_painter.setPen(pen_white)
+                pix_map_painter.drawLine(
+                    curr_rect_like_line.get_line()
+                )
+        else:
+            print(">>> Updating scenario: out-of-range")
+            #
+            self.draw_sliced_models()
+        #
+        self.update()
+
+    def append_one_k_line(self, data_frame):
+        # If another pix-map is needed:
+        #   - create new pix-map; AND:
+        #   - if temp_max OR temp_min is out of range, re-draw all;
+        #   - if in the range, just add the new pix-map to list;
+        # If enough space:
+        #   - consider temp_max OR temp_min to decide whether to re-draw or not;
+        #
+        data = data_frame.get_data_frame()[:1]
+        the_last_datum = data.ix[0]
+        self._data = pd.concat([self._data, data])
+        self._data_size += 1
+        #
+        max_sliced_data_size = self._CONST_SETTINGS['max_sliced_data_size']  #
+        temp_min, temp_max = get_min_and_max_price(data)
+        temp_min -= 5
+        temp_max += 5
+        #
+        if int(math.ceil(1.0 * self._data_size / max_sliced_data_size)) \
+                > int(len(self._sliced_models)):
+            #
+            self._sliced_models.append(
+                SlicedPixMapModel(self._data, 0, 0)
+            )
+            #
+            if temp_min >= self._the_min and temp_max <= self._the_max:
+                #
+                print(">>> Appending scenario: new pix-map & in-range")
+                #
+                x_step = self._CONST_SETTINGS['x_step']
+                y_range = self._CONST_SETTINGS['y_range']
+                rect_width = self._CONST_SETTINGS['rect_width']
+                margin_top = self._CONST_SETTINGS['margin_top']
+                max_height = self._CONST_SETTINGS['max_height']
+                max_width = self._CONST_SETTINGS['max_width']
+                #
+                the_last_sliced_model = self._sliced_models[-1]
+                pix_map = \
+                    QtGui.QPixmap(
+                        max_width,
+                        max_height
+                    )
+                pix_map.fill(self, 0, 0)
+                the_last_sliced_model.set_pix_map(
+                    pix_map
+                )
+                the_last_pix_map = the_last_sliced_model.get_pix_map()
+                the_last_inside_idx = the_last_sliced_model.get_size() - 1
+                #
+                pix_map_painter = QtGui.QPainter(the_last_pix_map)
+                pix_map_painter.initFrom(self)
+                #
+                open_price = the_last_datum['open']
+                close_price = the_last_datum['close']
+                high_price = the_last_datum['high']
+                low_price = the_last_datum['low']
+                #
+                x_start = \
+                    the_last_inside_idx * x_step + (x_step - rect_width) / 2.0
+                y_start = \
+                    margin_top \
+                    + abs(max(open_price, close_price) - self._the_max) \
+                    / (self._the_max - self._the_min) * y_range
+                y_height = \
+                    (max(open_price, close_price) - min(open_price, close_price)) \
+                    / (self._the_max - self._the_min) * y_range
+                #
+                curr_rect = QtCore.QRectF()
+                curr_rect_like_line = RectLikeLine()
+                #
+                # High enough: rect
+                if y_height >= 2:
+                    curr_rect.setRect(
+                        x_start, y_start, rect_width, y_height
+                    )
+                #
+                # Otherwise: line instead of rect
+                else:
+                    # TODO: set a min height;
+                    y_height = 2
+                    curr_rect_like_line.set_line_with_pen_width(
+                        x_start, y_start,
+                        x_start + rect_width, y_start,
+                        y_height
+                    )
+                #
+                # The high & low price line:
+                curr_line = QtCore.QLineF(
+                    x_start + rect_width / 2.0,
+                    margin_top
+                    + abs(high_price - self._the_max)
+                    / (self._the_max - self._the_min) * y_range,
+                    x_start + rect_width / 2.0,
+                    margin_top
+                    + abs(low_price - self._the_max)
+                    / (self._the_max - self._the_min) * y_range
+                )
+                #
+                if close_price > open_price:
+                    pix_map_painter.fillRect(curr_rect, QtCore.Qt.red)
+                    pen_red = QtGui.QPen(QtCore.Qt.red)
+                    pix_map_painter.setPen(pen_red)
+                    pix_map_painter.drawRect(curr_rect)
+                    pix_map_painter.drawLine(curr_line)
+                    #
+                    pen_red.setWidth(
+                        curr_rect_like_line.get_pen_width()
+                    )
+                    pix_map_painter.setPen(pen_red)
+                    pix_map_painter.drawLine(
+                        curr_rect_like_line.get_line()
+                    )
+                else:
+                    pix_map_painter.fillRect(curr_rect, QtCore.Qt.white)
+                    pen_white = QtGui.QPen(QtCore.Qt.white)
+                    pix_map_painter.setPen(pen_white)
+                    pix_map_painter.drawRect(curr_rect)
+                    pix_map_painter.drawLine(curr_line)
+                    #
+                    pen_white.setWidth(
+                        curr_rect_like_line.get_pen_width()
+                    )
+                    pix_map_painter.setPen(pen_white)
+                    pix_map_painter.drawLine(
+                        curr_rect_like_line.get_line()
+                    )
+                #
+                self._curr_start_idx = self._data_size - self.get_curr_span()
+                self._curr_end_idx = self._data_size - 1
+            else:
+                #
+                self.draw_sliced_models()
+        else:
+            #
+            if temp_min >= self._the_min and temp_max <= self._the_max:
+                #
+                print(">>> Appending scenario: enough space & in-range")
+                #
+                x_step = self._CONST_SETTINGS['x_step']
+                y_range = self._CONST_SETTINGS['y_range']
+                rect_width = self._CONST_SETTINGS['rect_width']
+                margin_top = self._CONST_SETTINGS['margin_top']
+                #
+                the_last_sliced_model = self._sliced_models[-1]
+                the_last_pix_map = the_last_sliced_model.get_pix_map()
+                the_last_sliced_model.set_to_idx(
+                    the_last_sliced_model.get_to_idx() + 1
+                )
+                the_last_inside_idx = the_last_sliced_model.get_size() - 1
+                #
+                pix_map_painter = QtGui.QPainter(the_last_pix_map)
+                pix_map_painter.initFrom(self)
+                #
+                open_price = the_last_datum['open']
+                close_price = the_last_datum['close']
+                high_price = the_last_datum['high']
+                low_price = the_last_datum['low']
+                #
+                x_start = \
+                    the_last_inside_idx * x_step + (x_step - rect_width) / 2.0
+                y_start = \
+                    margin_top \
+                    + abs(max(open_price, close_price) - self._the_max) \
+                    / (self._the_max - self._the_min) * y_range
+                y_height = \
+                    (max(open_price, close_price) - min(open_price, close_price)) \
+                    / (self._the_max - self._the_min) * y_range
+                #
+                curr_rect = QtCore.QRectF()
+                curr_rect_like_line = RectLikeLine()
+                #
+                # High enough: rect
+                if y_height >= 2:
+                    curr_rect.setRect(
+                        x_start, y_start, rect_width, y_height
+                    )
+                #
+                # Otherwise: line instead of rect
+                else:
+                    # TODO: set a min height;
+                    y_height = 2
+                    curr_rect_like_line.set_line_with_pen_width(
+                        x_start, y_start,
+                        x_start + rect_width, y_start,
+                        y_height
+                    )
+                #
+                # The high & low price line:
+                curr_line = QtCore.QLineF(
+                    x_start + rect_width / 2.0,
+                    margin_top
+                    + abs(high_price - self._the_max)
+                    / (self._the_max - self._the_min) * y_range,
+                    x_start + rect_width / 2.0,
+                    margin_top
+                    + abs(low_price - self._the_max)
+                    / (self._the_max - self._the_min) * y_range
+                )
+                #
+                if close_price > open_price:
+                    pix_map_painter.fillRect(curr_rect, QtCore.Qt.red)
+                    pen_red = QtGui.QPen(QtCore.Qt.red)
+                    pix_map_painter.setPen(pen_red)
+                    pix_map_painter.drawRect(curr_rect)
+                    pix_map_painter.drawLine(curr_line)
+                    #
+                    pen_red.setWidth(
+                        curr_rect_like_line.get_pen_width()
+                    )
+                    pix_map_painter.setPen(pen_red)
+                    pix_map_painter.drawLine(
+                        curr_rect_like_line.get_line()
+                    )
+                else:
+                    pix_map_painter.fillRect(curr_rect, QtCore.Qt.white)
+                    pen_white = QtGui.QPen(QtCore.Qt.white)
+                    pix_map_painter.setPen(pen_white)
+                    pix_map_painter.drawRect(curr_rect)
+                    pix_map_painter.drawLine(curr_line)
+                    #
+                    pen_white.setWidth(
+                        curr_rect_like_line.get_pen_width()
+                    )
+                    pix_map_painter.setPen(pen_white)
+                    pix_map_painter.drawLine(
+                        curr_rect_like_line.get_line()
+                    )
+                #
+                self._curr_start_idx = self._data_size - self.get_curr_span()
+                self._curr_end_idx = self._data_size - 1
+            else:
+                #
+                self.draw_sliced_models()
+        #
+        self.update()
+
     def get_curr_start_idx(self):
         return self._curr_start_idx
 
     def get_curr_end_idx(self):
         return self._curr_end_idx
 
+    def get_curr_span(self):
+        return self._curr_end_idx - self._curr_start_idx + 1
+
     def get_data_size(self):
         return self._data_size
+
+    # TODO: should be removed later;
+    def get_data(self):
+        return self._data
 
     def set_curr_start_idx(self, curr_start_idx):
         self._curr_start_idx = curr_start_idx
@@ -657,15 +1022,21 @@ class KLineContainer(QtGui.QMainWindow):
     def get_k_line_slider(self):
         return self._k_line_slider
 
-    def update_k_line(self, updated_data):
-        self._k_line.update_the_last_k_line(updated_data)
-        self._k_line_slider.setValue(self._max_offset)
-        self.slide_to_offset(self._max_offset)
+    def update_k_line(self, series):
+        self._k_line.update_the_last_k_line(series)
+        #
+        curr_span = self._k_line.get_curr_span()
+        print(curr_span)
+        self._k_line_slider.setSpan(
+            self._k_line_slider.maximum() - curr_span + 1,
+            self._k_line_slider.maximum()
+        )
 
-    def append_k_line(self, appended_data):
-        self._k_line.append_one_k_line(appended_data)
-        self._k_line_slider.setValue(self._max_offset)
-        self.slide_to_offset(self._max_offset)
+    def append_k_line(self, data_frame):
+        self._k_line.append_one_k_line(data_frame)
+        #
+        #self._k_line_slider.setValue(self._max_offset)
+        #self.slide_to_offset(self._max_offset)
 
     def load_data(self, data_file):
         """
@@ -675,7 +1046,7 @@ class KLineContainer(QtGui.QMainWindow):
         #
         self._k_line_slider.setRange(
             0,
-            self._k_line.get_data_size()
+            self._k_line.get_data_size() - 1
         )
         self._k_line_slider.setSpan(
             self._k_line.get_curr_start_idx(),
@@ -1344,6 +1715,16 @@ class MainForm(QtGui.QWidget):
             k_line_container,
             0, 0, 1, 1
         )
+        QtCore.QObject.connect(
+            k_line_container,
+            QtCore.SIGNAL("updateSeries(PyQt_PyObject)"),
+            k_line_container.update_k_line
+        )
+        QtCore.QObject.connect(
+            k_line_container,
+            QtCore.SIGNAL("appendDataFrame(PyQt_PyObject)"),
+            k_line_container.append_k_line
+        )
         #
         #
         tab_k_line_view = QtGui.QWidget()
@@ -1423,12 +1804,13 @@ class MainForm(QtGui.QWidget):
         )
         QtCore.QObject.connect(
             action_update,
-            QtCore.SIGNAL("triggered()"), self.update_k_line
+            QtCore.SIGNAL("triggered()"),
+            self.update_k_line
         )
         QtCore.QObject.connect(
             action_append,
             QtCore.SIGNAL("triggered()"),
-            lambda x=[action_append]: self.append_k_line(x)
+            self.append_k_line
         )
         #
         # Menu 'menu_k_line':
@@ -1458,29 +1840,27 @@ class MainForm(QtGui.QWidget):
 
     def update_k_line(self):
         # TODO: should be refactored as API;
-        '''
-        updated_data = \
-            get_random_series_from(
-                self._k_line_container.get_k_line().get_data()
-            )
-        #
-        self._k_line_container.update_k_line(updated_data)
-        '''
-        pass
-
-    def append_k_line(self, action_list):
-        # TODO: should be refactored as API;
-        '''
-        appended_data = \
+        updated_data_frame = AppendedDataFrameModel(
             get_random_series_list_from(
                 self._k_line_container.get_k_line().get_data()
             )
-        #
-        self._k_line_container.append_k_line(appended_data)
-        '''
-        #
-        for action in action_list:
-            action.setEnabled(False)
+        )
+        self._k_line_container.emit(
+            QtCore.SIGNAL("updateSeries(PyQt_PyObject)"),
+            updated_data_frame
+        )
+
+    def append_k_line(self):
+        # TODO: should be refactored as API;
+        appended_data_frame = AppendedDataFrameModel(
+            get_random_series_list_from(
+                self._k_line_container.get_k_line().get_data()
+            )
+        )
+        self._k_line_container.emit(
+            QtCore.SIGNAL("appendDataFrame(PyQt_PyObject)"),
+            appended_data_frame
+        )
 
     def load_data(self, action_list):
         file_dialog = QtGui.QFileDialog(self)

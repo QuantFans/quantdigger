@@ -292,6 +292,9 @@ class SlicedPixMapModel(object):
             return 0.0
         return self._pix_map.height()
 
+    def set_to_idx(self, to_idx):
+        self._to_idx = to_idx
+
 ################################################################################
 
 
@@ -322,3 +325,29 @@ class WindowedPixMapModel(object):
 
     def get_pix_map(self):
         return self._pix_map
+
+################################################################################
+
+
+class UpdatedSeriesModel(object):
+
+    def __init__(self, series):
+        super(UpdatedSeriesModel, self).__init__()
+        #
+        self._series = series
+
+    def get_series(self):
+        return self._series
+
+################################################################################
+
+
+class AppendedDataFrameModel(object):
+
+    def __init__(self, data_frame):
+        super(AppendedDataFrameModel, self).__init__()
+        #
+        self._data_frame = data_frame
+
+    def get_data_frame(self):
+        return self._data_frame
