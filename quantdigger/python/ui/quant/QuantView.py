@@ -215,13 +215,13 @@ class KLine(QtGui.QWidget):
         # Init the instance variables:
         self._data = None
         self._data_size = 0
-        self._sliced_models = list()
+        self._sliced_models = None
         #
         # CONSTANT private variable:
         self._CONST_SETTINGS = dict()
         self._CONST_SETTINGS['max_sliced_data_size'] = 1000
         self._CONST_SETTINGS['max_width'] = 30000.0
-        self._CONST_SETTINGS['y_range'] = 600.0
+        self._CONST_SETTINGS['y_range'] = 4000.0
         self._CONST_SETTINGS['margin_top'] = 20.0
         self._CONST_SETTINGS['margin_bottom'] = 20.0
         self._CONST_SETTINGS['max_height'] = \
@@ -251,6 +251,8 @@ class KLine(QtGui.QWidget):
         self._data = get_k_line_data_by_path(data_file)[0: 2000]
         #self._data = get_k_line_data_by_path(data_file)
         #
+        self._sliced_models = list()
+        #
         data_size = len(self._data)
         self._data_size = data_size
         #
@@ -262,7 +264,7 @@ class KLine(QtGui.QWidget):
         slice_size = int(math.ceil(1.0 * data_size / max_sliced_data_size))
         for i in range(slice_size):
             temp_data = \
-                self._data[i*max_sliced_data_size : (i+1)*max_sliced_data_size]
+                self._data[i*max_sliced_data_size: (i+1)*max_sliced_data_size]
             temp_data_size = len(temp_data)
             from_idx = i*max_sliced_data_size
             to_idx = i*max_sliced_data_size + temp_data_size - 1
@@ -455,7 +457,7 @@ class KLine(QtGui.QWidget):
             complete_size = len(complete_slice_indexes)
             #
             temp_min, temp_max = get_min_and_max_price(
-                self._data[curr_start_idx: curr_end_idx+1]
+                self._data[int(curr_start_idx): int(curr_end_idx)+1]
             )
             temp_min -= 5
             temp_max += 5
@@ -670,6 +672,10 @@ class KLine(QtGui.QWidget):
             #
             self.draw_sliced_models()
         #
+        # Fix bug: add the following two lines to fix the problem, which is
+        #   that when updating, pix map is not located correctly;
+        self._curr_start_idx = self._data_size - self.get_curr_span()
+        self._curr_end_idx = self._data_size - 1
         self.update()
 
     def append_one_k_line(self, data_frame):
@@ -694,7 +700,9 @@ class KLine(QtGui.QWidget):
                 > int(len(self._sliced_models)):
             #
             self._sliced_models.append(
-                SlicedPixMapModel(self._data, 0, 0)
+                SlicedPixMapModel(
+                    self._data, self._data_size-1, self._data_size-1
+                )
             )
             #
             if temp_min >= self._the_min and temp_max <= self._the_max:
@@ -799,8 +807,8 @@ class KLine(QtGui.QWidget):
                         curr_rect_like_line.get_line()
                     )
                 #
-                self._curr_start_idx = self._data_size - self.get_curr_span()
-                self._curr_end_idx = self._data_size - 1
+                #self._curr_start_idx = self._data_size - self.get_curr_span()
+                #self._curr_end_idx = self._data_size - 1
             else:
                 #
                 self.draw_sliced_models()
@@ -900,11 +908,62 @@ class KLine(QtGui.QWidget):
                         curr_rect_like_line.get_line()
                     )
                 #
-                self._curr_start_idx = self._data_size - self.get_curr_span()
-                self._curr_end_idx = self._data_size - 1
+                #self._curr_start_idx = self._data_size - self.get_curr_span()
+                #self._curr_end_idx = self._data_size - 1
             else:
                 #
                 self.draw_sliced_models()
+        #
+        self._curr_start_idx = self._data_size - self.get_curr_span()
+        self._curr_end_idx = self._data_size - 1
+        self.update()
+
+    def show_average_line(self):
+        """
+        [en]
+
+        [zh]
+        平均线绘制
+        """
+        #
+        print(">>> Show average line")
+        #
+        max_sliced_data_size = self._CONST_SETTINGS['max_sliced_data_size']
+        x_step = self._CONST_SETTINGS['x_step']
+        y_range = self._CONST_SETTINGS['y_range']
+        margin_top = self._CONST_SETTINGS['margin_top']
+        #
+        for i in range(len(self._sliced_models)):
+            curr_sliced_model = self._sliced_models[i]
+            curr_pix_map = curr_sliced_model.get_pix_map()
+            points = []
+            for j in range(
+                curr_sliced_model.get_from_idx(),
+                curr_sliced_model.get_to_idx() + 1
+            ):
+                curr_entry = self._data.ix[j]
+                #
+                open_price = curr_entry['open']
+                close_price = curr_entry['close']
+                #
+                mid_price = (open_price + close_price) / 2.0
+                #
+                temp_idx = j % max_sliced_data_size
+                #
+                points.append(
+                    QtCore.QPointF(
+                        temp_idx * x_step + x_step / 2.0,
+                        margin_top
+                        + abs(mid_price - self._the_max)
+                        / (self._the_max - self._the_min) * y_range
+                    )
+                )
+            painter = QtGui.QPainter(curr_pix_map)
+            painter.initFrom(self)
+            pen_yellow = QtGui.QPen(QtCore.Qt.yellow)
+            painter.setPen(pen_yellow)
+            # TODO: could draw, but pen width is not fit???
+            painter.drawPolyline(*points)
         #
         self.update()
 
@@ -1035,8 +1094,19 @@ class KLineContainer(QtGui.QMainWindow):
     def append_k_line(self, data_frame):
         self._k_line.append_one_k_line(data_frame)
         #
-        #self._k_line_slider.setValue(self._max_offset)
-        #self.slide_to_offset(self._max_offset)
+        self._k_line_slider.setRange(
+            0,
+            self._k_line.get_data_size() - 1
+        )
+        #
+        # Fix bug:
+        #   add span settings to set the value of slider;
+        curr_span = self._k_line.get_curr_span()
+        print(curr_span)
+        self._k_line_slider.setSpan(
+            self._k_line_slider.maximum() - curr_span + 1,
+            self._k_line_slider.maximum()
+        )
 
     def load_data(self, data_file):
         """
@@ -1069,6 +1139,9 @@ class KLineContainer(QtGui.QMainWindow):
             self._k_line_slider.lowerValue,
             self._k_line_slider.upperValue
         )
+
+    def show_average_line(self):
+        self._k_line.show_average_line()
 
 ################################################################################
 
@@ -1794,13 +1867,18 @@ class MainForm(QtGui.QWidget):
         menu_k_line.addSeparator()
         action_update = menu_k_line.addAction("Update last k-line")
         action_append = menu_k_line.addAction("Append one k-line")
+        menu_k_line.addSeparator()
+        action_show_average_line = menu_k_line.addAction("Show average line")
         action_update.setEnabled(False)
         action_append.setEnabled(False)
+        action_show_average_line.setEnabled(False)
         #
         QtCore.QObject.connect(
             action_load,
             QtCore.SIGNAL("triggered()"),
-            lambda x=[action_update, action_append]: self.load_data(x)
+            lambda x=[
+                action_update, action_append, action_show_average_line
+            ]: self.load_data(x)
         )
         QtCore.QObject.connect(
             action_update,
@@ -1812,8 +1890,13 @@ class MainForm(QtGui.QWidget):
             QtCore.SIGNAL("triggered()"),
             self.append_k_line
         )
+        QtCore.QObject.connect(
+            action_show_average_line,
+            QtCore.SIGNAL("triggered()"),
+            lambda x = action_show_average_line: self.show_average_line(x)
+        )
         #
-        # Menu 'menu_k_line':
+        # Menu for 'new k-line':
         new_action_load = menu_new_k_line.addAction("Load data file")
         menu_new_k_line.addSeparator()
         new_action_update = menu_new_k_line.addAction("Update last k-line")
@@ -1873,6 +1956,11 @@ class MainForm(QtGui.QWidget):
             self._k_line_container.load_data(data_file)
             for action in action_list:
                 action.setEnabled(True)
+
+    def show_average_line(self, self_action):
+        self._k_line_container.show_average_line()
+        #
+        self_action.setEnabled(False)
 
     def load_list_data(self, data, horizontal_header_info, action_list):
         self._quotation_view.set_data(data)

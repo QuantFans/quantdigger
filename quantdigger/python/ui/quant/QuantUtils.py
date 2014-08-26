@@ -74,7 +74,7 @@ def get_min_and_max_price(k_line_data):
     first_list.append(float(first_entry['low']))
     the_min = min(first_list)
     the_max = max(first_list)
-    for eachIndex in k_line_data.index:
+    for eachIndex in range(len(k_line_data)):
         each_entry = k_line_data.ix[eachIndex]
         temp_list = list()
         temp_list.append(float(each_entry['open']))
