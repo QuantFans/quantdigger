@@ -1305,36 +1305,61 @@ class KLineView(QtGui.QWidget):
     def __init__(self):
         super(KLineView, self).__init__()
         #
+        # [zh]
+        # 与所有数据相关的实例化变量
         self._data = None
         self._data_size = None
+        self._data_start_idx = 0
+        self._data_end_idx = 0
+        self._the_max = 0.0
+        self._the_min = 0.0
         #
+        # [zh]
+        # 与当前窗口显示的数据相关的实例化变量
         self._curr_data = None
         self._curr_data_size = None
+        self._curr_span = 20
+        self._curr_from_idx = 0
+        self._curr_to_idx = 0
         #
-        self._window_k_line_size = 20
+        # [zh]
+        # 控制当前窗口状态的实例化变量
+        self._is_data_loaded = False
+        self._is_average_line_shown = False
+        self._cached_pix_map = None
+        self._curr_x_step = 0
+        self._curr_rect_width = 0
         #
-        self._min_offset = 0
-        self._max_offset = 0
-        self._curr_offset = 0
-        self._min_setter = 1
-        self._max_setter = 999
-        #
+        # [zh]
+        # 预设的画图参考值
         self._CONST_SETTINGS = dict()
         self._CONST_SETTINGS['max_width'] = 30000
-        self._CONST_SETTINGS['y_range'] = 600
+        self._CONST_SETTINGS['y_range'] = 4000
         self._CONST_SETTINGS['margin_top'] = 20
         self._CONST_SETTINGS['margin_bottom'] = 20
         self._CONST_SETTINGS['x_step'] = 30
         self._CONST_SETTINGS['rect_width'] = 24
-        self._CONST_SETTINGS['max_k_line_size'] = 999
         self._CONST_SETTINGS['max_height'] = \
             self._CONST_SETTINGS['y_range'] \
             + self._CONST_SETTINGS['margin_top'] \
             + self._CONST_SETTINGS['margin_bottom']
         #
+        # [en]
+        # MAX_K_LINE_SIZE * MIN_X_STEP = MAX_WIDTH
+        #
+        # [zh]
+        # 参考值
+        self._CONST_SETTINGS['max_k_line_size'] = 6000
+        self._CONST_SETTINGS['min_x_step'] = 5
+        self._CONST_SETTINGS['min_rect_width'] = 3
+        #
         self._pix_map = None
         #
+        # [en]
         # Background and foreground:
+        #
+        # [zh]
+        # 背景色与前景色
         self_palette = QtGui.QPalette()
         self_palette.setColor(
             QtGui.QPalette.Background, QtGui.QColor(0, 0, 0)
@@ -1344,10 +1369,15 @@ class KLineView(QtGui.QWidget):
         )
         self.setPalette(self_palette)
         #
+        # 初始化
         self.init_pix_map()
         self.update()
 
     def paintEvent(self, event):
+        #
+        if self._is_average_line_shown:
+            self.draw_average_line()
+        #
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.drawPixmap(
@@ -1355,8 +1385,6 @@ class KLineView(QtGui.QWidget):
             self._pix_map,
             0, 0, self._pix_map.width(), self._pix_map.height()
         )
-        #print(self._pix_map.width())
-        #print(self._pix_map.height())
         painter.end()
 
     def init_pix_map(self):
@@ -1364,46 +1392,61 @@ class KLineView(QtGui.QWidget):
         self._pix_map.load("_no_data.png")
 
     def load_k_line(self, data_file):
-        self._data = get_k_line_data_by_path(data_file)
-        self._data_size = len(self._data)
-        temp_width = \
-            (self._data_size + 1) * self._CONST_SETTINGS['x_step'] \
-            if self._data_size < self._window_k_line_size \
-            else \
-            (self._window_k_line_size+1) * self._CONST_SETTINGS['x_step']
-        self._curr_data_size = \
-            self._data_size if self._data_size < self._window_k_line_size \
-            else self._window_k_line_size
-        self._curr_data = self._data[0-self._curr_data_size:]
-        self._pix_map = QtGui.QPixmap(
-            temp_width, self._CONST_SETTINGS['max_height']
-        )
+        self._data = get_k_line_data_by_path(data_file)[:2000]
+        #self._data = get_k_line_data_by_path(data_file)
         #
-        self._max_offset = \
-            0 if self._data_size < self._window_k_line_size \
-            else self._data_size - self._window_k_line_size
-        self._curr_offset = self._max_offset
-        self._max_setter = \
-            self._data_size \
-            if self._data_size < self._CONST_SETTINGS['max_k_line_size'] \
-            else self._CONST_SETTINGS['max_k_line_size']
+        self._data_size = len(self._data)
+        if self._data_size == 0:
+            print(">>> No data!")
+            return False
+        self._data_start_idx = 0
+        self._data_end_idx = self._data_size - 1
+        self._curr_span = 20
+        if self._data_size < self._curr_span:
+            self._curr_from_idx = 0
+            self._curr_to_idx = self._data_size - 1
+            self._curr_span = self._data_size
+        else:
+            self._curr_from_idx = self._data_size - self._curr_span
+            self._curr_to_idx = self._data_size - 1
+            #
         #
         self.draw_data_on_pix_map()
         self.update()
 
     def draw_data_on_pix_map(self):
-        self._pix_map.fill(self, 0, 0)
-        pix_map_painter = QtGui.QPainter(self._pix_map)
-        pix_map_painter.initFrom(self)
-        #
-        the_min, the_max = get_min_and_max_price(self._curr_data)
-        the_min -= 5.0
-        the_max += 5.0
+        temp_width = 0.0
         #
         x_step = self._CONST_SETTINGS['x_step']
         rect_width = self._CONST_SETTINGS['rect_width']
         y_range = self._CONST_SETTINGS['y_range']
         margin_top = self._CONST_SETTINGS['margin_top']
+        #
+        if self._curr_span <= 1000:
+            temp_width = self._curr_span * x_step
+            #
+            self._curr_x_step = x_step
+            self._curr_rect_width = rect_width
+        elif self._curr_span <= 6000:
+            x_step = math.ceil(self._CONST_SETTINGS['max_width'] / self._curr_span)
+            rect_width = math.ceil(x_step * 0.8)
+            temp_width = self._CONST_SETTINGS['max_width']
+            #
+            self._curr_x_step = x_step
+            self._curr_rect_width = rect_width
+        self._curr_data = self._data[self._curr_from_idx: self._curr_to_idx + 1]
+        self._pix_map = QtGui.QPixmap(
+            temp_width, self._CONST_SETTINGS['max_height']
+        )
+        self._pix_map.fill(self, 0, 0)
+        pix_map_painter = QtGui.QPainter(self._pix_map)
+        pix_map_painter.initFrom(self)
+        #
+        the_min, the_max = get_min_and_max_price(self._curr_data)
+        the_min -= 1.0
+        the_max += 1.0
+        self._the_min = the_min
+        self._the_max = the_max
         #
         k_line_rectangles_red = []
         k_line_rectangles_white = []
@@ -1412,7 +1455,7 @@ class KLineView(QtGui.QWidget):
         k_line_rect_like_lines_red = []
         k_line_rect_like_lines_white = []
         #
-        for i in list(xrange(self._curr_data_size)):
+        for i in list(xrange(self._curr_span)):
             #
             # Current row:
             curr_data = self._curr_data.ix[i]
@@ -1429,9 +1472,11 @@ class KLineView(QtGui.QWidget):
             # Low price:
             low_price = curr_data["low"]
             #
+            # Mid price:
+            mid_price = (open_price + close_price) / 2.0
+            #
             x_start = \
-                x_step * (i + 1) \
-                - rect_width / 2
+                (x_step - rect_width) / 2.0 + x_step * i
             y_start = \
                 margin_top \
                 + abs(max(open_price, close_price) - the_max) \
@@ -1446,7 +1491,7 @@ class KLineView(QtGui.QWidget):
             curr_rect_like_line = RectLikeLine()
             #
             # High enough: rect
-            if y_height >= 5:
+            if y_height >= 2:
                 curr_rect.setRect(
                     x_start, y_start, rect_width, y_height
                 )
@@ -1461,10 +1506,10 @@ class KLineView(QtGui.QWidget):
             #
             # The high & low price line:
             curr_line = QtCore.QLineF(
-                x_step * (i + 1),
+                x_step / 2.0 + x_step * i,
                 margin_top
                 + abs(high_price - the_max) / (the_max - the_min) * y_range,
-                x_step * (i + 1),
+                x_step / 2.0 + x_step * i,
                 margin_top
                 + abs(low_price - the_max) / (the_max - the_min) * y_range
             )
@@ -1482,6 +1527,7 @@ class KLineView(QtGui.QWidget):
                 k_line_rectangles_white.append(curr_rect)
                 k_line_lines_white.append(curr_line)
                 k_line_rect_like_lines_white.append(curr_rect_like_line)
+            #
         #
         # Red pen & white pen;
         pen_red = QtGui.QPen(QtCore.Qt.red)
@@ -1541,62 +1587,119 @@ class KLineView(QtGui.QWidget):
     def get_curr_data_size(self):
         return self._curr_data_size
 
-    def get_curr_offset(self):
-        return self._curr_offset
-
-    def set_curr_offset(self, offset):
-        self._curr_offset = offset
-        self._curr_data = self._data[offset:offset+self._curr_data_size]
-        #
-        self.draw_data_on_pix_map()
-        self.update()
-
-    def set_k_line_size(self, k_line_size):
-        #
-        self._curr_data_size = k_line_size
-        self._curr_data = self._data[0-self._curr_data_size:]
-        #
-        temp_width = \
-            (k_line_size+1) * self._CONST_SETTINGS['x_step']
-        self._pix_map = QtGui.QPixmap(
-            temp_width, self._CONST_SETTINGS['max_height']
-        )
-        #
-        self._max_offset = self._data_size - k_line_size
-        self._curr_offset = self._max_offset
-        #
-        self.draw_data_on_pix_map()
-        self.update()
-
     def get_data(self):
         return self._data
 
-    def update_k_line(self, updated_datum):
-        self._data.ix[-1] = updated_datum
-        self._curr_offset = self._max_offset
+    def update_k_line(self, data_frame):
+        data = data_frame.get_data_frame()
+        the_last_datum = data.ix[0]
+        self._data.ix[-1] = the_last_datum
+        #
+        self._curr_from_idx = self._data_end_idx - self._curr_span + 1
+        self._curr_to_idx = self._data_end_idx
         #
         self.draw_data_on_pix_map()
         self.update()
 
-    def append_k_line(self, appended_data):
-        self._data = pd.concat([self._data, appended_data])
-        self._data_size = len(self._data)
-        temp_width = \
-            (self._curr_data_size+1) * self._CONST_SETTINGS['x_step']
-        self._curr_data = self._data[0-self._curr_data_size:]
-        self._pix_map = QtGui.QPixmap(
-            temp_width, self._CONST_SETTINGS['max_height']
-        )
+    def append_k_line(self, data_frame):
+        data = data_frame.get_data_frame()[:1]
+        the_last_datum = data.ix[0]
+        self._data = pd.concat([self._data, data])
+        self._data_size += 1
+        self._data_end_idx += 1
         #
-        self._max_offset += 1
-        self._curr_offset = self._max_offset
-        self._max_setter = \
-            self._data_size \
-            if self._data_size < self._CONST_SETTINGS['max_k_line_size'] \
-            else self._CONST_SETTINGS['max_k_line_size']
+        self._curr_from_idx = self._data_end_idx - self._curr_span + 1
+        self._curr_to_idx = self._data_end_idx
         #
         self.draw_data_on_pix_map()
         self.update()
+
+    def set_span(self, from_idx, to_idx):
+        self._curr_from_idx = from_idx
+        self._curr_to_idx = to_idx
+        self._curr_span = self._curr_to_idx - self._curr_from_idx + 1
+        #
+        self.draw_data_on_pix_map()
+        self.update()
+
+    def draw_average_line(self):
+        if not self._is_average_line_shown:
+            return
+        #
+        #self._cached_pix_map = self._pix_map.copy(
+        #    QtCore.QRect(0, 0, self._pix_map.width(), self._pix_map.height())
+        #)
+        #
+        pix_map_painter = QtGui.QPainter(self._pix_map)
+        pix_map_painter.initFrom(self)
+        #
+        y_range = self._CONST_SETTINGS['y_range']
+        margin_top = self._CONST_SETTINGS['margin_top']
+        x_step = self._curr_x_step
+        rect_width = self._curr_rect_width
+        points = list()
+        for i in range(self._curr_from_idx, self._curr_to_idx + 1):
+            curr_entry = self._data.ix[i]
+            open_price = curr_entry['open']
+            close_price = curr_entry['close']
+            #
+            mid_price = (open_price + close_price) / 2.0
+            #
+            points.append(
+                QtCore.QPointF(
+                    x_step / 2.0 + x_step * (i - self._curr_from_idx),
+                    margin_top
+                    + abs(mid_price - self._the_max)
+                    / (self._the_max - self._the_min) * y_range
+                )
+            )
+        pen_yellow = QtGui.QPen(QtCore.Qt.yellow)
+        pen_yellow.setWidth(2)
+        pix_map_painter.setPen(pen_yellow)
+        # TODO: could draw, but pen width is not fit???
+        pix_map_painter.drawPolyline(*points)
+
+    def show_average_line(self):
+        #
+        print(">>> Show average line: new version;")
+        #
+        self._is_average_line_shown = True  # This could be use to undo drawing;
+        #
+        self.update()
+
+    def hide_average_line(self):
+        #
+        print(">>> Hide average line;")
+        #
+        self._is_average_line_shown = False
+        self.draw_data_on_pix_map()
+        #
+        self.update()
+
+    def get_curr_span(self):
+        """
+        """
+        return self._curr_span
+
+    def get_curr_from_idx(self):
+        """
+        """
+        return self._curr_from_idx
+
+    def get_curr_to_idx(self):
+        """
+        """
+        return self._curr_to_idx
+
+    def get_data_start_idx(self):
+        """
+        """
+        return self._data_start_idx
+
+    def get_data_end_idx(self):
+        """
+        """
+        return self._data_end_idx
 
 ################################################################################
 
@@ -1617,12 +1720,13 @@ class ContainerView(QtGui.QMainWindow):
         )
         #
         k_line_view = KLineView()
-        k_line_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        k_line_slider = QxtSpanSlider()
         left_splitter.addWidget(k_line_view)
         left_splitter.addWidget(k_line_slider)
         left_splitter.setSizes(
             [self.height()*0.9, self.height()*0.1]
         )
+        #k_line_slider.setHandleMovementMode(2)  # No crossing, no overlapping;
         k_line_slider.setEnabled(False)
         #
         info_area = InfoArea()
@@ -1644,68 +1748,92 @@ class ContainerView(QtGui.QMainWindow):
         #
         # sliderReleased is better than valueChanged:
         #   - will not delay;
+        self._item_moved = 0
         QtCore.QObject.connect(
             k_line_slider,
-            QtCore.SIGNAL("sliderReleased()"), self.slide_to_offset
+            QtCore.SIGNAL("lowerPositionChanged(int)"), self.slide_lower_handle
         )
         QtCore.QObject.connect(
-            k_line_size_setter.get_spin_box_size(),
-            QtCore.SIGNAL("valueChanged(int)"), self.set_to_size
+            k_line_slider,
+            QtCore.SIGNAL("upperPositionChanged(int)"), self.slide_upper_handle
+        )
+        QtCore.QObject.connect(
+            k_line_slider,
+            QtCore.SIGNAL("sliderReleased()"), self.change_span
         )
 
-    def load_k_line(self, data_file):
+    def load_data(self, data_file):
         self._k_line.load_k_line(data_file)
         #
-        if self._k_line.get_min_offset() < self._k_line.get_max_offset():
-            self._k_line_slider.setMinimum(self._k_line.get_min_offset())
-            self._k_line_slider.setMaximum(self._k_line.get_max_offset())
-            self._k_line_slider.setPageStep(1)
-            self._k_line_slider.setValue(self._k_line.get_curr_offset())
-            self._k_line_slider.setEnabled(True)
-        #
-        self._k_line_size_setter.set_size_min(self._k_line.get_min_setter())
-        self._k_line_size_setter.set_size_max(self._k_line.get_max_setter())
-        self._k_line_size_setter.set_curr_value(
-            self._k_line.get_curr_data_size()
+        self._k_line_slider.setRange(
+            self._k_line.get_data_start_idx(),
+            self._k_line.get_data_end_idx()
         )
-        self._k_line_size_setter.setEnabled(True)
-
-    def slide_to_offset(self):
-        self._k_line.set_curr_offset(self._k_line_slider.value())
-
-    def set_to_size(self, k_line_size):
-        self._k_line.set_k_line_size(k_line_size)
-        #
-        if self._k_line.get_min_offset() < self._k_line.get_max_offset():
-            self._k_line_slider.setMinimum(self._k_line.get_min_offset())
-            self._k_line_slider.setMaximum(self._k_line.get_max_offset())
-            self._k_line_slider.setPageStep(1)
-            self._k_line_slider.setValue(self._k_line.get_curr_offset())
-            self._k_line_slider.setEnabled(True)
-
-    def get_k_line(self):
-        return self._k_line
+        self._k_line_slider.setSpan(
+            self._k_line.get_curr_from_idx(),
+            self._k_line.get_curr_to_idx()
+        )
+        self._k_line_slider.setEnabled(True)
 
     def update_k_line(self, updated_datum):
         self._k_line.update_k_line(updated_datum)
-        self._k_line_slider.setValue(self._k_line.get_curr_offset())
-
-    def append_k_line(self, appended_data):
-        self._k_line.append_k_line(appended_data)
-        self._k_line_slider.setValue(self._k_line.get_curr_offset())
         #
-        if self._k_line.get_min_offset() < self._k_line.get_max_offset():
-            self._k_line_slider.setMinimum(self._k_line.get_min_offset())
-            self._k_line_slider.setMaximum(self._k_line.get_max_offset())
-            self._k_line_slider.setPageStep(1)
-            self._k_line_slider.setValue(self._k_line.get_curr_offset())
-            self._k_line_slider.setEnabled(True)
-        #
-        self._k_line_size_setter.set_size_min(self._k_line.get_min_setter())
-        self._k_line_size_setter.set_size_max(self._k_line.get_max_setter())
-        self._k_line_size_setter.set_curr_value(
-            self._k_line.get_curr_data_size()
+        self._k_line_slider.setSpan(
+            self._k_line.get_curr_from_idx(),
+            self._k_line.get_curr_to_idx()
         )
+
+    def append_k_line(self, data_frame):
+        self._k_line.append_k_line(data_frame)
+        #
+        self._k_line_slider.setSpan(
+            self._k_line.get_curr_from_idx(),
+            self._k_line.get_curr_to_idx()
+        )
+
+    def slide_lower_handle(self, value):
+        self._item_moved = 1
+
+    def slide_upper_handle(self, value):
+        self._item_moved = 2
+
+    def change_span(self):
+        lower_value = self._k_line_slider.lowerValue
+        upper_value = self._k_line_slider.upperValue
+        if upper_value - lower_value > 5999:  # 6000 - 1
+            #
+            if self._item_moved == 1:
+                lower_value = upper_value - 5999
+                #
+                QtGui.QMessageBox.about(
+                    self._k_line, "Lower", "Not so little"
+                )
+                #
+                self._k_line_slider.setSpan(
+                    lower_value, upper_value
+                )
+            elif self._item_moved == 2:
+                upper_value = lower_value + 5999
+                #
+                QtGui.QMessageBox.about(
+                    self._k_line, "Upper", "Not so much"
+                )
+                #
+                self._k_line_slider.setSpan(
+                    lower_value, upper_value
+                )
+        self._k_line.set_span(lower_value, upper_value)
+
+    def show_average_line(self):
+        self._k_line.show_average_line()
+
+    def hide_average_line(self):
+        self._k_line.hide_average_line()
+
+    def get_k_line(self):
+        #
+        # TODO: should be removed?
+        return self._k_line
 
 ################################################################################
 # TODO: my refactoring main form;
@@ -1811,6 +1939,16 @@ class MainForm(QtGui.QWidget):
             container_view,
             0, 0, 1, 1
         )
+        QtCore.QObject.connect(
+            container_view,
+            QtCore.SIGNAL("updateSeries(PyQt_PyObject)"),
+            container_view.update_k_line
+        )
+        QtCore.QObject.connect(
+            container_view,
+            QtCore.SIGNAL("appendDataFrame(PyQt_PyObject)"),
+            container_view.append_k_line
+        )
 
     def init_menu_bar(self, menu_bar):
         #
@@ -1903,13 +2041,23 @@ class MainForm(QtGui.QWidget):
         menu_new_k_line.addSeparator()
         new_action_update = menu_new_k_line.addAction("Update last k-line")
         new_action_append = menu_new_k_line.addAction("Append one k-line")
+        menu_new_k_line.addSeparator()
+        new_action_show_average_line = \
+            menu_new_k_line.addAction("Draw average line")
+        action_hide_average_line = \
+            menu_new_k_line.addAction("Hide average line")
         new_action_update.setEnabled(False)
         new_action_append.setEnabled(False)
+        new_action_show_average_line.setEnabled(False)
+        action_hide_average_line.setEnabled(False)
         #
         QtCore.QObject.connect(
             new_action_load,
             QtCore.SIGNAL("triggered()"),
-            lambda x=[new_action_update, new_action_append]:
+            lambda x=[
+                new_action_update, new_action_append,
+                new_action_show_average_line
+            ]:
             self.new_load_k_line(x)
         )
         QtCore.QObject.connect(
@@ -1921,6 +2069,22 @@ class MainForm(QtGui.QWidget):
             new_action_append,
             QtCore.SIGNAL("triggered()"),
             self.new_append_k_line
+        )
+        QtCore.QObject.connect(
+            new_action_show_average_line,
+            QtCore.SIGNAL("triggered()"),
+            lambda x=[
+                new_action_show_average_line, action_hide_average_line
+            ]:
+            self.new_show_average_line(x)
+        )
+        QtCore.QObject.connect(
+            action_hide_average_line,
+            QtCore.SIGNAL("triggered()"),
+            lambda x=[
+                new_action_show_average_line, action_hide_average_line
+            ]:
+            self.hide_average_line(x)
         )
 
     def update_k_line(self):
@@ -1999,24 +2163,42 @@ class MainForm(QtGui.QWidget):
         if file_dialog.exec_():  # Click 'Open' will return 1;
             data_file = file_dialog.selectedFiles()[0]
             print(">>> Selected file: " + data_file)
-            self._container_view.load_k_line(data_file)
+            self._container_view.load_data(data_file)
             for action in action_list:
                 action.setEnabled(True)
 
     def new_update_k_line(self):
         # TODO: should be refactored as API;
-        updated_datum = \
-            get_random_series_from(
-                self._container_view.get_k_line().get_data()
-            )
-        #
-        self._container_view.update_k_line(updated_datum)
-
-    def new_append_k_line(self):
-        # TODO: should be refactored as API;
-        appended_data = \
+        updated_data_frame = AppendedDataFrameModel(
             get_random_series_list_from(
                 self._container_view.get_k_line().get_data()
             )
+        )
+        self._container_view.emit(
+            QtCore.SIGNAL("updateSeries(PyQt_PyObject)"),
+            updated_data_frame
+        )
+
+    def new_append_k_line(self):
+        # TODO: should be refactored as API;
+        appended_data_frame = AppendedDataFrameModel(
+            get_random_series_list_from(
+                self._container_view.get_k_line().get_data()
+            )
+        )
+        self._container_view.emit(
+            QtCore.SIGNAL("appendDataFrame(PyQt_PyObject)"),
+            appended_data_frame
+        )
+
+    def new_show_average_line(self, x):
+        self._container_view.show_average_line()
         #
-        self._container_view.append_k_line(appended_data)
+        x[0].setEnabled(False)
+        x[1].setEnabled(True)
+
+    def hide_average_line(self, x):
+        self._container_view.hide_average_line()
+        #
+        x[0].setEnabled(True)
+        x[1].setEnabled(False)
