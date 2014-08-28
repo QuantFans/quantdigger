@@ -1999,7 +1999,7 @@ class MainForm(QtGui.QWidget):
         if file_dialog.exec_():  # Click 'Open' will return 1;
             data_file = file_dialog.selectedFiles()[0]
             print(">>> Selected file: " + data_file)
-            self._container_view.load_data(data_file)
+            self._container_view.load_k_line(data_file)
             for action in action_list:
                 action.setEnabled(True)
 
