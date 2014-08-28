@@ -2043,7 +2043,7 @@ class MainForm(QtGui.QWidget):
         new_action_append = menu_new_k_line.addAction("Append one k-line")
         menu_new_k_line.addSeparator()
         new_action_show_average_line = \
-            menu_new_k_line.addAction("Draw average line")
+            menu_new_k_line.addAction("Show average line")
         action_hide_average_line = \
             menu_new_k_line.addAction("Hide average line")
         new_action_update.setEnabled(False)
