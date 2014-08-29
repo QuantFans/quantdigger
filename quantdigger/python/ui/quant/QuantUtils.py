@@ -54,7 +54,7 @@ def get_k_line_data_by_path(path):
     :param path:
     :return:
     """
-    return csv2frame(os.path.abspath(path))
+    return csv2frame(unicode(path))
 
 
 def get_min_and_max_price(k_line_data):
