@@ -146,60 +146,35 @@ class IndexRangeSelector(QtGui.QWidget):
         self._spin_box_to.setValue(to_index + 1)
 
 ################################################################################
-# TODO: for test; to be removed;
 
 
-class BlankArea(QtGui.QWidget):
-
-    def __init__(self):
-        super(BlankArea, self).__init__()
-        #
-        self_palette = QtGui.QPalette()
-        self_palette.setColor(
-            QtGui.QPalette.Background, QtGui.QColor(255, 0, 0)
-        )
-        self.setPalette(self_palette)
-        self._pix_map = QtGui.QPixmap(self.size())
-        self.refresh_pix_map()
-
-    def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
-        painter.begin(self)
-        painter.drawPixmap(0, 0, self._pix_map)
-        painter.end()
-
-    def refresh_pix_map(self):
-        self._pix_map.fill(self, 0, 0)
-        #
-        self.update()
-
-################################################################################
-# TODO: to be used for showing info;
-
-
-class InfoArea(QtGui.QWidget):
+class InfoView(QtGui.QWidget):
 
     def __init__(self):
-        super(InfoArea, self).__init__()
+        super(InfoView, self).__init__()
         #
+        # [en]
+        # Background and foreground:
+        #
+        # [zh]
+        # 背景色与前景色
         self_palette = QtGui.QPalette()
         self_palette.setColor(
-            QtGui.QPalette.Background, QtGui.QColor(0, 0, 255)
+            QtGui.QPalette.Background, QtGui.QColor(0, 0, 0)
+        )
+        self_palette.setColor(
+            QtGui.QPalette.Foreground, QtGui.QColor(255, 0, 0)
         )
         self.setPalette(self_palette)
+        #
         self.pix_map = QtGui.QPixmap(self.size())
-        self.refresh_pix_map()
+        self.pix_map.fill(self, 0, 0)
 
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
+        painter = QtGui.QPainter()
         painter.begin(self)
-        painter.drawPixmap(0, 0, self.pix_map)
+        painter.drawPixmap(0, 0, self.width(), self.height(), self.pix_map)
         painter.end()
-
-    def refresh_pix_map(self):
-        self.pix_map.fill(self, 0, 0)
-        #
-        self.update()
 
 ################################################################################
 
@@ -211,6 +186,165 @@ class PriceAxisView(QtGui.QWidget):
     def __init__(self):
         super(PriceAxisView, self).__init__()
         #
+        # [en]
+        # Background and foreground:
+        #
+        # [zh]
+        # 背景色与前景色
+        self_palette = QtGui.QPalette()
+        self_palette.setColor(
+            QtGui.QPalette.Background, QtGui.QColor(0, 0, 0)
+        )
+        self_palette.setColor(
+            QtGui.QPalette.Foreground, QtGui.QColor(255, 0, 0)
+        )
+        self.setPalette(self_palette)
+        #
+        self._the_min = 0.0
+        self._the_max = 0.0
+        #
+        self._pix_map_width = 80
+        self._pix_map_y_step_height = 100
+        self._pix_map_y_steps = 6
+        self._pix_map_margin_top = 3
+        self._pix_map_margin_bottom = 30
+        self._pix_map_height = \
+            self._pix_map_y_step_height * self._pix_map_y_steps \
+            + self._pix_map_margin_top \
+            + self._pix_map_margin_bottom
+        self._pix_map_margin_left = 15
+        self._pix_map_margin_right = 10
+        self._pix_map_indicator_width = 5
+        self._pix_map_text_rect_width = \
+            self._pix_map_width \
+            - self._pix_map_margin_left - self._pix_map_margin_right \
+            - self._pix_map_indicator_width - 5
+        self._pix_map_text_rect_height = 40
+        #
+        self._pix_map = QtGui.QPixmap(self.size())
+        self._pix_map.fill(self, 0, 0)
+
+    def set_min_and_max_price(self, the_min, the_max):
+        #
+        self._the_min = the_min
+        self._the_max = the_max
+        price_step = 1.0 * (the_max - the_min) / (self._pix_map_y_steps - 1)
+        #
+        self._pix_map = QtGui.QPixmap(
+            self._pix_map_width,
+            self._pix_map_height
+        )
+        self._pix_map.fill(self, 0, 0)
+        pix_map_painter = QtGui.QPainter(self._pix_map)
+        pix_map_painter.initFrom(self)
+        #
+        price_axis = QtCore.QLineF(
+            self._pix_map_width - self._pix_map_margin_right,
+            self._pix_map_margin_top,
+            self._pix_map_width - self._pix_map_margin_right,
+            self._pix_map_margin_top
+            + self._pix_map_y_steps * self._pix_map_y_step_height
+        )
+        for i in range(self._pix_map_y_steps + 1):
+            temp_line = QtCore.QLineF(
+                self._pix_map_width - self._pix_map_margin_right
+                - self._pix_map_indicator_width,
+                self._pix_map_margin_top + self._pix_map_y_step_height * i,
+                self._pix_map_width - self._pix_map_margin_right,
+                self._pix_map_margin_top + self._pix_map_y_step_height * i
+            )
+            pix_map_painter.drawLine(temp_line)
+            #
+            temp_rect = QtCore.QRectF(
+                self._pix_map_margin_left,
+                self._pix_map_margin_top/2.0 + self._pix_map_y_step_height * i,
+                self._pix_map_text_rect_width,
+                self._pix_map_text_rect_height
+            )
+            pix_map_painter.drawText(
+                temp_rect,
+                QtCore.Qt.AlignRight,
+                QtCore.QString(str(the_max - price_step * i))
+            )
+        #
+        pix_map_painter.drawLine(price_axis)
+        #
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        if self._pix_map:
+            painter.drawPixmap(
+                0, 0, self.width(), self.height(),
+                self._pix_map,
+                0, 0, self._pix_map_width, self._pix_map_height
+            )
+        painter.end()
+
+################################################################################
+
+
+class TimestampAxisView(QtGui.QWidget):
+    """
+    #
+    """
+
+    def __init__(self):
+        super(TimestampAxisView, self).__init__()
+        #
+        # [en]
+        # Background and foreground:
+        #
+        # [zh]
+        # 背景色与前景色
+        self_palette = QtGui.QPalette()
+        self_palette.setColor(
+            QtGui.QPalette.Background, QtGui.QColor(0, 0, 0)
+        )
+        self_palette.setColor(
+            QtGui.QPalette.Foreground, QtGui.QColor(255, 0, 0)
+        )
+        self.setPalette(self_palette)
+        #
+        self._pix_map = QtGui.QPixmap(self.size())
+        self._pix_map.fill(self, 0, 0)
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        painter.drawPixmap(
+            0, 0, self.width(), self.height(),
+            self._pix_map,
+            0, 0, self._pix_map.width(), self._pix_map.height()
+        )
+        painter.end()
+
+    def set_timestamps(self, timestamps):
+        # TODO: codes;
+        self._pix_map = QtGui.QPixmap(self.size())
+        self._pix_map.fill(self, 0, 0)
+        #
+        size = len(timestamps)
+        x_step = 1.0 * self.width() / size
+        #
+        painter = QtGui.QPainter(self._pix_map)
+        painter.initFrom(self)
+        timestamp_axis = QtCore.QLineF(
+            x_step / 2.0, self.height() - 40,
+            self.width() - x_step / 2.0, self.height() - 40
+        )
+        painter.drawLine(timestamp_axis)
+        #
+        for i in range(size + 1):
+            painter.drawLine(
+                x_step / 2.0 + x_step * i,
+                self.height() - 40,
+                x_step / 2.0 + x_step * i,
+                self.height() - 40 + 5,
+            )
+        self.update()
 
 ################################################################################
 
@@ -404,6 +538,7 @@ class KLineView(QtGui.QWidget):
         self._CONST_SETTINGS['y_range'] = 4000
         self._CONST_SETTINGS['margin_top'] = 20
         self._CONST_SETTINGS['margin_bottom'] = 200
+        #
         self._CONST_SETTINGS['x_step'] = 30
         self._CONST_SETTINGS['rect_width'] = 24
         self._CONST_SETTINGS['max_height'] = \
@@ -495,7 +630,9 @@ class KLineView(QtGui.QWidget):
             self._curr_x_step = x_step
             self._curr_rect_width = rect_width
         elif self._curr_span <= 6000:
-            x_step = math.ceil(self._CONST_SETTINGS['max_width'] / self._curr_span)
+            x_step = math.ceil(
+                self._CONST_SETTINGS['max_width'] / self._curr_span
+            )
             rect_width = math.ceil(x_step * 0.8)
             temp_width = self._CONST_SETTINGS['max_width']
             #
@@ -657,6 +794,9 @@ class KLineView(QtGui.QWidget):
     def get_data(self):
         return self._data
 
+    def get_curr_data(self):
+        return self._curr_data
+
     def update_k_line(self, data_frame):
         data = data_frame.get_data_frame()
         the_last_datum = data.ix[0]
@@ -770,6 +910,16 @@ class KLineView(QtGui.QWidget):
         """
         return self._data_end_idx
 
+    def get_the_min(self):
+        """
+        """
+        return self._the_min
+
+    def get_the_max(self):
+        """
+        """
+        return self._the_max
+
 ################################################################################
 
 
@@ -780,32 +930,46 @@ class ContainerView(QtGui.QMainWindow):
         #
         main_splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
         left_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        center_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         right_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         #
         main_splitter.addWidget(left_splitter)
+        main_splitter.addWidget(center_splitter)
         main_splitter.addWidget(right_splitter)
         main_splitter.setSizes(
-            [self.width()*0.8, self.width()*0.2]
+            [self.width()*0.15, self.width()*0.7, self.width()*0.15]
         )
         #
-        k_line_view = KLineView()
-        k_line_slider = QxtSpanSlider()
-        left_splitter.addWidget(k_line_view)
-        left_splitter.addWidget(k_line_slider)
+        price_axis_view = PriceAxisView()
+        empty_widget = QtGui.QWidget()
+        left_splitter.addWidget(price_axis_view)
+        left_splitter.addWidget(empty_widget)
         left_splitter.setSizes(
-            [self.height()*0.9, self.height()*0.1]
-        )
-        #k_line_slider.setHandleMovementMode(2)  # No crossing, no overlapping;
-        k_line_slider.setEnabled(False)
-        #
-        info_area = InfoArea()
-        k_line_size_setter = KLineSizeSetter()
-        right_splitter.addWidget(info_area)
-        right_splitter.addWidget(k_line_size_setter)
-        right_splitter.setSizes(
             [self.height()*0.8, self.height()*0.2]
         )
-        k_line_size_setter.setEnabled(False)
+        price_axis_view.setEnabled(False)
+        #
+        k_line_view = KLineView()
+        timestamp_view = TimestampAxisView()
+        k_line_slider = QxtSpanSlider()
+        center_splitter.addWidget(k_line_view)
+        center_splitter.addWidget(timestamp_view)
+        center_splitter.addWidget(k_line_slider)
+        center_splitter.setSizes(
+            [self.height()*0.8, self.height()*0.15, self.height()*0.05]
+        )
+        #k_line_slider.setHandleMovementMode(2)  # No crossing, no overlapping;
+        timestamp_view.setEnabled(False)
+        k_line_slider.setEnabled(False)
+        #
+        info_view = InfoView()
+        index_range_selector = IndexRangeSelector()
+        right_splitter.addWidget(info_view)
+        right_splitter.addWidget(index_range_selector)
+        right_splitter.setSizes(
+            [self.height()*0.85, self.height()*0.15]
+        )
+        index_range_selector.setEnabled(False)
         #
         self.setCentralWidget(main_splitter)
         #
@@ -813,27 +977,34 @@ class ContainerView(QtGui.QMainWindow):
         self._k_line = k_line_view
         self._max_offset = 0
         self._k_line_slider = k_line_slider
-        self._k_line_size_setter = k_line_size_setter
+        self._index_range_selector = index_range_selector
+        self._price_axis_view = price_axis_view
+        self._timestamp_view = timestamp_view
         #
         # sliderReleased is better than valueChanged:
         #   - will not delay;
         self._item_moved = 0
         QtCore.QObject.connect(
             k_line_slider,
-            QtCore.SIGNAL("lowerPositionChanged(int)"), self.slide_lower_handle
+            QtCore.SIGNAL("lowerPositionChanged(int)"),
+            self.slide_lower_handle
         )
         QtCore.QObject.connect(
             k_line_slider,
-            QtCore.SIGNAL("upperPositionChanged(int)"), self.slide_upper_handle
+            QtCore.SIGNAL("upperPositionChanged(int)"),
+            self.slide_upper_handle
         )
         QtCore.QObject.connect(
             k_line_slider,
-            QtCore.SIGNAL("sliderReleased()"), self.change_span
+            QtCore.SIGNAL("sliderReleased()"),
+            self.change_span
         )
 
     def load_data(self, data_file):
         self._k_line.load_k_line(data_file)
         #
+        # [zh]
+        # 载入数据后，启用双节点滚动条；
         self._k_line_slider.setRange(
             self._k_line.get_data_start_idx(),
             self._k_line.get_data_end_idx()
@@ -843,6 +1014,19 @@ class ContainerView(QtGui.QMainWindow):
             self._k_line.get_curr_to_idx()
         )
         self._k_line_slider.setEnabled(True)
+        #
+        # [zh]
+        # 载入数据后，启用价格坐标轴；
+        self._price_axis_view.set_min_and_max_price(
+            self._k_line.get_the_min(),
+            self._k_line.get_the_max()
+        )
+        #
+        # [zh]
+        # 载入数据后，启用时间坐标轴；
+        self._timestamp_view.set_timestamps(
+            self._k_line.get_curr_data()
+        )
 
     def update_k_line(self, updated_datum):
         self._k_line.update_k_line(updated_datum)
@@ -892,6 +1076,11 @@ class ContainerView(QtGui.QMainWindow):
                     lower_value, upper_value
                 )
         self._k_line.set_span(lower_value, upper_value)
+        #
+        self._price_axis_view.set_min_and_max_price(
+            self._k_line.get_the_min(),
+            self._k_line.get_the_max()
+        )
 
     def show_average_line(self):
         self._k_line.show_average_line()
