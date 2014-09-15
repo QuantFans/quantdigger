@@ -24,59 +24,6 @@ from QuantTestData import AllDataForTest
 
 from QxtSpanSlider import QxtSpanSlider
 
-################################################################################
-
-
-class KLineSizeSetter(QtGui.QWidget):
-    """
-    """
-
-    def __init__(self, size_min=1, size_max=100, curr_value=1):
-        super(KLineSizeSetter, self).__init__()
-        #
-        main_grid_layout = QtGui.QGridLayout(self)
-        #
-        label_size = QtGui.QLabel(from_utf8("K-Line size: "))
-        spin_box_size = QtGui.QSpinBox()
-        #
-        main_grid_layout.addWidget(label_size, 0, 0, 1, 1)
-        main_grid_layout.addWidget(spin_box_size, 1, 0, 1, 1)
-        #
-        spin_box_size.setMinimum(size_min)
-        spin_box_size.setMaximum(size_max)
-        spin_box_size.setValue(curr_value)
-        #
-        self._spin_box_size = spin_box_size
-
-    def get_spin_box_size(self):
-        """
-        Getter for widget: self._spin_box_size;
-        """
-        return self._spin_box_size
-
-    def get_spin_box_size_value(self):
-        """
-        Getter for value of self._spin_box_size;
-        """
-        return self._spin_box_size.value()
-
-    def set_size_min(self, size_min):
-        """
-        Setter for minimum value of self._spin_box_size;
-        """
-        self._spin_box_size.setMinimum(size_min)
-
-    def set_size_max(self, size_max):
-        """
-        Setter for maximum value of self._spin_box_size;
-        """
-        self._spin_box_size.setMaximum(size_max)
-
-    def set_curr_value(self, curr_value):
-        """
-        Setter for value of self._spin_box_size;
-        """
-        self._spin_box_size.setValue(curr_value)
 
 ################################################################################
 # TODO: not enables for now;
@@ -192,176 +139,6 @@ class InfoView(QtGui.QWidget):
         painter.begin(self)
         painter.drawPixmap(0, 0, self.width(), self.height(), self.pix_map)
         painter.end()
-
-################################################################################
-
-
-class PriceAxisView(QtGui.QWidget):
-    """
-    """
-
-    def __init__(self):
-        super(PriceAxisView, self).__init__()
-        #
-        # [en]
-        # Background and foreground:
-        #
-        # [zh]
-        # 背景色与前景色
-        self_palette = QtGui.QPalette()
-        self_palette.setColor(
-            QtGui.QPalette.Background, QtGui.QColor(0, 0, 0)
-        )
-        self_palette.setColor(
-            QtGui.QPalette.Foreground, QtGui.QColor(255, 0, 0)
-        )
-        self.setPalette(self_palette)
-        #
-        self._the_min = 0.0
-        self._the_max = 0.0
-        #
-        self._pix_map_width = 80
-        self._pix_map_y_step_height = 100
-        self._pix_map_y_steps = 6
-        self._pix_map_margin_top = 3
-        self._pix_map_margin_bottom = 30
-        self._pix_map_height = \
-            self._pix_map_y_step_height * self._pix_map_y_steps \
-            + self._pix_map_margin_top \
-            + self._pix_map_margin_bottom
-        self._pix_map_margin_left = 15
-        self._pix_map_margin_right = 10
-        self._pix_map_indicator_width = 5
-        self._pix_map_text_rect_width = \
-            self._pix_map_width \
-            - self._pix_map_margin_left - self._pix_map_margin_right \
-            - self._pix_map_indicator_width - 5
-        self._pix_map_text_rect_height = 40
-        #
-        self._pix_map = QtGui.QPixmap(self.size())
-        self._pix_map.fill(self, 0, 0)
-
-    def set_min_and_max_price(self, the_min, the_max):
-        #
-        self._the_min = the_min
-        self._the_max = the_max
-        price_step = 1.0 * (the_max - the_min) / (self._pix_map_y_steps - 1)
-        #
-        self._pix_map = QtGui.QPixmap(
-            self._pix_map_width,
-            self._pix_map_height
-        )
-        self._pix_map.fill(self, 0, 0)
-        pix_map_painter = QtGui.QPainter(self._pix_map)
-        pix_map_painter.initFrom(self)
-        #
-        price_axis = QtCore.QLineF(
-            self._pix_map_width - self._pix_map_margin_right,
-            self._pix_map_margin_top,
-            self._pix_map_width - self._pix_map_margin_right,
-            self._pix_map_margin_top
-            + self._pix_map_y_steps * self._pix_map_y_step_height
-        )
-        for i in range(self._pix_map_y_steps + 1):
-            temp_line = QtCore.QLineF(
-                self._pix_map_width - self._pix_map_margin_right
-                - self._pix_map_indicator_width,
-                self._pix_map_margin_top + self._pix_map_y_step_height * i,
-                self._pix_map_width - self._pix_map_margin_right,
-                self._pix_map_margin_top + self._pix_map_y_step_height * i
-            )
-            pix_map_painter.drawLine(temp_line)
-            #
-            temp_rect = QtCore.QRectF(
-                self._pix_map_margin_left,
-                self._pix_map_margin_top/2.0 + self._pix_map_y_step_height * i,
-                self._pix_map_text_rect_width,
-                self._pix_map_text_rect_height
-            )
-            pix_map_painter.drawText(
-                temp_rect,
-                QtCore.Qt.AlignRight,
-                QtCore.QString(str(the_max - price_step * i))
-            )
-        #
-        pix_map_painter.drawLine(price_axis)
-        #
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        if self._pix_map:
-            painter.drawPixmap(
-                0, 0, self.width(), self.height(),
-                self._pix_map,
-                0, 0, self._pix_map_width, self._pix_map_height
-            )
-        painter.end()
-
-################################################################################
-
-
-class TimestampAxisView(QtGui.QWidget):
-    """
-    #
-    """
-
-    def __init__(self):
-        super(TimestampAxisView, self).__init__()
-        #
-        # [en]
-        # Background and foreground:
-        #
-        # [zh]
-        # 背景色与前景色
-        self_palette = QtGui.QPalette()
-        self_palette.setColor(
-            QtGui.QPalette.Background, QtGui.QColor(0, 0, 0)
-        )
-        self_palette.setColor(
-            QtGui.QPalette.Foreground, QtGui.QColor(255, 0, 0)
-        )
-        self.setPalette(self_palette)
-        #
-        self._pix_map = QtGui.QPixmap(self.size())
-        self._pix_map.fill(self, 0, 0)
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        painter.drawPixmap(
-            0, 0, self.width(), self.height(),
-            self._pix_map,
-            0, 0, self._pix_map.width(), self._pix_map.height()
-        )
-        painter.end()
-
-    def set_timestamps(self, timestamps):
-        # TODO: codes;
-        self._pix_map = QtGui.QPixmap(self.size())
-        self._pix_map.fill(self, 0, 0)
-        #
-        size = len(timestamps)
-        x_step = 1.0 * self.width() / size
-        #
-        painter = QtGui.QPainter(self._pix_map)
-        painter.initFrom(self)
-        timestamp_axis = QtCore.QLineF(
-            x_step / 2.0, self.height() - 40,
-            self.width() - x_step / 2.0, self.height() - 40
-        )
-        painter.drawLine(timestamp_axis)
-        #
-        for i in range(size + 1):
-            painter.drawLine(
-                x_step / 2.0 + x_step * i,
-                self.height() - 40,
-                x_step / 2.0 + x_step * i,
-                self.height() - 40 + 5,
-            )
-        self.update()
 
 ################################################################################
 
@@ -523,6 +300,10 @@ class KLineView(QtGui.QWidget):
     def __init__(self):
         super(KLineView, self).__init__()
         #
+        # TODO: size;
+        self.setMinimumWidth(800)
+        self.setMinimumHeight(480)
+        #
         # [zh]
         # 与所有数据相关的实例化变量
         self._data = None
@@ -555,11 +336,12 @@ class KLineView(QtGui.QWidget):
         self._CONST_SETTINGS = dict()
         self._CONST_SETTINGS['max_width'] = 30000
         self._CONST_SETTINGS['y_range'] = 4000
-        self._CONST_SETTINGS['margin_top'] = 20
-        self._CONST_SETTINGS['margin_bottom'] = 200
-        #self._CONST_SETTINGS['y_range'] = self.height() - 10 - 20
-        #self._CONST_SETTINGS['margin_top'] = 10
-        #self._CONST_SETTINGS['margin_bottom'] = 20
+        self._CONST_SETTINGS['margin_top'] = 10
+        self._CONST_SETTINGS['margin_bottom'] = 10
+        #
+        # TODO: new settings;
+        self._CONST_SETTINGS['price_pix_map_width'] = 160
+        self._CONST_SETTINGS['timestamp_pix_map_height'] = 80
         #
         #
         self._CONST_SETTINGS['x_step'] = 30
@@ -579,7 +361,11 @@ class KLineView(QtGui.QWidget):
         self._CONST_SETTINGS['min_x_step'] = 5
         self._CONST_SETTINGS['min_rect_width'] = 3
         #
+        # All maps;
         self._pix_map = None
+        self._timestamp_pix_map = None
+        self._price_pix_map = None
+        self._corner_pix_map = None
         #
         # [en]
         # Background and foreground:
@@ -602,16 +388,43 @@ class KLineView(QtGui.QWidget):
 
     def paintEvent(self, event):
         #
-        if self._is_average_line_shown:
-            self.draw_average_line()
-        #
         painter = QtGui.QPainter()
         painter.begin(self)
         #
         painter.drawPixmap(
-            0, 0, self.width(), self.height(),
+            0, 0,
+            self._CONST_SETTINGS['price_pix_map_width'],
+            self.height(),
+            self._price_pix_map,
+            0, 0,
+            self._price_pix_map.width(),
+            self._price_pix_map.height()
+        )
+        painter.drawPixmap(
+            self._CONST_SETTINGS['price_pix_map_width'],
+            0,
+            self.width()
+            - self._CONST_SETTINGS['price_pix_map_width'],
+            self.height()
+            - self._CONST_SETTINGS['timestamp_pix_map_height'],
             self._pix_map,
-            0, 0, self._pix_map.width(), self._pix_map.height()
+            0,
+            0,
+            self._pix_map.width(),
+            self._pix_map.height()
+        )
+        painter.drawPixmap(
+            self._CONST_SETTINGS['price_pix_map_width'],
+            self.height()
+            - self._CONST_SETTINGS['timestamp_pix_map_height'],
+            self.width()
+            - self._CONST_SETTINGS['price_pix_map_width'],
+            self._CONST_SETTINGS['timestamp_pix_map_height'],
+            self._timestamp_pix_map,
+            0,
+            0,
+            self._timestamp_pix_map.width(),
+            self._timestamp_pix_map.height()
         )
         #
         if self._click_status == 1:
@@ -619,24 +432,80 @@ class KLineView(QtGui.QWidget):
             #
             cursor_pos = QtGui.QCursor.pos()
             cursor_pos = self.mapFromGlobal(cursor_pos)
-            #print(cursor_pos)
             cursor_x = cursor_pos.x()
             cursor_y = cursor_pos.y()
-            painter.drawLine(cursor_x, 0, cursor_x, self.height())
-            painter.drawLine(0, cursor_y, self.width(), cursor_y)
+            if self._CONST_SETTINGS['price_pix_map_width'] <= \
+                    cursor_x <= self.width() \
+                    and 0 <= cursor_y <= \
+                    self.height() - \
+                    self._CONST_SETTINGS['timestamp_pix_map_height']:
+                painter.drawLine(cursor_x, 0, cursor_x, self.height())
+                painter.drawLine(0, cursor_y, self.width(), cursor_y)
         elif self._click_status == 0:
             painter.eraseRect(0, 0, self.width(), self.height())
             painter.drawPixmap(
-                0, 0, self.width(), self.height(),
+                0, 0,
+                self._CONST_SETTINGS['price_pix_map_width'],
+                self.height(),
+                self._price_pix_map,
+                0, 0,
+                self._price_pix_map.width(),
+                self._price_pix_map.height()
+            )
+            painter.drawPixmap(
+                self._CONST_SETTINGS['price_pix_map_width'],
+                0,
+                self.width()
+                - self._CONST_SETTINGS['price_pix_map_width'],
+                self.height()
+                - self._CONST_SETTINGS['timestamp_pix_map_height'],
                 self._pix_map,
-                0, 0, self._pix_map.width(), self._pix_map.height()
+                0,
+                0,
+                self._pix_map.width(),
+                self._pix_map.height()
+            )
+            painter.drawPixmap(
+                self._CONST_SETTINGS['price_pix_map_width'],
+                self.height()
+                - self._CONST_SETTINGS['timestamp_pix_map_height'],
+                self.width()
+                - self._CONST_SETTINGS['price_pix_map_width'],
+                self._CONST_SETTINGS['timestamp_pix_map_height'],
+                self._timestamp_pix_map,
+                0,
+                0,
+                self._timestamp_pix_map.width(),
+                self._timestamp_pix_map.height()
             )
         #
         painter.end()
 
     def init_pix_map(self):
-        self._pix_map = QtGui.QPixmap(self.size())
+        #
+        # [zh]
+        # k线区域；
+        self._pix_map = QtGui.QPixmap(
+            self.width() - self._CONST_SETTINGS['price_pix_map_width'],
+            self.height() - self._CONST_SETTINGS['timestamp_pix_map_height']
+        )
         self._pix_map.load("_no_data.png")
+        #
+        # [zh]
+        # 横坐标轴，i.e.时间戳坐标轴；
+        self._timestamp_pix_map = QtGui.QPixmap(
+            self.width() - self._CONST_SETTINGS['price_pix_map_width'],
+            self._CONST_SETTINGS['timestamp_pix_map_height']
+        )
+        self._timestamp_pix_map.fill(self, 0, 0)
+        #
+        # [zh]
+        # 纵坐标轴，i.e.价格坐标轴；
+        self._price_pix_map = QtGui.QPixmap(
+            self._CONST_SETTINGS['price_pix_map_width'],
+            self.height()
+        )
+        self._price_pix_map.fill(self, 0, 0)
 
     def load_k_line(self, data_file):
         self._data = get_k_line_data_by_path(data_file)[:2000]
@@ -660,34 +529,26 @@ class KLineView(QtGui.QWidget):
             self._curr_to_idx = self._data_size - 1
             #
         #
-        self.draw_data_on_pix_map()
+        self.draw_all_pix_maps()
         self.update()
 
     def draw_data_on_pix_map(self):
-        temp_width = 0.0
         #
-        x_step = self._CONST_SETTINGS['x_step']
-        rect_width = self._CONST_SETTINGS['rect_width']
-        y_range = self._CONST_SETTINGS['y_range']
+        pix_map_width = \
+            self.width() - self._CONST_SETTINGS['price_pix_map_width']
+        pix_map_height = \
+            self.height() - self._CONST_SETTINGS['timestamp_pix_map_height']
+        #
         margin_top = self._CONST_SETTINGS['margin_top']
+        x_step = 1.0 * pix_map_width / self._curr_span
+        rect_width = 0.0
+        if x_step >= 3:
+            rect_width = x_step * 0.8
+        y_range = pix_map_height - margin_top
         #
-        if self._curr_span <= 1000:
-            temp_width = self._curr_span * x_step
-            #
-            self._curr_x_step = x_step
-            self._curr_rect_width = rect_width
-        elif self._curr_span <= 6000:
-            x_step = math.ceil(
-                self._CONST_SETTINGS['max_width'] / self._curr_span
-            )
-            rect_width = math.ceil(x_step * 0.8)
-            temp_width = self._CONST_SETTINGS['max_width']
-            #
-            self._curr_x_step = x_step
-            self._curr_rect_width = rect_width
         self._curr_data = self._data[self._curr_from_idx: self._curr_to_idx + 1]
         self._pix_map = QtGui.QPixmap(
-            temp_width, self._CONST_SETTINGS['max_height']
+            pix_map_width, pix_map_height
         )
         self._pix_map.fill(self, 0, 0)
         pix_map_painter = QtGui.QPainter(self._pix_map)
@@ -703,8 +564,6 @@ class KLineView(QtGui.QWidget):
         k_line_rectangles_white = []
         k_line_lines_red = []
         k_line_lines_white = []
-        k_line_rect_like_lines_red = []
-        k_line_rect_like_lines_white = []
         #
         for i in list(xrange(self._curr_span)):
             #
@@ -723,9 +582,6 @@ class KLineView(QtGui.QWidget):
             # Low price:
             low_price = curr_data["low"]
             #
-            # Mid price:
-            mid_price = (open_price + close_price) / 2.0
-            #
             x_start = \
                 (x_step - rect_width) / 2.0 + x_step * i
             y_start = \
@@ -739,20 +595,19 @@ class KLineView(QtGui.QWidget):
                 / (the_max - the_min) * y_range
             #
             curr_rect = QtCore.QRectF()
-            curr_rect_like_line = RectLikeLine()
+            curr_rect_like_line = QtCore.QLineF()
             #
             # High enough: rect
-            if y_height >= 2:
+            if y_height >= 1:
                 curr_rect.setRect(
                     x_start, y_start, rect_width, y_height
                 )
             #
             # Otherwise: line instead of rect
             else:
-                curr_rect_like_line.set_line_with_pen_width(
+                curr_rect_like_line.setLine(
                     x_start, y_start,
-                    x_start + rect_width, y_start,
-                    y_height
+                    x_start + rect_width, y_start
                 )
             #
             # The high & low price line:
@@ -770,14 +625,14 @@ class KLineView(QtGui.QWidget):
                 pix_map_painter.fillRect(curr_rect, QtCore.Qt.red)
                 k_line_rectangles_red.append(curr_rect)
                 k_line_lines_red.append(curr_line)
-                k_line_rect_like_lines_red.append(curr_rect_like_line)
+                k_line_lines_red.append(curr_rect_like_line)
             #
             # White:
             else:
                 pix_map_painter.fillRect(curr_rect, QtCore.Qt.white)
                 k_line_rectangles_white.append(curr_rect)
                 k_line_lines_white.append(curr_line)
-                k_line_rect_like_lines_white.append(curr_rect_like_line)
+                k_line_lines_white.append(curr_rect_like_line)
             #
         #
         # Red pen & white pen;
@@ -789,29 +644,101 @@ class KLineView(QtGui.QWidget):
         pix_map_painter.setPen(pen_white)
         pix_map_painter.drawRects(k_line_rectangles_white)
         pix_map_painter.drawLines(k_line_lines_white)
+
+    def draw_timestamp_pix_map(self):
         #
-        pen_red_for_rect_like_line = QtGui.QPen(QtCore.Qt.red)
-        for each_rect_like_line in k_line_rect_like_lines_red:
-            pen_red_for_rect_like_line.setWidth(
-                each_rect_like_line.get_pen_width()
-            )
-            pix_map_painter.setPen(pen_red_for_rect_like_line)
+        timestamp_pix_map_width = \
+            self.width() - self._CONST_SETTINGS['price_pix_map_width']
+        timestamp_pix_map_height = \
+            self._CONST_SETTINGS['timestamp_pix_map_height']
+        #
+        self._timestamp_pix_map = QtGui.QPixmap(
+            timestamp_pix_map_width,
+            timestamp_pix_map_height
+        )
+        self._timestamp_pix_map.fill(self, 0, 0)
+        pix_map_painter = QtGui.QPainter(self._timestamp_pix_map)
+        pix_map_painter.initFrom(self)
+        #
+        x_step = 1.0 * timestamp_pix_map_width / self._curr_span
+        #
+        timestamp_axis = QtCore.QLineF(
+            x_step / 2.0,
+            timestamp_pix_map_height * 0.5,
+            timestamp_pix_map_width - x_step / 2.0,
+            timestamp_pix_map_height * 0.5
+        )
+        pix_map_painter.drawLine(timestamp_axis)
+        #
+        for i in range(self._curr_span):
             pix_map_painter.drawLine(
-                each_rect_like_line.get_line()
-            )
-        pen_white_for_rect_like_line = QtGui.QPen(QtCore.Qt.white)
-        for each_rect_like_line in k_line_rect_like_lines_white:
-            pen_white_for_rect_like_line.setWidth(
-                each_rect_like_line.get_pen_width()
-            )
-            pix_map_painter.setPen(pen_white_for_rect_like_line)
-            pix_map_painter.drawLine(
-                each_rect_like_line.get_line()
+                x_step / 2.0 + x_step * i,
+                timestamp_pix_map_height * 0.5,
+                x_step / 2.0 + x_step * i,
+                timestamp_pix_map_height * 0.5 + 5,
             )
         #
-        # TODO: test;
-        print(self.size())
-        print(self._pix_map.size())
+
+    def draw_price_pix_map(self):
+        #
+        price_pix_map_width = self._CONST_SETTINGS['price_pix_map_width']
+        price_pix_map_height = self.height()
+        #
+        margin_top = self._CONST_SETTINGS['margin_top']
+        y_range = \
+            self.height() \
+            - self._CONST_SETTINGS['timestamp_pix_map_height'] \
+            - margin_top
+        y_steps = 3
+        #
+        the_min = self._the_min
+        the_max = self._the_max
+        price_step = 1.0 * (the_max - the_min) / y_steps
+        #
+        self._price_pix_map = QtGui.QPixmap(
+            price_pix_map_width,
+            price_pix_map_height
+        )
+        self._price_pix_map.fill(self, 0, 0)
+        pix_map_painter = QtGui.QPainter(self._price_pix_map)
+        pix_map_painter.initFrom(self)
+        #
+        price_axis = QtCore.QLineF(
+            price_pix_map_width * 0.9,
+            margin_top,
+            price_pix_map_width * 0.9,
+            price_pix_map_height
+            - self._CONST_SETTINGS['timestamp_pix_map_height']
+        )
+        pix_map_painter.drawLine(price_axis)
+        #
+        for i in range(y_steps + 1):
+            pix_map_painter.drawLine(
+                price_pix_map_width * 0.9,
+                margin_top + 1.0 * y_range / y_steps * i,
+                price_pix_map_width * 0.9 - 5,
+                margin_top + 1.0 * y_range / y_steps * i
+            )
+            text_rect = QtCore.QRectF(
+                0,
+                margin_top * 0.5 + 1.0 * y_range / y_steps * i,
+                price_pix_map_width * 0.9 - 10,
+                1.0 * y_range / y_steps * 0.4
+            )
+            pix_map_painter.drawText(
+                text_rect,
+                QtCore.Qt.AlignRight,
+                QtCore.QString(str(the_max - price_step*i))
+            )
+        #
+
+    def draw_all_pix_maps(self):
+        self.draw_data_on_pix_map()
+        self.draw_timestamp_pix_map()
+        self.draw_price_pix_map()
+        #
+        if self._is_average_line_shown:
+            self.draw_average_line()
 
     def update_k_line(self, data_frame):
         data = data_frame.get_data_frame()
@@ -821,7 +748,7 @@ class KLineView(QtGui.QWidget):
         self._curr_from_idx = self._data_end_idx - self._curr_span + 1
         self._curr_to_idx = self._data_end_idx
         #
-        self.draw_data_on_pix_map()
+        self.draw_all_pix_maps()
         self.update()
 
     def append_k_line(self, data_frame):
@@ -834,7 +761,7 @@ class KLineView(QtGui.QWidget):
         self._curr_from_idx = self._data_end_idx - self._curr_span + 1
         self._curr_to_idx = self._data_end_idx
         #
-        self.draw_data_on_pix_map()
+        self.draw_all_pix_maps()
         self.update()
 
     def set_span(self, from_idx, to_idx):
@@ -842,7 +769,7 @@ class KLineView(QtGui.QWidget):
         self._curr_to_idx = to_idx
         self._curr_span = self._curr_to_idx - self._curr_from_idx + 1
         #
-        self.draw_data_on_pix_map()
+        self.draw_all_pix_maps()
         self.update()
         #
         self.emit(QtCore.SIGNAL("kLineSpanChanged()"))
@@ -858,10 +785,16 @@ class KLineView(QtGui.QWidget):
         pix_map_painter = QtGui.QPainter(self._pix_map)
         pix_map_painter.initFrom(self)
         #
-        y_range = self._CONST_SETTINGS['y_range']
+        #
+        pix_map_width = \
+            self.width() - self._CONST_SETTINGS['price_pix_map_width']
+        pix_map_height = \
+            self.height() - self._CONST_SETTINGS['timestamp_pix_map_height']
+        #
         margin_top = self._CONST_SETTINGS['margin_top']
-        x_step = self._curr_x_step
-        rect_width = self._curr_rect_width
+        x_step = 1.0 * pix_map_width / self._curr_span
+        y_range = pix_map_height - margin_top
+        #
         points = list()
         for i in range(self._curr_from_idx, self._curr_to_idx + 1):
             curr_entry = self._data.ix[i]
@@ -879,12 +812,9 @@ class KLineView(QtGui.QWidget):
                 )
             )
         pen_yellow = QtGui.QPen(QtCore.Qt.yellow)
-        pen_yellow.setWidth(2)
+        pen_yellow.setWidth(1)
         pix_map_painter.setPen(pen_yellow)
-        # TODO: could draw, but pen width is not fit???
-        #pix_map_painter.drawPolyline(*points)
-        for i in range(len(points) - 1):
-            pix_map_painter.drawLine(QtCore.QLineF(points[i], points[i+1]))
+        pix_map_painter.drawPolyline(*points)
 
     def show_average_line(self):
         #
@@ -892,6 +822,7 @@ class KLineView(QtGui.QWidget):
         #
         self._is_average_line_shown = True  # This could be use to undo drawing;
         #
+        self.draw_average_line()
         self.update()
 
     def hide_average_line(self):
@@ -899,13 +830,15 @@ class KLineView(QtGui.QWidget):
         print(">>> Hide average line;")
         #
         self._is_average_line_shown = False
-        self.draw_data_on_pix_map()
         #
+        self.draw_data_on_pix_map()
         self.update()
 
     def mousePressEvent(self, event):
         if not self._is_data_loaded:
-            return  # Nothing happened because of no data loaded
+            return  # Nothing happened because of no data loaded;
+        if not event.button() == QtCore.Qt.LeftButton:
+            return  # Nothing happened;
         #
         print(">>> Mouse pressed;")
         self._curr_cursor_pos = event.pos()
@@ -916,6 +849,8 @@ class KLineView(QtGui.QWidget):
     def mouseReleaseEvent(self, event):
         if not self._is_data_loaded:
             return  # Nothing happened because of no data loaded
+        if not event.button() == QtCore.Qt.LeftButton:
+            return  # Nothing happened;
         #
         print(">>> Mouse released;")
         #
@@ -1058,37 +993,23 @@ class ContainerView(QtGui.QMainWindow):
         super(ContainerView, self).__init__()
         #
         main_splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        left_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         center_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         right_splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         #
-        main_splitter.addWidget(left_splitter)
         main_splitter.addWidget(center_splitter)
         main_splitter.addWidget(right_splitter)
         main_splitter.setSizes(
-            [self.width()*0.15, self.width()*0.7, self.width()*0.15]
+            [800, 160]
         )
-        #
-        price_axis_view = PriceAxisView()
-        empty_widget = QtGui.QWidget()
-        left_splitter.addWidget(price_axis_view)
-        left_splitter.addWidget(empty_widget)
-        left_splitter.setSizes(
-            [self.height()*0.8, self.height()*0.2]
-        )
-        price_axis_view.setEnabled(False)
         #
         k_line_view = KLineView()
-        timestamp_view = TimestampAxisView()
         k_line_slider = QxtSpanSlider()
         center_splitter.addWidget(k_line_view)
-        center_splitter.addWidget(timestamp_view)
         center_splitter.addWidget(k_line_slider)
         center_splitter.setSizes(
-            [self.height()*0.8, self.height()*0.15, self.height()*0.05]
+            [480, 20]
         )
         #k_line_slider.setHandleMovementMode(2)  # No crossing, no overlapping;
-        timestamp_view.setEnabled(False)
         k_line_slider.setEnabled(False)
         #
         info_view = InfoView()
@@ -1096,7 +1017,7 @@ class ContainerView(QtGui.QMainWindow):
         right_splitter.addWidget(info_view)
         right_splitter.addWidget(index_range_selector)
         right_splitter.setSizes(
-            [self.height()*0.85, self.height()*0.15]
+            [400, 100]
         )
         index_range_selector.setEnabled(False)
         #
@@ -1107,8 +1028,6 @@ class ContainerView(QtGui.QMainWindow):
         self._max_offset = 0
         self._k_line_slider = k_line_slider
         self._index_range_selector = index_range_selector
-        self._price_axis_view = price_axis_view
-        self._timestamp_view = timestamp_view
         #
         # sliderReleased is better than valueChanged:
         #   - will not delay;
@@ -1175,19 +1094,6 @@ class ContainerView(QtGui.QMainWindow):
         )
         self._k_line_slider.setEnabled(True)
         #
-        # [zh]
-        # 载入数据后，启用价格坐标轴；
-        self._price_axis_view.set_min_and_max_price(
-            self._k_line.get_the_min(),
-            self._k_line.get_the_max()
-        )
-        #
-        # [zh]
-        # 载入数据后，启用时间坐标轴；
-        self._timestamp_view.set_timestamps(
-            self._k_line.get_curr_data()
-        )
-        #
         self._index_range_selector.set_ranges(
             self._k_line.get_data_start_idx(),
             self._k_line.get_data_end_idx()
@@ -1201,23 +1107,11 @@ class ContainerView(QtGui.QMainWindow):
     def update_k_line(self, updated_datum):
         self._k_line.update_k_line(updated_datum)
         #
-        '''
-        self._k_line_slider.setSpan(
-            self._k_line.get_curr_from_idx(),
-            self._k_line.get_curr_to_idx()
-        )
-        '''
         self.emit(QtCore.SIGNAL("updateKLine()"))
 
     def append_k_line(self, data_frame):
         self._k_line.append_k_line(data_frame)
         #
-        '''
-        self._k_line_slider.setSpan(
-            self._k_line.get_curr_from_idx(),
-            self._k_line.get_curr_to_idx()
-        )
-        '''
         self.emit(QtCore.SIGNAL("appendKLine()"))
 
     def slide_lower_handle(self, value):
@@ -1256,15 +1150,6 @@ class ContainerView(QtGui.QMainWindow):
         self._k_line_slider.setSpan(
             self._k_line.get_curr_from_idx(),
             self._k_line.get_curr_to_idx()
-        )
-        #
-        self._price_axis_view.set_min_and_max_price(
-            self._k_line.get_the_min(),
-            self._k_line.get_the_max()
-        )
-        #
-        self._timestamp_view.set_timestamps(
-            self._k_line.get_curr_data()
         )
         #
         self._index_range_selector.set_ranges(
@@ -1354,10 +1239,6 @@ class MainForm(QtGui.QWidget):
         self.setWindowTitle(
             translate("Form", "TE-K-Line", None)
         )
-        #
-        # Size of MainForm:
-        self.setMinimumWidth(800)
-        self.setMinimumHeight(600)
         #
         # Layout for MainForm:
         main_form_grid_layout = QtGui.QGridLayout(self)

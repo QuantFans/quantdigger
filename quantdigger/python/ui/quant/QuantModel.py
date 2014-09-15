@@ -21,7 +21,7 @@ class RectLikeLine(object):
         :param y2
         :param pen_width
         """
-        self._line.setLine(x1, y1 - pen_width/2.0, x2, y2 - pen_width/2.0)
+        self._line.setLine(x1, y1, x2, y2)
 
     def get_line(self):
         """
