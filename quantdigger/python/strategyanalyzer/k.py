@@ -16,6 +16,7 @@ xslider = plt.axes([0.1, 0.1, 0.8, 0.03])
 
 #price_data = csv2frame(os.getcwd() + "\\data\\stock_data\\_IF000.csv")
 price_data = csv2frame(os.getcwd() + "/data/stock_data/_IF000.csv")
+print os.getcwd() + "/data/stock_data/_IF000.csv"
 print "plotting..." 
 observer_slider = Slider(xslider, "slider", '', 0, len(price_data), len(price_data), len(price_data)/100, "%d")
 kwindow = CandleWindow(axk, "kwindow", price_data, 100, 50)
