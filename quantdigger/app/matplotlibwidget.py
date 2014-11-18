@@ -2,6 +2,9 @@ __author__ = 'Wenwei Huang'
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from matplotlib.colors import colorConverter
+from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.finance import *
 from PyQt4 import QtCore
 from utils import fromUtf8
 import numpy as np
@@ -96,14 +99,52 @@ class PointMarker(object):
     def cleanup(self):
         self.marker.remove()
 
+class VolumeBars(object):
+    def __init__(self, ax, dates, opens, closes, volumes):
+        self.dates = dates
+        self.opens = opens
+        self.closes = closes
+        self.volumes = [float(v)/1e6 for v in volumes]
+        self.ax = ax
+
+    def add_bars(self, colorup='g', colordown='r', alpha=0.5, width=1):
+        r,g,b = colorConverter.to_rgb(colorup)
+        colorup = r,g,b,alpha
+        r,g,b = colorConverter.to_rgb(colordown)
+        colordown = r,g,b,alpha
+        colord = {True: colorup, False: colordown}
+        colors = [colord[open<close] for open, close in zip(self.opens, self.closes)]
+
+        delta = width/2.0
+        bars = [((x-delta, 0), (x-delta, y), (x+delta, y), (x+delta, 0)) 
+            for x, y in zip(self.dates, self.volumes)]
+
+        barCollection = PolyCollection(bars, facecolors = colors)
+
+        self.ax.step(self.dates, self.volumes)
+        #self.ax.add_collection(barCollection)
+        #self.ax.bar(self.dates, self.volumes)
+        #self.ax.plot(self.dates, self.volumes)
+
+        xmin, xmax = self.ax.get_xlim()
+        ys = [y for x, y in zip(self.dates, self.volumes) if xmin<=x<=xmax]
+        if ys:
+            self.ax.set_ylim([0, max(ys)*10])
+
+        for tick in self.ax.get_yticklabels():
+            tick.set_visible(False)
+
+
 class MatplotlibWidget(FigureCanvasQTAgg):
     def __init__(self, parent=None):
         self.fig = Figure()
-        self.axes = self.fig.add_subplot(111)
+        self.volume_axes = self.fig.add_subplot(111)
+        self.axes = self.volume_axes.twinx()
         super(MatplotlibWidget, self).__init__(self.fig)
         self.setParent(parent)
         self.cross_cursor = None
         self.marker = None
+        self.volumn_bars = None
         self.data = None
         self.main_x = None
         self.main_y = None
@@ -125,23 +166,25 @@ class MatplotlibWidget(FigureCanvasQTAgg):
     def set_data(self, data):
         if data is None: return
         self.data = data
-        date = self.data['datetime'].values if 'datetime' in self.data.columns else None
-        open = self.data['open'].values if 'open' in self.data.columns else None
-        high = self.data['high'].values if 'high' in self.data.columns else None
-        low = self.data['low'].values if 'low' in self.data.columns else None
-        close = self.data['close'].values if 'close' in self.data.columns else None
-        vol = self.data['volume'].values if 'volume' in self.data.columns else None
-        self.main_x = date
-        self.main_y = close
+        dates = self.data['datetime'].values if 'datetime' in self.data.columns else None
+        opens = self.data['open'].values if 'open' in self.data.columns else None
+        highs = self.data['high'].values if 'high' in self.data.columns else None
+        lows = self.data['low'].values if 'low' in self.data.columns else None
+        closes = self.data['close'].values if 'close' in self.data.columns else None
+        volumes = self.data['volume'].values if 'volume' in self.data.columns else None
+        self.main_x = dates
+        self.main_y = closes
 
         if self.cross_cursor:
             self.cross_cursor.cleanup()
         if self.marker:
             self.marker.cleanup()
         self.cross_cursor = SnaptoCursor(self.axes)
-        self.cross_cursor.set_data(date, open, high, low, close, vol)
+        self.cross_cursor.set_data(dates, opens, highs, lows, closes, volumes)
         self.marker = PointMarker(self.axes)
-        self.marker.set_data(date, close)
+        self.marker.set_data(dates, closes)
+
+        self.volumn_bars = VolumeBars(self.volume_axes, dates, opens, closes, volumes).add_bars()
 
         xmin, xmax = min(self.main_x), max(self.main_x)
         self.axes.set_xlim([xmin, xmax])

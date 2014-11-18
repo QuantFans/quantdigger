@@ -2,6 +2,8 @@ __author__ = 'Wenwei Huang'
 
 import os
 import logging
+import glob
+import imp
 from datetime import datetime
 
 import pandas as pd
@@ -13,8 +15,10 @@ import matplotlib.dates as mdates
 from functools import partial
 
 from config import data_path
+from config import strategy_path
 from utils import fromUtf8, WindowSize
 from mainwindow_ui import Ui_MainWindow
+from strategy_runner import StrategyRunner
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +31,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui_controller.matplotlibWidget.connect()
         self.init_style_menu()
         self.init_indicator_menu()
+        self.init_strategy_panel()
 
     def init_style_menu(self):
         self.ui_controller.styleMenu = QtGui.QMenu(self)
@@ -52,10 +57,21 @@ class MainWindow(QtGui.QMainWindow):
         self.ui_controller.indicatorMenu.addAction(self.ui_controller.indicator_RSIAction)
         self.ui_controller.indicatorToolButton.setMenu(self.ui_controller.indicatorMenu)
 
+    def init_strategy_panel(self):
+        strategy_files = sorted(glob.glob('%s/*.py' % strategy_path))
+        for file in strategy_files:
+            base = os.path.splitext(os.path.basename(file))[0]
+            item = QtGui.QListWidgetItem(base, self.ui_controller.strategyListWidget)
+            item.setData(QtCore.Qt.UserRole, QtCore.QVariant(file))
+            self.ui_controller.strategyListWidget.addItem(item)
+        self.ui_controller.strategyListWidget.customContextMenuRequested.connect(self.showMenu)
+
     def connect(self):
         self.ui_controller.loadQuoteButton.clicked.connect(self.on_loadQuoteClicked)
         for toolButton in self.ui_controller.buttonGroup.buttons():
             toolButton.clicked.connect(partial(self.on_toolButtonClicked, toolButton))
+        self.ui_controller.actionRunStrategy.triggered.connect(self.on_runStrategy)
+        self.ui_controller.actionEditStrategy.triggered.connect(self.on_editStrategy)
 
     def on_loadQuoteClicked(self):
         logger.info('load quote')
@@ -99,3 +115,33 @@ class MainWindow(QtGui.QMainWindow):
         size = button_values[name]
         self.ui_controller.matplotlibWidget.setxlim(size)
 
+    def showMenu(self, position):
+        indexes = self.ui_controller.strategyListWidget.selectedIndexes()
+        if len(indexes) > 0:
+            menu = QtGui.QMenu()
+            menu.addAction(self.ui_controller.actionRunStrategy)
+            menu.addAction(self.ui_controller.actionEditStrategy)
+            menu.exec_(self.ui_controller.strategyListWidget.viewport().mapToGlobal(position))
+
+    def on_runStrategy(self, check):
+        indexes = self.ui_controller.strategyListWidget.selectedIndexes()
+        if len(indexes) > 0:
+            logger.info('Run strategy')
+            index = indexes[0].row()
+            item = self.ui_controller.strategyListWidget.item(index)
+            strategy_file = str(item.data(QtCore.Qt.UserRole).toPyObject())
+            strategy = imp.load_source('strategy', strategy_file)
+            if hasattr(strategy, 'initialize') and hasattr(strategy, 'run'):
+                runner = StrategyRunner(initialize=strategy.initialize, run=strategy.run)
+                runner.run('Data')
+            else:
+                logger.error("%s is not a valid strategy" % strategy_file)
+
+    def on_editStrategy(self, check):
+        indexes = self.ui_controller.strategyListWidget.selectedIndexes()
+        if len(indexes) > 0:
+            logger.info('Edit strategy')
+            index = indexes[0].row()
+            item = self.ui_controller.strategyListWidget.item(index)
+            strategy_file = item.data(QtCore.Qt.UserRole).toPyObject()
+            print strategy_file

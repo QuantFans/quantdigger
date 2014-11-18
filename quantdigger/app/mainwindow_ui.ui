@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>883</width>
-    <height>600</height>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -233,7 +233,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <zorder></zorder>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
          </widget>
         </item>
        </layout>
@@ -260,16 +262,16 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="loadStrategyButton">
-         <property name="text">
-          <string>Load Strategy</string>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+        <widget class="QListWidget" name="strategyListWidget">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
          </property>
         </widget>
        </item>
@@ -360,13 +362,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="runBacktestButton">
-         <property name="text">
-          <string>Run Backtest</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -390,7 +385,7 @@
      <x>0</x>
      <y>0</y>
      <width>883</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_View">
@@ -449,6 +444,24 @@
     <string>Preferences...</string>
    </property>
   </action>
+  <action name="actionRunStrategy">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/run.png</normaloff>:/icons/run.png</iconset>
+   </property>
+   <property name="text">
+    <string>Run Strategy</string>
+   </property>
+  </action>
+  <action name="actionEditStrategy">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/edit.png</normaloff>:/icons/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Strategy</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -458,7 +471,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionBacktest_Window</sender>

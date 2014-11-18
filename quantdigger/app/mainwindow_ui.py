@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'mainwindow_ui.ui'
 #
-# Created: Tue Nov  4 18:11:30 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Mon Nov 17 23:59:36 2014
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(883, 600)
+        MainWindow.resize(883, 616)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.centralwidget)
@@ -125,6 +125,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.matplotlibWidget.sizePolicy().hasHeightForWidth())
         self.matplotlibWidget.setSizePolicy(sizePolicy)
+        self.matplotlibWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.matplotlibWidget.setObjectName(_fromUtf8("matplotlibWidget"))
         self.verticalLayout_3.addWidget(self.matplotlibWidget)
         self.tabWidget.addTab(self.chartTab, _fromUtf8(""))
@@ -144,14 +145,15 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.loadStrategyButton = QtGui.QPushButton(self.dockWidgetContents)
-        self.loadStrategyButton.setObjectName(_fromUtf8("loadStrategyButton"))
-        self.verticalLayout.addWidget(self.loadStrategyButton)
         self.line = QtGui.QFrame(self.dockWidgetContents)
         self.line.setFrameShape(QtGui.QFrame.HLine)
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
         self.line.setObjectName(_fromUtf8("line"))
         self.verticalLayout.addWidget(self.line)
+        self.strategyListWidget = QtGui.QListWidget(self.dockWidgetContents)
+        self.strategyListWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.strategyListWidget.setObjectName(_fromUtf8("strategyListWidget"))
+        self.verticalLayout.addWidget(self.strategyListWidget)
         self.label = QtGui.QLabel(self.dockWidgetContents)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
@@ -182,16 +184,13 @@ class Ui_MainWindow(object):
         self.initialCashSpinBox.setProperty("value", 50000000)
         self.initialCashSpinBox.setObjectName(_fromUtf8("initialCashSpinBox"))
         self.verticalLayout.addWidget(self.initialCashSpinBox)
-        self.runBacktestButton = QtGui.QPushButton(self.dockWidgetContents)
-        self.runBacktestButton.setObjectName(_fromUtf8("runBacktestButton"))
-        self.verticalLayout.addWidget(self.runBacktestButton)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
         self.verticalLayout_2.addLayout(self.verticalLayout)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 883, 25))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 883, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menu_View = QtGui.QMenu(self.menuBar)
         self.menu_View.setObjectName(_fromUtf8("menu_View"))
@@ -214,6 +213,16 @@ class Ui_MainWindow(object):
         self.actionBacktest_Window.setObjectName(_fromUtf8("actionBacktest_Window"))
         self.actionPerference = QtGui.QAction(MainWindow)
         self.actionPerference.setObjectName(_fromUtf8("actionPerference"))
+        self.actionRunStrategy = QtGui.QAction(MainWindow)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/run.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRunStrategy.setIcon(icon)
+        self.actionRunStrategy.setObjectName(_fromUtf8("actionRunStrategy"))
+        self.actionEditStrategy = QtGui.QAction(MainWindow)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/edit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionEditStrategy.setIcon(icon1)
+        self.actionEditStrategy.setObjectName(_fromUtf8("actionEditStrategy"))
         self.menu_View.addAction(self.actionBacktest_Window)
         self.menu_Settings.addAction(self.actionPerference)
         self.menuBar.addAction(self.menu_View.menuAction())
@@ -243,14 +252,12 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.chartTab), _translate("MainWindow", "Chart", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.statsTab), _translate("MainWindow", "Statistics", None))
         self.dockWidget.setWindowTitle(_translate("MainWindow", "Backtest Panel", None))
-        self.loadStrategyButton.setText(_translate("MainWindow", "Load Strategy", None))
         self.label.setText(_translate("MainWindow", "Start", None))
         self.dateStartEdit.setDisplayFormat(_translate("MainWindow", "MM/dd/yyyy", None))
         self.label_2.setText(_translate("MainWindow", "End", None))
         self.dateEndEdit.setDisplayFormat(_translate("MainWindow", "MM/dd/yyyy", None))
         self.label_3.setText(_translate("MainWindow", "Initial Cash", None))
         self.initialCashSpinBox.setPrefix(_translate("MainWindow", "$ ", None))
-        self.runBacktestButton.setText(_translate("MainWindow", "Run Backtest", None))
         self.menu_View.setTitle(_translate("MainWindow", "&View", None))
         self.menu_Settings.setTitle(_translate("MainWindow", "&Settings", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
@@ -260,5 +267,8 @@ class Ui_MainWindow(object):
         self.actionLineChart.setText(_translate("MainWindow", "LineChart", None))
         self.actionBacktest_Window.setText(_translate("MainWindow", "Backtest Panel", None))
         self.actionPerference.setText(_translate("MainWindow", "Preferences...", None))
+        self.actionRunStrategy.setText(_translate("MainWindow", "Run Strategy", None))
+        self.actionEditStrategy.setText(_translate("MainWindow", "Edit Strategy", None))
 
 from matplotlibwidget import MatplotlibWidget
+import resource_rc

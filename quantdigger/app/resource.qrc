@@ -1,0 +1,6 @@
+<RCC>
+  <qresource>
+    <file>icons/edit.png</file>
+    <file>icons/run.png</file>
+  </qresource>
+</RCC>
