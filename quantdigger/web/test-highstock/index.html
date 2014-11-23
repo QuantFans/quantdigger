@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0"/>
+
+    <title></title>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script src="jquery.min.js"></script>
+<style type="text/css">
+    ${demo.css}
+</style>
+<script src="highstock.js"></script>
+<script>
+var path = "_IF000.json";
+$(function () {
+    $.getJSON(path, function (result) {
+        var data = result.data;
+        // split the data set into ohlc and volume
+        var ohlc = [],
+            volume = [],
+            dataLength = data.length;
+
+        for (i = 0; i < dataLength; i++) {
+            ohlc.push([
+                new Date(data[i]['entry_datetime']).valueOf(), // the date
+                parseFloat(data[i]['open']), // open
+                parseFloat(data[i]['high']), // high
+                parseFloat(data[i]['low']), // low
+                parseFloat(data[i]['close']) // close
+            ]);
+
+            volume.push([
+                new Date(data[i]['entry_datetime']).valueOf(), // the date
+                parseFloat(data[i]['vol']) // the volume
+            ])
+        }
+
+        // set the allowed units for data grouping
+        var groupingUnits = [[
+            'week',                         // unit name
+            [1]                             // allowed multiples
+        ], [
+            'month',
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        ]];
+
+        // create the chart
+        $('#container').highcharts('StockChart', {
+
+            rangeSelector: {
+                selected: 1
+            },
+
+            title: {
+                text: 'AAPL Historical'
+            },
+
+            yAxis: [{
+                title: {
+                    text: 'OHLC'
+                },
+                height: 200,
+                lineWidth: 2
+            }, {
+                title: {
+                    text: 'Volume'
+                },
+                top: 200,
+                height: 100,
+                offset: 0,
+                lineWidth: 2
+            }],
+
+            series: [{
+                type: 'candlestick',
+                name: 'AAPL',
+                data: ohlc,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            }, {
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            }]
+        });
+    });
+});
+</script>
+
+</body>
+</html>
