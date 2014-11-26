@@ -72,10 +72,14 @@ class SnaptoCursor(object):
         self.txt.set_text('\n'.join(text))
 
     def cleanup(self):
-        self.x, self.y = None, None
-        self.lx.remove()
-        self.ly.remove()
-        self.txt.remove()
+        try:
+            self.x, self.y = None, None
+            self.lx.remove()
+            self.ly.remove()
+            self.txt.remove()
+        except ValueError:
+            import traceback
+            logger.warn(traceback.format_exc())
 
 class PointMarker(object):
     def __init__(self, ax, color='k'):
@@ -97,7 +101,11 @@ class PointMarker(object):
         self.marker.set_ydata(y)
 
     def cleanup(self):
-        self.marker.remove()
+        try:
+            self.marker.remove()
+        except ValueError:
+            import traceback
+            logger.warn(traceback.format_exc())
 
 class VolumeBars(object):
     def __init__(self, ax, dates, opens, closes, volumes):
@@ -121,10 +129,11 @@ class VolumeBars(object):
 
         barCollection = PolyCollection(bars, facecolors = colors)
 
-        self.ax.step(self.dates, self.volumes)
+        #self.ax.step(self.dates, self.volumes)
         #self.ax.add_collection(barCollection)
         #self.ax.bar(self.dates, self.volumes)
         #self.ax.plot(self.dates, self.volumes)
+        self.ax.fill_between(self.dates, self.volumes, alpha=0.5)
 
         xmin, xmax = self.ax.get_xlim()
         ys = [y for x, y in zip(self.dates, self.volumes) if xmin<=x<=xmax]
@@ -166,6 +175,8 @@ class MatplotlibWidget(FigureCanvasQTAgg):
     def set_data(self, data):
         if data is None: return
         self.data = data
+        self.axes.clear()
+        self.volume_axes.clear()
         dates = self.data['datetime'].values if 'datetime' in self.data.columns else None
         opens = self.data['open'].values if 'open' in self.data.columns else None
         highs = self.data['high'].values if 'high' in self.data.columns else None

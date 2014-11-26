@@ -4,6 +4,7 @@ import os
 import logging
 import glob
 import imp
+import pytz
 from datetime import datetime
 
 import pandas as pd
@@ -16,9 +17,10 @@ from functools import partial
 
 from config import data_path
 from config import strategy_path
-from utils import fromUtf8, WindowSize
+from utils import fromUtf8, WindowSize, sysopen
 from mainwindow_ui import Ui_MainWindow
 from strategy_runner import StrategyRunner
+from loader import load_from_yahoo, _load_raw_yahoo_data
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,9 @@ class MainWindow(QtGui.QMainWindow):
         self.init_style_menu()
         self.init_indicator_menu()
         self.init_strategy_panel()
+        self.ui_controller.dateStartEdit.setDateTime(datetime(1990,1,1))
+        self.ui_controller.dateEndEdit.setDateTime(datetime.now())
+        self.df = None
 
     def init_style_menu(self):
         self.ui_controller.styleMenu = QtGui.QMenu(self)
@@ -67,11 +72,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui_controller.strategyListWidget.customContextMenuRequested.connect(self.showMenu)
 
     def connect(self):
-        self.ui_controller.loadQuoteButton.clicked.connect(self.on_loadQuoteClicked)
         for toolButton in self.ui_controller.buttonGroup.buttons():
             toolButton.clicked.connect(partial(self.on_toolButtonClicked, toolButton))
         self.ui_controller.actionRunStrategy.triggered.connect(self.on_runStrategy)
         self.ui_controller.actionEditStrategy.triggered.connect(self.on_editStrategy)
+        self.ui_controller.symbolLineEdit.returnPressed.connect(self.load_symbol)
+        self.ui_controller.symbolLineEdit.textChanged.connect(self.on_symbolEditChanged)
 
     def on_loadQuoteClicked(self):
         logger.info('load quote')
@@ -98,6 +104,7 @@ class MainWindow(QtGui.QMainWindow):
             if 'datetime' in df.columns and not df['datetime'].empty:
                 self.ui_controller.matplotlibWidget.set_data(df)
                 self.ui_controller.matplotlibWidget.draw_data()
+            self.df = df
 
     def on_toolButtonClicked(self, button):
         name = str(button.objectName())
@@ -133,7 +140,7 @@ class MainWindow(QtGui.QMainWindow):
             strategy = imp.load_source('strategy', strategy_file)
             if hasattr(strategy, 'initialize') and hasattr(strategy, 'run'):
                 runner = StrategyRunner(initialize=strategy.initialize, run=strategy.run)
-                runner.run('Data')
+                runner.run(self.df)
             else:
                 logger.error("%s is not a valid strategy" % strategy_file)
 
@@ -144,4 +151,30 @@ class MainWindow(QtGui.QMainWindow):
             index = indexes[0].row()
             item = self.ui_controller.strategyListWidget.item(index)
             strategy_file = item.data(QtCore.Qt.UserRole).toPyObject()
-            print strategy_file
+            sysopen(strategy_file)
+
+    def on_symbolEditChanged(self, text):
+        if text:
+            self.ui_controller.symbolLineEdit.setText(str(text).upper())
+        
+    def load_symbol(self):
+        start = parser.parse(str(self.ui_controller.dateStartEdit.text()))
+        end = parser.parse(str(self.ui_controller.dateEndEdit.text()))
+        symbol = str(self.ui_controller.symbolLineEdit.text())
+        if not symbol: return
+        data = _load_raw_yahoo_data(stocks=[symbol], indexes={},
+                                    start=start, end=end)
+        self.df = data[symbol]
+        self.df.columns = [col.lower() for col in self.df.columns]
+        self.df['datetime'] = self.df.index
+        self.df['datetime'] = self.df.apply(
+            lambda row: mdates.date2num(row['datetime']),
+            axis=1)
+        if 'adj close' in self.df.columns:
+            self.df['close'] = self.df['adj close']
+
+        self.ui_controller.matplotlibWidget.set_data(self.df)
+        self.ui_controller.matplotlibWidget.draw_data()
+        self.ui_controller.symbolLineEdit.setText('')
+
+

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'mainwindow_ui.ui'
 #
-# Created: Mon Nov 17 23:59:36 2014
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Wed Nov 26 17:14:54 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(883, 616)
+        MainWindow.resize(1057, 678)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.centralwidget)
@@ -112,9 +112,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.indicatorToolButton)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        self.loadQuoteButton = QtGui.QPushButton(self.chartTab)
-        self.loadQuoteButton.setObjectName(_fromUtf8("loadQuoteButton"))
-        self.horizontalLayout_2.addWidget(self.loadQuoteButton)
+        self.symbolLineEdit = QtGui.QLineEdit(self.chartTab)
+        self.symbolLineEdit.setObjectName(_fromUtf8("symbolLineEdit"))
+        self.horizontalLayout_2.addWidget(self.symbolLineEdit)
         self.pushButton = QtGui.QPushButton(self.chartTab)
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.horizontalLayout_2.addWidget(self.pushButton)
@@ -145,11 +145,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.line = QtGui.QFrame(self.dockWidgetContents)
-        self.line.setFrameShape(QtGui.QFrame.HLine)
-        self.line.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line.setObjectName(_fromUtf8("line"))
-        self.verticalLayout.addWidget(self.line)
         self.strategyListWidget = QtGui.QListWidget(self.dockWidgetContents)
         self.strategyListWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.strategyListWidget.setObjectName(_fromUtf8("strategyListWidget"))
@@ -190,7 +185,7 @@ class Ui_MainWindow(object):
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 883, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1057, 25))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menu_View = QtGui.QMenu(self.menuBar)
         self.menu_View.setObjectName(_fromUtf8("menu_View"))
@@ -247,7 +242,6 @@ class Ui_MainWindow(object):
         self.maxToolButton.setText(_translate("MainWindow", "Max", None))
         self.styleToolButton.setText(_translate("MainWindow", "Style", None))
         self.indicatorToolButton.setText(_translate("MainWindow", "+Indicator", None))
-        self.loadQuoteButton.setText(_translate("MainWindow", "Load Quote", None))
         self.pushButton.setText(_translate("MainWindow", "+Comparison", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.chartTab), _translate("MainWindow", "Chart", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.statsTab), _translate("MainWindow", "Statistics", None))

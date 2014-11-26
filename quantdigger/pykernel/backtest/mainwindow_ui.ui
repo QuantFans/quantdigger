@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>883</width>
-    <height>616</height>
+    <width>1057</width>
+    <height>678</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -210,11 +210,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="loadQuoteButton">
-            <property name="text">
-             <string>Load Quote</string>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="symbolLineEdit"/>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton">
@@ -261,13 +257,6 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QListWidget" name="strategyListWidget">
          <property name="contextMenuPolicy">
@@ -384,8 +373,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>883</width>
-     <height>22</height>
+     <width>1057</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_View">

@@ -2,6 +2,7 @@ __author__ = 'Wenwei Huang'
 
 
 from PyQt4 import QtCore
+import os, sys
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -22,3 +23,11 @@ class WindowSize(object):
     FIVEYEAR = 'FIVEYEAR'
     MAX = 'MAX'
 
+
+def sysopen(filename):
+    if os.name == 'nt':
+        os.startfile(filename)
+    elif sys.platform.startswith('darwin'):
+        os.system('open %s' % filename)
+    elif os.name == 'posix':
+        os.system('xdg-open %s' % filename)
