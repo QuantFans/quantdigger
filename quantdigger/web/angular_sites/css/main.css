@@ -1,0 +1,222 @@
+/* Wrapper for page content to push down footer */
+/* line 6, ../sass/main.scss */
+.wrap {
+  min-height: 100%;
+  height: auto;
+  /* Negative indent footer by its height */
+  margin: 0 auto 0;
+  /* Pad bottom by footer height */
+  padding: 0 0 1em;
+}
+
+/* Set the fixed height of the footer here */
+/* line 16, ../sass/main.scss */
+.footer {
+  height: auto;
+  background-color: #f5f5f5;
+}
+
+body {
+    font-family: "MicroSoft YaHei";
+}
+
+.pad-bottom-1em {
+    padding-bottom: 1em;
+}
+
+.pad-top-1em {
+    padding-top: 1em;
+}
+
+.well-font-size {
+    font-size: 1.2em;
+}
+
+.font-size-3em {
+    font-size: 3em;
+}
+
+.font-size-2em {
+    font-size: 2em;
+}
+
+.font-size-1_2em {
+    font-size: 1.2em;
+}
+
+.front-color-lightgray {
+    color: lightgray;
+}
+/*链接样式初始化*/
+a{
+	color: #333;
+	text-decoration: none;
+	cursor: pointer;
+}
+.footer a{
+	color: #f3f3f3;
+	text-decoration: none;
+}
+a:hover{
+	color: #f36;
+	text-decoration: none;
+}
+
+/*去除浏览器按钮，超链接默认边框*/
+/*button[type=submit],input[type=button],input[type=submit]{outline:none;}*//*//IE*/
+/*button[type=submit]:focus,input[type=button]:focus,input[type=submit]:focus{outline:none;}*//*//IE*/
+/*input[type=button]::-moz-focus-inner{outline:0;}*//*//火狐*/
+a{outline:none;}/*//IE文字链接*/
+a:focus{outline: none;}
+/*全局P标签样式*/
+p{
+	color: #999;
+	font-size: 12px;
+}
+/*适应创意商品展示在大屏的三列布局*/
+@media (min-width: 992px){
+	.idea-item{
+		width:33.3%;
+	}
+}
+
+/*商品详情图片TAB切换*/
+ul.pic-show{
+  width: 100%;
+	padding: 0;
+	margin: 0;
+}
+ul.pic-show li img{
+  width: 100%;
+}
+ul.pic-list li.default{
+  width: 15%;
+	opacity: 0.5;
+	border: 1px solid #fff;
+	float: left;
+	margin: 0 5px;
+}
+ul.pic-list li.img-hover{
+	opacity: 1;
+	border: 1px solid #f36;
+}
+
+
+/*提交创意动画效果*/
+#submit-idea-form{ position:relative; min-height:800px; overflow:hidden; padding:30px; }
+
+#submit-idea-views.ng-enter,#submit-idea-views.ng-leave{
+	position:absolute; left:30px; right:30px;
+    transition:0.5s all ease;
+    -moz-transition:0.5s all ease;
+    -webkit-transition:0.5s all ease;
+}
+#submit-idea-views.ng-enter{
+    -webkit-animation:slideInRight 0.5s both ease;
+    -moz-animation:slideInRight 0.5s both ease;
+    animation:slideInRight 0.5s both ease;
+}
+#submit-idea-views.ng-leave{
+    -webkit-animation:slideOutLeft 0.5s both ease;
+    -moz-animation:slideOutLeft 0.5s both ease;
+    animation:slideOutLeft 0.5s both ease;
+}
+
+/**/
+/* slide out to the left */
+@keyframes slideOutLeft {
+    to         { transform: translateX(-200%); }
+}
+@-moz-keyframes slideOutLeft {
+    to         { -moz-transform: translateX(-200%); }
+}
+@-webkit-keyframes slideOutLeft {
+    to         { -webkit-transform: translatex(-200%); }
+}
+
+/* slide in from the right */
+@keyframes slideInRight {
+    from     { transform:translateX(200%); }
+    to         { transform: translateX(0); }
+}
+@-moz-keyframes slideInRight {
+    from     { -moz-transform:translateX(200%); }
+    to         { -moz-transform: translateX(0); }
+}
+@-webkit-keyframes slideInRight {
+    from     { -webkit-transform:translateX(200%); }
+    to         { -webkit-transform: translateX(0); }
+}
+
+
+/*多图上传*/
+.fileinput-button {
+  position: relative;
+  overflow: hidden;
+}
+.fileinput-button input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  font-size: 200px;
+  direction: ltr;
+  cursor: pointer;
+}
+
+/* Fixes for IE < 8 */
+@media screen\9 {
+  .fileinput-button input {
+    filter: alpha(opacity=0);
+    font-size: 100%;
+    height: 100%;
+  }
+}
+
+.fileupload-buttonbar .btn,
+.fileupload-buttonbar .toggle {
+  margin-bottom: 5px;
+}
+.progress-animated .progress-bar,
+.progress-animated .bar {
+  background: url("../img/progressbar.gif") !important;
+  filter: none;
+}
+.fileupload-process {
+  float: right;
+  display: none;
+}
+.fileupload-processing .fileupload-process,
+.files .processing .preview {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: url("../img/loading.gif") center no-repeat;
+  background-size: contain;
+}
+.files audio,
+.files video {
+  max-width: 300px;
+}
+
+@media (max-width: 767px) {
+  .fileupload-buttonbar .toggle,
+  .files .toggle,
+  .files .btn span {
+    display: none;
+  }
+  .files .name {
+    width: 80px;
+    word-wrap: break-word;
+  }
+  .files audio,
+  .files video {
+    max-width: 80px;
+  }
+  .files img,
+  .files canvas {
+    max-width: 100%;
+  }
+}

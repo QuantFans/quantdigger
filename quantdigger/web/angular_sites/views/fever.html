@@ -1,0 +1,108 @@
+<!--轮播图区域开始-->
+<div class="container-fluid">
+	<div ui-view="carousel"></div>
+</div>
+<!--轮播图区域结束-->
+
+<div  style="width: 100%;height: 130px; background: #F3F3F3;">
+	<div class="container" style="background: #F3F3F3;">
+		<div class="row">
+			<div class="col-md-18">
+				<h1>发现创意<br /><small>find an idea</small></h1>
+			</div>
+		</div>
+	</div>
+</div>
+<!--分类导航栏开始-->
+<div style="width: 100%;padding: 10px 0; border-bottom: 1px solid #ccc;">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-20">
+				<ul class="nav nav-pills shop-type">
+				    {% for key, value in cats.items %}
+                    	<li ui-sref-active="active" ui-sref=".{{ key }}"><a href="">{{ value }}</a></li>
+                    {% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+<!--分类导航栏结束-->
+<br />
+<div ui-view>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-18 col-xs-16" style="height: 50px;">
+				<h3 style="margin-top: 0;">最新发现</h3>
+			</div>
+			<div class="col-md-2 col-xs-4">
+				<a class="pull-right" ui-sref=".latest">
+					<span class="badge">More</span>
+					>>>
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div ui-view="fever-list">展示创意列表</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-18" style="height: 50px;">
+				<h3 style="margin-top: 0;">成功项目</h3>
+			</div>
+			<div class="col-md-2">
+				<a class="pull-right" ui-sref=".success">
+					<span class="badge">More</span>
+					>>>
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div ui-view="fever-list">展示创意列表</div>
+		</div>
+	</div>
+</div>
+
+<!--合作机构开始-->
+<div class="container">
+	<div class="row">
+		<div class="col-md-20">
+			<h3 style="margin-top: 0;">合作机构</h3>
+		</div>
+	</div>
+	<br />
+	<div class="row">
+		<div class="col-md-20" style="height: 30px;padding-left: 0;overflow: hidden;">
+			<span class="glyphicon glyphicon-chevron-left" style="padding-right: 20px;"></span>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<a href="#"><img src="/img/01-233.jpg" alt="" style="width: 80px;height: 30px;margin-right: 10px;" /></a>
+			<span class="glyphicon glyphicon-chevron-right" style="padding-left: 20px;"></span>
+		</div>
+	</div>
+</div>
+<!--合作机构结束-->
+<br />
+
+<div class="footer" style="background-color: #333333;color: #f3f3f3;">
+	<div class="container">
+		<div class="row" style="height: 200px;">
+			<div ui-view="footer"></div>
+		</div>
+	</div>
+</div>

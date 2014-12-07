@@ -1,0 +1,54 @@
+<h1>我是全部创意商品</h1>
+<div class="col-md-6 col-sm-10 col-xs-20 idea-item" ng-repeat="f in one" ng-init="views=0" style="padding-bottom: 50px;">
+	<div class="fever-box" style="box-shadow: 0 3px 6px 3px #ccc;">
+		<div class="img-box">
+			<a ui-sref="fever-detail.describe" target="_blank" ng-click="views=views+1">
+				<img class="img-responsive" ng-src="{[f.photo_intros]}" width="100%" />
+			</a>
+		</div>
+		<div class="fever-title" style="padding:0 10px">
+			<a ui-sref="fever-detail.describe" target="_blank" ng-click="views=views+1">
+				<h3>{[f.title]}<br /></h3>
+			</a>
+			<p></p>
+		</div>
+		<div class="media" style="padding:0 10px">
+			<a class="pull-left" href="#">
+				<img class="media-object img-circle img-responsive" ng-src="{[f.post_aount.avatar]}" style="width: 35px;height: 35px;">
+			</a>
+			<div class="media-body">
+				<a href="#"><h5 class="media-heading">{[f.post_aount.username]}</h5></a>
+				<div>{[f.post_aount.comments]}</div>
+			</div>
+		</div>
+		<br />
+		<div style="padding: 0 10px;">
+			<div class="progress progress-striped active" style="height: 10px;">
+			   <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" 
+			      aria-valuemin="0" aria-valuemax="100" ng-style="width: {[f.actual_like/f.target_like]}%;height: 10px;">
+			      <span class="sr-only">{[f.actual_like/f.target_like]}% 完成</span>
+			   </div>
+			</div>
+		</div>
+		<div class="row" style="padding: 0 10px;height: 38px;">
+			<span class="col-md-6 col-md-offset-1 col-xs-6 text-center">{[f.target_like]}赞<br />还需 </span>
+			<span class="col-md-6 col-xs-6 text-center" style="border-right: 1px dashed #ccc;border-left: 1px dashed #ccc;">{[f.actual_like/f.target_like]}%<br />已达到</span>
+			<span class="col-md-6 col-xs-6 text-center">{[f.deadline | date:"d"]} 天<br />剩余</span>
+		</div>
+		<hr style="margin: 8px 0;" />
+		<div style="padding: 0 10px 10px;">
+			<a href="#" style="margin-right: 20px;">
+				<span style="font-size: 16px;" class="glyphicon glyphicon-thumbs-up"></span>&nbsp;{[f.actual_like]}
+			</a>
+			<!--<a href="#" style="margin-right: 20px;">
+				<span style="font-size: 16px;" class="glyphicon glyphicon-thumbs-down"></span>&nbsp;88
+			</a>-->
+			<a href="#" style="margin-right: 20px;">
+				<span style="font-size: 16px;" class="glyphicon glyphicon-comment"></span>&nbsp;88
+			</a>
+			<a href="#" style="margin-right: 20px;">
+				<span style="font-size: 16px;" class="glyphicon glyphicon-eye-open"></span>&nbsp;{[views]}
+			</a>
+		</div>
+	</div>
+</div>

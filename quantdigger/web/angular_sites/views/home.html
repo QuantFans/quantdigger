@@ -1,0 +1,24 @@
+<br />
+<div class="wrap">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-10 text-center tt" style="border-right: 1px dashed #ccc;">
+				<a ui-sref="idea">
+					<h1>创意征集</h1>
+				</a>
+			</div>
+			<div class="col-md-10 text-center tt">
+				<a ui-sref="shop">
+					<h1>创意集市</h1>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$(function(){
+		var height=$(window).innerHeight()-100;
+		var paddingTop=height/2;
+		$('.tt').css({'height':height,'padding-top':paddingTop});
+	});
+</script>

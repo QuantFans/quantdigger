@@ -86,7 +86,7 @@ def entry_analyze(fig, data, n):
     # ordered by profits
     data2 = data.sort_index(by='exit_profit')
 
-    data_long = data2[data2['islong'] ] # 如果是单根开平，且开平价一样，那么此法不成立
+    data_long = data2[data2['islong']] # 如果是单根开平，且开平价一样，那么此法不成立
     data_short = data2[data2['islong'] == False]
 
     exit_profit = data2['exit_profit']
@@ -245,7 +245,7 @@ class AnalyzeFrame(object):
     def __init__(self, fname, n=10, intraday=False):
         """ """
         self.fig = plt.figure(facecolor='white')
-        self.fig.canvas.set_window_title(u'期货数据分析')
+        #self.fig.canvas.set_window_title(u'期货数据分析')
         self.nbar = n
         self.cursors = []
         self.data, = load_datas(n, intraday, fname)
@@ -256,6 +256,8 @@ class AnalyzeFrame(object):
         self.radio.on_clicked(self.update)
 
     def update(self, op):
+        print op
+        print "oooooooooooooooooooooooooooooooooooooooooooooooooooo" 
         for ax in self.axes:
             self.fig.delaxes(ax)
         for c in self.cursors:

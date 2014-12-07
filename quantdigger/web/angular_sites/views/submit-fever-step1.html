@@ -1,0 +1,97 @@
+<div class="row">
+	<div class="col-md-6 col-md-offset-1">
+        <p class="text-center">
+            <span style="font-size: 3em;">
+                1
+            </span>
+        </p>
+        <p class="text-center">
+            <span style="font-size: 1.2em;">
+                基本信息
+            </span>
+        </p>
+    </div>
+    <div class="col-md-6">
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 3em;">
+                2
+            </span>
+        </p>
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 1.2em;">
+                填写详细内容
+            </span>
+        </p>
+    </div>
+    <div class="col-md-6">
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 3em;">
+                3
+            </span>
+        </p>
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 1.2em;">
+                上传图片&视频
+            </span>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-20">
+        <p>
+            <span class="font-size-2em">
+                填写基本信息
+            </span>
+            <a><i class="glyphicon glyphicon-question-sign"></i></a>
+        </p>
+    </div>
+</div>
+<!-- -->
+<div class="row">
+    <div class="col-md-20">
+        <div class="panel panel-default">
+            <div class="panel-body">
+            	<div class="form-group">
+	                <h4>类别</h4>
+	                <div>
+
+                    {% for key, value in cats.items %}
+	                    <label class="radio-inline">
+	                    	<input type="radio" name="ideaType"
+                            ng-model="idea.type" value="{{ key  }}" {% if forloop.first %}ng-checked="true"{% endif %}/>
+                            {{ value  }}
+	                    </label>
+                    {% endfor %}
+	                </div>
+            	</div>
+                <p class="font-size-1_2em">标题</p>
+                <div class="form-group">
+                    <input class="form-control" ng-model="idea.title" placeholder="标题" />
+                </div>
+                <p class="front-color-lightgray">给你的创意起个名字</p>
+                <p class="font-size-1_2em">创意简介</p>
+                <div class="form-group">
+                    <textarea class="form-control" rows="6" ng-model="idea.introduction">
+                    </textarea>
+                </div>
+                <p class="front-color-lightgray">给你30秒的时间，你该如何描述你的创意</p>
+                <p class="font-size-1_2em">标签</p>
+                <div class="form-group">
+                    <input class="form-control" ng-model="idea.label" placeholder="标签" />
+                </div>
+                <div class="form-group">
+                	<label class="checkbox-inline">
+                    	<input type="checkbox" ng-model="idea.empower"/>授权
+                    </label>
+                </div>
+                <p>
+                    <span class="pull-right">
+                        <a ui-sref="submit-fever-center" class="btn btn-default">取消</a>
+                        <a ui-sref="submit-fever-center.submit-fever-step2" class="btn btn-default">下一步</a>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

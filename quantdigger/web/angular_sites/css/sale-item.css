@@ -1,0 +1,51 @@
+.sale-item{
+	margin: 20px 0;
+}
+.sale-item-box:hover{
+	/*border: 1px solid #f3f3f3;*/
+	/*border-radius: 8px;*/
+	box-shadow: 0px 3px 10px 3px #ccc;
+}
+.sale-item-img{
+	position: relative;
+}
+.sale-item-img p{
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	padding: 3px 8px;
+	margin: 0;
+	background-color: #fff;
+	opacity: 0.7;
+}
+.sale-item-img a img{
+	width: 100%;
+}
+.sale-item-title{
+	height: 53px;
+	padding: 10px 10px 0;
+	overflow: hidden;
+}
+.sale-item-tips{
+	padding: 10px 10px 0;
+}
+.sale-item-line{
+	margin: 10px 0;
+}
+.sale-item-comment{
+	height: 55px;
+	padding: 0 10px;
+	overflow: hidden;
+}
+.sale-item-comment ul li img{
+	width: 30px;
+	height: 30px;
+}
+.sale-item-comment ul li.head{
+	float: left;
+	width: 20%;
+}
+.sale-item-comment ul li.comment{
+	float: right;
+	width: 80%;
+}

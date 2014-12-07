@@ -22,8 +22,8 @@ def accumulate(iterable, func=operator.add):
         total = func(total, element)
         yield total
 
-font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=8) 
-font_big = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=14) 
+font = FontProperties(fname=r"simsun.ttf", size=8) 
+font_big = FontProperties(fname=r"simsun.ttf", size=14) 
 
 
 class EventHandler(object):

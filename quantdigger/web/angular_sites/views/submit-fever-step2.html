@@ -1,0 +1,99 @@
+<div class="row">
+	<div class="col-md-6 col-md-offset-1">
+        <p class="text-center">
+            <span style="font-size: 3em;">
+                1
+            </span>
+        </p>
+        <p class="text-center">
+            <span style="font-size: 1.2em;">
+                基本信息
+            </span>
+        </p>
+    </div>
+    <div class="col-md-6">
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 3em;">
+                2
+            </span>
+        </p>
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 1.2em;">
+                填写详细内容
+            </span>
+        </p>
+    </div>
+    <div class="col-md-6">
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 3em;">
+                3
+            </span>
+        </p>
+        <p class="text-center front-color-lightgray">
+            <span style="font-size: 1.2em;">
+                上传图片&视频
+            </span>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-20">
+        <p>
+            <span class="font-size-2em">
+                创意详细说明
+            </span>
+            <a><i class="glyphicon glyphicon-question-sign"></i></a>
+        </p>
+    </div>
+</div>
+<!-- -->
+<div class="row">
+    <div class="col-md-20">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                    <textarea class="form-control" id="tiny" rows="8" ng-model="idea.detail"></textarea>
+				<br />
+                <p>
+                    <span class="pull-left">
+                        <a ui-sref="submit-fever-center.submit-fever-step1" class="btn btn-default" href="">上一步</a>
+                    </span>
+                    <span class="pull-right">
+                        <a ui-sref="submit-fever-center.submit-fever-step3" class="btn btn-default" href="">下一步</a>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="js/lib/tinymce/tinymce.min.js"></script>
+<script type="text/javascript">
+tinymce.init({
+    selector: "textarea",
+    theme: "modern",
+    plugins: [
+        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+        "searchreplace wordcount visualblocks visualchars code fullscreen",
+        "insertdatetime media nonbreaking save table contextmenu directionality",
+        "emoticons template paste textcolor colorpicker textpattern jbimages"
+    ],
+    toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+    toolbar2: "print preview media | forecolor backcolor emoticons jbimages",
+    image_advtab: true,
+    templates: [
+        {title: 'Test template 1', content: 'Test 1'},
+        {title: 'Test template 2', content: 'Test 2'}
+    ],
+    language:'zh_CN',
+    relative_urls: false
+});
+
+function tiny_data() {
+    var ed = tinymce.get('tiny');
+    return ed.getContent();
+}//end of tiny_test
+
+</script>
+

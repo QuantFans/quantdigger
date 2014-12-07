@@ -9,7 +9,6 @@ def wave_analyze(fname):
     #load_data(0, fname)
     data, = load_datas(0, False, fname) 
     t, = load_wavedata(fname)
-    print t[0]
 
 def tradeinfo(fname, n=10, intraday=False):
     '''docstring for analyze''' 
@@ -18,5 +17,4 @@ def tradeinfo(fname, n=10, intraday=False):
 
 if __name__ == '__main__':
     tradeinfo("_djtrend2_IF000")
-    print "ok" 
 

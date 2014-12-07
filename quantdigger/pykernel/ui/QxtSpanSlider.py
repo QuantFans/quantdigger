@@ -1,5 +1,15 @@
-from PyQt4.QtCore import pyqtSignature, pyqtProperty, SIGNAL, SLOT, QRect, QPoint
-from PyQt4.QtGui import QWidget, QAbstractSlider, QSlider, QStyle, QGridLayout, QLabel, QDoubleSpinBox, QGridLayout, QStylePainter, QStyleOption, QStyleOptionSlider, QPen, QPalette, QLinearGradient, QStyleFactory
+from PyQt4.QtCore import pyqtProperty, SIGNAL, QRect, QPoint
+from PyQt4.QtGui import (
+    QAbstractSlider,
+    QSlider,
+    QStyle,
+    QStylePainter,
+    QStyleOptionSlider,
+    QPen,
+    QPalette,
+    QLinearGradient,
+    QStyleFactory
+)
 import PyQt4.QtCore as QtCore
 
 def clamp(v, lower, upper):

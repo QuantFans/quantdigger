@@ -165,6 +165,7 @@ def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
     print "Loaded File: %s" % pricefname
     PRICE = 'close' 
     data = pd.DataFrame(tradeinfo.ix[:,0:2])
+    print "----------------", pricefname
     price_data = csv2frame(pricefname)
     high_profits = []
     low_profits = []
@@ -269,8 +270,6 @@ def load_datas(n, intraday, *fnames):
         name, ext =  os.path.splitext(os.path.basename(fname))
         name = os.path.dirname(fname) + name + "_" + ext
         names.append(path_name(name))
-        print "***************" 
-        print names
 
         tradeinfo = pd.concat([csv2frame(name) for name in names])
         tradeinfo = tradeinfo.sort_index()
@@ -286,15 +285,12 @@ def load_datas(n, intraday, *fnames):
 def load_tradeinfo(fname):
     '''''' 
     def path_name(fname):
-        #return "".join([home, "trace\\", fname, ".csv" ])
         return "".join([home, "trace/", fname, ".csv" ])
     #stock_dir=home + "stock_data\\"
     names = [path_name(fname)]
     name, ext =  os.path.splitext(os.path.basename(fname))
     name = os.path.dirname(fname) + name + "_" + ext
     names.append(path_name(name))
-    print "******" 
-    print names
 
     tradeinfo = pd.concat([csv2frame(name) for name in names])
     tradeinfo = tradeinfo.sort_index()
@@ -303,12 +299,13 @@ def load_tradeinfo(fname):
     return tradeinfo
 
 
-def symbolfromtradefname(fname, prefixnum=2):
+def symbolfromtradefname(fname, prefixnum=3):
     '''docstring for symbolfromfname''' 
+     ## @todo 和文件夹名字中的下划线冲突了.
     return fname.split('_')[prefixnum]
 
 
-def pricefname_from_tradefname(fname, prefixnum=2):
+def pricefname_from_tradefname(fname, prefixnum=3):
     '''docstring for pricefname_from_tradefname''' 
     return '_' + symbolfromtradefname(fname, prefixnum) + '.csv'
 
