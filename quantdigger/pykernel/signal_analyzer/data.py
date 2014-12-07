@@ -4,7 +4,6 @@ import numpy as np
 import os
 import datetime as dt
 
-#home = os.getcwd() + "\\data\\" 
 home = os.getcwd() + "/data/" 
 
 def set_dir(dname):
@@ -120,17 +119,10 @@ def simple_deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
     PRICE = 'close' 
     data = pd.DataFrame(tradeinfo.ix[:,0:2])
     price_data = csv2frame(pricefname)
-    high_profits = []
-    low_profits = []
-    exit_profits = []
 
-    periods = []
     entry_nbar_bests = []
     entry_nbar_worsts = []
-    exit_nbar_bests = []
-    exit_nbar_worsts = []
     islongs = []
-    returns = []
     entry_Nlist = []
     for i in range(len(data)):
         startt = tradeinfo.index[i]
@@ -162,10 +154,14 @@ def simple_deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
 
 
 def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
-    print "Loaded File: %s" % pricefname
+    """ 根据交易信号和数据文件，处理数据． 
+    return data['high_profits', 'low_profit', 'exit_profit', 'period', 'return', 
+                'entry_nbar_bests', 'entry_nbar_worsts', 'exit_nbar_bests',
+                'exit_nbar_worsts', 'islong', 'entry_n', 'exit_n'
+            ]
+    """
     PRICE = 'close' 
     data = pd.DataFrame(tradeinfo.ix[:,0:2])
-    print "----------------", pricefname
     price_data = csv2frame(pricefname)
     high_profits = []
     low_profits = []
@@ -259,7 +255,7 @@ def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
 
 
 def load_datas(n, intraday, *fnames):
-    '''''' 
+    """ 根据文件列表，返回结果列表． """
     def path_name(fname):
         return "".join([home, "trace/", fname, ".csv" ])
     datas = []

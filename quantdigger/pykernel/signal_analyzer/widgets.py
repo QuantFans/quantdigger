@@ -237,7 +237,7 @@ class CandleWindow(AxesWidget):
         ax.set_ylim((self.ymin, self.ymax))
         self.a1, self.a2 = candlestick2(ax, data.open.tolist()[:self.xmax], data.close.tolist()[:self.xmax], 
                                         data.high.tolist()[:self.xmax], data.low.tolist()[:self.xmax], 
-                                        0.6, 'r', 'g')
+                                        0.6, 'r', 'g', alpha=1)
         self.connect_event('key_release_event', self.keyrelease)
         #self.connect_event('button_release_event', self._update)
 

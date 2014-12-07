@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import operator
 import pandas as pd
-
+#from pylab import *  
+#mpl.rcParams['font.sans-serif'] =  ['Microsoft YaHei'] #指定默认字体  
 
 def accumulate(iterable, func=operator.add):
     'Return running totals'
@@ -22,8 +23,8 @@ def accumulate(iterable, func=operator.add):
         total = func(total, element)
         yield total
 
-font = FontProperties(fname=r"simsun.ttf", size=8) 
-font_big = FontProperties(fname=r"simsun.ttf", size=14) 
+font = FontProperties(size=8) 
+font_big = FontProperties(size=14) 
 
 
 class EventHandler(object):
@@ -125,7 +126,7 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
     #fig.canvas.mpl_connect('pick_event', handle.on_pick)
 
     def format_coord(x, y):
-        '''''' 
+        """ 状态栏信息显示 """
         i = int(x)/1
         c = pd.to_datetime(exit_profit.index[i]).strftime("%Y-%m-%d %H:%M:%S") + " Profit: %s MAE: %s"%(exit_profit[i], entry_worst[i])
         return str(c)
@@ -188,7 +189,6 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
         multi = MultiCursor(fig.canvas, fig.axes, color='r', lw=1, horizOn=False, vertOn=True)
         return [ax1, ax2], [multi]
     else:
-        print "oooooo" 
         return [], []
 
 
@@ -564,8 +564,6 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
 
 
 from matplotlib.colors import colorConverter
-from matplotlib.lines import Line2D, TICKLEFT, TICKRIGHT
-from matplotlib.patches import Rectangle
 from matplotlib.collections import LineCollection, PolyCollection
 def candlestick2(ax, opens, closes, highs, lows, width=4,
                  colorup='r', colordown='g', lc='w',
@@ -628,4 +626,11 @@ def candlestick2(ax, opens, closes, highs, lows, width=4,
     # add these last
     ax.add_collection(barCollection)
     ax.add_collection(rangeCollection)
+
+    def format_coord(x, y):
+        """ 状态栏信息显示 """
+        i = int(x)/1
+        c = "x:%s" %(x)
+        return str(c)
+    ax.format_coord = format_coord
     return rangeCollection, barCollection

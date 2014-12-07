@@ -18,41 +18,6 @@ def summary(data):
     zero_df = data[data.exit_profit==0]
     total_num = len(data)
     av_period = data['period'].mean()
-    #plt.figure()
-    #rows = [
-            #u"Overall Profits: ", 
-            #u"Overall Loss: ", 
-            #u"Net Profits: ", 
-            #u"Number of Transaction: ", 
-            #u"Number of Winning Trades: ",
-            #u"Number of Losing Trades: ",
-            #u"Average Profit:",
-            #u"AV Profits / AV Loss: ", 
-            #u"Winning Percentage: ",
-            #u"Stock Holding Period: " 
-           #]
-
-    #cell_text=[
-                #[str(data_win.exit_profit.sum() * 300)],
-                #[str(data_lose.exit_profit.sum() * 300)],
-                #[str((data.exit_profit.sum()) * 300)],
-                #[str(total_num)],
-                #[str(len(data_win))],
-                #[str(len(data_lose))], 
-                #[str(data_win.exit_profit.sum()/ total_num*300)],
-                #[str(abs(data_win.exit_profit.sum()/len(data_win) / (data_lose.exit_profit.sum()/len(data_lose))))],
-                #[str(len(data_win)/float(total_num)*100) + "%" ], 
-                #[str(av_period)]
-              #]
-    #columns=(['Summary'])
-    #assert len(cell_text) == len(rows)
-    ## Add a table at the bottom of the axes
-
-    #the_table = plt.table(cellText=cell_text,
-                      #colWidths = [0.4],
-                      #rowLabels=rows,
-                      #colLabels=columns,
-                      #loc='center right', fontsize=14)
     #plt.text(12,3.4,'Table Title',size=8)
     print "******************************************" 
     print u"总盈利: " + str(data_win.exit_profit.sum() * 300)
@@ -126,18 +91,6 @@ def scatter_analyze(fig, data):
                             data_lose.period.tolist(),
                             data_lose.exit_profit.tolist(), 30)
 
-
-def follow_entry_analyze(fig, data, nbar):
-    '''恒敏的入场效率评估''' 
-    # 
-    #data_long = data[data.high_profit>data.low_profit] # 如果是单根开平，且开平价一样，那么此法不成立
-    #data_short = data[data.high_profit<=data.low_profit]
-    #ax = fig.add_subplot(111)
-    #effi_HM = entry_efficiency_HM(data_long, data_short, nbar)
-    #ax.plot(effi_HM.order().tolist(), color='b')
-    #ax.bar(range(len(effi_HM)), effi_HM.tolist(), color='r')
-    #return [ax], []
-    pass
 
 
 # Entry analyze
@@ -236,7 +189,11 @@ def compare_analyze(datas, colors=['r'], names=[]):
     plt.show()
     return figs, axes
 
-
+"""
+首先deal_tradeinfo会统计数据，
+然后analyze函数会根据显示要求，排序数据；
+最后由stock_plot里面的函数绘图．
+"""
 class AnalyzeFrame(object):
     """
     A slider representing a floating point range
@@ -245,10 +202,11 @@ class AnalyzeFrame(object):
     def __init__(self, fname, n=10, intraday=False):
         """ """
         self.fig = plt.figure(facecolor='white')
-        #self.fig.canvas.set_window_title(u'期货数据分析')
+        self.fig.canvas.set_window_title(u'期货数据分析')
         self.nbar = n
         self.cursors = []
         self.data, = load_datas(n, intraday, fname)
+        print self.data
         self.axes = []
         self.rax = plt.axes([0, 0.5, 0.08, 0.15])
         self.radio = RadioButtons(self.rax, ('scatter', 'summary', 'summary2', 'entry', 'exit', 'simple'), active=0)
@@ -256,30 +214,25 @@ class AnalyzeFrame(object):
         self.radio.on_clicked(self.update)
 
     def update(self, op):
-        print op
-        print "oooooooooooooooooooooooooooooooooooooooooooooooooooo" 
         for ax in self.axes:
             self.fig.delaxes(ax)
         for c in self.cursors:
             del c
         if op == "scatter":
-            print "scatter_analyze" 
+            print("scatter_analyze")
             self.axes, self.cursors = scatter_analyze(self.fig, self.data)
         elif op == "summary":
-            print "summary_analyze" 
+            print("summary_analyze")
             self.axes, self.cursors = summary_analyze(self.fig, self.data, self.nbar, 1)
         elif op == "summary2":
-            print "summary2_analyze" 
+            print("summary2_analyze")
             self.axes, self.cursors = summary_analyze(self.fig, self.data, self.nbar, 2)
         elif op == "entry":
-            print "entry_analyze" 
+            print("entry_analyze") 
             self.axes, self.cursors = entry_analyze(self.fig, self.data, self.nbar)
         elif op == "exit":
-            print "exit_analyze" 
+            print("exit_analyze")
             self.axes, self.cursors = exit_analyze(self.fig, self.data, self.nbar)
         elif op == "simple":
             self.axes, self.cursors = simple_entry_analyze(self.fig, self.data, self.nbar)
-        #elif op == "hm":
-            #axes, cursors = follow_entry_analyze(fig, data)
-            #print "hm" 
         self.fig.canvas.draw()
