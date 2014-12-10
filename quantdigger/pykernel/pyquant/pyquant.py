@@ -1,14 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-import sip
-sip.setapi('QString', 2)
+from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
+from IPython.qt.inprocess import QtInProcessKernelManager
+from PyQt4 import QtGui, QtCore
 
-from PyQt4 import QtCore, QtGui
+
+
+
+class EmbedIPython(RichIPythonWidget):
+
+    def __init__(self, **kwarg):
+        super(RichIPythonWidget, self).__init__()
+        self.kernel_manager = QtInProcessKernelManager()
+        self.kernel_manager.start_kernel()
+        self.kernel = self.kernel_manager.kernel
+        self.kernel.gui = 'qt4'
+        self.kernel.shell.push(kwarg)
+        self.kernel_client = self.kernel_manager.client()
+        self.kernel_client.start_channels()
 
 
 class MainWindow(QtGui.QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
+
 
         self.createToolBox()
         self.textEdit = QtGui.QTextEdit()
@@ -69,16 +85,11 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar().showMessage("Ready")
 
     def createDockWindows(self):
-        # Ipython命令栏
+        # Ipython终端栏
+        self.console = EmbedIPython(testing=123)
+        self.console.kernel.shell.run_cell('%pylab qt')
         dock = QtGui.QDockWidget("Paragraphs", self)
-        self.paragraphsList = QtGui.QListWidget(dock)
-        self.paragraphsList.addItems((
-            "Thank you for your payment which we have received today.",
-            "Your order has been dispatched and should be with you within "
-                "28 days.",
-            "You made an overpayment (more than $5). Do you wish to buy more "
-                "items, or should we return the excess to you?"))
-        dock.setWidget(self.paragraphsList)
+        dock.setWidget(self.console)
         dock.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea | QtCore.Qt.TopDockWidgetArea)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
@@ -165,11 +176,12 @@ class MainWindow(QtGui.QMainWindow):
         return widget
 
 
+
 if __name__ == '__main__':
-
     import sys
-
     app = QtGui.QApplication(sys.argv)
-    mainWin = MainWindow()
-    mainWin.show()
+    main = MainWindow()
+    main.show()
     sys.exit(app.exec_())
+    ## 执行终端语句
+    ##self.console.execute("print('a[\\\'text\\\'] = \"'+ a['text'] +'\"')")
