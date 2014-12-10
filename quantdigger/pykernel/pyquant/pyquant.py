@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf8 -*-
 import sip
 sip.setapi('QString', 2)
 
@@ -68,12 +69,7 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar().showMessage("Ready")
 
     def createDockWindows(self):
-        dock = QtGui.QDockWidget("Customers", self)
-        dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
-        dock.setWidget(self.toolBox)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dock)
-        self.viewMenu.addAction(dock.toggleViewAction())
-
+        # Ipython命令栏
         dock = QtGui.QDockWidget("Paragraphs", self)
         self.paragraphsList = QtGui.QListWidget(dock)
         self.paragraphsList.addItems((
@@ -83,7 +79,14 @@ class MainWindow(QtGui.QMainWindow):
             "You made an overpayment (more than $5). Do you wish to buy more "
                 "items, or should we return the excess to you?"))
         dock.setWidget(self.paragraphsList)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dock)
+        dock.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea | QtCore.Qt.TopDockWidgetArea)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, dock)
+        self.viewMenu.addAction(dock.toggleViewAction())
+        # ToolBox工具栏
+        dock = QtGui.QDockWidget("Customers", self)
+        dock.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        dock.setWidget(self.toolBox)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
         #self.customerList.currentTextChanged.connect(self.insertCustomer)
