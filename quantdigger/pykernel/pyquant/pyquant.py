@@ -3,7 +3,7 @@
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 from PyQt4 import QtGui, QtCore
-
+ 
 
 
 
