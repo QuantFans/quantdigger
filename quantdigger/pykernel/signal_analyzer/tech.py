@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 import matplotlib
 matplotlib.use('TkAgg')
-import os
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Cursor
+import os
+#from matplotlib.widgets import Cursor
 from widgets import *
 from data import csv2frame, load_tradeinfo
+import mplotw
 
-fig = plt.figure(facecolor='white')
-axk = plt.axes([0.1, 0.2, 0.8, 0.7], axisbg='k')
-axk.grid(True)
-xslider = plt.axes([0.1, 0.1, 0.8, 0.03])
-#yslider = plt.axes([0.1, 0.05, 0.8, 0.03])
-#ax.xaxis.set_minor_formatter(dayFormatter)
 
 # prepare data
 def get_stock_signal_data():
@@ -42,9 +37,17 @@ def get_stock_signal_data():
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 slw = 2
-# setup windows
-print("plotting.......")
-observer_slider = Slider(xslider, "slider", '', 0, len(price_data), len(price_data), len(price_data)/100, "%d")
+win = mplotw.MPlotW(3, 1)
+axk = win.axes[0]
+axk.grid(True)
+#axk = plt.axes([0.1, 0.2, 0.8, 0.7], axisbg='k')
+#xslider = plt.axes([0.1, 0.1, 0.8, 0.03])
+
+#yslider = plt.axes([0.1, 0.05, 0.8, 0.03])
+#ax.xaxis.set_minor_formatter(dayFormatter)
+## setup windows
+#print("plotting.......")
+#observer_slider = Slider(xslider, "slider", '', 0, len(price_data), len(price_data), len(price_data)/100, "%d")
 kwindow = CandleWindow(axk, "kwindow", price_data, 100, 50)
 
 #kwindow.on_changed(observer_slider)

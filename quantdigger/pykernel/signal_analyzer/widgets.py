@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 """
 GUI Neutral widgets
 ===================
@@ -10,8 +11,6 @@ wide and tall you want your Axes to be to accommodate your widget.
 """
 
 
-from matplotlib.patches import Circle, Rectangle
-from matplotlib.lines import Line2D
 from matplotlib.widgets import AxesWidget
 import numpy as np
 from stock_plot import candlestick2
@@ -96,7 +95,7 @@ class Slider(AxesWidget):
         ax.set_xlim((valmin, valmax))
         ax.set_xticks([])
         ax.set_navigate(False)
-
+        # 信号连接。
         self.connect_event('button_press_event', self._update)
         self.connect_event('button_release_event', self._update)
         if dragging:
@@ -181,7 +180,7 @@ class Slider(AxesWidget):
         self.update_observer("kwindow")
 
     def update_observer(self, obname):
-        '''docstring for update_observer''' 
+        """ 通知相关窗口更新数据 """
         for name, obj in self.observers.iteritems():
             if name == obname and obname == "kwindow":
                 obj.update(self.val)
@@ -278,7 +277,7 @@ class CandleWindow(AxesWidget):
             pass
 
     def update_observer(self, obname):
-        '''docstring for update_observer''' 
+        "通知进度条改变宽度" 
         for name, obj in self.observers.iteritems():
             if name == obname and obname == "slider":
                 obj.update(obj.val, self.wdlength)
