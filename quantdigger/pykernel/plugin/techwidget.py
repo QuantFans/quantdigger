@@ -4,8 +4,15 @@ from matplotlib.widgets import Cursor
 from matplotlib.widgets import MultiCursor
 import matplotlib.pyplot as plt
 
+import os, sys
+sys.path.append(os.getcwd())
+from  mplot_widgets import widgets as mwidgets
 
-class TechnicWidget(FigureCanvasQTAgg):
+
+
+
+
+class TechWidget(FigureCanvasQTAgg):
     def __init__(self, parent=None, *args):
         self.fig = plt.figure()
         self.cross_cursor = None
@@ -14,7 +21,7 @@ class TechnicWidget(FigureCanvasQTAgg):
         self.connect()
         for ax in self.axes:
             ax.format_coord = self.format_coord 
-        super(TechnicWidget, self).__init__(self.fig)
+        super(TechWidget, self).__init__(self.fig)
         self.setParent(parent)
 
 
@@ -68,8 +75,11 @@ class TechnicWidget(FigureCanvasQTAgg):
             else:
                 plt.subplot2grid((num_axes, 1), (sum(args[:i]), 0), rowspan = ratio)
 
-        #for ax in self.fig.axes:
-            #ax.set_xticklabels([])
+        #self.slider = mwidgets.Slider(xslider, "slider", '', 0, len(price_data), len(price_data), len(price_data)/100, "%d")
+        ##kwindow.on_changed(observer_slider)
+        ##observer_slider.on_changed(kwindow)
+        #signal = SignalWindow(axk, zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), colors, slw)
+
 
     def subplots_adjust(self, left, bottom, right, top, wspace=None, hspace=None):
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)

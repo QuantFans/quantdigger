@@ -1,10 +1,35 @@
-# -*- coding: gbk -*-
-import pandas as pd
-import numpy as np
+# -*- coding: utf8 -*-
 import os
+import pandas as pd
 import datetime as dt
+home = os.path.join(os.getcwd(), 'datasource', 'data')
 
-home = os.getcwd() + "/data/" 
+# prepare data
+def get_stock_signal_data():
+    fname =  os.path.join(os.getcwd(), 'datasource', 'data', 'stock_data', '_IF000.csv')
+    price_data = csv2frame(fname)
+    from matplotlib.colors import colorConverter
+    info = load_tradeinfo("_djtrend2_IF000")
+    entry_x = []
+    entry_y = info['entry_price'].tolist()
+    exit_x = []
+    exit_y = info['exit_price'].tolist()
+    colors = []
+    for t in info.index:
+        entry_x.append(price_data.index.searchsorted(t))
+    for t in info['exit_datetime'].values:
+        exit_x.append(price_data.index.searchsorted(t))
+    for i in range(len(info)):
+        tr = info.ix[i]
+        if tr['islong']:
+            c = 'r' if tr['exit_price']>tr['entry_price'] else 'w'
+        else:
+            c = 'r' if tr['exit_price']<tr['entry_price'] else 'w'
+        r,g,b = colorConverter.to_rgb(c)
+        colors.append((r,g,b,1))
+    return price_data, entry_x, entry_y, exit_x, exit_y, colors
+
+
 
 def set_dir(dname):
     '''docstring for set_dir''' 
@@ -13,7 +38,7 @@ def set_dir(dname):
 
 
 def csv2frame(fname):
-    ''' ¶ÁÈ¡CSVÎÄ¼şµ½DataFrame '''
+    ''' è¯»å–CSVæ–‡ä»¶åˆ°DataFrame '''
     try:
         print "*******", fname
         data = pd.read_csv(fname, index_col=0, parse_dates=True)
@@ -42,7 +67,7 @@ class Record(object):
 
     def is_long(self):
         '''docstring for is_long()''' 
-        # Èç¹ûÊÇµ¥¸ù¿ªÆ½£¬ÇÒ¿ªÆ½¼ÛÒ»Ñù£¬ÄÇÃ´´Ë·¨²»³ÉÁ¢
+        # å¦‚æœæ˜¯å•æ ¹å¼€å¹³ï¼Œä¸”å¼€å¹³ä»·ä¸€æ ·ï¼Œé‚£ä¹ˆæ­¤æ³•ä¸æˆç«‹
         return self.high_profit > self.low_profit
 
     def __str__(self):
@@ -154,7 +179,7 @@ def simple_deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
 
 
 def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
-    """ ¸ù¾İ½»Ò×ĞÅºÅºÍÊı¾İÎÄ¼ş£¬´¦ÀíÊı¾İ£® 
+    """ æ ¹æ®äº¤æ˜“ä¿¡å·å’Œæ•°æ®æ–‡ä»¶ï¼Œå¤„ç†æ•°æ®ï¼ 
     return data['high_profits', 'low_profit', 'exit_profit', 'period', 'return', 
                 'entry_nbar_bests', 'entry_nbar_worsts', 'exit_nbar_bests',
                 'exit_nbar_worsts', 'islong', 'entry_n', 'exit_n'
@@ -255,7 +280,7 @@ def deal_tradeinfo(tradeinfo, pricefname, n=10, intraday=False):
 
 
 def load_datas(n, intraday, *fnames):
-    """ ¸ù¾İÎÄ¼şÁĞ±í£¬·µ»Ø½á¹ûÁĞ±í£® """
+    """ æ ¹æ®æ–‡ä»¶åˆ—è¡¨ï¼Œè¿”å›ç»“æœåˆ—è¡¨ï¼ """
     def path_name(fname):
         return "".join([home, "trace/", fname, ".csv" ])
     datas = []
@@ -281,8 +306,7 @@ def load_datas(n, intraday, *fnames):
 def load_tradeinfo(fname):
     '''''' 
     def path_name(fname):
-        return "".join([home, "trace/", fname, ".csv" ])
-    #stock_dir=home + "stock_data\\"
+        return os.path.join(home, 'trace', fname + '.csv')
     names = [path_name(fname)]
     name, ext =  os.path.splitext(os.path.basename(fname))
     name = os.path.dirname(fname) + name + "_" + ext
@@ -297,7 +321,7 @@ def load_tradeinfo(fname):
 
 def symbolfromtradefname(fname, prefixnum=3):
     '''docstring for symbolfromfname''' 
-     ## @todo ºÍÎÄ¼ş¼ĞÃû×ÖÖĞµÄÏÂ»®Ïß³åÍ»ÁË.
+     ## @todo å’Œæ–‡ä»¶å¤¹åå­—ä¸­çš„ä¸‹åˆ’çº¿å†²çªäº†.
     return fname.split('_')[prefixnum]
 
 
