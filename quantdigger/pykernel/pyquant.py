@@ -38,7 +38,7 @@ class MainWindow(QtGui.QMainWindow):
         self.createToolBox()
         self.textEdit = QtGui.QTextEdit()
 
-        self.center_widget = TechWidget(self, 4, 1, 1)
+        self.center_widget = TechWidget(self, 1)
         self.center_widget.subplots_adjust(0.05, 0.05, 1, 1)
         axk = self.center_widget.axes[0]
         axk.grid(True)
