@@ -14,13 +14,13 @@ class TechMPlot(object):
             ax.format_coord = self.format_coord 
         self.connect()
 
-    def set_cursor(self):
+    def init_qt(self):
+        """docstring for set_qt""" 
+        self.in_qt = True
         if len(self.axes) == 1:
             self.cross_cursor = Cursor(self.axes[0], useblit=True, color='red', linewidth=2, vertOn=True, horizOn=True)
         else:
             self.v_cursor = MultiCursor(self.fig.canvas, self.fig.axes, color='r', lw=2, horizOn=False, vertOn=True)
-
-
 
     def connect(self):
         """
@@ -58,15 +58,14 @@ class TechMPlot(object):
             axes = [ax for ax in self.fig.axes if ax is not event.inaxes]
             self.v_cursor = MultiCursor(event.canvas, axes, color='r', lw=2, horizOn=False, vertOn=True)
             self.cross_cursor = Cursor(event.inaxes, useblit=True, color='red', linewidth=2, vertOn=True, horizOn=True)
-            event.canvas.draw()
+        event.canvas.draw()
         print("enter---")
 
     def leave_axes(self, event):
         if not self.in_qt:
             self.v_cursor = None
             self.cross_cursor = None
-        #event.inaxes.patch.set_facecolor('white')
-        #event.canvas.draw()
+            event.canvas.draw()  # 在qt中不起作用，还影响流畅。
         print("leave---")
 
     def add_subplot(self, *args):

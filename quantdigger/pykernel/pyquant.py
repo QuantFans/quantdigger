@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+import os, sys
+sys.path.append(os.path.join('.'))
 from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 from PyQt4 import QtGui, QtCore
-from plugin.techwidget import TechWidget
+from plugin.qtwidgets.techwidget import TechWidget
 from datasource import data
-from  mplot_widgets import widgets as mwidgets
-
-
-
 price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
-
-
- 
 
 
 
@@ -38,13 +33,9 @@ class MainWindow(QtGui.QMainWindow):
         self.createToolBox()
         self.textEdit = QtGui.QTextEdit()
 
-        self.center_widget = TechWidget(self, 1)
+        self.center_widget = TechWidget(self, 1,3)
         self.center_widget.subplots_adjust(0.05, 0.05, 1, 1)
-        axk = self.center_widget.axes[0]
-        axk.grid(True)
-        self.kwindow = mwidgets.CandleWindow(axk, "kwindow", price_data, 100, 50)
 
-        self.setCentralWidget(self.center_widget)
         self.createActions()
         self.createMenus()
         self.createToolBars()
@@ -52,6 +43,8 @@ class MainWindow(QtGui.QMainWindow):
         self.createDockWindows()
         self.setWindowTitle("QuantDigger")
         self.setUnifiedTitleAndToolBarOnMac(True)
+        self.setCentralWidget(self.center_widget)
+        self.center_widget.setFocus(True)
 
     def about(self):
         QtGui.QMessageBox.about(self, "About Dock Widgets",
@@ -188,8 +181,13 @@ class MainWindow(QtGui.QMainWindow):
 
         widget = QtGui.QWidget()
         widget.setLayout(layout)
-
         return widget
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        print(key)
+        if key == QtCore.Qt.Key_Left:
+           print('Left Arrow Pressed')
 
 
 

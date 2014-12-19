@@ -1,19 +1,79 @@
 # -*- coding: utf8 -*-
-"""
-GUI Neutral widgets
-===================
-
-Widgets that are designed to work for any of the GUI backends.
-All of these widgets require you to predefine an :class:`matplotlib.axes.Axes`
-instance and pass that as the first arg.  matplotlib doesn't try to
-be too smart with respect to layout -- you will have to figure out how
-wide and tall you want your Axes to be to accommodate your widget.
-"""
-
-
 from matplotlib.widgets import AxesWidget
 import numpy as np
-from stock_plot import candlestick2
+
+from matplotlib.colors import colorConverter
+from matplotlib.collections import LineCollection, PolyCollection
+
+def plot_candles(ax, opens, closes, highs, lows, width=4,
+                 colorup='r', colordown='g', lc='w',
+                 alpha=1,
+                ):
+    """
+
+    Represent the open, close as a bar line and high low range as a
+    vertical line.
+
+
+    ax          : an Axes instance to plot to
+    width       : the bar width in points
+    colorup     : the color of the lines where close >= open
+    colordown   : the color of the lines where close <  open
+    alpha       : bar transparency
+
+    return value is lineCollection, barCollection
+    """
+
+    # note this code assumes if any value open, close, low, high is
+    # missing they all are missing
+
+    delta = width/2.
+    barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(xrange(len(opens)), opens, closes) if open != -1 and close!=-1 ]
+    rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(xrange(len(lows)), lows, highs) if low != -1 ]
+    r,g,b = colorConverter.to_rgb(colorup)
+    colorup = r,g,b,alpha
+    r,g,b = colorConverter.to_rgb(colordown)
+    colordown = r,g,b,alpha
+    colord = { True : colorup,
+               False : colordown,
+               }
+    colors = [colord[open<close] for open, close in zip(opens, closes) if open!=-1 and close !=-1]
+    assert(len(barVerts)==len(rangeSegments))
+    useAA = 0,  # use tuple here
+    lw = 0.5,   # and here
+    r,g,b = colorConverter.to_rgb(lc)
+    linecolor = r,g,b,alpha
+    rangeCollection = LineCollection(rangeSegments,
+                                     colors       = ( linecolor, ),
+                                     linewidths   = lw,
+                                     antialiaseds = useAA,
+                                     zorder = 0,
+                                     )
+
+    barCollection = PolyCollection(barVerts,
+                                   facecolors   = colors,
+                                   edgecolors   = colors,
+                                   antialiaseds = useAA,
+                                   linewidths   = lw,
+                                   zorder = 1,
+                                   )
+    minx, maxx = 0, len(rangeSegments)
+    miny = min([low for low in lows if low !=-1])
+    maxy = max([high for high in highs if high != -1])
+    corners = (minx, miny), (maxx, maxy)
+    ax.update_datalim(corners)
+    ax.autoscale_view()
+    # add these last
+    ax.add_collection(barCollection)
+    ax.add_collection(rangeCollection)
+
+    def format_coord(x, y):
+        """ 状态栏信息显示 """
+        i = int(x)/1
+        c = "x:%s" %(x)
+        return str(c)
+    ax.format_coord = format_coord
+    return rangeCollection, barCollection
 
 
 class Slider(AxesWidget):
@@ -46,13 +106,13 @@ class Slider(AxesWidget):
       *slidermax* : another slider - if not *None*, this slider must be
                      less than *slidermax*
 
-      *dragging*  : allow for mouse dragging on slider
+      *drag_enabled*  : allow for mouse dragging on slider
 
-    Call :meth:`on_changed` to connect to the slider event
+    Call :meth:`add_observer` to connect to the slider event
     """
     def __init__(self, ax, name, label, valmin, valmax, valinit=0.5, width=1, valfmt='%1.2f', 
                  closedmin=True, closedmax=True, slidermin=None,
-                 slidermax=None, dragging=True, **kwargs):
+                 slidermax=None, drag_enabled=True, **kwargs):
         """
         Create a slider from *valmin* to *valmax* in axes *ax*
 
@@ -95,11 +155,7 @@ class Slider(AxesWidget):
         ax.set_xlim((valmin, valmax))
         ax.set_xticks([])
         ax.set_navigate(False)
-        # 信号连接。
-        self.connect_event('button_press_event', self._update)
-        self.connect_event('button_release_event', self._update)
-        if dragging:
-            self.connect_event('motion_notify_event', self._update)
+
         self.label = ax.text(-0.02, 0.5, label, transform=ax.transAxes,
                              verticalalignment='center',
                              horizontalalignment='right')
@@ -111,28 +167,32 @@ class Slider(AxesWidget):
 
         self.cnt = 0
         self.observers = {}
-
         self.closedmin = closedmin
         self.closedmax = closedmax
         self.slidermin = slidermin
         self.slidermax = slidermax
         self.drag_active = False
+        self.drag_enabled = drag_enabled
+
+    def connect(self):
+        """docstring for con""" 
+        # 信号连接。
+        self.connect_event('button_press_event', self._update)
+        self.connect_event('button_release_event', self._update)
+        if self.drag_enabled:
+            self.connect_event('motion_notify_event', self._update)
 
     def _update(self, event):
         """update the slider position"""
         if self.ignore(event):
             return
-
         if event.button != 1:
             return
-
         if event.name == 'button_press_event' and event.inaxes == self.ax:
             self.drag_active = True
             event.canvas.grab_mouse(self.ax)
-
         if not self.drag_active:
             return
-
         elif ((event.name == 'button_release_event') or
               (event.name == 'button_press_event' and
                event.inaxes != self.ax)):
@@ -164,6 +224,8 @@ class Slider(AxesWidget):
         if width:
             self.width = width
         self.set_val(val)
+        # 重绘
+        self.ax.figure.canvas.draw()
 
     def set_val(self, val):
         xy = self.poly.xy
@@ -186,7 +248,7 @@ class Slider(AxesWidget):
                 obj.update(self.val)
                 break
 
-    def on_changed(self, obj):
+    def add_observer(self, obj):
         """
         When the slider value is changed, call *func* with the new
         slider position
@@ -210,7 +272,7 @@ class Slider(AxesWidget):
 
 class CandleWindow(AxesWidget):
     """
-    A slider representing a floating point range
+    画蜡烛线。
 
     """
     def __init__(self, ax, name, data, wdlength, min_wdlength):
@@ -231,14 +293,15 @@ class CandleWindow(AxesWidget):
         self.observers = {}
         self.data = data
         self.name = name
-
         ax.set_xlim((self.xmin, self.xmax))
         ax.set_ylim((self.ymin, self.ymax))
-        self.a1, self.a2 = candlestick2(ax, data.open.tolist()[:self.xmax], data.close.tolist()[:self.xmax], 
+        self.a1, self.a2 = plot_candles(ax, data.open.tolist()[:self.xmax], data.close.tolist()[:self.xmax], 
                                         data.high.tolist()[:self.xmax], data.low.tolist()[:self.xmax], 
                                         0.6, 'r', 'g', alpha=1)
+        self.connect()
+
+    def connect(self):
         self.connect_event('key_release_event', self.keyrelease)
-        #self.connect_event('button_release_event', self._update)
 
     def _update(self, event):
         """update the slider position"""
@@ -259,8 +322,7 @@ class CandleWindow(AxesWidget):
         #self.ax.draw_artist(self.a2)
         self.ax.figure.canvas.draw()
 
-
-    def on_changed(self, obj):
+    def add_observer(self, obj):
         """
         When the slider value is changed, call *func* with the new
         slider position
@@ -313,4 +375,5 @@ class SignalWindow(object):
                                  )
         ax.add_collection(signal)
     #ax.add_collection(barCollection)
+
 

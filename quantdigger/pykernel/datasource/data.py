@@ -2,11 +2,11 @@
 import os
 import pandas as pd
 import datetime as dt
-home = os.path.join(os.getcwd(), 'datasource', 'data')
+home = os.path.join('/Users/alan/Work/Quant/quantdigger/quantdigger/pykernel/' , 'datasource', 'data')
 
 # prepare data
 def get_stock_signal_data():
-    fname =  os.path.join(os.getcwd(), 'datasource', 'data', 'stock_data', '_IF000.csv')
+    fname =  os.path.join(home, 'stock_data', '_IF000.csv')
     price_data = csv2frame(fname)
     from matplotlib.colors import colorConverter
     info = load_tradeinfo("_djtrend2_IF000")
