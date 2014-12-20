@@ -22,9 +22,9 @@ def get_stock_signal_data():
     for i in range(len(info)):
         tr = info.ix[i]
         if tr['islong']:
-            c = 'r' if tr['exit_price']>tr['entry_price'] else 'w'
+            c = 'r' if tr['exit_price']>tr['entry_price'] else 'b'
         else:
-            c = 'r' if tr['exit_price']<tr['entry_price'] else 'w'
+            c = 'r' if tr['exit_price']<tr['entry_price'] else 'b'
         r,g,b = colorConverter.to_rgb(c)
         colors.append((r,g,b,1))
     return price_data, entry_x, entry_y, exit_x, exit_y, colors

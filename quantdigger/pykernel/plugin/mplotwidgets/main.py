@@ -3,5 +3,5 @@ matplotlib.use('TkAgg')
 import techmplot
 import matplotlib.pyplot as plt
 fig = plt.figure()
-obj = techmplot.TechMPlot(fig, 1, 3)
+obj = techmplot.TechMPlot(fig, 4,3,1)
 plt.show()

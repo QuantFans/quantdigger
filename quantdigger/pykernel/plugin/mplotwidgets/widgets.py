@@ -6,7 +6,7 @@ from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
 
 def plot_candles(ax, opens, closes, highs, lows, width=4,
-                 colorup='r', colordown='g', lc='w',
+                 colorup='r', colordown='g', lc='k',
                  alpha=1,
                 ):
     """
@@ -43,7 +43,7 @@ def plot_candles(ax, opens, closes, highs, lows, width=4,
     lw = 0.5,   # and here
     r,g,b = colorConverter.to_rgb(lc)
     linecolor = r,g,b,alpha
-    rangeCollection = LineCollection(rangeSegments,
+    lineCollection = LineCollection(rangeSegments,
                                      colors       = ( linecolor, ),
                                      linewidths   = lw,
                                      antialiaseds = useAA,
@@ -65,15 +65,24 @@ def plot_candles(ax, opens, closes, highs, lows, width=4,
     ax.autoscale_view()
     # add these last
     ax.add_collection(barCollection)
-    ax.add_collection(rangeCollection)
+    ax.add_collection(lineCollection)
 
-    def format_coord(x, y):
-        """ 状态栏信息显示 """
-        i = int(x)/1
-        c = "x:%s" %(x)
-        return str(c)
-    ax.format_coord = format_coord
-    return rangeCollection, barCollection
+    return lineCollection, barCollection
+
+class RangeWidget(object):
+    """"""
+    def __init__(self, name, ax, data):
+        self.name = name
+        self.ax = ax
+        self.ax.plot(data)
+
+    def update(self):
+        """""" 
+        #self.zorder = 1000
+        #self.ax.visible = True
+        #self.ax.figure.canvas.draw()
+        print "8888" 
+    
 
 
 class Slider(AxesWidget):
@@ -145,7 +154,8 @@ class Slider(AxesWidget):
         self.valinit = valinit
         self.ax = ax
         self.width = width
-        self.poly = ax.axvspan(valmax-self.width,valmax, 0, 1, **kwargs)
+        # 滑动条
+        self.poly = ax.axvspan(valmax-self.width/2,valmax+self.width/2, 0, 1, **kwargs)
         self.name = name
         #axhspan
         #self.vline = ax.axvline(valinit, 0, 1, color='r', lw=1)
@@ -153,7 +163,7 @@ class Slider(AxesWidget):
         self.valfmt = valfmt
         ax.set_yticks([])
         ax.set_xlim((valmin, valmax))
-        ax.set_xticks([])
+        #ax.set_xticks([]) # disable ticks
         ax.set_navigate(False)
 
         self.label = ax.text(-0.02, 0.5, label, transform=ax.transAxes,
@@ -178,9 +188,15 @@ class Slider(AxesWidget):
         """docstring for con""" 
         # 信号连接。
         self.connect_event('button_press_event', self._update)
+        self.connect_event('button_press_event', self.update_range)
         self.connect_event('button_release_event', self._update)
         if self.drag_enabled:
             self.connect_event('motion_notify_event', self._update)
+
+    def update_range(self, event):
+        """""" 
+        self.observers["range"].update()
+
 
     def _update(self, event):
         """update the slider position"""
@@ -226,6 +242,7 @@ class Slider(AxesWidget):
         self.set_val(val)
         # 重绘
         self.ax.figure.canvas.draw()
+        print "update...." 
 
     def set_val(self, val):
         xy = self.poly.xy
@@ -233,7 +250,7 @@ class Slider(AxesWidget):
         xy[3] = val, 0
         self.val = val
         self.poly.remove()
-        self.poly = self.ax.axvspan(val-self.width, val, 0, 1)
+        self.poly = self.ax.axvspan(val-self.width/2, val+self.width/2, 0, 1)
         #self.poly.xy = xy
         self.valtext.set_text(self.valfmt % val)
         self.val = val
@@ -246,6 +263,8 @@ class Slider(AxesWidget):
         for name, obj in self.observers.iteritems():
             if name == obname and obname == "kwindow":
                 obj.update(self.val)
+            #else:
+                #obj.update()
                 break
 
     def add_observer(self, obj):
@@ -284,10 +303,13 @@ class CandleWindow(AxesWidget):
         self.wdlength = wdlength
         self.min_wdlength = min_wdlength
         self.voffset = 0
+
+        # 当前显示的范围。 
         self.xmax = len(data)
         self.xmin = max(0, self.xmax-self.wdlength) 
         self.ymax = np.max(data.high[self.xmin : self.xmax].values) + self.voffset
         self.ymin = np.min(data.low[self.xmin : self.xmax].values) - self.voffset
+
         self.ax = ax
         self.cnt = 0
         self.observers = {}
@@ -295,7 +317,7 @@ class CandleWindow(AxesWidget):
         self.name = name
         ax.set_xlim((self.xmin, self.xmax))
         ax.set_ylim((self.ymin, self.ymax))
-        self.a1, self.a2 = plot_candles(ax, data.open.tolist()[:self.xmax], data.close.tolist()[:self.xmax], 
+        self.lines, self.rects = plot_candles(ax, data.open.tolist()[:self.xmax], data.close.tolist()[:self.xmax], 
                                         data.high.tolist()[:self.xmax], data.low.tolist()[:self.xmax], 
                                         0.6, 'r', 'g', alpha=1)
         self.connect()
@@ -314,6 +336,7 @@ class CandleWindow(AxesWidget):
         self.xmin = max(0, self.xmax-self.wdlength)
         self.ymax = np.max(self.data.high[val-self.wdlength : val].values) + self.voffset
         self.ymin = np.min(self.data.low[val-self.wdlength : val].values) - self.voffset
+
         self.ax.set_xlim((val-self.wdlength, val))
         self.ax.set_ylim((self.ymin, self.ymax))
         self.ax.autoscale_view()
@@ -339,11 +362,12 @@ class CandleWindow(AxesWidget):
             pass
 
     def update_observer(self, obname):
-        "通知进度条改变宽度" 
-        for name, obj in self.observers.iteritems():
-            if name == obname and obname == "slider":
-                obj.update(obj.val, self.wdlength)
-                break
+        #"通知进度条改变宽度" 
+        #for name, obj in self.observers.iteritems():
+            #if name == obname and obname == "slider":
+                #obj.update(obj.val, self.wdlength)
+                #break
+        pass
              
     def keyrelease(self, event):
         '''docstring for keypress''' 

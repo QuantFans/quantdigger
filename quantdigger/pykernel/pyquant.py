@@ -6,10 +6,8 @@ from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 from PyQt4 import QtGui, QtCore
 from plugin.qtwidgets.techwidget import TechWidget
-from datasource import data
-price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
-
-
+#from datasource import data
+#price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
 
 class EmbedIPython(RichIPythonWidget):
 
@@ -29,11 +27,10 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-
         self.createToolBox()
         self.textEdit = QtGui.QTextEdit()
 
-        self.center_widget = TechWidget(self, 1,3)
+        self.center_widget = TechWidget(self, 4,1,1)
         self.center_widget.subplots_adjust(0.05, 0.05, 1, 1)
 
         self.createActions()
