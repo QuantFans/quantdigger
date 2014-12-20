@@ -3,104 +3,28 @@ from matplotlib.widgets import Cursor
 from matplotlib.widgets import MultiCursor
 import matplotlib.pyplot as plt
 import widgets
-
-
+from indicator import *
 import os, sys
 sys.path.append(os.path.join('..', '..'))
+
 from datasource.data import get_stock_signal_data
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
-import datetime
-import numpy as np
 import matplotlib.finance as finance
-import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 
-def moving_average(x, n, type='simple'):
-    """
-    compute an n period moving average.
-
-    type is 'simple' | 'exponential'
-
-    """
-    x = np.asarray(x)
-    if type=='simple':
-        weights = np.ones(n)
-    else:
-        weights = np.exp(np.linspace(-1., 0., n))
-
-    weights /= weights.sum()
 
 
-    a =  np.convolve(x, weights, mode='full')[:len(x)]
-    a[:n] = a[n]
-    return a
+class MyLocator(mticker.MaxNLocator):
+    def __init__(self, *args, **kwargs):
+        mticker.MaxNLocator.__init__(self, *args, **kwargs)
 
-def relative_strength(prices, n=14):
-    """
-    compute the n period relative strength indicator
-    http://stockcharts.com/school/doku.php?id=chart_school:glossary_r#relativestrengthindex
-    http://www.investopedia.com/terms/r/rsi.asp
-    """
-
-    deltas = np.diff(prices)
-    seed = deltas[:n+1]
-    up = seed[seed>=0].sum()/n
-    down = -seed[seed<0].sum()/n
-    rs = up/down
-    rsi = np.zeros_like(prices)
-    rsi[:n] = 100. - 100./(1.+rs)
-
-    for i in range(n, len(prices)):
-        delta = deltas[i-1] # cause the diff is 1 shorter
-
-        if delta>0:
-            upval = delta
-            downval = 0.
-        else:
-            upval = 0.
-            downval = -delta
-
-        up = (up*(n-1) + upval)/n
-        down = (down*(n-1) + downval)/n
-
-        rs = up/down
-        rsi[i] = 100. - 100./(1.+rs)
-
-    return rsi
-
-def moving_average_convergence(x, nslow=26, nfast=12):
-    """
-    compute the MACD (Moving Average Convergence/Divergence) using a fast and slow exponential moving avg'
-    return value is emaslow, emafast, macd which are len(x) arrays
-    """
-    emaslow = moving_average(x, nslow, type='exponential')
-    emafast = moving_average(x, nfast, type='exponential')
-    return emaslow, emafast, emafast - emaslow
-
-rsi = relative_strength(price_data['close'])
-def plot_rsi(ax, fillcolor = 'b'):
-    """docstring for plot_rsi""" 
-    textsize = 9
-    ax.plot(rsi, color=fillcolor)
-    ax.axhline(70, color=fillcolor)
-    ax.axhline(30, color=fillcolor)
-    ax.fill_between(rsi, 70, where=(rsi>=70), facecolor=fillcolor, edgecolor=fillcolor)
-    ax.fill_between(rsi, 30, where=(rsi<=30), facecolor=fillcolor, edgecolor=fillcolor)
-    ax.text(0.6, 0.9, '>70 = overbought', va='top', transform=ax.transAxes, fontsize=textsize, color = 'k')
-    ax.text(0.6, 0.1, '<30 = oversold', transform=ax.transAxes, fontsize=textsize, color = 'k')
-    ax.set_ylim(0, 100)
-    ax.set_yticks([30,70])
-    ax.text(0.025, 0.95, 'RSI (14)', va='top', transform=ax.transAxes, fontsize=textsize)
+    def __call__(self, *args, **kwargs):
+        return mticker.MaxNLocator.__call__(self, *args, **kwargs)
 
 
 #plt.rc('axes', grid=True)
-
-
-
 
 
 class TechMPlot(object):
@@ -197,31 +121,36 @@ class TechMPlot(object):
 
         for ax in self.axes:
             ax.grid(True)
-            ax.set_xticklabels([])
+            #ax.set_xticklabels([])
         main_index = -1 if len(self.axes) > 1 else 0
         self.kwindow = widgets.CandleWindow(self.axes[main_index], "kwindow", price_data, 100, 50)
 
 
-        plot_rsi(self.axes[-2])
-        ma20 = moving_average(price_data['close'], 20, type='simple')
-        ma30 = moving_average(price_data['close'], 30, type='simple')
-        linema20, = self.axes[-1].plot( ma20, color='y', lw=2, label='MA (20)')
-        linema30, = self.axes[-1].plot( ma30, color='b', lw=2, label='MA (30)')
+        RSI(price_data.close, 14, self.axes[-2], 'b')
+        
+        MA(price_data.close, 20, 'simple', self.axes[-1], 'y', 2)
+        MA(price_data.close, 30, 'simple', self.axes[-1], 'b', 2)
         props = font_manager.FontProperties(size=10)
         leg = self.axes[-1].legend(loc='center left', shadow=True, fancybox=True, prop=props)
         leg.get_frame().set_alpha(0.5)
+
+
+        # at most 5 ticks, pruning the upper and lower so they don't overlap
+        # with other ticks
+        #self.axes[0].yaxis.set_major_locator(MyLocator(5, prune='both'))
+        #self.axes[1].yaxis.set_major_locator(MyLocator(5, prune='both'))
     
 
 
         #volume = (r.close*r.volume)/1e6  # dollar volume in millions
         ax2t = self.axes[0]
-        volume = price_data['vol']
         #vmax = volume.max()
-        finance.volume_overlay(ax2t, price_data['open'], price_data['close'],
-                price_data['vol'], colorup = 'r', colordown = 'b', width = 1)
         #poly = ax2t.fill_between(volume, 0, label='Volume', facecolor='b', edgecolor='b' )
         #ax2t.set_ylim(0, 5*vmax)
         #ax2t.set_yticks([])
+        volume = price_data['vol']
+        finance.volume_overlay(ax2t, price_data['open'], price_data['close'],
+                               volume, colorup = 'r', colordown = 'b', width = 1)
 
 
         self.rangew = widgets.RangeWidget('range', self.range_ax, price_data['close'])
