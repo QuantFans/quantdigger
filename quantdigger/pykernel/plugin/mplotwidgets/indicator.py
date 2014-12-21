@@ -1,13 +1,72 @@
 # -*- coding: utf8 -*-
 import numpy as np
+from matplotlib.axes import Axes
 
-class MA(object):
-    """docstring for Ave"""
-    def __init__(self, price, n, type='simple', ax=None, color='y', lw=2):
+class Indicator(object):
+    """docstring for Indicator"""
+    def __init__(self, name, value=None, widget=None):
+        """
+        
+        Args:
+            name (str): description
+            value (np.dataarray): 值
+            widget (widget): Axes or QtGui.Widget。
+        
+        Returns:
+            Indicator. The result
+        """
+        self.name = name
+        # 可能是qt widget, Axes, WebUI
+        self.widget = widget
+        self.value = value
+
+    def __float__(self):
+        return float(self.n)
+    
+    # api
+    def plot_line(self, data, color, lw):
+        """ 画线    
+        
+        Args:
+            data (list): 浮点数组。
+            color (str): 颜色。
+            lw (int): 线宽。
+        """
+        def mplot_line(data, color, lw):
+            """ 使用matplotlib容器绘线 """
+            raise NotImplementedError
+
+        def qtplot_line(self, data, color, lw):
+            """ 使用pyqtq容器绘线 """
+            raise NotImplementedError
+
+        if isinstance(self.widget, Axes):
+            mplot_line(data, color, lw) 
+        else:
+            qtplot_line(data, color, lw)
+
+    # other plot ..
+
+
+from matplotlib.collections import LineCollection
+class TradingSignal(Indicator):
+    """docstring for signalWindow"""
+    def __init__(self, s, name="Signal"):
+        self.signal=s
+        super(TradingSignal , self).__init__(name)
+
+    def plot_signal(self, widget, c, lw):
+        useAA = 0,  # use tuple here
+        signal = LineCollection(self.signal, colors=c, linewidths=lw,
+                                antialiaseds=useAA)
+        widget.add_collection(signal)
+
+
+class MA(Indicator):
+    def __init__(self, price, n, type='simple', name='MA'):
+        super(MA, self).__init__(name)
         self.value = self._moving_average(price, n, type)
         self.n = n
-        if ax:
-            self.plot_ma(ax, color, lw) 
 
     def _moving_average(self, x, n, type='simple'):
         """
@@ -26,26 +85,31 @@ class MA(object):
         a[:n] = a[n]
         return a
     
-    def plot_ma(self, ax, color='y', lw=2):
-        ax.plot(self.value, color=color, lw=lw, label='MA (%d)' % self.n)
+    def plot_ma(self, widget, color='y', lw=2):
+        self.widget = widget
+        if isinstance(widget, Axes):
+            self._mplot(widget, color, lw)
+        else:
+            # pyqt
+            self._qtplot(widget, color, lw)
+
+    def _mplot(self, ax, color, lw):
+        ax.plot(self.value, color=color, lw=lw, label=self.name)
+
+    def _qtplot(self, widget, color, lw):
+        """docstring for qtplot""" 
+        raise  NotImplementedError
 
 
-class RSI(object):
-    """docstring for RSI"""
-    def __init__(self, prices, n=14, ax=None, fillcolor='b'):
+class RSI(Indicator):
+    def __init__(self, prices, n=14, name="RSI"):
+        super(RSI, self).__init__(name)
         self.prices = prices
         self.n = n
         self.value = self._relative_strength(prices, n)
-        if ax:
-            self.plot_rsi(ax, fillcolor) 
     
     def _relative_strength(self, prices, n=14):
-        """
-        compute the n period relative strength indicator
-        http://stockcharts.com/school/doku.php?id=chart_school:glossary_r#relativestrengthindex
-        http://www.investopedia.com/terms/r/rsi.asp
 
-        """
         deltas = np.diff(prices)
         seed = deltas[:n+1]
         up = seed[seed>=0].sum()/n
@@ -56,7 +120,6 @@ class RSI(object):
 
         for i in range(n, len(prices)):
             delta = deltas[i-1] # cause the diff is 1 shorter
-
             if delta>0:
                 upval = delta
                 downval = 0.
@@ -69,10 +132,13 @@ class RSI(object):
 
             rs = up/down
             rsi[i] = 100. - 100./(1.+rs)
-
         return rsi
 
-    def plot_rsi(self, ax, fillcolor = 'b'):
+    def plot_rsi(self, widget, fillcolor = 'b'):
+        self.widget = widget
+        self._mplot(widget, fillcolor)
+
+    def _mplot(self, ax, fillcolor):
         textsize = 9
         ax.plot(self.value, color=fillcolor)
         ax.axhline(70, color=fillcolor)
@@ -86,19 +152,13 @@ class RSI(object):
         ax.text(0.025, 0.95, 'rsi (14)', va='top', transform=ax.transAxes, fontsize=textsize)
 
 
-class MACD(object):
+
+class MACD(Indicator):
     """"""
-    def __init__(self, prices, nslow, nfast):
+    def __init__(self, prices, nslow, nfast, name='MACD'):
+        super(MACD, self).__init__(name)
         self.emaslow, self.emafast, self.macd = self._moving_average_convergence(prices, nslow=nslow, nfast=nfast)
-        
-    def plot_macd(self, ax):
-        """docstring for plot_macd""" 
-        fillcolor = 'darkslategrey'
-        nema = 9
-        ema9 = MA(self.macd, nema, type='exponential').value
-        ax.plot(self.macd, color='black', lw=2)
-        ax.plot(self.ema9, color='blue', lw=1)
-        ax.fill_between(self.macd-ema9, 0, alpha=0.5, facecolor=fillcolor, edgecolor=fillcolor)
+        self.value = (self.emaslow, self.emafast, self.macd)
 
     def _moving_average_convergence(x, nslow=26, nfast=12):
         """
@@ -108,3 +168,18 @@ class MACD(object):
         emaslow = MA(x, nslow, type='exponential').value
         emafast = MA(x, nfast, type='exponential').value
         return emaslow, emafast, emafast - emaslow
+        
+    def plot_macd(self, widget):
+        self.widget = widget
+        self._mplot(widget)
+
+    def _mplot(self, ax):
+        fillcolor = 'darkslategrey'
+        nema = 9
+        ema9 = MA(self.macd, nema, type='exponential').value
+        ax.plot(self.macd, color='black', lw=2)
+        ax.plot(self.ema9, color='blue', lw=1)
+        ax.fill_between(self.macd-ema9, 0, alpha=0.5, facecolor=fillcolor, edgecolor=fillcolor)
+
+    #def _qtplot(self, widget, fillcolor):
+        #raise  NotImplementedError

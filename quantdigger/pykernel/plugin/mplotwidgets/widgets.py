@@ -57,16 +57,18 @@ def plot_candles(ax, opens, closes, highs, lows, width=4,
                                    linewidths   = lw,
                                    zorder = 1,
                                    )
-    minx, maxx = 0, len(rangeSegments)
-    miny = min([low for low in lows if low !=-1])
-    maxy = max([high for high in highs if high != -1])
-    corners = (minx, miny), (maxx, maxy)
-    ax.update_datalim(corners)
+    #minx, maxx = 0, len(rangeSegments)
+    #miny = min([low for low in lows if low !=-1])
+    #maxy = max([high for high in highs if high != -1])
+    #corners = (minx, miny), (maxx, maxy)
+    #ax.update_datalim(corners)
     ax.autoscale_view()
     # add these last
     ax.add_collection(barCollection)
     ax.add_collection(lineCollection)
 
+    #ax.plot(closes, color = 'y')
+    #lineCollection, barCollection = None, None
     return lineCollection, barCollection
 
 class RangeWidget(object):
@@ -340,9 +342,6 @@ class CandleWindow(AxesWidget):
         self.ax.set_xlim((val-self.wdlength, val))
         self.ax.set_ylim((self.ymin, self.ymax))
         self.ax.autoscale_view()
-        #self.ax.draw()
-        #self.ax.draw_artist(self.a1)
-        #self.ax.draw_artist(self.a2)
         self.ax.figure.canvas.draw()
 
     def add_observer(self, obj):
@@ -384,20 +383,5 @@ class CandleWindow(AxesWidget):
             self.wdlength = max(self.wdlength, self.min_wdlength)
             self.update(self.xmax)
             self.update_observer("slider")
-
-
-from matplotlib.collections import LineCollection
-class SignalWindow(object):
-    """docstring for signalWindow"""
-    def __init__(self,ax, s, c, lw=0.5):
-        useAA = 0,  # use tuple here
-        signal = LineCollection(s,
-                                colors       = c, 
-                                linewidths   = lw,
-                                antialiaseds = useAA,
-                                #zorder = 0,
-                                 )
-        ax.add_collection(signal)
-    #ax.add_collection(barCollection)
 
 
