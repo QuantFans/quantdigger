@@ -2,74 +2,7 @@
 from matplotlib.widgets import AxesWidget
 import numpy as np
 
-from matplotlib.colors import colorConverter
-from matplotlib.collections import LineCollection, PolyCollection
 
-def plot_candles(ax, opens, closes, highs, lows, width=4,
-                 colorup='r', colordown='g', lc='k',
-                 alpha=1,
-                ):
-    """
-
-    Represent the open, close as a bar line and high low range as a
-    vertical line.
-
-
-    ax          : an Axes instance to plot to
-    width       : the bar width in points
-    colorup     : the color of the lines where close >= open
-    colordown   : the color of the lines where close <  open
-    alpha       : bar transparency
-
-    return value is lineCollection, barCollection
-    """
-
-    # note this code assumes if any value open, close, low, high is
-    # missing they all are missing
-
-    delta = width/2.
-    barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(xrange(len(opens)), opens, closes) if open != -1 and close!=-1 ]
-    rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(xrange(len(lows)), lows, highs) if low != -1 ]
-    r,g,b = colorConverter.to_rgb(colorup)
-    colorup = r,g,b,alpha
-    r,g,b = colorConverter.to_rgb(colordown)
-    colordown = r,g,b,alpha
-    colord = { True : colorup,
-               False : colordown,
-               }
-    colors = [colord[open<close] for open, close in zip(opens, closes) if open!=-1 and close !=-1]
-    assert(len(barVerts)==len(rangeSegments))
-    useAA = 0,  # use tuple here
-    lw = 0.5,   # and here
-    r,g,b = colorConverter.to_rgb(lc)
-    linecolor = r,g,b,alpha
-    lineCollection = LineCollection(rangeSegments,
-                                     colors       = ( linecolor, ),
-                                     linewidths   = lw,
-                                     antialiaseds = useAA,
-                                     zorder = 0,
-                                     )
-
-    barCollection = PolyCollection(barVerts,
-                                   facecolors   = colors,
-                                   edgecolors   = colors,
-                                   antialiaseds = useAA,
-                                   linewidths   = lw,
-                                   zorder = 1,
-                                   )
-    #minx, maxx = 0, len(rangeSegments)
-    #miny = min([low for low in lows if low !=-1])
-    #maxy = max([high for high in highs if high != -1])
-    #corners = (minx, miny), (maxx, maxy)
-    #ax.update_datalim(corners)
-    ax.autoscale_view()
-    # add these last
-    ax.add_collection(barCollection)
-    ax.add_collection(lineCollection)
-
-    #ax.plot(closes, color = 'y')
-    #lineCollection, barCollection = None, None
-    return lineCollection, barCollection
 
 class RangeWidget(object):
     """"""
@@ -290,7 +223,7 @@ class Slider(AxesWidget):
         if (self.val != self.valinit):
             self.set_val(self.valinit)
 
-
+from indicator import Candles
 class CandleWindow(AxesWidget):
     """
     画蜡烛线。
@@ -319,9 +252,8 @@ class CandleWindow(AxesWidget):
         self.name = name
         ax.set_xlim((self.xmin, self.xmax))
         ax.set_ylim((self.ymin, self.ymax))
-        self.lines, self.rects = plot_candles(ax, data.open.tolist()[:self.xmax], data.close.tolist()[:self.xmax], 
-                                        data.high.tolist()[:self.xmax], data.low.tolist()[:self.xmax], 
-                                        0.6, 'r', 'g', alpha=1)
+        candles = Candles(data, 0.6, 'r', 'g', alpha=1)
+        self.lines, self.rects = candles.plot(ax)
         self.connect()
 
     def connect(self):

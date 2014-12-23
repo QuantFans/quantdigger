@@ -1,6 +1,24 @@
 # -*- coding: utf8 -*-
 import numpy as np
+import inspect
 from matplotlib.axes import Axes
+
+def plot_interface(method):
+    def wrapper(self, widget, *args, **kwargs):
+        self.widget = widget
+        # 用函数中的参数覆盖属性。
+        arg_names = inspect.getargspec(method).args[2:]
+        method_args = { }
+        obj_attrs = { }
+        for i, arg in enumerate(args):
+            method_args[arg_names[i]] = arg
+        method_args.update(kwargs)
+        for attr in arg_names:
+            obj_attrs[attr] = getattr(self, attr)
+        obj_attrs.update(method_args)
+        return method(self, widget, **obj_attrs)
+    return wrapper
+
 
 class Indicator(object):
     """docstring for Indicator"""
@@ -63,9 +81,11 @@ class TradingSignal(Indicator):
 
 
 class MA(Indicator):
-    def __init__(self, price, n, type='simple', name='MA'):
+    def __init__(self, price, n, name='MA', type='simple', color='y', lw=1):
         super(MA, self).__init__(name)
         self.value = self._moving_average(price, n, type)
+        self.color = color
+        self.lw = lw
         self.n = n
 
     def _moving_average(self, x, n, type='simple'):
@@ -84,32 +104,36 @@ class MA(Indicator):
         a =  np.convolve(x, weights, mode='full')[:len(x)]
         a[:n] = a[n]
         return a
-    
-    def plot_ma(self, widget, color='y', lw=2):
-        self.widget = widget
+
+    @plot_interface
+    def plot(self, widget, color=None, lw=None):
+        ## @todo 使用Indicator类中的绘图接口绘图。
         if isinstance(widget, Axes):
             self._mplot(widget, color, lw)
         else:
             # pyqt
             self._qtplot(widget, color, lw)
 
+
     def _mplot(self, ax, color, lw):
         ax.plot(self.value, color=color, lw=lw, label=self.name)
+
 
     def _qtplot(self, widget, color, lw):
         """docstring for qtplot""" 
         raise  NotImplementedError
 
 
+
 class RSI(Indicator):
-    def __init__(self, prices, n=14, name="RSI"):
+    def __init__(self, prices, n=14, name="RSI", fillcolor='b'):
         super(RSI, self).__init__(name)
         self.prices = prices
         self.n = n
         self.value = self._relative_strength(prices, n)
+        self.fillcolor = fillcolor
     
     def _relative_strength(self, prices, n=14):
-
         deltas = np.diff(prices)
         seed = deltas[:n+1]
         up = seed[seed>=0].sum()/n
@@ -134,9 +158,11 @@ class RSI(Indicator):
             rsi[i] = 100. - 100./(1.+rs)
         return rsi
 
-    def plot_rsi(self, widget, fillcolor = 'b'):
-        self.widget = widget
+
+    @plot_interface
+    def plot(self, widget, fillcolor='b'):
         self._mplot(widget, fillcolor)
+
 
     def _mplot(self, ax, fillcolor):
         textsize = 9
@@ -150,7 +176,6 @@ class RSI(Indicator):
         ax.set_ylim(0, 100)
         ax.set_yticks([30,70])
         ax.text(0.025, 0.95, 'rsi (14)', va='top', transform=ax.transAxes, fontsize=textsize)
-
 
 
 class MACD(Indicator):
@@ -169,7 +194,7 @@ class MACD(Indicator):
         emafast = MA(x, nfast, type='exponential').value
         return emaslow, emafast, emafast - emaslow
         
-    def plot_macd(self, widget):
+    def plot(self, widget):
         self.widget = widget
         self._mplot(widget)
 
@@ -183,3 +208,96 @@ class MACD(Indicator):
 
     #def _qtplot(self, widget, fillcolor):
         #raise  NotImplementedError
+
+import matplotlib.finance as finance
+class Volume(Indicator):
+    """docstring for Volume"""
+    def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
+        self.name = name
+        self.volume = volume
+        self.open = open
+        self.close = close
+        self.colorup = colorup
+        self.colordown = colordown
+        self.width = width
+
+    @plot_interface
+    def plot(self, widget, colorup = 'r', colordown = 'b', width = 1):
+        """docstring for plot""" 
+        finance.volume_overlay(widget, self.open, self.close, self.volume, colorup, colordown, width)
+
+
+
+
+from matplotlib.colors import colorConverter
+from matplotlib.collections import LineCollection, PolyCollection
+class Candles(Indicator):
+    def __init__(self, data, width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
+        """ Represent the open, close as a bar line and high low range as a
+        vertical line.
+
+
+        ax          : an Axes instance to plot to
+        width       : the bar width in points
+        colorup     : the color of the lines where close >= open
+        colordown   : the color of the lines where close <  open
+        alpha       : bar transparency
+
+        return value is lineCollection, barCollection
+        """
+        self.data = data
+        self.width = width
+        self.colorup = colorup
+        self.colordown = colordown
+        self.lc = lc
+        self.alpha = alpha
+        # note this code assumes if any value open, close, low, high is
+        # missing they all are missing
+
+
+    @plot_interface
+    def plot(self, widget, width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
+        """docstring for plot""" 
+        delta = width/2.
+        barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(xrange(len(self.data)), self.data.open, self.data.close) if open != -1 and close!=-1 ]
+        rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(xrange(len(self.data)), self.data.low, self.data.high) if low != -1 ]
+        r,g,b = colorConverter.to_rgb(colorup)
+        colorup = r,g,b,alpha
+        r,g,b = colorConverter.to_rgb(colordown)
+        colordown = r,g,b,alpha
+        colord = { True : colorup,
+                   False : colordown,
+                   }
+        colors = [colord[open<close] for open, close in zip(self.data.open, self.data.close) if open!=-1 and close !=-1]
+        assert(len(barVerts)==len(rangeSegments))
+        useAA = 0,  # use tuple here
+        lw = 0.5,   # and here
+        r,g,b = colorConverter.to_rgb(lc)
+        linecolor = r,g,b,alpha
+        lineCollection = LineCollection(rangeSegments,
+                                         colors       = ( linecolor, ),
+                                         linewidths   = lw,
+                                         antialiaseds = useAA,
+                                         zorder = 0,
+                                         )
+
+        barCollection = PolyCollection(barVerts,
+                                       facecolors   = colors,
+                                       edgecolors   = colors,
+                                       antialiaseds = useAA,
+                                       linewidths   = lw,
+                                       zorder = 1,
+                                       )
+        #minx, maxx = 0, len(rangeSegments)
+        #miny = min([low for low in self.data.low if low !=-1])
+        #maxy = max([high for high in self.data.high if high != -1])
+        #corners = (minx, miny), (maxx, maxy)
+        #ax.update_datalim(corners)
+        widget.autoscale_view()
+        # add these last
+        widget.add_collection(barCollection)
+        widget.add_collection(lineCollection)
+
+        #ax.plot(self.data.close, color = 'y')
+        #lineCollection, barCollection = None, None
+        return lineCollection, barCollection

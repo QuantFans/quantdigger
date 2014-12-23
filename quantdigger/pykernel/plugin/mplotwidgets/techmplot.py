@@ -19,6 +19,7 @@ class MyLocator(mticker.MaxNLocator):
 class TechMPlot(object):
     def __init__(self, fig, *args):
         self.fig = fig
+        self.indicators = { }
         self.cross_cursor = None
         self.v_cursor = None
         self.in_qt = False
@@ -34,6 +35,66 @@ class TechMPlot(object):
         # or yield
         return self.axes.__iter__()
 
+
+    def add_indicator(self, ith_axes, indicator, if_twinx=False):
+        """ 在ith_axes上画指标indicator。
+        
+        Args:
+            ith_axes (Axes): 第i个窗口。
+            indicator  (Indicator): 指标.
+            if_twinx  (Bool): 是否是独立坐标。
+        Returns:
+            Indicator. 传进来的指标变量。
+        """
+        try:
+            indicator.plot(self.axes[ith_axes])
+            ax_indicators = self.indicators.get(ith_axes, [])
+            if ax_indicators:
+                ax_indicators.append(indicator) 
+            else:
+                self.indicators[ith_axes] = [indicator]
+            return indicator
+        except Exception as e:
+            raise e
+
+
+    def replace_indicator(self, ith_axes, indicator):
+        """ 在ith_axes上画指标indicator。
+        
+        Args:
+            ith_axes (Axes): 第i个窗口。
+            indicator  (Indicator): 指标.
+            if_twinx  (Bool): 是否是独立坐标。
+        Returns:
+            Indicator. 传进来的指标变量。
+        """
+        try:
+            ## @todo remove paint
+            self.indicators[ith_axes] = [indicator]
+            indicator.plot(self.axes[ith_axes])
+            return indicator
+        except Exception as e:
+            raise e
+
+
+    def add_widget(self, ith_axes, widget):
+        """ 添加一个能接收消息事件的控件。
+        
+        Args:
+            ith_axes (Axes): 第i个窗口。
+            widget (AxesWidget)
+        
+        Returns:
+            AxesWidget. widget
+        """
+        try:
+            widget.set_parent(self.axes[ith_axes])
+            widget.connect()
+        except Exception, e:
+            raise e
+
+
+
     def init_qt(self):
         """docstring for set_qt""" 
         self.in_qt = True
@@ -44,21 +105,19 @@ class TechMPlot(object):
         """
         matplotlib信号连接。
         """
-        #self.cidpress = self.fig.canvas.mpl_connect( "button_press_event", self.on_press)
-        #self.cidrelease = self.fig.canvas.mpl_connect( "button_release_event", self.on_release)
-        #self.cidmotion = self.fig.canvas.mpl_connect( "motion_notify_event", self.on_motion)
+        self.cidpress = self.fig.canvas.mpl_connect( "button_press_event", self.on_press)
+        self.cidrelease = self.fig.canvas.mpl_connect( "button_release_event", self.on_release)
+        self.cidmotion = self.fig.canvas.mpl_connect( "motion_notify_event", self.on_motion)
         self.fig.canvas.mpl_connect('axes_enter_event', self.enter_axes)
         self.fig.canvas.mpl_connect('axes_leave_event', self.leave_axes)
 
         self.slider.connect()
         #self.kwindow.connect()
 
-
     def disconnect(self):
         self.fig.canvas.mpl_disconnect(self.cidmotion)
         self.fig.canvas.mpl_disconnect(self.cidrelease)
         self.fig.canvas.mpl_disconnect(self.cidpress)
-
 
     def on_press(self, event):
         pass
@@ -114,8 +173,10 @@ class TechMPlot(object):
             ax.grid(True)
             ax.set_xticklabels([])
 
+
     def _user_axes(self):
         return self.fig.axes[2:]
+
 
     @property
     def axes(self):
