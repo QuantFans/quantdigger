@@ -118,22 +118,42 @@ class Slider(AxesWidget):
         self.slidermax = slidermax
         self.drag_active = False
         self.drag_enabled = drag_enabled
+        self._connect()
 
-    def connect(self):
+
+    def add_observer(self, obj):
+        """
+        When the slider value is changed, call *func* with the new
+        slider position
+
+        A connection id is returned which can be used to disconnect
+        """
+        self.observers[obj.name] = obj
+
+
+    def remove_observer(self, cid):
+        """remove the observer with connection id *cid*"""
+        try:
+            del self.observers[cid]
+        except KeyError:
+            pass
+
+    def reset(self):
+        """reset the slider to the initial value if needed"""
+        if (self.val != self.valinit):
+            self._set_val(self.valinit)
+
+
+    def _connect(self):
         """docstring for con""" 
         # 信号连接。
-        self.connect_event('button_press_event', self._update)
-        self.connect_event('button_press_event', self.update_range)
-        self.connect_event('button_release_event', self._update)
+        self.connect_event('button_press_event', self.on_mouse)
+        self.connect_event('button_release_event', self.on_mouse)
         if self.drag_enabled:
-            self.connect_event('motion_notify_event', self._update)
-
-    def update_range(self, event):
-        """""" 
-        self.observers["range"].update()
+            self.connect_event('motion_notify_event', self.on_mouse)
 
 
-    def _update(self, event):
+    def on_mouse(self, event):
         """update the slider position"""
         if self.ignore(event):
             return
@@ -150,10 +170,13 @@ class Slider(AxesWidget):
             self.drag_active = False
             event.canvas.release_mouse(self.ax)
             return
-        self.update(event.xdata)
+        self._update(event.xdata)
+        self._update_observer(event)
+        # 重绘
+        self.ax.figure.canvas.draw()
 
 
-    def update(self, val, width=None):
+    def _update(self, val, width=None):
         if val <= self.valmin:
             if not self.closedmin:
                 return
@@ -174,12 +197,10 @@ class Slider(AxesWidget):
             val = self.slidermax.val
         if width:
             self.width = width
-        self.set_val(val)
-        # 重绘
-        self.ax.figure.canvas.draw()
-        print "update...." 
+        self._set_val(val)
 
-    def set_val(self, val):
+
+    def _set_val(self, val):
         xy = self.poly.xy
         xy[2] = val, 1
         xy[3] = val, 0
@@ -191,50 +212,31 @@ class Slider(AxesWidget):
         self.val = val
         if not self.eventson:
             return
-        self.update_observer("kwindow")
 
-    def update_observer(self, obname):
+
+    def _update_observer(self, event):
         """ 通知相关窗口更新数据 """
         for name, obj in self.observers.iteritems():
-            if name == obname and obname == "kwindow":
-                obj.update(self.val)
-            #else:
-                #obj.update()
-                break
+            try:
+                obj.on_slider(self.val, event)
+            except Exception, e:
+                print(e)
 
-    def add_observer(self, obj):
-        """
-        When the slider value is changed, call *func* with the new
-        slider position
 
-        A connection id is returned which can be used to disconnect
-        """
-        self.observers[obj.name] = obj
-
-    def disconnect(self, cid):
-        """remove the observer with connection id *cid*"""
-        try:
-            del self.observers[cid]
-        except KeyError:
-            pass
-
-    def reset(self):
-        """reset the slider to the initial value if needed"""
-        if (self.val != self.valinit):
-            self.set_val(self.valinit)
 
 from indicator import Candles
-class CandleWindow(AxesWidget):
+class CandleWindow(object):
     """
     画蜡烛线。
 
     """
-    def __init__(self, ax, name, data, wdlength, min_wdlength):
+    def __init__(self, name, data, wdlength, min_wdlength):
         """
         Create a slider from *valmin* to *valmax* in axes *ax*
 
         """
-        AxesWidget.__init__(self, ax)
+        #AxesWidget.__init__(self, ax)
+        self.name = name
         self.wdlength = wdlength
         self.min_wdlength = min_wdlength
         self.voffset = 0
@@ -245,25 +247,20 @@ class CandleWindow(AxesWidget):
         self.ymax = np.max(data.high[self.xmin : self.xmax].values) + self.voffset
         self.ymin = np.min(data.low[self.xmin : self.xmax].values) - self.voffset
 
-        self.ax = ax
         self.cnt = 0
         self.observers = {}
         self.data = data
-        self.name = name
-        ax.set_xlim((self.xmin, self.xmax))
-        ax.set_ylim((self.ymin, self.ymax))
-        candles = Candles(data, 0.6, 'r', 'g', alpha=1)
+
+    def set_parent(self, ax):
+        """docstring for init_widget""" 
+        self.ax = ax
+        #ax.set_xlim((self.xmin, self.xmax))
+        #ax.set_ylim((self.ymin, self.ymax))
+        candles = Candles(self.data, 0.6, 'r', 'g', alpha=1)
         self.lines, self.rects = candles.plot(ax)
         self.connect()
 
-    def connect(self):
-        self.connect_event('key_release_event', self.keyrelease)
-
-    def _update(self, event):
-        """update the slider position"""
-        self.update(event.xdata)
-
-    def update(self, val):
+    def on_slider(self, val, event):
         '''docstring for update(val)''' 
         val = int(val)
         self.xmax = val
@@ -274,7 +271,14 @@ class CandleWindow(AxesWidget):
         self.ax.set_xlim((val-self.wdlength, val))
         self.ax.set_ylim((self.ymin, self.ymax))
         self.ax.autoscale_view()
-        self.ax.figure.canvas.draw()
+
+    def connect(self):
+        #self.ax.figure.canvas.mpl_connect('key_release_event', self.enter_axes)
+        pass
+
+    def _update(self, event):
+        """update the slider position"""
+        self.update(event.xdata)
 
     def add_observer(self, obj):
         """
@@ -292,7 +296,7 @@ class CandleWindow(AxesWidget):
         except KeyError:
             pass
 
-    def update_observer(self, obname):
+    def _update_observer(self, obname):
         #"通知进度条改变宽度" 
         #for name, obj in self.observers.iteritems():
             #if name == obname and obname == "slider":
@@ -309,11 +313,11 @@ class CandleWindow(AxesWidget):
             self.wdlength += self.wdlength/2 
             self.wdlength = len(self.data) if self.wdlength>len(self.data) else self.wdlength
             self.update(self.xmax)
-            self.update_observer("slider")
+            self._update_observer("slider")
         elif event.key == "up" :
             self.wdlength -= self.wdlength/2 
             self.wdlength = max(self.wdlength, self.min_wdlength)
             self.update(self.xmax)
-            self.update_observer("slider")
+            self._update_observer("slider")
 
 

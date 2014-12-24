@@ -17,7 +17,8 @@ class MyLocator(mticker.MaxNLocator):
 
 #plt.rc('axes', grid=True)
 class TechMPlot(object):
-    def __init__(self, fig, *args):
+    def __init__(self, fig, length, *args):
+        self.name = "TechMPlot" 
         self.fig = fig
         self.indicators = { }
         self.cross_cursor = None
@@ -30,6 +31,7 @@ class TechMPlot(object):
             ax.format_coord = self.format_coord 
         self.connect()
         self.v_cursor = MultiCursor(self.fig.canvas, self.axes, color='r', lw=2, horizOn=True, vertOn=True)
+        self.axes[0].set_xlim((len(price_data)-length, len(price_data)))
 
     def __iter__(self):
         # or yield
@@ -59,7 +61,7 @@ class TechMPlot(object):
 
 
     def replace_indicator(self, ith_axes, indicator):
-        """ 在ith_axes上画指标indicator。
+        """ 在ith_axes上画指标indicator, 删除其它指标。
         
         Args:
             ith_axes (Axes): 第i个窗口。
@@ -77,7 +79,7 @@ class TechMPlot(object):
             raise e
 
 
-    def add_widget(self, ith_axes, widget):
+    def add_widget(self, ith_axes, widget, connect_slider=False):
         """ 添加一个能接收消息事件的控件。
         
         Args:
@@ -89,10 +91,11 @@ class TechMPlot(object):
         """
         try:
             widget.set_parent(self.axes[ith_axes])
-            widget.connect()
+            if connect_slider:
+                self.slider.add_observer(widget)
+            return widget
         except Exception, e:
             raise e
-
 
 
     def init_qt(self):
@@ -111,13 +114,19 @@ class TechMPlot(object):
         self.fig.canvas.mpl_connect('axes_enter_event', self.enter_axes)
         self.fig.canvas.mpl_connect('axes_leave_event', self.leave_axes)
 
-        self.slider.connect()
-        #self.kwindow.connect()
 
     def disconnect(self):
         self.fig.canvas.mpl_disconnect(self.cidmotion)
         self.fig.canvas.mpl_disconnect(self.cidrelease)
         self.fig.canvas.mpl_disconnect(self.cidpress)
+
+
+    def on_slider(self, val, event):
+        """docstring for update""" 
+        print self.name
+        print event.name
+        print val
+
 
     def on_press(self, event):
         pass
@@ -132,13 +141,17 @@ class TechMPlot(object):
     def enter_axes(self, event):
         #event.inaxes.patch.set_facecolor('yellow')
         # 只有当前axes会闪烁。
-        if event.inaxes is self.slider_ax or self.in_qt or event.inaxes is self.range_ax:
+        if event.inaxes is self.slider_ax: #or event.inaxes is self.range_ax:
+            self.v_cursor = None
+            event.canvas.draw()
             return 
         #self.cross_cursor = Cursor(event.inaxes, useblit=True, color='red', linewidth=2, vertOn=True, horizOn=True)
         print("enter---")
 
     def leave_axes(self, event):
-        #event.canvas.draw()
+        if event.inaxes is self.slider_ax:
+            self.v_cursor = MultiCursor(self.fig.canvas, self.axes, color='r', lw=2, horizOn=True, vertOn=True)
+            event.canvas.draw()
         print("leave---")
 
     def init_slider(self):
@@ -152,6 +165,7 @@ class TechMPlot(object):
         self.slider = widgets.Slider(self.slider_ax, "slider", '', 0, len(price_data),
                                     len(price_data), len(price_data)/50, "%d")
         self.rangew = widgets.RangeWidget('range', self.range_ax, price_data['close'])
+        self.slider.add_observer(self)
 
     def add_subplot(self, *args):
         args = list(reversed(args))

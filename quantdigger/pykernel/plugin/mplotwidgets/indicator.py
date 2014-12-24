@@ -4,6 +4,8 @@ import inspect
 from matplotlib.axes import Axes
 
 def plot_interface(method):
+    # 如果plot函数不带绘图参数，则使用属性值做为参数。
+    # 如果带参数，者指标中的plot函数参数能够覆盖本身的属性。
     def wrapper(self, widget, *args, **kwargs):
         self.widget = widget
         # 用函数中的参数覆盖属性。
@@ -13,10 +15,35 @@ def plot_interface(method):
         for i, arg in enumerate(args):
             method_args[arg_names[i]] = arg
         method_args.update(kwargs)
-        for attr in arg_names:
-            obj_attrs[attr] = getattr(self, attr)
+
+        try:
+            for attr in arg_names:
+                obj_attrs[attr] = getattr(self, attr)
+        except Exception:
+            print("构造函数和绘图函数的绘图属性参数不匹配。" )
         obj_attrs.update(method_args)
         return method(self, widget, **obj_attrs)
+    return wrapper
+
+
+def plot_init(method):
+    # 根据构造函数的参数和默认参数构造属性。
+    def wrapper(self, *args, **kwargs):
+        magic = inspect.getargspec(method)
+        arg_names = magic.args[1:]
+        # 默认参数
+        default =  dict((x, y) for x, y in zip(magic.args[-len(magic.defaults):], magic.defaults))
+        # 调用参数
+        method_args = { }
+        for i, arg in enumerate(args):
+            method_args[arg_names[i]] = arg
+        method_args.update(kwargs)
+        # 
+        default.update(method_args)
+        #
+        for key, value in default.iteritems():
+            setattr(self, key, value)
+        return method(self, *args, **kwargs)
     return wrapper
 
 
@@ -69,11 +96,16 @@ class Indicator(object):
 from matplotlib.collections import LineCollection
 class TradingSignal(Indicator):
     """docstring for signalWindow"""
-    def __init__(self, s, name="Signal"):
-        self.signal=s
+    @plot_init
+    def __init__(self, signal, name="Signal", c=None, lw=2):
         super(TradingSignal , self).__init__(name)
+        #self.signal=signal
+        #self.c = c
+        #self.lw = lw
 
-    def plot_signal(self, widget, c, lw):
+    @plot_interface
+    def plot(self, widget, c=None, lw=2):
+        print c
         useAA = 0,  # use tuple here
         signal = LineCollection(self.signal, colors=c, linewidths=lw,
                                 antialiaseds=useAA)
@@ -81,12 +113,11 @@ class TradingSignal(Indicator):
 
 
 class MA(Indicator):
+    @plot_init
     def __init__(self, price, n, name='MA', type='simple', color='y', lw=1):
         super(MA, self).__init__(name)
         self.value = self._moving_average(price, n, type)
-        self.color = color
-        self.lw = lw
-        self.n = n
+    
 
     def _moving_average(self, x, n, type='simple'):
         """
@@ -106,7 +137,7 @@ class MA(Indicator):
         return a
 
     @plot_interface
-    def plot(self, widget, color=None, lw=None):
+    def plot(self, widget, color='y', lw=2):
         ## @todo 使用Indicator类中的绘图接口绘图。
         if isinstance(widget, Axes):
             self._mplot(widget, color, lw)
@@ -126,12 +157,10 @@ class MA(Indicator):
 
 
 class RSI(Indicator):
+    @plot_init
     def __init__(self, prices, n=14, name="RSI", fillcolor='b'):
         super(RSI, self).__init__(name)
-        self.prices = prices
-        self.n = n
         self.value = self._relative_strength(prices, n)
-        self.fillcolor = fillcolor
     
     def _relative_strength(self, prices, n=14):
         deltas = np.diff(prices)
@@ -212,14 +241,16 @@ class MACD(Indicator):
 import matplotlib.finance as finance
 class Volume(Indicator):
     """docstring for Volume"""
+    @plot_init
     def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
-        self.name = name
-        self.volume = volume
-        self.open = open
-        self.close = close
-        self.colorup = colorup
-        self.colordown = colordown
-        self.width = width
+        super(Volume, self).__init__(name)
+        #self.name = name
+        #self.volume = volume
+        #self.open = open
+        #self.close = close
+        #self.colorup = colorup
+        #self.colordown = colordown
+        #self.width = width
 
     @plot_interface
     def plot(self, widget, colorup = 'r', colordown = 'b', width = 1):

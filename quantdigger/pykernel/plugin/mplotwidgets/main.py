@@ -10,7 +10,7 @@ price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 #import matplotlib.font_manager as font_manager
 fig = plt.figure()
-frame = techmplot.TechMPlot(fig, 4,3,1)
+frame = techmplot.TechMPlot(fig, 50, 4,3,1)
 ax_candles, ax_rsi, ax_volume = frame
 
 # 把窗口传给techplot, 连接信号
@@ -19,9 +19,11 @@ ax_candles, ax_rsi, ax_volume = frame
 # rangew
 # 事件从techplot传到PYQT
 
-kwindow = widgets.CandleWindow(ax_candles, "kwindow", price_data, 100, 50)
-signal = TradingSignal(zip(zip(entry_x,entry_y),zip(exit_x,exit_y)))
-signal.plot_signal(ax_candles, colors, 2)
+kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
+frame.add_widget(0, kwindow, True)
+signal = TradingSignal(zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
+frame.add_indicator(0, signal)
+#frame.add_indicator(0, signal)
 
 # 指标窗口
 ma = frame.add_indicator(0, MA(price_data.close, 20, 'MA20', 'simple', 'y', 2))
@@ -41,8 +43,6 @@ frame.add_indicator(2, Volume(price_data.open, price_data.close, price_data.vol)
 ax_volume.yaxis.set_major_locator(techmplot.MyLocator(5, prune='both'))
 
 # sharex 所有所有的窗口都移动
-frame.slider.add_observer(kwindow)
-kwindow.connect()
 #frame.slider.add_observer(frame.rangew)
 
 plt.show()
