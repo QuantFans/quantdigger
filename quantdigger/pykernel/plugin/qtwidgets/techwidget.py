@@ -12,4 +12,3 @@ class TechWidget(TechMPlot, FigureCanvasQTAgg):
         self.init_qt()
         #self.connect()  # 必须在这里再调用一次。
 
-

@@ -164,16 +164,18 @@ class Slider(AxesWidget):
             event.canvas.grab_mouse(self.ax)
         if not self.drag_active:
             return
-        elif ((event.name == 'button_release_event') or
-              (event.name == 'button_press_event' and
-               event.inaxes != self.ax)):
+        elif event.name == 'button_press_event' and event.inaxes != self.ax:
             self.drag_active = False
             event.canvas.release_mouse(self.ax)
+            return
+        elif event.name == 'button_release_event' and event.inaxes == self.ax:
+            self.drag_active = False
+            event.canvas.release_mouse(self.ax)
+            self._update_observer(event)
             return
         self._update(event.xdata)
         self._update_observer(event)
         # 重绘
-        self.ax.figure.canvas.draw()
 
 
     def _update(self, val, width=None):
@@ -242,35 +244,38 @@ class CandleWindow(object):
         self.voffset = 0
 
         # 当前显示的范围。 
-        self.xmax = len(data)
-        self.xmin = max(0, self.xmax-self.wdlength) 
-        self.ymax = np.max(data.high[self.xmin : self.xmax].values) + self.voffset
-        self.ymin = np.min(data.low[self.xmin : self.xmax].values) - self.voffset
+        #self.xmax = len(data)
+        #self.xmin = max(0, self.xmax-self.wdlength) 
+        #self.ymax = np.max(data.high[self.xmin : self.xmax].values) + self.voffset
+        #self.ymin = np.min(data.low[self.xmin : self.xmax].values) - self.voffset
 
         self.cnt = 0
         self.observers = {}
         self.data = data
+        self.main_indicator = None
 
-    def set_parent(self, ax):
+    def set_parent(self, parent, ith_axes):
         """docstring for init_widget""" 
-        self.ax = ax
+        self.ax = parent.axes[ith_axes]
         #ax.set_xlim((self.xmin, self.xmax))
         #ax.set_ylim((self.ymin, self.ymax))
-        candles = Candles(self.data, 0.6, 'r', 'g', alpha=1)
-        self.lines, self.rects = candles.plot(ax)
+        candles = Candles(self.data, self.name, 0.6, 'r', 'g', alpha=1)
+        parent.register_indicator(ith_axes, candles)
+        self.lines, self.rects = candles.plot(self.ax)
+        self.main_indicator = candles
         self.connect()
 
     def on_slider(self, val, event):
-        '''docstring for update(val)''' 
-        val = int(val)
-        self.xmax = val
-        self.xmin = max(0, self.xmax-self.wdlength)
-        self.ymax = np.max(self.data.high[val-self.wdlength : val].values) + self.voffset
-        self.ymin = np.min(self.data.low[val-self.wdlength : val].values) - self.voffset
+        #'''docstring for update(val)''' 
+        pass
+        #val = int(val)
+        #self.xmax = val
+        #self.xmin = max(0, self.xmax-self.wdlength)
+        #self.ymax = np.max(self.data.high[val-self.wdlength : val].values) + self.voffset
+        #self.ymin = np.min(self.data.low[val-self.wdlength : val].values) - self.voffset
 
-        self.ax.set_xlim((val-self.wdlength, val))
-        self.ax.set_ylim((self.ymin, self.ymax))
-        self.ax.autoscale_view()
+        #self.ax.set_xlim((val-self.wdlength, val))
+        #self.ax.set_ylim((self.ymin, self.ymax))
 
     def connect(self):
         #self.ax.figure.canvas.mpl_connect('key_release_event', self.enter_axes)
@@ -279,6 +284,7 @@ class CandleWindow(object):
     def _update(self, event):
         """update the slider position"""
         self.update(event.xdata)
+
 
     def add_observer(self, obj):
         """
@@ -289,12 +295,14 @@ class CandleWindow(object):
         """
         self.observers[obj.name] = obj
 
+
     def disconnect(self, cid):
         """remove the observer with connection id *cid*"""
         try:
             del self.observers[cid]
         except KeyError:
             pass
+
 
     def _update_observer(self, obname):
         #"通知进度条改变宽度" 
@@ -304,20 +312,5 @@ class CandleWindow(object):
                 #break
         pass
              
-    def keyrelease(self, event):
-        '''docstring for keypress''' 
-        #print event.__dict__
-        print event.key
-        #global observer_slider
-        if event.key == "down":
-            self.wdlength += self.wdlength/2 
-            self.wdlength = len(self.data) if self.wdlength>len(self.data) else self.wdlength
-            self.update(self.xmax)
-            self._update_observer("slider")
-        elif event.key == "up" :
-            self.wdlength -= self.wdlength/2 
-            self.wdlength = max(self.wdlength, self.min_wdlength)
-            self.update(self.xmax)
-            self._update_observer("slider")
 
 

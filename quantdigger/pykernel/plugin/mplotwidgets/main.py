@@ -20,16 +20,17 @@ ax_candles, ax_rsi, ax_volume = frame
 # 事件从techplot传到PYQT
 
 kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
-frame.add_widget(0, kwindow, True)
+candle_widget = frame.add_widget(0, kwindow, True)
 signal = TradingSignal(zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
 frame.add_indicator(0, signal)
-#frame.add_indicator(0, signal)
 
 # 指标窗口
 ma = frame.add_indicator(0, MA(price_data.close, 20, 'MA20', 'simple', 'y', 2))
 frame.add_indicator(0, MA(price_data.close, 30, 'MA30', 'simple', 'b', 2))
 frame.add_indicator(1, RSI(price_data.close, 14, name='RSI', fillcolor='b'))
 frame.add_indicator(2, Volume(price_data.open, price_data.close, price_data.vol))
+frame.draw_window()
+
 # legend
 #props = font_manager.FontProperties(size=10)
 #leg = ax_candles.legend(loc='center left', shadow=True, fancybox=True, prop=props)

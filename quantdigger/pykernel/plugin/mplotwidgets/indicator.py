@@ -90,6 +90,19 @@ class Indicator(object):
         else:
             qtplot_line(data, color, lw)
 
+    def set_yrange(self, upper, lower=[]):
+        self.upper = upper
+        self.lower = lower if len(lower)>0 else upper
+
+
+    def y_interval(self, w_left, w_right):
+        if len(self.upper) == 2:
+            return max(self.upper), min(self.lower) 
+        ymax = np.max(self.upper[w_left: w_right])
+        ymin = np.min(self.lower[w_left: w_right])
+        return ymax, ymin
+            
+
     # other plot ..
 
 
@@ -99,17 +112,20 @@ class TradingSignal(Indicator):
     @plot_init
     def __init__(self, signal, name="Signal", c=None, lw=2):
         super(TradingSignal , self).__init__(name)
+        #self.set_yrange(price)
         #self.signal=signal
         #self.c = c
         #self.lw = lw
 
     @plot_interface
     def plot(self, widget, c=None, lw=2):
-        print c
         useAA = 0,  # use tuple here
         signal = LineCollection(self.signal, colors=c, linewidths=lw,
                                 antialiaseds=useAA)
         widget.add_collection(signal)
+
+    def y_interval(self, w_left, w_right):
+        return 0, 100000000
 
 
 class MA(Indicator):
@@ -117,6 +133,7 @@ class MA(Indicator):
     def __init__(self, price, n, name='MA', type='simple', color='y', lw=1):
         super(MA, self).__init__(name)
         self.value = self._moving_average(price, n, type)
+        self.set_yrange(price)
     
 
     def _moving_average(self, x, n, type='simple'):
@@ -161,6 +178,8 @@ class RSI(Indicator):
     def __init__(self, prices, n=14, name="RSI", fillcolor='b'):
         super(RSI, self).__init__(name)
         self.value = self._relative_strength(prices, n)
+        self.set_yrange([0, 100])
+
     
     def _relative_strength(self, prices, n=14):
         deltas = np.diff(prices)
@@ -211,6 +230,7 @@ class MACD(Indicator):
     """"""
     def __init__(self, prices, nslow, nfast, name='MACD'):
         super(MACD, self).__init__(name)
+        self.set_yrange(prices)
         self.emaslow, self.emafast, self.macd = self._moving_average_convergence(prices, nslow=nslow, nfast=nfast)
         self.value = (self.emaslow, self.emafast, self.macd)
 
@@ -244,6 +264,7 @@ class Volume(Indicator):
     @plot_init
     def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(name)
+        self.set_yrange(volume)
         #self.name = name
         #self.volume = volume
         #self.open = open
@@ -263,7 +284,8 @@ class Volume(Indicator):
 from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
 class Candles(Indicator):
-    def __init__(self, data, width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
+    @plot_init
+    def __init__(self, data, name='candle',  width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
         vertical line.
 
@@ -276,12 +298,9 @@ class Candles(Indicator):
 
         return value is lineCollection, barCollection
         """
-        self.data = data
-        self.width = width
-        self.colorup = colorup
-        self.colordown = colordown
-        self.lc = lc
-        self.alpha = alpha
+        super(Candles, self).__init__(name)
+        self.set_yrange(data.high.values, data.low.values)
+
         # note this code assumes if any value open, close, low, high is
         # missing they all are missing
 

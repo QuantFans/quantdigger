@@ -6,8 +6,9 @@ from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 from PyQt4 import QtGui, QtCore
 from plugin.qtwidgets.techwidget import TechWidget
-#from datasource import data
-#price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
+from datasource import data
+from plugin.mplotwidgets import widgets, indicator
+price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
 
 class EmbedIPython(RichIPythonWidget):
 
@@ -30,8 +31,8 @@ class MainWindow(QtGui.QMainWindow):
         self.createToolBox()
         self.textEdit = QtGui.QTextEdit()
 
-        self.center_widget = TechWidget(self, 4,1,1)
-        self.center_widget.subplots_adjust(0.05, 0.05, 1, 1)
+        self.center_widget = self.demo_plot()
+        #self.center_widget.subplots_adjust(0.05, 0.05, 1, 1)
 
         self.createActions()
         self.createMenus()
@@ -105,9 +106,41 @@ class MainWindow(QtGui.QMainWindow):
         dock.setWidget(self.toolBox)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
-
         #self.customerList.currentTextChanged.connect(self.insertCustomer)
         #self.paragraphsList.currentTextChanged.connect(self.addParagraph)
+
+
+    def demo_plot(self):
+        frame = TechWidget(self, 80, 4, 3, 1)
+        ax_candles, ax_rsi, ax_volume = frame
+
+        # 把窗口传给techplot, 连接信号
+        # 事件处理 ||||  绘图，数据的分离。
+        # twins窗口。
+        # rangew
+        # 事件从techplot传到PYQT
+
+        try:
+            kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
+            frame.add_widget(0, kwindow, True)
+            signal = indicator.TradingSignal(zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
+            frame.add_indicator(0, signal)
+
+            # 指标窗口
+            frame.add_indicator(0, indicator.MA(price_data.close, 20, 'MA20', 'simple', 'y', 2))
+            frame.add_indicator(0, indicator.MA(price_data.close, 30, 'MA30', 'simple', 'b', 2))
+            frame.add_indicator(1, indicator.RSI(price_data.close, 14, name='RSI', fillcolor='b'))
+            frame.add_indicator(2, indicator.Volume(price_data.open, price_data.close, price_data.vol))
+            frame.draw_window()
+        except Exception, e:
+            print "----------------------" 
+            print e
+
+        return frame
+
+
+
+
 
     def createToolBox(self):
         self.buttonGroup = QtGui.QButtonGroup()
