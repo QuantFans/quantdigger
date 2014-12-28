@@ -19,5 +19,9 @@ QuantDigger
 
 运行
 =======
-* mplot_demo .py  matplotlib画k线，指标线的demo。
+* mplot_demo.py  matplotlib画k线，指标线的demo。
+.. figure:: https://github.com/QuantFans/quantdigger/blob/master/plot.png
+    :align: center
 * pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。
+.. figure:: https://github.com/QuantFans/quantdigger/blob/master/pyquant.png
+    :align: center
