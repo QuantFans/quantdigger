@@ -3,7 +3,7 @@ import numpy as np
 import inspect
 from matplotlib.axes import Axes
 
-def plot_interface(method):
+def override_attributes(method):
     # 如果plot函数不带绘图参数，则使用属性值做为参数。
     # 如果带参数，者指标中的plot函数参数能够覆盖本身的属性。
     def wrapper(self, widget, *args, **kwargs):
@@ -26,7 +26,7 @@ def plot_interface(method):
     return wrapper
 
 
-def plot_init(method):
+def create_attributes(method):
     # 根据构造函数的参数和默认参数构造属性。
     def wrapper(self, *args, **kwargs):
         magic = inspect.getargspec(method)
@@ -109,7 +109,7 @@ class Indicator(object):
 from matplotlib.collections import LineCollection
 class TradingSignal(Indicator):
     """docstring for signalWindow"""
-    @plot_init
+    @create_attributes
     def __init__(self, signal, name="Signal", c=None, lw=2):
         super(TradingSignal , self).__init__(name)
         #self.set_yrange(price)
@@ -117,7 +117,7 @@ class TradingSignal(Indicator):
         #self.c = c
         #self.lw = lw
 
-    @plot_interface
+    @override_attributes
     def plot(self, widget, c=None, lw=2):
         useAA = 0,  # use tuple here
         signal = LineCollection(self.signal, colors=c, linewidths=lw,
@@ -129,7 +129,7 @@ class TradingSignal(Indicator):
 
 
 class MA(Indicator):
-    @plot_init
+    @create_attributes
     def __init__(self, price, n, name='MA', type='simple', color='y', lw=1):
         super(MA, self).__init__(name)
         self.value = self._moving_average(price, n, type)
@@ -153,7 +153,7 @@ class MA(Indicator):
         a[:n] = a[n]
         return a
 
-    @plot_interface
+    @override_attributes
     def plot(self, widget, color='y', lw=2):
         ## @todo 使用Indicator类中的绘图接口绘图。
         if isinstance(widget, Axes):
@@ -174,7 +174,7 @@ class MA(Indicator):
 
 
 class RSI(Indicator):
-    @plot_init
+    @create_attributes
     def __init__(self, prices, n=14, name="RSI", fillcolor='b'):
         super(RSI, self).__init__(name)
         self.value = self._relative_strength(prices, n)
@@ -207,16 +207,16 @@ class RSI(Indicator):
         return rsi
 
 
-    @plot_interface
+    @override_attributes
     def plot(self, widget, fillcolor='b'):
         self._mplot(widget, fillcolor)
 
 
     def _mplot(self, ax, fillcolor):
         textsize = 9
-        ax.plot(self.value, color=fillcolor)
-        ax.axhline(70, color=fillcolor)
-        ax.axhline(30, color=fillcolor)
+        ax.plot(self.value, color=fillcolor, lw=2)
+        ax.axhline(70, color=fillcolor, linestyle='-')
+        ax.axhline(30, color=fillcolor, linestyle='-')
         ax.fill_between(self.value, 70, where=(self.value>=70), facecolor=fillcolor, edgecolor=fillcolor)
         ax.fill_between(self.value, 30, where=(self.value<=30), facecolor=fillcolor, edgecolor=fillcolor)
         ax.text(0.6, 0.9, '>70 = overbought', va='top', transform=ax.transAxes, fontsize=textsize, color = 'k')
@@ -261,7 +261,7 @@ class MACD(Indicator):
 import matplotlib.finance as finance
 class Volume(Indicator):
     """docstring for Volume"""
-    @plot_init
+    @create_attributes
     def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(name)
         self.set_yrange(volume)
@@ -273,7 +273,7 @@ class Volume(Indicator):
         #self.colordown = colordown
         #self.width = width
 
-    @plot_interface
+    @override_attributes
     def plot(self, widget, colorup = 'r', colordown = 'b', width = 1):
         """docstring for plot""" 
         finance.volume_overlay(widget, self.open, self.close, self.volume, colorup, colordown, width)
@@ -284,7 +284,7 @@ class Volume(Indicator):
 from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
 class Candles(Indicator):
-    @plot_init
+    @create_attributes
     def __init__(self, data, name='candle',  width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
         vertical line.
@@ -305,7 +305,7 @@ class Candles(Indicator):
         # missing they all are missing
 
 
-    @plot_interface
+    @override_attributes
     def plot(self, widget, width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """docstring for plot""" 
         delta = width/2.

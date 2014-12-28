@@ -1,4 +1,6 @@
 # -*- coding: utf8 -*-
+import os, sys
+sys.path.append(os.path.join('..', '..'))
 import matplotlib
 matplotlib.use('TkAgg')
 import techmplot
@@ -10,21 +12,16 @@ price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 #import matplotlib.font_manager as font_manager
 fig = plt.figure()
-frame = techmplot.TechMPlot(fig, 50, 4,3,1)
+frame = techmplot.TechMPlot(fig, price_data, 50, 4,3,1)
 ax_candles, ax_rsi, ax_volume = frame
 
-# 把窗口传给techplot, 连接信号
-# 事件处理 ||||  绘图，数据的分离。
-# twins窗口。
-# rangew
-# 事件从techplot传到PYQT
-
+# 添加k线和交易信号。
 kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
 candle_widget = frame.add_widget(0, kwindow, True)
 signal = TradingSignal(zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
 frame.add_indicator(0, signal)
 
-# 指标窗口
+# 添加指标
 ma = frame.add_indicator(0, MA(price_data.close, 20, 'MA20', 'simple', 'y', 2))
 frame.add_indicator(0, MA(price_data.close, 30, 'MA30', 'simple', 'b', 2))
 frame.add_indicator(1, RSI(price_data.close, 14, name='RSI', fillcolor='b'))

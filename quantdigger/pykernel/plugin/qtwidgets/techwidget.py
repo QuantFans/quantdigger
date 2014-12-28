@@ -9,6 +9,3 @@ class TechWidget(TechMPlot, FigureCanvasQTAgg):
         FigureCanvasQTAgg.__init__(self, self.fig)
         TechMPlot.__init__(self, self.fig, *args)
         self.setParent(parent)
-        self.init_qt()
-        #self.connect()  # 必须在这里再调用一次。
-
