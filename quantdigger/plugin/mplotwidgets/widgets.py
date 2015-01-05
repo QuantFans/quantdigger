@@ -1,7 +1,5 @@
 # -*- coding: utf8 -*-
 from matplotlib.widgets import AxesWidget
-import numpy as np
-
 
 
 class RangeWidget(object):
@@ -138,6 +136,7 @@ class Slider(AxesWidget):
         except KeyError:
             pass
 
+
     def reset(self):
         """reset the slider to the initial value if needed"""
         if (self.val != self.valinit):
@@ -265,6 +264,7 @@ class CandleWindow(object):
         self.main_indicator = candles
         self.connect()
 
+
     def on_slider(self, val, event):
         #'''docstring for update(val)''' 
         pass
@@ -277,9 +277,11 @@ class CandleWindow(object):
         #self.ax.set_xlim((val-self.wdlength, val))
         #self.ax.set_ylim((self.ymin, self.ymax))
 
+
     def connect(self):
         #self.ax.figure.canvas.mpl_connect('key_release_event', self.enter_axes)
         pass
+
 
     def _update(self, event):
         """update the slider position"""
@@ -311,6 +313,3 @@ class CandleWindow(object):
                 #obj.update(obj.val, self.wdlength)
                 #break
         pass
-             
-
-
