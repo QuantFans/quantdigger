@@ -258,7 +258,7 @@ class CandleWindow(object):
         self.ax = parent.axes[ith_axes]
         #ax.set_xlim((self.xmin, self.xmax))
         #ax.set_ylim((self.ymin, self.ymax))
-        candles = Candles(self.data, self.name, 0.6, 'r', 'g', alpha=1)
+        candles = Candles(None, self.data, self.name, 0.6, 'r', 'g', alpha=1)
         parent.register_indicator(ith_axes, candles)
         self.lines, self.rects = candles.plot(self.ax)
         self.main_indicator = candles

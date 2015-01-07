@@ -49,7 +49,7 @@ def create_attributes(method):
 
 class Indicator(object):
     """docstring for Indicator"""
-    def __init__(self, name, value=None, widget=None):
+    def __init__(self, tracker, name, value=None, widget=None):
         """
         
         Args:
@@ -64,10 +64,31 @@ class Indicator(object):
         # 可能是qt widget, Axes, WebUI
         self.widget = widget
         self.value = value
+        ## @todo 判断tracker是否为字符串。
+        ## @todo remove set_yrange 
 
-    def __float__(self):
-        return float(self.n)
-    
+    #def __float__(self):
+        ## 判断是否已经计算过。
+        ## 计算值, 传递计算函数和参数给它。
+        ## MACD的多值传递。返回元？
+        #print "parent" 
+        #return float(self.n)
+
+
+    def __getitem__(self, index):
+        # 小于当前的肯定被运行过。
+        if index == 0:
+            return self.__float__() 
+        elif index < 0:
+            return self.value[index]
+        else:
+            raise IndexError
+
+
+    def __call__(self, a):
+        print a
+
+
     # api
     def plot_line(self, data, color, lw):
         """ 画线    
@@ -90,6 +111,7 @@ class Indicator(object):
         else:
             qtplot_line(data, color, lw)
 
+
     def set_yrange(self, upper, lower=[]):
         self.upper = upper
         self.lower = lower if len(lower)>0 else upper
@@ -110,8 +132,8 @@ from matplotlib.collections import LineCollection
 class TradingSignal(Indicator):
     """docstring for signalWindow"""
     @create_attributes
-    def __init__(self, signal, name="Signal", c=None, lw=2):
-        super(TradingSignal , self).__init__(name)
+    def __init__(self, tracker, signal, name="Signal", c=None, lw=2):
+        super(TradingSignal , self).__init__(tracker, name)
         #self.set_yrange(price)
         #self.signal=signal
         #self.c = c
@@ -130,11 +152,11 @@ class TradingSignal(Indicator):
 
 class MA(Indicator):
     @create_attributes
-    def __init__(self, price, n, name='MA', type='simple', color='y', lw=1):
-        super(MA, self).__init__(name)
+    def __init__(self, tracker, price, n, name='MA', type='simple', color='y', lw=1):
+        super(MA, self).__init__(tracker, name)
         self.value = self._moving_average(price, n, type)
-        self.set_yrange(price)
-    
+        self.set_yrange(self.value)
+
 
     def _moving_average(self, x, n, type='simple'):
         """
@@ -152,6 +174,15 @@ class MA(Indicator):
         a =  np.convolve(x, weights, mode='full')[:len(x)]
         a[:n] = a[n]
         return a
+
+
+    def __float__(self):
+        # 判断是否已经计算过。
+        # 计算值, 传递计算函数和参数给它。
+        # MACD的多值传递。返回元？
+        print "child" 
+        return float(self.n)
+
 
     @override_attributes
     def plot(self, widget, color='y', lw=2):
@@ -175,8 +206,8 @@ class MA(Indicator):
 
 class RSI(Indicator):
     @create_attributes
-    def __init__(self, prices, n=14, name="RSI", fillcolor='b'):
-        super(RSI, self).__init__(name)
+    def __init__(self, tracker, prices, n=14, name="RSI", fillcolor='b'):
+        super(RSI, self).__init__(tracker, name)
         self.value = self._relative_strength(prices, n)
         self.set_yrange([0, 100])
 
@@ -228,8 +259,8 @@ class RSI(Indicator):
 
 class MACD(Indicator):
     """"""
-    def __init__(self, prices, nslow, nfast, name='MACD'):
-        super(MACD, self).__init__(name)
+    def __init__(self, tracker, prices, nslow, nfast, name='MACD'):
+        super(MACD, self).__init__(tracker, name)
         self.set_yrange(prices)
         self.emaslow, self.emafast, self.macd = self._moving_average_convergence(prices, nslow=nslow, nfast=nfast)
         self.value = (self.emaslow, self.emafast, self.macd)
@@ -243,9 +274,11 @@ class MACD(Indicator):
         emafast = MA(x, nfast, type='exponential').value
         return emaslow, emafast, emafast - emaslow
         
+
     def plot(self, widget):
         self.widget = widget
         self._mplot(widget)
+
 
     def _mplot(self, ax):
         fillcolor = 'darkslategrey'
@@ -262,8 +295,8 @@ import matplotlib.finance as finance
 class Volume(Indicator):
     """docstring for Volume"""
     @create_attributes
-    def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
-        super(Volume, self).__init__(name)
+    def __init__(self, tracker, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
+        super(Volume, self).__init__(tracker, name)
         self.set_yrange(volume)
         #self.name = name
         #self.volume = volume
@@ -285,7 +318,7 @@ from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
 class Candles(Indicator):
     @create_attributes
-    def __init__(self, data, name='candle',  width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
+    def __init__(self, tracker, data, name='candle',  width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
         vertical line.
 
@@ -298,7 +331,7 @@ class Candles(Indicator):
 
         return value is lineCollection, barCollection
         """
-        super(Candles, self).__init__(name)
+        super(Candles, self).__init__(tracker, name)
         self.set_yrange(data.high.values, data.low.values)
 
         # note this code assumes if any value open, close, low, high is
