@@ -40,7 +40,6 @@ def set_dir(dname):
 def csv2frame(fname):
     ''' 读取CSV文件到DataFrame '''
     try:
-        print "*******", fname
         data = pd.read_csv(fname, index_col=0, parse_dates=True)
         data['islong'] = False if fname.endswith("_.csv") else True
         assert data.index.is_unique
@@ -392,3 +391,39 @@ def load_wavedata(*fnames):
         d = zip(*entroinfo)
     rst.append((wave_ts, pd.DataFrame({'pre':d[1], 'after':d[2]}, index=d[0])))
     return tuple(rst)
+
+
+class LocalData(object):
+    """ 本地数据数据接口类。
+    
+    包括数据，合约信息等。
+    """
+    def load_data(self, pcontract, dt_start=None, dt_end=None):
+        """ 加载本地周期合约数据.
+        
+        Args:
+            pcontract (PContract): 周期合约
+        
+        Returns:
+            DataFrame. 
+        Raises:
+            FileDoesNotExist
+        """
+        fname = ''.join([str(pcontract), ".csv"])
+        print fname
+        try:
+            data = pd.read_csv(fname, index_col=0, parse_dates=True)
+            assert data.index.is_unique
+        except Exception:
+            print u"**Warning: File \"%s\" doesn't exist!"%fname
+            raise Exception
+        else:
+            return data
+
+    def loadTickData(self):
+        raise NotImplementedError
+
+    def loadContractsInfo(self):
+        raise NotImplementedError
+
+local_data = LocalData()

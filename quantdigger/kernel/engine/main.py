@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
 # Declare the components with respective parameters
 bars = DataHandler(..)
 strategy = Strategy(..)

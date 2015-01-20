@@ -2,7 +2,8 @@
 import numpy as np
 import inspect
 from matplotlib.axes import Axes
-from engine import series
+from quantdigger.kernel.engine import series
+from quantdigger.errors import SeriesIndexError
 
 
 # 带参数decorator
@@ -86,28 +87,126 @@ class Indicator(object):
         ## @todo remove set_yrange 
 
     def init_state(self, value, algo, args):
-        #self.series
-        self._serie = series.Series(self._tracker, value)
+        """ 序列变量创建，实时函数登记。
+        
+        Args:
+            value (array): 数据
+            algo (function): 实时指标函数。
+            args (tuple): 实时指标函数的参数。
+        """
+        self._series = series.NumberSeries(self._tracker, value)
         self._algo = algo
         self._args = args
 
+
+    def calculate_latest_element(self):
+        """ 被tracker调用，确保series总是最新的。 """
+        if self._series.curbar >= self._series.length_history:
+            self._series.update(apply(self._algo, self._args))
+
+
+    def __size__(self):
+        """""" 
+        return len(self._series)
+
+
     def __getitem__(self, index):
-        # 小于当前的肯定被运行过。
-        if index <= 0:
-            return self._serie[index]
+        # 大于当前的肯定被运行过。
+        if index >= 0:
+            return self._series[index]
         else:
-            raise IndexError
+            raise SeriesIndexError
+
 
     def _added_to_tracker(self, tracker):
         tracker.add_indicator(self)
 
 
     def __float__(self):
-        return self._serie[0]
+        return self._series[0]
 
-    def calculate_latest_element(self):
-        """ 被tracker调用，确保series总是最新的。 """
-        self._serie.value(apply(self._algo, self._args))
+    def __str__(self):
+        return str(self._series[0])
+
+    #
+    def __eq__(self, v):
+        return float(self) == v
+
+    def __lt__(self, other):
+        return float(self) < other
+
+    def __le__(self, other):
+        return float(self) <= other
+
+    def __ne__(self, other):
+        return float(self) != other
+
+    def __gt__(self, other):
+        return float(self) > other
+
+    def __ge__(self, other):
+        return float(self) >= other
+
+    ## 不该被改变。
+    #def __iadd__(self, r):
+        #self._series[0] += r
+        #return self
+
+    #def __isub__(self, r):
+        #self._series[0] -= r
+        #return self
+
+    #def __imul__(self, r):
+        #self._data[self._curbar] *= r
+        #return self
+
+    #def __idiv__(self, r):
+        #self._data[self._curbar] /= r
+        #return self
+
+    #def __ifloordiv__(self, r):
+        #self._data[self._curbar] %= r
+        #return self
+
+    #
+    def __add__(self, r):
+        return self._series[0] + r
+
+    def __sub__(self, r):
+        return self._series[0] - r
+
+    def __mul__(self, r):
+        return self._series[0] * r
+
+    def __div__(self, r):
+        return self._series[0] / r
+
+    def __mod__(self, r):
+        return self._series[0] % r
+
+    def __pow__(self, r):
+        return self._series[0] ** r
+
+    #
+    def __radd__(self, r):
+        return self._series[0] + r
+
+    def __rsub__(self, r):
+        return self._series[0] - r
+
+    def __rmul__(self, r):
+        return self._series[0] * r
+
+    def __rdiv__(self, r):
+        return self._series[0] / r
+
+    def __rmod__(self, r):
+        return self._series[0] % r
+
+    def __rpow__(self, r):
+        return self._series[0] ** r
+
+
 
 
     # api
@@ -145,30 +244,7 @@ class Indicator(object):
         ymin = np.min(self.lower[w_left: w_right])
         return ymax, ymin
             
-
     # other plot ..
-
-
-from matplotlib.collections import LineCollection
-class TradingSignal(Indicator):
-    """docstring for signalWindow"""
-    @create_attributes
-    def __init__(self, tracker, signal, name="Signal", c=None, lw=2):
-        super(TradingSignal , self).__init__(tracker, name)
-        #self.set_yrange(price)
-        #self.signal=signal
-        #self.c = c
-        #self.lw = lw
-
-    @override_attributes
-    def plot(self, widget, c=None, lw=2):
-        useAA = 0,  # use tuple here
-        signal = LineCollection(self.signal, colors=c, linewidths=lw,
-                                antialiaseds=useAA)
-        widget.add_collection(signal)
-
-    def y_interval(self, w_left, w_right):
-        return 0, 100000000
 
 
 class MA(Indicator):
@@ -178,19 +254,18 @@ class MA(Indicator):
         self.value = self._moving_average(price, n, type)
         self.set_yrange(self.value)
         self.init_state(self.value, self.moving_average, (price, n))
-        #NumberSeries(self.value)
-        # 如果这里不实现，value = None, 切换为函数形式，那么构造函数其实很简单。整体也不会复杂。
 
 
-    def _moving_average(self, x, n, type='simple'):
+    def _moving_average(self, data, n, type_='simple'):
         """
         compute an n period moving average.
 
         type is 'simple' | 'exponential'
 
         """
-        x = np.asarray(x)
-        if type=='simple':
+        ## @todo series, nparray
+        x = np.asarray(data._data) # 减少非必须的拷贝。
+        if type_=='simple':
             weights = np.ones(n)
         else:
             weights = np.exp(np.linspace(-1., 0., n))
@@ -334,7 +409,6 @@ class Volume(Indicator):
 
 
 
-
 from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
 class Candles(Indicator):
@@ -405,3 +479,24 @@ class Candles(Indicator):
         #ax.plot(self.data.close, color = 'y')
         #lineCollection, barCollection = None, None
         return lineCollection, barCollection
+
+
+class TradingSignal(Indicator):
+    """docstring for signalWindow"""
+    @create_attributes
+    def __init__(self, tracker, signal, name="Signal", c=None, lw=2):
+        super(TradingSignal , self).__init__(tracker, name)
+        #self.set_yrange(price)
+        #self.signal=signal
+        #self.c = c
+        #self.lw = lw
+
+    @override_attributes
+    def plot(self, widget, c=None, lw=2):
+        useAA = 0,  # use tuple here
+        signal = LineCollection(self.signal, colors=c, linewidths=lw,
+                                antialiaseds=useAA)
+        widget.add_collection(signal)
+
+    def y_interval(self, w_left, w_right):
+        return 0, 100000000
