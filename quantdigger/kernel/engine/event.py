@@ -1,12 +1,12 @@
+# -*- coding: utf8 -*-
  # event.py
+from flufl.enum import Enum
 
-class Event(object):
-    """
-    Event is base class providing an interface for all subsequent 
-    (inherited) events, that will trigger further events in the 
-    trading infrastructure.   
-    """
-    pass 
+class Event(Enum):
+    MARKET = 1
+    SIGNAL = 2
+    ORDER = 3
+    FILL = 4
 
 
 class MarketEvent(Event):
@@ -19,7 +19,7 @@ class MarketEvent(Event):
         """
         Initialises the MarketEvent.
         """
-        self.type = 'MARKET'
+        self.type = Event.MARKET
 
 
 class SignalEvent(Event):
@@ -38,7 +38,7 @@ class SignalEvent(Event):
         signal_type - 'LONG' or 'SHORT'.
         """
         
-        self.type = 'SIGNAL'
+        self.type = Event.SIGNAL
         self.symbol = symbol
         self.datetime = datetime
         self.signal_type = signal_type
@@ -65,7 +65,9 @@ class OrderEvent(Event):
         direction - 'BUY' or 'SELL' for long or short.
         """
         
-        self.type = 'ORDER'
+        # simbol 会比Contract好记。
+        # 让计算机处理simbol和contract的映射。
+        self.type = Event.ORDER
         self.symbol = symbol
         self.order_type = order_type
         self.quantity = quantity
@@ -108,7 +110,7 @@ class FillEvent(Event):
         commission - An optional commission sent from IB.
         """
         
-        self.type = 'FILL'
+        self.type = Event.FILL
         self.timeindex = timeindex
         self.symbol = symbol
         self.exchange = exchange

@@ -1,7 +1,8 @@
 # -*- coding: utf8 -*-
-
+import Queue
 from quantdigger.kernel.datasource import datamanager
 from quantdigger.errors import DataAlignError
+from event import Event
 class ExecuteUnit(object):
     """"""
     def __init__(self, begin_dt=None, end_dt=None):
@@ -10,7 +11,6 @@ class ExecuteUnit(object):
         self.begin_dt = begin_dt
         self.end_dt = end_dt
         self._data = { }     # PContract -> pandas.DataFrame
-
         # 如果begin_dt, end_dt 等于None，做特殊处理。
         # accociate with a mplot widget
         #tracker.pcontracts
@@ -20,16 +20,42 @@ class ExecuteUnit(object):
 
     def run(self):
         """""" 
-        print 'running'
+        print 'running...'
         curbar = 0
+
         while curbar < self._data_length:
             for tracker in self._trackers:
                 pass
-
             for algo in self._strategies:
                 algo.update_curbar(curbar)
+            
+                algo.blotter.update_timeindex(curbar)
+                algo.on_tick()
 
-            algo.on_tick()
+                while True:
+                    # 事件处理。在回测中无需MARKET事件。
+                    # 这样可以加速回测速度。
+                    try:
+                        event = algo.events_pool.get()
+                    except Queue.Empty:
+                        break
+                    except IndexError:
+                        break
+                    else:
+                        if event is not None:
+                            #if event.type == 'MARKET':
+                                #strategy.calculate_signals(event)
+                                #port.update_timeindex(event)
+
+                            if event.type == Event.MARKET:
+                                algo.blotter.update_signal(event)
+
+                            elif event.type == Event.ORDER:
+                                algo.broker.execute_order(event)
+
+                            elif event.type == Event.FILL:
+                                algo.blotter.update_fill(event)
+
             curbar += 1
             
 

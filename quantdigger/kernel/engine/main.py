@@ -19,6 +19,8 @@ while True:
             event = events.get(False)
         except Queue.Empty:
             break
+        except IndexError:
+            break
         else:
             if event is not None:
                 if event.type == 'MARKET':

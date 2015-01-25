@@ -1,17 +1,12 @@
-# portfolio.py
-
-import datetime
-import numpy as np
 import pandas as pd
-import Queue
 
 from abc import ABCMeta, abstractmethod
 from math import floor
 
-from event import FillEvent, OrderEvent
+from event import OrderEvent, Event
 from performance import create_sharpe_ratio, create_drawdowns
 
-class Portfolio(object):
+class Blotter(object):
     """
     The Portfolio class handles the positions and market
     value of all instruments at a resolution of a "bar",
@@ -37,37 +32,44 @@ class Portfolio(object):
         raise NotImplementedError("Should implement update_fill()")
 
 
-class NaivePortfolio(Portfolio):
+class SimpleBlotter(Blotter):
     """
-    The NaivePortfolio object is designed to send orders to
+    The SimpleBlotter object is designed to send orders to
     a brokerage object with a constant quantity size blindly,
     i.e. without any risk management or position sizing. It is
     used to test simpler strategies such as BuyAndHoldStrategy.
     """
     
-    def __init__(self, bars, events, start_date, initial_capital=100000.0):
-        """
-        Initialises the portfolio with bars and an event queue. 
-        Also includes a starting datetime index and initial capital 
-        (USD unless otherwise stated).
+    #def __init__(self, bars, events, start_date, initial_capital=100000.0):
+        #"""
+        #Initialises the portfolio with bars and an event queue. 
+        #Also includes a starting datetime index and initial capital 
+        #(USD unless otherwise stated).
 
-        Parameters:
-        bars - The DataHandler object with current market data.
-        events - The Event Queue object.
-        start_date - The start date (bar) of the portfolio.
-        initial_capital - The starting capital in USD.
-        """
-        self.bars = bars
-        self.events = events
-        self.symbol_list = self.bars.symbol_list
-        self.start_date = start_date
-        self.initial_capital = initial_capital
+        #Parameters:
+        #bars - The DataHandler object with current market data.
+        #events - The Event Queue object.
+        #start_date - The start date (bar) of the portfolio.
+        #initial_capital - The starting capital in USD.
+        #"""
+        #self.bars = bars
+        #self.events = events
+        #self.symbol_list = self.bars.symbol_list
+        #self.start_date = start_date
+        #self.initial_capital = initial_capital
         
-        self.all_positions = self.construct_all_positions()
-        self.current_positions = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        #self.all_positions = self.construct_all_positions()
+        #self.current_positions = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
 
-        self.all_holdings = self.construct_all_holdings()
-        self.current_holdings = self.construct_current_holdings()
+        #self.all_holdings = self.construct_all_holdings()
+        #self.current_holdings = self.construct_current_holdings()
+
+
+    def __init__(self, timeseries, events_pool, initial_capital=100000.0):
+        """docstring for __init__""" 
+        self._timeseries = timeseries
+        self.events = events_pool
+        self.initial_capital = initial_capital
 
 
     def construct_all_positions(self):
@@ -113,35 +115,36 @@ class NaivePortfolio(Portfolio):
 
             Makes use of a MarketEvent from the events queue.
             """
-            bars = {}
-            for sym in self.symbol_list:
-                bars[sym] = self.bars.get_latest_bars(sym, N=1)
+            #bars = {}
+            #for sym in self.symbol_list:
+                #bars[sym] = self.bars.get_latest_bars(sym, N=1)
 
-            # Update positions
-            dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
-            dp['datetime'] = bars[self.symbol_list[0]][0][1]
+            ## Update positions
+            #dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+            #dp['datetime'] = bars[self.symbol_list[0]][0][1]
 
-            for s in self.symbol_list:
-                dp[s] = self.current_positions[s]
+            #for s in self.symbol_list:
+                #dp[s] = self.current_positions[s]
 
-            # Append the current positions
-            self.all_positions.append(dp)
+            ## Append the current positions
+            #self.all_positions.append(dp)
 
-            # Update holdings
-            dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
-            dh['datetime'] = bars[self.symbol_list[0]][0][1]
-            dh['cash'] = self.current_holdings['cash']
-            dh['commission'] = self.current_holdings['commission']
-            dh['total'] = self.current_holdings['cash']
+            ## Update holdings
+            #dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+            #dh['datetime'] = bars[self.symbol_list[0]][0][1]
+            #dh['cash'] = self.current_holdings['cash']
+            #dh['commission'] = self.current_holdings['commission']
+            #dh['total'] = self.current_holdings['cash']
 
-            for s in self.symbol_list:
-                # Approximation to the real value
-                market_value = self.current_positions[s] * bars[s][0][5]
-                dh[s] = market_value
-                dh['total'] += market_value
+            #for s in self.symbol_list:
+                ## Approximation to the real value
+                #market_value = self.current_positions[s] * bars[s][0][5]
+                #dh[s] = market_value
+                #dh['total'] += market_value
 
-            # Append the current holdings
-            self.all_holdings.append(dh)
+            ## Append the current holdings
+            #self.all_holdings.append(dh)
+            pass
 
 
     def update_positions_from_fill(self, fill):
@@ -233,7 +236,7 @@ class NaivePortfolio(Portfolio):
             Acts on a SignalEvent to generate new orders 
             based on the portfolio logic.
             """
-            if event.type == 'SIGNAL':
+            if event.type == Event.Signal:
                 order_event = self.generate_naive_order(event)
                 self.events.put(order_event)
 

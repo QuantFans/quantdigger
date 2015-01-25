@@ -1,7 +1,20 @@
 # -*- coding: utf8 -*-
 from quantdigger.kernel.engine.series import NumberSeries
 import numpy as np
-class BarTracker(object):
+from blotter import SimpleBlotter
+from pool import EventPool
+from broker import SimulateBroker
+from event import OrderEvent
+
+class Simulator(object):
+    """docstring for Simulator"""
+    def __init__(self):
+        self.events_pool = EventPool()
+        self.blotter = SimpleBlotter(None, self.events_pool)
+        self.broker = SimulateBroker(self.events_pool)
+
+    
+class BarTracker(Simulator):
     def __init__(self, pcontracts):
         """ 初始化数据列表
         
@@ -11,6 +24,7 @@ class BarTracker(object):
             pcontracts (PContract list): 周期合约列表，长度至少唯一。
         
         """
+        super(BarTracker, self).__init__()
         self._excution = None
         # 如果一次性给出所有合约，加载可以更快。
         self.pcontracts = pcontracts
@@ -21,7 +35,7 @@ class BarTracker(object):
             ## @todo 提醒用户用法。
             raise KeyError
         self._container_day = np.zeros(shape=(self.length_day(self._main_pcontract), ), dtype = float)
-        
+
 
     def length_day(self, pcontract):
         """ 计算当天的数据量 """ 
@@ -65,6 +79,7 @@ class BarTracker(object):
         self.low = NumberSeries(self, data.low, True)
         self.volume = NumberSeries(self, data.volume, True)
         self.curbar = 0
+
 
     def get_data(self, pcontract):
         return self._excution.load_data(pcontract)
@@ -115,6 +130,13 @@ class TradingStrategy(BarTracker):
             indicator.calculate_latest_element()
 
 
+    def order(self):
+        """docstring for order""" 
+        #self.events_pool.put()
+        #OrderEvent
+        pass
+
+
 def average(series, n):
     """""" 
     sum_ = 0
@@ -131,13 +153,13 @@ class DemoStrategy(TradingStrategy):
 
     def init_trading(self):
         self.ma = MA(self, self.open, 2)
-
         self.ma2 = NumberSeries(self)
 
 
     def on_tick(self):
         """""" 
         self.ma2.update(average(self.open, 2))
+
         print self.open, self.ma2, self.ma
         #print self.ma
 

@@ -5,7 +5,9 @@ QuantDigger
 
 安装
 =======
- 建议安装[Anaconda](http://continuum.io/downloads), 这样可以一次性搞定所有依赖包。
+ * 建议安装[Anaconda](http://continuum.io/downloads), 这样可以一次性搞定所有依赖包。
+ * 设置PYTHONPATH环境变量。
+
 
 依赖库
 =======

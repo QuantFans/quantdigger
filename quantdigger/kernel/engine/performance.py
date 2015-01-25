@@ -1,4 +1,4 @@
-mport numpy as np
+import numpy as np
 import pandas as pd
 
 def create_sharpe_ratio(returns, periods=252):
