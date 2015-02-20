@@ -1,9 +1,10 @@
+# -*- coding: utf8 -*-
 import pandas as pd
 
 from abc import ABCMeta, abstractmethod
 from math import floor
 
-from event import OrderEvent, Event
+from quantdigger.kernel.engine.event import OrderEvent, Event
 from performance import create_sharpe_ratio, create_drawdowns
 
 class Blotter(object):
@@ -70,6 +71,9 @@ class SimpleBlotter(Blotter):
         self._timeseries = timeseries
         self.events = events_pool
         self.initial_capital = initial_capital
+        self._open_orders = []
+        self._triggerd_orders = { }
+        self._pre_settlement = 0
 
 
     def construct_all_positions(self):
@@ -107,44 +111,45 @@ class SimpleBlotter(Blotter):
             return d
 
 
-    def update_timeindex(self, event):
-            """
-            Adds a new record to the positions matrix for the current 
-            market data bar. This reflects the PREVIOUS bar, i.e. all
-            current market data at this stage is known (OLHCVI).
+    def update_datetime(self, dt):
+        """docstring for update_datetime""" 
+        self._datetime = dt
+        """
+        Adds a new record to the positions matrix for the current 
+        market data bar. This reflects the PREVIOUS bar, i.e. all
+        current market data at this stage is known (OLHCVI).
 
-            Makes use of a MarketEvent from the events queue.
-            """
-            #bars = {}
-            #for sym in self.symbol_list:
-                #bars[sym] = self.bars.get_latest_bars(sym, N=1)
+        Makes use of a MarketEvent from the events queue.
+        """
+        #bars = {}
+        #for sym in self.symbol_list:
+            #bars[sym] = self.bars.get_latest_bars(sym, N=1)
 
-            ## Update positions
-            #dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
-            #dp['datetime'] = bars[self.symbol_list[0]][0][1]
+        ## Update positions
+        #dp = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        #dp['datetime'] = bars[self.symbol_list[0]][0][1]
 
-            #for s in self.symbol_list:
-                #dp[s] = self.current_positions[s]
+        #for s in self.symbol_list:
+            #dp[s] = self.current_positions[s]
 
-            ## Append the current positions
-            #self.all_positions.append(dp)
+        ## Append the current positions
+        #self.all_positions.append(dp)
 
-            ## Update holdings
-            #dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
-            #dh['datetime'] = bars[self.symbol_list[0]][0][1]
-            #dh['cash'] = self.current_holdings['cash']
-            #dh['commission'] = self.current_holdings['commission']
-            #dh['total'] = self.current_holdings['cash']
+        ## Update holdings
+        #dh = dict( (k,v) for k, v in [(s, 0) for s in self.symbol_list] )
+        #dh['datetime'] = bars[self.symbol_list[0]][0][1]
+        #dh['cash'] = self.current_holdings['cash']
+        #dh['commission'] = self.current_holdings['commission']
+        #dh['total'] = self.current_holdings['cash']
 
-            #for s in self.symbol_list:
-                ## Approximation to the real value
-                #market_value = self.current_positions[s] * bars[s][0][5]
-                #dh[s] = market_value
-                #dh['total'] += market_value
+        #for s in self.symbol_list:
+            ## Approximation to the real value
+            #market_value = self.current_positions[s] * bars[s][0][5]
+            #dh[s] = market_value
+            #dh['total'] += market_value
 
-            ## Append the current holdings
-            #self.all_holdings.append(dh)
-            pass
+        ## Append the current holdings
+        #self.all_holdings.append(dh)
 
 
     def update_positions_from_fill(self, fill):
@@ -195,10 +200,23 @@ class SimpleBlotter(Blotter):
             Updates the portfolio current positions and holdings 
             from a FillEvent.
             """
-            if event.type == 'FILL':
-                self.update_positions_from_fill(event)
-                self.update_holdings_from_fill(event)
+            assert event.type == Event.FILL
+            print "on_fill_event" 
+            return
+            self.update_positions_from_fill(event)
+            self.update_holdings_from_fill(event)
 
+    def update_signal(self, event):
+            """
+            Acts on a SignalEvent to generate new orders 
+            based on the portfolio logic.
+            """
+            assert event.type == Event.SIGNAL
+            for order in event.orders:
+                self.events.put(OrderEvent(order)) 
+            self._open_orders.extend(event.orders)
+            #print "Receive %d signals!" % len(event.orders)
+            #self.generate_naive_order(event.orders)
 
     def generate_naive_order(self, signal):
             """
@@ -229,16 +247,6 @@ class SimpleBlotter(Blotter):
             if direction == 'EXIT' and cur_quantity < 0:
                 order = OrderEvent(symbol, order_type, abs(cur_quantity), 'BUY')
             return order
-
-
-    def update_signal(self, event):
-            """
-            Acts on a SignalEvent to generate new orders 
-            based on the portfolio logic.
-            """
-            if event.type == Event.Signal:
-                order_event = self.generate_naive_order(event)
-                self.events.put(order_event)
 
 
     def create_equity_curve_dataframe(self):

@@ -2,7 +2,7 @@
 import os
 import pandas as pd
 import datetime as dt
-home = os.path.join('/Users/alan/Work/Quant/quantdigger/quantdigger/' , 'datasource', 'data')
+home = os.path.join('/Users/alan/Work/Quant/quantdigger/quantdigger/kernel/' , 'datasource', 'data')
 
 # prepare data
 def get_stock_signal_data():
@@ -310,6 +310,7 @@ def load_tradeinfo(fname):
     name, ext =  os.path.splitext(os.path.basename(fname))
     name = os.path.dirname(fname) + name + "_" + ext
     names.append(path_name(name))
+    print names
 
     tradeinfo = pd.concat([csv2frame(name) for name in names])
     tradeinfo = tradeinfo.sort_index()

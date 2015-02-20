@@ -36,7 +36,8 @@ def override_attributes(method):
         try:
             for attr in arg_names:
                 obj_attrs[attr] = getattr(self, attr)
-        except Exception:
+        except Exception, e:
+            print e
             print("构造函数和绘图函数的绘图属性参数不匹配。" )
         obj_attrs.update(method_args)
         return method(self, widget, **obj_attrs)
@@ -57,10 +58,18 @@ def create_attributes(method):
         method_args.update(kwargs)
         # 
         default.update(method_args)
-        #
+        # 属性创建
         for key, value in default.iteritems():
             setattr(self, key, value)
-        return method(self, *args, **kwargs)
+        # 构造函数
+        rst =  method(self, *args, **kwargs)
+        # 序列变量
+        if self.tracker:
+            self._series = series.NumberSeries(self.tracker, self.value)
+        # 绘图中的y轴范围
+        if hasattr(self, 'value') and not self.upper:
+            self.set_yrange(self.value)
+        return rst
     return wrapper
 
 
@@ -74,29 +83,15 @@ class Indicator(object):
             value (np.dataarray): 值
             widget (widget): Axes or QtGui.Widget。
         
-        Returns:
-            Indicator. The result
         """
         self.name = name
         # 可能是qt widget, Axes, WebUI
         self.widget = widget
+        self.upper = self.lower = None
         ## @todo 判断tracker是否为字符串。
-        self._added_to_tracker(tracker)
+        if tracker:
+            self._added_to_tracker(tracker)
         self._tracker = tracker
-
-        ## @todo remove set_yrange 
-
-    def init_state(self, value, algo, args):
-        """ 序列变量创建，实时函数登记。
-        
-        Args:
-            value (array): 数据
-            algo (function): 实时指标函数。
-            args (tuple): 实时指标函数的参数。
-        """
-        self._series = series.NumberSeries(self._tracker, value)
-        self._algo = algo
-        self._args = args
 
 
     def calculate_latest_element(self):
@@ -119,7 +114,8 @@ class Indicator(object):
 
 
     def _added_to_tracker(self, tracker):
-        tracker.add_indicator(self)
+        if tracker:
+            tracker.add_indicator(self)
 
 
     def __float__(self):
@@ -129,23 +125,23 @@ class Indicator(object):
         return str(self._series[0])
 
     #
-    def __eq__(self, v):
-        return float(self) == v
+    def __eq__(self, r):
+        return float(self) == float(r)
 
     def __lt__(self, other):
-        return float(self) < other
+        return float(self) < float(other)
 
     def __le__(self, other):
-        return float(self) <= other
+        return float(self) <= float(other)
 
     def __ne__(self, other):
-        return float(self) != other
+        return float(self) != float(other)
 
     def __gt__(self, other):
-        return float(self) > other
+        return float(self) > float(other)
 
     def __ge__(self, other):
-        return float(self) >= other
+        return float(self) >= float(other)
 
     ## 不该被改变。
     #def __iadd__(self, r):
@@ -170,47 +166,44 @@ class Indicator(object):
 
     #
     def __add__(self, r):
-        return self._series[0] + r
+        return self._series[0] + float(r)
 
     def __sub__(self, r):
-        return self._series[0] - r
+        return self._series[0] - float(r)
 
     def __mul__(self, r):
-        return self._series[0] * r
+        return self._series[0] * float(r)
 
     def __div__(self, r):
-        return self._series[0] / r
+        return self._series[0] / float(r)
 
     def __mod__(self, r):
-        return self._series[0] % r
+        return self._series[0] % float(r)
 
     def __pow__(self, r):
-        return self._series[0] ** r
+        return self._series[0] ** float(r)
 
     #
     def __radd__(self, r):
-        return self._series[0] + r
+        return self._series[0] + float(r)
 
     def __rsub__(self, r):
-        return self._series[0] - r
+        return self._series[0] - float(r)
 
     def __rmul__(self, r):
-        return self._series[0] * r
+        return self._series[0] * float(r)
 
     def __rdiv__(self, r):
-        return self._series[0] / r
+        return self._series[0] / float(r)
 
     def __rmod__(self, r):
-        return self._series[0] % r
+        return self._series[0] % float(r)
 
     def __rpow__(self, r):
-        return self._series[0] ** r
-
-
-
+        return self._series[0] ** float(r)
 
     # api
-    def plot_line(self, data, color, lw):
+    def plot_line(self, data, color, lw, style='line'):
         """ 画线    
         
         Args:
@@ -218,76 +211,24 @@ class Indicator(object):
             color (str): 颜色。
             lw (int): 线宽。
         """
-        def mplot_line(data, color, lw):
+        ## @todo 放到两个类中。
+        def mplot_line(data, color, lw, style='line' ):
             """ 使用matplotlib容器绘线 """
-            raise NotImplementedError
+            self.widget.plot(data, color=color, lw=lw, label=self.name)
 
         def qtplot_line(self, data, color, lw):
             """ 使用pyqtq容器绘线 """
             raise NotImplementedError
 
-        if isinstance(self.widget, Axes):
-            mplot_line(data, color, lw) 
+        # 区分向量绘图和逐步绘图。
+        if len(data) > 0:
+            # 区分绘图容器。
+            if isinstance(self.widget, Axes):
+                mplot_line(data, color, lw, style) 
+            else:
+                qtplot_line(data, color, lw, style)
         else:
-            qtplot_line(data, color, lw)
-
-
-    def set_yrange(self, upper, lower=[]):
-        self.upper = upper
-        self.lower = lower if len(lower)>0 else upper
-
-
-    def y_interval(self, w_left, w_right):
-        if len(self.upper) == 2:
-            return max(self.upper), min(self.lower) 
-        ymax = np.max(self.upper[w_left: w_right])
-        ymin = np.min(self.lower[w_left: w_right])
-        return ymax, ymin
-            
-    # other plot ..
-
-
-class MA(Indicator):
-    @create_attributes
-    def __init__(self, tracker, price, n, name='MA', type='simple', color='y', lw=1):
-        super(MA, self).__init__(tracker, name)
-        self.value = self._moving_average(price, n, type)
-        self.set_yrange(self.value)
-        self.init_state(self.value, self.moving_average, (price, n))
-
-
-    def _moving_average(self, data, n, type_='simple'):
-        """
-        compute an n period moving average.
-
-        type is 'simple' | 'exponential'
-
-        """
-        ## @todo series, nparray
-        x = np.asarray(data._data) # 减少非必须的拷贝。
-        if type_=='simple':
-            weights = np.ones(n)
-        else:
-            weights = np.exp(np.linspace(-1., 0., n))
-        weights /= weights.sum()
-        a =  np.convolve(x, weights, mode='full')[:len(x)]
-        a[:n] = a[n]
-        return a
-
-
-    def moving_average(self, price, n):
-        """docstring for moving_average""" 
-        pass
-
-
-    @override_attributes
-    def plot(self, widget, color='y', lw=2):
-        ## @todo 使用Indicator类中的绘图接口绘图。
-        if isinstance(widget, Axes):
-            self._mplot(widget, color, lw)
-        else:
-            # pyqt
-            self._qtplot(widget, color, lw)
+            pass
 
 
     def _mplot(self, ax, color, lw):
@@ -297,6 +238,66 @@ class MA(Indicator):
     def _qtplot(self, widget, color, lw):
         """docstring for qtplot""" 
         raise  NotImplementedError
+
+    def set_yrange(self, upper, lower=[]):
+        self.upper = upper
+        self.lower = lower if len(lower)>0 else upper
+
+    def y_interval(self, w_left, w_right):
+        if len(self.upper) == 2:
+            return max(self.upper), min(self.lower) 
+        ymax = np.max(self.upper[w_left: w_right])
+        ymin = np.min(self.lower[w_left: w_right])
+        return ymax, ymin
+            
+    # other plot ..
+def NUMBER_SERIES_SUPPORT(data):
+    """ 如果是series变量，返回ndarray """
+    if data.__class__.__name__ == 'NumberSeries':
+        # 获取ndarray变量 
+        data = data.data
+    return data
+    #elif data.__class__.__name__ == 'Series' or data.__class__.__name__ == 'ndarray':
+        #x = np.asarray(data)
+    #else:
+        #raise Exception
+
+class MA(Indicator):
+    @create_attributes
+    def __init__(self, tracker, price, n, name='MA', type='simple', color='y', lw=1, style="line"):
+        super(MA, self).__init__(tracker, name)
+        self.value = self._moving_average(price, n, type) # 任何支持index的数据结构。
+        self._algo = self._iter_moving_average
+        self._args = (n,)
+
+    def _iter_moving_average(self, price, n):
+        """ 逐步运行的均值函数。""" 
+        pass
+
+    def _moving_average(self, data, n, type_='simple'):
+        """ 向量化运行的均值函数。
+
+        compute an n period moving average.
+
+        type is 'simple' | 'exponential'
+
+        """
+        data = NUMBER_SERIES_SUPPORT(data)
+        # 减少非必须的拷贝。
+        x = np.asarray(data)
+        if type_=='simple':
+            weights = np.ones(n)
+        else:
+            weights = np.exp(np.linspace(-1., 0., n))
+        weights /= weights.sum()
+        a =  np.convolve(x, weights, mode='full')[:len(x)]
+        a[:n] = a[n]
+        return a
+
+    @override_attributes
+    def plot(self, widget, color='y', lw=2, style="line"):
+        self.widget = widget
+        self.plot_line(self.value, color, lw, style)
 
 
 
@@ -411,8 +412,7 @@ class Volume(Indicator):
 
 from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
-class Candles(Indicator):
-    @create_attributes
+class Candles(object):
     def __init__(self, tracker, data, name='candle',  width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
         vertical line.
@@ -426,14 +426,16 @@ class Candles(Indicator):
 
         return value is lineCollection, barCollection
         """
-        super(Candles, self).__init__(tracker, name)
+        #super(Candles, self).__init__(tracker, name)
         self.set_yrange(data.high.values, data.low.values)
+        self.data = data
+        self.name = name
 
         # note this code assumes if any value open, close, low, high is
         # missing they all are missing
 
 
-    @override_attributes
+    #@override_attributes
     def plot(self, widget, width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """docstring for plot""" 
         delta = width/2.
@@ -480,18 +482,28 @@ class Candles(Indicator):
         #lineCollection, barCollection = None, None
         return lineCollection, barCollection
 
+    def set_yrange(self, upper, lower=[]):
+        self.upper = upper
+        self.lower = lower if len(lower)>0 else upper
 
-class TradingSignal(Indicator):
+    def y_interval(self, w_left, w_right):
+        if len(self.upper) == 2:
+            return max(self.upper), min(self.lower) 
+        ymax = np.max(self.upper[w_left: w_right])
+        ymin = np.min(self.lower[w_left: w_right])
+        return ymax, ymin
+
+
+class TradingSignal(object):
     """docstring for signalWindow"""
-    @create_attributes
     def __init__(self, tracker, signal, name="Signal", c=None, lw=2):
-        super(TradingSignal , self).__init__(tracker, name)
         #self.set_yrange(price)
         #self.signal=signal
         #self.c = c
         #self.lw = lw
+        self.signal = signal
+        self.name = name
 
-    @override_attributes
     def plot(self, widget, c=None, lw=2):
         useAA = 0,  # use tuple here
         signal = LineCollection(self.signal, colors=c, linewidths=lw,

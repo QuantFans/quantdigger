@@ -406,11 +406,11 @@ class LocalData(object):
         
         Returns:
             DataFrame. 
+
         Raises:
             FileDoesNotExist
         """
         fname = ''.join([str(pcontract), ".csv"])
-        print fname
         try:
             data = pd.read_csv(fname, index_col=0, parse_dates=True)
             assert data.index.is_unique

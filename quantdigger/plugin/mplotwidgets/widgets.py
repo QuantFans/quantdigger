@@ -225,7 +225,7 @@ class Slider(AxesWidget):
 
 
 
-from indicator import Candles
+from quantdigger.kernel.indicators.sys_indicator import Candles
 class CandleWindow(object):
     """
     画蜡烛线。
@@ -258,7 +258,9 @@ class CandleWindow(object):
         self.ax = parent.axes[ith_axes]
         #ax.set_xlim((self.xmin, self.xmax))
         #ax.set_ylim((self.ymin, self.ymax))
+        print "--------------------" 
         candles = Candles(None, self.data, self.name, 0.6, 'r', 'g', alpha=1)
+        print "--------------------" 
         parent.register_indicator(ith_axes, candles)
         self.lines, self.rects = candles.plot(self.ax)
         self.main_indicator = candles

@@ -94,7 +94,7 @@ class TechMPlot(object):
 
     def register_indicator(self, ith_axes, indicator):
         """ 注册指标。
-        axes到指标的映射。
+            axes到指标的映射。
         """ 
         try:
             ax_indicators = self._indicators.get(ith_axes, [])
@@ -137,8 +137,11 @@ class TechMPlot(object):
             AxesWidget. widget
         """
         try:
+            print "***********11111" 
             widget.set_parent(self, ith_axes)
+            print "***********11111" 
             if connect_slider:
+                print "***********11111" 
                 self._slider.add_observer(widget)
             return widget
         except Exception, e:
@@ -274,8 +277,11 @@ class TechMPlot(object):
 
     def _init_widgets(self, *args):
         args = list(reversed(args))
-        num_axes = sum(args)
-        unit = (1.0 - self._top) / num_axes
+        # 默认子窗口数量为1
+        if len(args) ==  0:
+            args = (1,) 
+        total_units = sum(args)
+        unit = (1.0 - self._top) / total_units
         bottom = self._top
         for i, ratio in enumerate(args):
             rect = [self._left, bottom, self._width, unit * ratio]

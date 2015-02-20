@@ -3,11 +3,11 @@
 #sys.path.append(os.path.join('..', '..'))
 import matplotlib
 matplotlib.use('TkAgg')
-from plugin.mplotwidgets import techmplot
 import matplotlib.pyplot as plt
-from plugin.mplotwidgets import widgets
-from plugin.mplotwidgets.indicator import *
-from datasource.data import get_stock_signal_data
+from quantdigger.plugin.mplotwidgets import techmplot
+from quantdigger.plugin.mplotwidgets import widgets
+from quantdigger.kernel.indicators.sys_indicator import *
+from quantdigger.kernel.datasource.data import get_stock_signal_data
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 #import matplotlib.font_manager as font_manager

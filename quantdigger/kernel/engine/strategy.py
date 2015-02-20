@@ -2,16 +2,19 @@
 from quantdigger.kernel.engine.series import NumberSeries
 import numpy as np
 from blotter import SimpleBlotter
-from pool import EventPool
-from broker import SimulateBroker
-from event import OrderEvent
+#from broker import SimulateBroker
+from event import OrderEvent, EventsPool
+from quantdigger.kernel.datastruct import Order, Bar
+from quantdigger.kernel.engine.exchange import Exchange
+from quantdigger.kernel.engine.event import SignalEvent
 
 class Simulator(object):
     """docstring for Simulator"""
     def __init__(self):
-        self.events_pool = EventPool()
+        self.events_pool = EventsPool()
         self.blotter = SimpleBlotter(None, self.events_pool)
-        self.broker = SimulateBroker(self.events_pool)
+        #self.broker = SimulateBroker(self.events_pool)
+        self.exchange = Exchange(self.events_pool)
 
     
 class BarTracker(Simulator):
@@ -31,23 +34,21 @@ class BarTracker(Simulator):
         self._series = []
         try:
             self._main_pcontract = self.pcontracts[0]
+            self._main_contract = self._main_pcontract.contract
         except KeyError:
             ## @todo 提醒用户用法。
             raise KeyError
         self._container_day = np.zeros(shape=(self.length_day(self._main_pcontract), ), dtype = float)
-
 
     def length_day(self, pcontract):
         """ 计算当天的数据量 """ 
         ## @todo local_data
         return 4
 
-
     def set_pcontracts(self, pcontracts):
         """ 在用户类的初始化中可被调用。 """
         ## @todo property, set
         self.pcontracts = pcontracts
-
 
     def prepare_execution(self, exe):
         """ 数据加载，关键数据变量初始化, 设置执行器。
@@ -62,10 +63,8 @@ class BarTracker(Simulator):
         self._init_main_data(self._main_pcontract)
         self.init_trading()
 
-
     def init_trading(self):
         raise NotImplementedError
-        
 
     @property
     def container_day(self):
@@ -78,6 +77,8 @@ class BarTracker(Simulator):
         self.high = NumberSeries(self, data.high, True)
         self.low = NumberSeries(self, data.low, True)
         self.volume = NumberSeries(self, data.volume, True)
+        ## @todo timeseries
+        self.datetime = data.index
         self.curbar = 0
 
 
@@ -88,8 +89,12 @@ class BarTracker(Simulator):
         """""" 
         pass
 
+    def execute_strategy(self):
+        self.on_tick()
+
     def add_series(self, series):
         self._series.append(series)
+
 
 
 class TradingStrategy(BarTracker):
@@ -97,6 +102,7 @@ class TradingStrategy(BarTracker):
     def __init__(self, pcontracts):
         super(TradingStrategy, self).__init__(pcontracts)
         self._indicators = []
+        self._orders = []
 
 
     def add_indicator(self, indic):
@@ -113,7 +119,7 @@ class TradingStrategy(BarTracker):
             index (int.): 当前bar索引。
         
         Raises:
-            SerieIndexError
+            SeriesIndexError
         """
         self.curbar = index
         self.open.update_curbar(index)
@@ -121,6 +127,8 @@ class TradingStrategy(BarTracker):
         self.high.update_curbar(index)
         self.low.update_curbar(index)
         self.volume.update_curbar(index)
+        ## @todo 
+        #self.datetime.update_curbar(index)
 
         for serie in self._series:
             serie.update_curbar(index)
@@ -128,14 +136,60 @@ class TradingStrategy(BarTracker):
 
         for indicator in self._indicators:
             indicator.calculate_latest_element()
+        return Bar(self.datetime[index],
+                   self.open[0], self.close[0],
+                   self.high[0], self.low[0],
+                   self.volume[0])
 
+    def execute_strategy(self):
+        self.on_tick()
+        if self._orders:
+            self.generate_signals_event()
+        self._orders = []
 
-    def order(self):
-        """docstring for order""" 
-        #self.events_pool.put()
-        #OrderEvent
-        pass
+    def generate_signals_event(self):
+        self.events_pool.put(SignalEvent(self._orders))
 
+    def buy(self, deal_type, direction, price, amount):
+        """ 开仓
+        
+        Args:
+            deal_type (str): 下单方式，限价单('limit'), 市价单('market')
+            direction (str): 多头('d'), 或者空头('k')
+            amount (int): 数量
+            price (float): 价格
+        """
+        self._orders.append(Order(
+                self.datetime[self.curbar],## @todo ...
+                self._main_contract,
+                deal_type,
+                'k',
+                direction,
+                price,
+                amount
+        ))
+
+    def sell(self, deal_type, direction, price, amount):
+        """ 平仓
+        
+        Args:
+            deal_type (str): 下单方式，限价单('limit'), 市价单('market')
+            direction (str): 多头('d'), 或者空头('k')
+            amount (int): 数量
+            price (float): 价格
+        """
+        self._orders.append(Order(
+                self.datetime[self.curbar],## @todo ...
+                self._main_contract,
+                deal_type,
+                'p',
+                direction,
+                price,
+                amount
+        ))
+
+    def position(self, contract=None):
+        pass    
 
 def average(series, n):
     """""" 
@@ -152,18 +206,19 @@ class DemoStrategy(TradingStrategy):
 
 
     def init_trading(self):
-        self.ma = MA(self, self.open, 2)
+        self.ma = MA(self, self.open, 10)
         self.ma2 = NumberSeries(self)
 
 
     def on_tick(self):
         """""" 
-        self.ma2.update(average(self.open, 2))
-
-        print self.open, self.ma2, self.ma
-        #print self.ma
-
-        #for v in self.ma._serie._data:
-            #print v
-        #assert False
-        pass
+        self.ma2.update(average(self.open, 10))
+        #print self.open, self.ma2, self.ma
+        if self.open[1] < self.ma[1] and self.open > self.ma:
+            self.buy('limit',  'd', self.open, 1) 
+        elif self.open[1] > self.ma[1] and self.open < self.ma:
+            self.sell('limit',  'd', self.open, 1) 
+        # logger
+        # 画线
+        # 结果是否正确
+        # 订单内部情况 
