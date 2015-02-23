@@ -22,6 +22,7 @@ QuantDigger
 
 策略DEMO
 =======
+~~~~{.python}
 class DemoStrategy(TradingStrategy):
     """ 策略实例 """
     def __init__(self, pcontracts, exe):
@@ -38,7 +39,7 @@ class DemoStrategy(TradingStrategy):
             self.buy('d', self.open, 1) 
         elif self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
             self.sell('d', self.open, 1) 
-
+~~~~
 
 运行结果
 =======
