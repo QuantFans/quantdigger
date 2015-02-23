@@ -1,32 +1,50 @@
 # -*- coding: utf8 -*-
-from quantdigger.kernel.datastruct import PContract, Contract, Period
 from quantdigger.kernel.engine.execute_unit import ExecuteUnit
-from quantdigger.kernel.engine.strategy import DemoStrategy
+from quantdigger.kernel.indicators.common import MA
+from quantdigger.kernel.engine.strategy import TradingStrategy, pcontract
+#from quantdigger.kernel.engine.series import NumberSeries
 
-def pcontract(exchange, contract, time_unit, unit_count):
-    """ 构建周期合约结构的便捷方式。
-    
-    Args:
-        exchange (str): 交易所
-        contract (str): 合约
-        time_unit (str): 时间单位
-        unit_count (int): 时间数目
-    
-    Returns:
-        int. The result
-    Raises:
-    """
-    """docstring for pco""" 
-    return PContract(Contract(exchange, contract),
-                     Period(time_unit, unit_count))
+def average(series, n):
+    """ 一个可选的平均线函数 """ 
+    ## @todo plot element
+    sum_ = 0
+    for i in range(0, n):
+        sum_ += series[i]
+    return sum_ / n
+
+
+class DemoStrategy(TradingStrategy):
+    """ 策略实例 """
+    def __init__(self, pcontracts, exe):
+        super(DemoStrategy, self).__init__(pcontracts, exe)
+
+        self.ma20 = MA(self, self.open, 20,'ma20', 'b', '1')
+        self.ma10 = MA(self, self.open, 10,'ma10', 'y', '1')
+        #self.ma2 = NumberSeries(self)
+
+    def on_tick(self):
+        """ 策略函数，对每根Bar运行一次。""" 
+        #self.ma2.update(average(self.open, 10))
+        if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
+            self.buy('d', self.open, 1) 
+        elif self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
+            self.sell('d', self.open, 1) 
+
 
 def plot_result(price_data, indicators, signals, blotter):
+    """ 
+        显示回测结果。
+    """
+
     import matplotlib
     matplotlib.use('TkAgg')
     import matplotlib.pyplot as plt
     from quantdigger.plugin.mplotwidgets import techmplot
     from quantdigger.plugin.mplotwidgets import widgets
     from quantdigger.kernel.indicators.common import *
+
+    blotter.create_equity_curve_dataframe()
+    print blotter.output_summary_stats()
 
     fig = plt.figure()
     frame = techmplot.TechMPlot(fig,
@@ -52,18 +70,16 @@ def plot_result(price_data, indicators, signals, blotter):
     ax.plot(blotter.equity_curve.total)
     plt.show()
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     begin_dt, end_dt = None, None
     pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
-    algo = DemoStrategy([pcon])
     simulator = ExecuteUnit(begin_dt, end_dt)
-    simulator.add_strategy(algo)
+    algo = DemoStrategy([pcon], simulator)
     simulator.run()
 
-    blotter = algo.blotter
-    blotter.create_equity_curve_dataframe()
-    print blotter.output_summary_stats()
-
-    plot_result(simulator.data[pcon], algo._indicators,
-            algo.blotter.deal_positions, blotter)
+    # 显示回测结果
+    plot_result(simulator.data[pcon],
+                algo._indicators,
+                algo.blotter.deal_positions,
+                algo.blotter)

@@ -19,7 +19,7 @@ class Simulator(object):
 
     
 class BarTracker(Simulator):
-    def __init__(self, pcontracts):
+    def __init__(self, pcontracts, exe):
         """ 初始化数据列表
         
         每个Tracker都可能跟踪多个数据。
@@ -40,6 +40,7 @@ class BarTracker(Simulator):
             ## @todo 提醒用户用法。
             raise KeyError
         self._container_day = np.zeros(shape=(self.length_day(self._main_pcontract), ), dtype = float)
+        exe.add_strategy(self)
 
     def length_day(self, pcontract):
         """ 计算当天的数据量 """ 
@@ -53,7 +54,7 @@ class BarTracker(Simulator):
 
     def prepare_execution(self, exe):
         """ 数据加载，关键数据变量初始化, 设置执行器。
-
+        
         Args:
             exe (ExecuteUnit): 执行器。
         
@@ -62,10 +63,7 @@ class BarTracker(Simulator):
         for pcontract in self.pcontracts:
             self.get_data(pcontract)
         self._init_main_data(self._main_pcontract)
-        self.init_trading()
 
-    def init_trading(self):
-        raise NotImplementedError
 
     @property
     def container_day(self):
@@ -101,8 +99,8 @@ class BarTracker(Simulator):
 
 class TradingStrategy(BarTracker):
     """docstring for TradingStrategy"""
-    def __init__(self, pcontracts):
-        super(TradingStrategy, self).__init__(pcontracts)
+    def __init__(self, pcontracts, exe):
+        super(TradingStrategy, self).__init__(pcontracts, exe)
         self._indicators = []
         self._orders = []
 
@@ -191,39 +189,21 @@ class TradingStrategy(BarTracker):
     def position(self, contract=None):
         pass    
 
-def average(series, n):
-    """""" 
-    ## @todo plot element
-    sum_ = 0
-    for i in range(0, n):
-        sum_ += series[i]
-    return sum_ / n
 
-
-from quantdigger.kernel.indicators.common import *
-class DemoStrategy(TradingStrategy):
-    def __init__(self, pcontracts):
-        super(DemoStrategy, self).__init__(pcontracts)
-
-    def init_trading(self):
-        self.ma20 = MA(self, self.open, 20,'ma20', 'b', '1')
-        self.ma10 = MA(self, self.open, 10,'ma10', 'y', '1')
-        self.ma2 = NumberSeries(self)
-
-    def on_tick(self):
-        """""" 
-        self.ma2.update(average(self.open, 10))
-        #print self.open, self.ma2, self.ma
-        #if self.curbar:
-             
-        if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
-            self.buy('d', self.open, 1) 
-            logger.info('buy')
-        elif self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
-            self.sell('d', self.open, 1) 
-            logger.info('sell')
-        logger.info(self.curbar)
-        # logger
-        # 画线
-        # 结果是否正确
-        # 订单内部情况 
+from quantdigger.kernel.datastruct import PContract, Contract, Period
+def pcontract(exchange, contract, time_unit, unit_count):
+    """ 构建周期合约结构的便捷方式。
+    
+    Args:
+        exchange (str): 交易所
+        contract (str): 合约
+        time_unit (str): 时间单位
+        unit_count (int): 时间数目
+    
+    Returns:
+        int. The result
+    Raises:
+    """
+    """docstring for pco""" 
+    return PContract(Contract(exchange, contract),
+                     Period(time_unit, unit_count))

@@ -30,7 +30,6 @@ def get_stock_signal_data():
     return price_data, entry_x, entry_y, exit_x, exit_y, colors
 
 
-
 def set_dir(dname):
     '''docstring for set_dir''' 
     global home
