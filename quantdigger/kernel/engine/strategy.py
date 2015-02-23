@@ -1,20 +1,21 @@
 # -*- coding: utf8 -*-
-from quantdigger.kernel.engine.series import NumberSeries
 import numpy as np
-from blotter import SimpleBlotter
-#from broker import SimulateBroker
-from event import OrderEvent, EventsPool
+
+from quantdigger.kernel.engine.series import NumberSeries
 from quantdigger.kernel.datastruct import Order, Bar
 from quantdigger.kernel.engine.exchange import Exchange
 from quantdigger.kernel.engine.event import SignalEvent
+from quantdigger.util import engine_logger as logger
+
+from blotter import SimpleBlotter
+from event import EventsPool
 
 class Simulator(object):
     """docstring for Simulator"""
     def __init__(self):
         self.events_pool = EventsPool()
         self.blotter = SimpleBlotter(None, self.events_pool)
-        #self.broker = SimulateBroker(self.events_pool)
-        self.exchange = Exchange(self.events_pool)
+        self.exchange = Exchange(self.events_pool, strict=False)
 
     
 class BarTracker(Simulator):
@@ -72,6 +73,7 @@ class BarTracker(Simulator):
 
     def _init_main_data(self, pcontract):
         data = self.get_data(pcontract)
+        # 预留了历史和当天的数据空间。
         self.open = NumberSeries(self, data.open, True)
         self.close = NumberSeries(self, data.close, True)
         self.high = NumberSeries(self, data.high, True)
@@ -104,10 +106,8 @@ class TradingStrategy(BarTracker):
         self._indicators = []
         self._orders = []
 
-
     def add_indicator(self, indic):
         self._indicators.append(indic)
-
 
     def update_curbar(self, index):
         """ 更新当前bar索引。
@@ -116,7 +116,7 @@ class TradingStrategy(BarTracker):
         计算系列指标中的最新值。
         
         Args:
-            index (int.): 当前bar索引。
+            index (int): 当前bar索引。
         
         Raises:
             SeriesIndexError
@@ -150,14 +150,14 @@ class TradingStrategy(BarTracker):
     def generate_signals_event(self):
         self.events_pool.put(SignalEvent(self._orders))
 
-    def buy(self, deal_type, direction, price, amount):
+    def buy(self, direction, price, quantity, deal_type='limit'):
         """ 开仓
         
         Args:
-            deal_type (str): 下单方式，限价单('limit'), 市价单('market')
             direction (str): 多头('d'), 或者空头('k')
-            amount (int): 数量
+            quantity (int): 数量
             price (float): 价格
+            deal_type (str): 下单方式，限价单('limit'), 市价单('market')
         """
         self._orders.append(Order(
                 self.datetime[self.curbar],## @todo ...
@@ -165,18 +165,18 @@ class TradingStrategy(BarTracker):
                 deal_type,
                 'k',
                 direction,
-                price,
-                amount
+                float(price),
+                quantity
         ))
 
-    def sell(self, deal_type, direction, price, amount):
+    def sell(self, direction, price, quantity, deal_type='limit'):
         """ 平仓
         
         Args:
-            deal_type (str): 下单方式，限价单('limit'), 市价单('market')
             direction (str): 多头('d'), 或者空头('k')
-            amount (int): 数量
+            quantity (int): 数量
             price (float): 价格
+            deal_type (str): 下单方式，限价单('limit'), 市价单('market')
         """
         self._orders.append(Order(
                 self.datetime[self.curbar],## @todo ...
@@ -184,8 +184,8 @@ class TradingStrategy(BarTracker):
                 deal_type,
                 'p',
                 direction,
-                price,
-                amount
+                float(price),
+                quantity
         ))
 
     def position(self, contract=None):
@@ -193,31 +193,36 @@ class TradingStrategy(BarTracker):
 
 def average(series, n):
     """""" 
+    ## @todo plot element
     sum_ = 0
     for i in range(0, n):
         sum_ += series[i]
     return sum_ / n
 
 
-from quantdigger.kernel.indicators.sys_indicator import *
+from quantdigger.kernel.indicators.common import *
 class DemoStrategy(TradingStrategy):
     def __init__(self, pcontracts):
         super(DemoStrategy, self).__init__(pcontracts)
 
-
     def init_trading(self):
-        self.ma = MA(self, self.open, 10)
+        self.ma20 = MA(self, self.open, 20,'ma20', 'b', '1')
+        self.ma10 = MA(self, self.open, 10,'ma10', 'y', '1')
         self.ma2 = NumberSeries(self)
-
 
     def on_tick(self):
         """""" 
         self.ma2.update(average(self.open, 10))
         #print self.open, self.ma2, self.ma
-        if self.open[1] < self.ma[1] and self.open > self.ma:
-            self.buy('limit',  'd', self.open, 1) 
-        elif self.open[1] > self.ma[1] and self.open < self.ma:
-            self.sell('limit',  'd', self.open, 1) 
+        #if self.curbar:
+             
+        if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
+            self.buy('d', self.open, 1) 
+            logger.info('buy')
+        elif self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
+            self.sell('d', self.open, 1) 
+            logger.info('sell')
+        logger.info(self.curbar)
         # logger
         # 画线
         # 结果是否正确

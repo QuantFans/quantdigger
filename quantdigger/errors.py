@@ -16,6 +16,12 @@ class QuantDiggerError(Exception):
     __repr__ = __str__
 
 
+class DataFormatError(Exception):
+    """
+    """
+    msg = "错误的数据格式！" 
+
+
 class FileDoesNotExist(Exception):
     """
     当本地文件不存在的时候触发。

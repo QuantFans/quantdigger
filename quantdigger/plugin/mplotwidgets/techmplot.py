@@ -106,7 +106,6 @@ class TechMPlot(object):
         except Exception as e:
             raise e
 
-
     def replace_indicator(self, ith_axes, indicator):
         """ 在ith_axes上画指标indicator, 删除其它指标。
         
@@ -125,7 +124,6 @@ class TechMPlot(object):
         except Exception as e:
             raise e
 
-
     def add_widget(self, ith_axes, widget, ymain=False, connect_slider=False):
         """ 添加一个能接收消息事件的控件。
         
@@ -137,11 +135,8 @@ class TechMPlot(object):
             AxesWidget. widget
         """
         try:
-            print "***********11111" 
             widget.set_parent(self, ith_axes)
-            print "***********11111" 
             if connect_slider:
-                print "***********11111" 
                 self._slider.add_observer(widget)
             return widget
         except Exception, e:
@@ -251,12 +246,10 @@ class TechMPlot(object):
             return 
         #self.cross_cursor = Cursor(event.inaxes, useblit=True, color='red', linewidth=2, vertOn=True, horizOn=True)
 
-
     def on_leave_axes(self, event):
         if event.inaxes is self._slider_ax:
             self._cursor = MultiCursor(self._fig.canvas, self.axes, color='r', lw=2, horizOn=True, vertOn=True)
             event.canvas.draw()
-
 
     def _init_slider(self):
         #
@@ -298,15 +291,12 @@ class TechMPlot(object):
             ax.grid(True)
             ax.set_xticklabels([])
 
-
     def _user_axes(self):
         return self._fig.axes[2:]
-
 
     @property
     def axes(self):
         return self._axes
-
 
     def format_coord(self, x, y):
         """ 状态栏信息显示 """

@@ -93,9 +93,9 @@ class OrderEvent(object):
 
 
 class FillEvent(object):
-    def __init__(self, transact):
+    def __init__(self, transaction):
         self.type = Event.FILL
-        self.transact = transact
+        self.transaction = transaction
     #"""
     #Encapsulates the notion of a Filled Order, as returned
     #from a brokerage. Stores the quantity of an instrument

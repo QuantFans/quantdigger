@@ -2,6 +2,46 @@
 
 #from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
+from quantdigger import util
+
+class Position(object):
+    """docstring for Position"""
+    def __init__(self, order, transaction):
+        self.order = order
+        self.transaction = transaction
+        self.quantity = transaction.quantity
+
+    @property
+    def datetime(self):
+        return self.transaction.datetime
+
+    @property
+    def price(self):
+        """ 成交价格""" 
+        return self.transaction.price
+
+    #def order_time(self):
+        #return self.order.datetime
+
+    #def order_price(self):
+        #pass
+
+    def __hash__(self):
+        if hasattr(self, '_hash'):
+            return self._hash
+        else:
+            self._hash =  hash(util.time2int(self.datetime))
+            return self._hash
+
+    def __str__(self):
+        rst = """
+                Position:
+                   datetime - %s
+                   price - %f
+                   quantity - %d
+               """ % (str(self.datetime), self.price, self.quantity)
+        return rst
+
 
 class Bar(object):
     """docstring for Bar"""
@@ -16,8 +56,25 @@ class Bar(object):
 
 class Transaction(object):
     """ 成交记录 """
-    def __init__(self):
-        pass
+    def __init__(self, order=None):
+        if order:
+            self.contract = order.contract
+            self.direction = order.direction
+            self.price = order.price
+            self.quantity = order.quantity
+            self.kpp = order.kpp
+            self.datetime = order.datetime
+            self.type = order.type
+            self.id = order.id
+        self.commission = 0
+
+    def __hash__(self):
+        if hasattr(self, '_hash'):
+            return self._hash
+        else:
+            self._hash =  hash(self.id)
+            return self._hash
+
     
 class OrderID(object):
     """docstring for OrderID"""
@@ -52,7 +109,7 @@ class OrderID(object):
 
 class Order(object):
     """ 订单 """
-    def __init__(self, dt, contract, type_, kpp, direction, price, amount):
+    def __init__(self, dt, contract, type_, kpp, direction, price, quantity):
         """     
         Args:
             dt (datetime): 下单日期和时间
@@ -70,7 +127,7 @@ class Order(object):
         self.contract = contract
         self.direction = direction
         self.price = price
-        self.amount = amount
+        self.quantity = quantity
         self.kpp = kpp
         self.datetime = dt
         self.type = type_
@@ -80,6 +137,13 @@ class Order(object):
         #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \
             #(self.symbol, self.order_type, self.quantity, self.direction)
         pass
+
+    def __hash__(self):
+        if hasattr(self, '_hash'):
+            return self._hash
+        else:
+            self._hash =  hash(self.id)
+            return self._hash
 
 
     

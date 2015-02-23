@@ -15,6 +15,9 @@ class NumberSeries(object):
             int. The result
         Raises:
         """
+        # 非向量化运行的普通序列变量的_length_history的值为0.
+        self._length_history = len(data)
+
         # 为当天数据预留空间。
         # 系统序列变量总是预留空间。向量化运行中，非系统序列变量的长度
         # 计算中会与系统序列变量的长度对齐。非向量化运行的普通序列变量
@@ -23,10 +26,6 @@ class NumberSeries(object):
             self.data = np.append(data, tracker.container_day)
         else:
             self.data = data
-
-        # 非向量化运行的普通序列变量的_length_history的值为0.
-        self._length_history = len(data)
-
         self._curbar = 0
         self._tracker = tracker
         self._system_var = system_var

@@ -6,8 +6,9 @@ from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 from PyQt4 import QtGui, QtCore
 from plugin.qtwidgets.techwidget import TechWidget
-from datasource import data
-from plugin.mplotwidgets import widgets, indicator
+from quantdigger.kernel.datasource import data
+from plugin.mplotwidgets import widgets
+from quantdigger.kernel.indicators import sys_indicator as indicator
 price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
 
 class EmbedIPython(RichIPythonWidget):
@@ -127,8 +128,8 @@ class MainWindow(QtGui.QMainWindow):
             frame.add_indicator(0, signal)
 
             # 指标窗口
-            frame.add_indicator(0, indicator.MA(price_data.close, 20, 'MA20', 'simple', 'y', 2))
-            frame.add_indicator(0, indicator.MA(price_data.close, 30, 'MA30', 'simple', 'b', 2))
+            frame.add_indicator(0, indicator.MA(price_data.close, 20, 'MA20', 'y', 2))
+            frame.add_indicator(0, indicator.MA(price_data.close, 30, 'MA30', 'b', 2))
             frame.add_indicator(1, indicator.RSI(price_data.close, 14, name='RSI', fillcolor='b'))
             frame.add_indicator(2, indicator.Volume(price_data.open, price_data.close, price_data.vol))
             frame.draw_window()

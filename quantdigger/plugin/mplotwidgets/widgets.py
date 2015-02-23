@@ -225,7 +225,7 @@ class Slider(AxesWidget):
 
 
 
-from quantdigger.kernel.indicators.sys_indicator import Candles
+from quantdigger.kernel.indicators.common import Candles
 class CandleWindow(object):
     """
     画蜡烛线。
