@@ -79,13 +79,26 @@ def create_attributes(method):
             setattr(self, key, value)
         # 构造函数
         rst =  method(self, *args, **kwargs)
-        # 序列变量
-        if self.tracker:
-            self._series = series.NumberSeries(self.tracker, self.value)
-        # 绘图中的y轴范围
-        if hasattr(self, 'value') and not self.upper:
-            self.set_yrange(self.value)
-        return rst
+        if not hasattr(self, 'value'):
+            raise Exception("每个指标都必须有value属性，代表指标值！")
+        else:
+            # 序列变量
+            if self.tracker:
+                if self.value.__class__.__name__ == 'tuple':
+                    self._series = [series.NumberSeries(self.tracker, value) for value in self.value]
+                else:
+                    self._series = series.NumberSeries(self.tracker, self.value)
+            # 绘图中的y轴范围未被设置，使用默认值。
+            if not self.upper:
+                upper = lower = []
+                if self.value.__class__.__name__ == 'tuple':
+                    upper = [ max([value[i] for value in self.value ]) for i in xrange(0, len(self.value[0]))]
+                    lower = [ min([value[i] for value in self.value ]) for i in xrange(0, len(self.value[0]))]
+                else:
+                    upper = self.value
+                    lower = self.value
+                self.set_yrange(upper, lower)
+            return rst
     return wrapper
 
 
@@ -109,30 +122,91 @@ class IndicatorBase(object):
             self._added_to_tracker(tracker)
         self._tracker = tracker
 
-
     def calculate_latest_element(self):
         """ 被tracker调用，确保series总是最新的。 """
-        if self._series.curbar >= self._series.length_history:
-            self._series.update(apply(self._algo, self._args))
-
+        s = self._series
+        m = False
+        if self._series.__class__.__name__ == 'list':
+            s = self._series[0] 
+            m = True
+        if s.curbar >= s.length_history:
+            if not m:
+                self._series.update(apply(self._algo, self._args))
+            else:
+                rst = apply(self._algo, self._args)
+                for i, v in enumerate(rst):
+                    self._series[i].update(v)
 
     def __size__(self):
         """""" 
-        return len(self._series)
-
-
-    def __getitem__(self, index):
-        # 大于当前的肯定被运行过。
-        if index >= 0:
-            return self._series[index]
+        if self._series.__class__.__name__ == 'list':
+            return len(self._series[0])
         else:
-            raise SeriesIndexError
-
+            return len(self._series)
 
     def _added_to_tracker(self, tracker):
         if tracker:
             tracker.add_indicator(self)
 
+    # api
+    def plot_line(self, data, color, lw, style='line'):
+        """ 画线    
+        
+        Args:
+            data (list): 浮点数组。
+            color (str): 颜色。
+            lw (int): 线宽。
+        """
+        ## @todo 放到两个类中。
+        def mplot_line(data, color, lw, style='line' ):
+            """ 使用matplotlib容器绘线 """
+            self.widget.plot(data, color=color, lw=lw, label=self.name)
+
+        def qtplot_line(self, data, color, lw):
+            """ 使用pyqtq容器绘线 """
+            raise NotImplementedError
+
+        # 区分向量绘图和逐步绘图。
+        if len(data) > 0:
+            # 区分绘图容器。
+            if isinstance(self.widget, Axes):
+                mplot_line(data, color, lw, style) 
+            else:
+                qtplot_line(data, color, lw, style)
+        else:
+            pass
+
+    def set_yrange(self, upper, lower):
+        self.upper = upper
+        self.lower = lower
+
+    def calcute_bound(self):
+        """""" 
+        pass
+
+    def y_interval(self, w_left, w_right):
+        ## @todo 只存储上下界, 每次缩放的时候计算一次, 在移动时候无需计算。
+        if len(self.upper) == 2:
+            # 就两个值，分别代表上下界。
+            return max(self.upper), min(self.lower) 
+
+        ymax = np.max(self.upper[w_left: w_right])
+        ymin = np.min(self.lower[w_left: w_right])
+        return ymax, ymin
+
+    def __tuple__(self):
+        """docstring for __iter__""" 
+        if self._series.__class__.__name__ == 'list':
+            return tuple(self._series)
+        else:
+            return (self._series,)
+
+    #def __iter__(self):
+        #"""docstring for __iter__""" 
+        #if self._series.__class__.__name__ == 'list':
+            #return tuple(self._series)
+        #else:
+            #return (self._series,)
 
     def __float__(self):
         return self._series[0]
@@ -158,6 +232,14 @@ class IndicatorBase(object):
 
     def __ge__(self, other):
         return float(self) >= float(other)
+
+    # 以下都是单值函数。
+    def __getitem__(self, index):
+        # 大于当前的肯定被运行过。
+        if index >= 0:
+            return self._series[index]
+        else:
+            raise SeriesIndexError
 
     ## 不该被改变。
     #def __iadd__(self, r):
@@ -218,41 +300,3 @@ class IndicatorBase(object):
     def __rpow__(self, r):
         return self._series[0] ** float(r)
 
-    # api
-    def plot_line(self, data, color, lw, style='line'):
-        """ 画线    
-        
-        Args:
-            data (list): 浮点数组。
-            color (str): 颜色。
-            lw (int): 线宽。
-        """
-        ## @todo 放到两个类中。
-        def mplot_line(data, color, lw, style='line' ):
-            """ 使用matplotlib容器绘线 """
-            self.widget.plot(data, color=color, lw=lw, label=self.name)
-
-        def qtplot_line(self, data, color, lw):
-            """ 使用pyqtq容器绘线 """
-            raise NotImplementedError
-
-        # 区分向量绘图和逐步绘图。
-        if len(data) > 0:
-            # 区分绘图容器。
-            if isinstance(self.widget, Axes):
-                mplot_line(data, color, lw, style) 
-            else:
-                qtplot_line(data, color, lw, style)
-        else:
-            pass
-
-    def set_yrange(self, upper, lower=[]):
-        self.upper = upper
-        self.lower = lower if len(lower)>0 else upper
-
-    def y_interval(self, w_left, w_right):
-        if len(self.upper) == 2:
-            return max(self.upper), min(self.lower) 
-        ymax = np.max(self.upper[w_left: w_right])
-        ymin = np.min(self.lower[w_left: w_right])
-        return ymax, ymin

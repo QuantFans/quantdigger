@@ -7,6 +7,7 @@ class QuantDiggerError(Exception):
         self.args = args
         self.kwargs = kwargs
         self.message = str(self)
+        
 
     def __str__(self):
         msg = self.msg.format(**self.kwargs)
@@ -16,30 +17,30 @@ class QuantDiggerError(Exception):
     __repr__ = __str__
 
 
-class DataFormatError(Exception):
+class DataFormatError(QuantDiggerError):
     """
     """
     msg = "错误的数据格式！" 
 
 
-class FileDoesNotExist(Exception):
+class FileDoesNotExist(QuantDiggerError):
     """
     当本地文件不存在的时候触发。
     """
-    msg = "文件不存在！" 
+    msg = "不存在文件:{file}" 
 
 
-class PeriodTypeError(Exception):
+class PeriodTypeError(QuantDiggerError):
     msg = "不存在该周期！" 
 
 
-class DataAlignError(Exception):
+class DataAlignError(QuantDiggerError):
     msg = "数据没有对齐！" 
 
-class SeriesIndexError(KeyError):
+class SeriesIndexError(QuantDiggerError):
     msg = "序列变量索引越界！" 
 
-class BreakConstError(Exception):
+class BreakConstError(QuantDiggerError):
     msg = "不能对常量赋值！" 
     
 

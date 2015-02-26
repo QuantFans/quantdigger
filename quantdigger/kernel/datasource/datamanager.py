@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import datetime as dt
+from quantdigger.errors import FileDoesNotExist
 home = os.path.join('/Users/alan/Work/Quant/quantdigger/quantdigger/' , 'datasource', 'data')
 
 # prepare data
@@ -392,6 +393,21 @@ def load_wavedata(*fnames):
     return tuple(rst)
 
 
+def process_tushare_data(data):
+    """""" 
+    data.open = data.open.astype(float)
+    data.close = data.close.astype(float)
+    data.high = data.high.astype(float)
+    data.low = data.low.astype(float)
+    ## @todo bug: data.volume 里面有浮点值！
+    data.volume = data.volume.astype(float)
+    data.index.names = ['datetime']
+    data.index = pd.to_datetime(data.index)
+
+    return data
+
+
+import tushare as ts
 class LocalData(object):
     """ 本地数据数据接口类。
     
@@ -409,20 +425,28 @@ class LocalData(object):
         Raises:
             FileDoesNotExist
         """
-        fname = ''.join([str(pcontract), ".csv"])
-        try:
-            data = pd.read_csv(fname, index_col=0, parse_dates=True)
-            assert data.index.is_unique
-        except Exception:
-            print u"**Warning: File \"%s\" doesn't exist!"%fname
-            raise Exception
+        if pcontract.contract.exch_type == 'stock':
+            # 使用tushare接口
+            print "load stock data with tushare..." 
+            data = ts.get_hist_data(pcontract.contract.code)
+            return process_tushare_data(data)
         else:
-            return data
+            # 期货数据
+            fname = ''.join([str(pcontract), ".csv"])
+            try:
+                data = pd.read_csv(fname, index_col=0, parse_dates=True)
+                assert data.index.is_unique
+            except Exception:
+                #print u"**Warning: File \"%s\" doesn't exist!"%fname
+                raise FileDoesNotExist(file=fname)
+            else:
+                return data
 
     def loadTickData(self):
         raise NotImplementedError
 
     def loadContractsInfo(self):
+        """ 合约信息 """
         raise NotImplementedError
 
 local_data = LocalData()

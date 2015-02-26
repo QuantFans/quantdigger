@@ -1,10 +1,10 @@
 # -*- coding: utf8 -*-
 import numpy as np
 
-from quantdigger.kernel.engine.series import NumberSeries
 from quantdigger.kernel.datastruct import Order, Bar
 from quantdigger.kernel.engine.exchange import Exchange
 from quantdigger.kernel.engine.event import SignalEvent
+from quantdigger.kernel.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.util import engine_logger as logger
 
 from blotter import SimpleBlotter
@@ -77,10 +77,8 @@ class BarTracker(Simulator):
         self.high = NumberSeries(self, data.high, True)
         self.low = NumberSeries(self, data.low, True)
         self.volume = NumberSeries(self, data.volume, True)
-        ## @todo timeseries
-        self.datetime = data.index
+        self.datetime = DateTimeSeries(self, data.index, True)
         self.curbar = 0
-
 
     def get_data(self, pcontract):
         return self._excution.load_data(pcontract)
@@ -94,7 +92,6 @@ class BarTracker(Simulator):
 
     def add_series(self, series):
         self._series.append(series)
-
 
 
 class TradingStrategy(BarTracker):
@@ -125,8 +122,7 @@ class TradingStrategy(BarTracker):
         self.high.update_curbar(index)
         self.low.update_curbar(index)
         self.volume.update_curbar(index)
-        ## @todo 
-        #self.datetime.update_curbar(index)
+        self.datetime.update_curbar(index)
 
         for serie in self._series:
             serie.update_curbar(index)
@@ -134,7 +130,7 @@ class TradingStrategy(BarTracker):
 
         for indicator in self._indicators:
             indicator.calculate_latest_element()
-        return Bar(self.datetime[index],
+        return Bar(self.datetime[0],
                    self.open[0], self.close[0],
                    self.high[0], self.low[0],
                    self.volume[0])
@@ -158,7 +154,7 @@ class TradingStrategy(BarTracker):
             deal_type (str): 下单方式，限价单('limit'), 市价单('market')
         """
         self._orders.append(Order(
-                self.datetime[self.curbar],## @todo ...
+                self.datetime,
                 self._main_contract,
                 deal_type,
                 'k',
@@ -177,7 +173,7 @@ class TradingStrategy(BarTracker):
             deal_type (str): 下单方式，限价单('limit'), 市价单('market')
         """
         self._orders.append(Order(
-                self.datetime[self.curbar],## @todo ...
+                self.datetime,
                 self._main_contract,
                 deal_type,
                 'p',
@@ -201,9 +197,19 @@ def pcontract(exchange, contract, time_unit, unit_count):
         unit_count (int): 时间数目
     
     Returns:
-        int. The result
-    Raises:
+        PContract. 周期合约
     """
-    """docstring for pco""" 
     return PContract(Contract(exchange, contract),
                      Period(time_unit, unit_count))
+
+def stock(code):
+    """ 构建周期合约结构的便捷方式。
+    
+    Args:
+        code (str): 股票代码
+    
+    Returns:
+        PContract. 周期合约
+    """
+    return PContract(Contract('stock', code),
+                     Period('Days', 1))

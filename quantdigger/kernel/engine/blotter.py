@@ -132,15 +132,39 @@ class SimpleBlotter(Blotter):
 
         # 更新资金历史。
         dh = { }
+
+        #dh['datetime'] = dt
+        #dh['commission'] = self.current_holdings['commission']
+        #dh['total'] = 0
+        #pre_assure = self.current_holdings['assure']
+        #self.current_holdings['assure'] = 0
+        #for contract, pos_info in self.current_positions.iteritems():
+            ## 以close价格替代市场价格。
+            #market_value = self._bars[contract].close * pos_info.total
+            #dh[contract] = market_value
+            #dh['total'] += 该品种的保证金 / 该品种的保证金比例
+            #assure_ratio = pos_info.positions[0].assure_ratio
+            #self.current_holdings['assure'] += market_value * assure_ratio
+            #dh['assure'] = self.current_holdings['assure']
+
+        #self.current_holdings['cash'] -= (self.current_holdings['assure'] - pre_assure)
+        #dh['cash'] = self.current_holdings['cash']
+        #dh['total'] += self.current_holdings['cash']
+        #if self.current_holdings['cash'] < 0:
+            #raise Exception('你已经破产!')
+
+
         dh['datetime'] = dt
-        dh['cash'] = self.current_holdings['cash']
         dh['commission'] = self.current_holdings['commission']
-        dh['total'] = self.current_holdings['cash']
-        for key, value in self.current_positions.iteritems():
+        dh['total'] = 0
+        for contract, pos_info in self.current_positions.iteritems():
             # 以close价格替代市场价格。
-            market_value = self._bars[key].close * value.total
-            dh[key] = market_value
+            market_value = self._bars[contract].close * pos_info.total
+            dh[contract] = market_value
             dh['total'] += market_value
+
+        dh['cash'] = self.current_holdings['cash']
+        dh['total'] += self.current_holdings['cash']
         self.all_holdings.append(dh)
 
     def _update_positions(self, order, trans):
@@ -203,10 +227,13 @@ class SimpleBlotter(Blotter):
         trans_kpp = 1 if trans.kpp == 'k' else -1
         trans_cost = self._bars[trans.contract].close  # Close price
         cost = trans_kpp * trans_cost * trans.quantity
+        actual_cost = trans.assure_ratio * cost if trans.kpp == 'k' else cost
+        #self.current_holdings['assure'] += actual_cost
         self.current_holdings['commission'] += trans.commission     # 每笔佣金，和数目无关！
-        self.current_holdings['cash'] -= (cost + trans.commission)  # 现金
+        self.current_holdings['cash'] -= (actual_cost + trans.commission)  # 现金
         # 正确的值会在下一个时间点update_datetime中补回来，但不影响本轮的使用。
-        self.current_holdings['total'] -= (cost + trans.commission)
+        # total = cash + market_value
+        self.current_holdings['total'] -= (actual_cost + trans.commission)
 
     def update_fill(self, event):
         """

@@ -20,6 +20,11 @@ class Position(object):
         """ 成交价格""" 
         return self.transaction.price
 
+    @property
+    def assure_ratio(self):
+        """ 保证金比例 """ 
+        return self.transaction.assure_ratio
+
     #def order_time(self):
         #return self.order.datetime
 
@@ -67,6 +72,7 @@ class Transaction(object):
             self.type = order.type
             self.id = order.id
         self.commission = 0
+        self.assure_ratio = 1
 
     def __hash__(self):
         if hasattr(self, '_hash'):
@@ -145,12 +151,11 @@ class Order(object):
             self._hash =  hash(self.id)
             return self._hash
 
-
     
 class Contract(object):
     """ 合约 """
     def __init__(self, exch_type, code):
-        self.exch_type = exch_type
+        self.exch_type = exch_type  # 用'stock'表示中国股市
         self.code = code
 
     def __str__(self):
