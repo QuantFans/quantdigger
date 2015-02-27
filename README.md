@@ -17,8 +17,9 @@ QuantDigger是一个开源的股票/期货回测框架。
 * python-dateutil 
 * matplotlib 
 * numpy
-* pyqt
 * TA-Lib
+* pyqt (可选)
+* tushare (可选)
 
 策略DEMO
 =======
@@ -27,15 +28,6 @@ from quantdigger.kernel.engine.execute_unit import ExecuteUnit
 from quantdigger.kernel.indicators.common import MA, BOLL
 from quantdigger.kernel.engine.strategy import TradingStrategy, pcontract, stock
 import plotting
-#from quantdigger.kernel.engine.series import NumberSeries
-
-#def average(series, n):
-    #""" 一个可选的平均线函数 """ 
-    ### @todo plot element
-    #sum_ = 0
-    #for i in range(0, n):
-        #sum_ += series[i]
-    #return sum_ / n
 
 
 class DemoStrategy(TradingStrategy):
@@ -64,7 +56,7 @@ class DemoStrategy(TradingStrategy):
 # 运行策略
 begin_dt, end_dt = None, None
 pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
-#pcon = stock('600848')
+#pcon = stock('600848')  利用tushare远程加载股票数据
 simulator = ExecuteUnit(begin_dt, end_dt)
 algo = DemoStrategy([pcon], simulator)
 simulator.run()
