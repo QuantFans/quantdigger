@@ -23,9 +23,25 @@ QuantDigger是一个开源的股票/期货回测框架。
 策略DEMO
 =======
 ~~~~{.python}
+from quantdigger.kernel.engine.execute_unit import ExecuteUnit
+from quantdigger.kernel.indicators.common import MA, BOLL
+from quantdigger.kernel.engine.strategy import TradingStrategy, pcontract, stock
+import plotting
+#from quantdigger.kernel.engine.series import NumberSeries
+
+#def average(series, n):
+    #""" 一个可选的平均线函数 """ 
+    ### @todo plot element
+    #sum_ = 0
+    #for i in range(0, n):
+        #sum_ += series[i]
+    #return sum_ / n
+
+
 class DemoStrategy(TradingStrategy):
-    """ 策略实例 """
+    """ 策略类 """
     def __init__(self, pcontracts, exe):
+        """ 初始化指标变量 """
         super(DemoStrategy, self).__init__(pcontracts, exe)
 
         self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
@@ -43,8 +59,22 @@ class DemoStrategy(TradingStrategy):
 
         print self.position(), self.cash()
         print self.datetime, self.b_upper, self.b_middler, self.b_lower
-~~~~
 
+
+# 运行策略
+begin_dt, end_dt = None, None
+pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
+#pcon = stock('600848')
+simulator = ExecuteUnit(begin_dt, end_dt)
+algo = DemoStrategy([pcon], simulator)
+simulator.run()
+
+# 显示回测结果
+plotting.plot_result(simulator.data[pcon],
+            algo._indicators,
+            algo.blotter.deal_positions,
+            algo.blotter)
+~~~~
 运行结果
 =======
 * main.py 策略回测结果信号线和资金曲线。

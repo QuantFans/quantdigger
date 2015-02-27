@@ -2,15 +2,16 @@
 from quantdigger.kernel.engine.execute_unit import ExecuteUnit
 from quantdigger.kernel.indicators.common import MA, BOLL
 from quantdigger.kernel.engine.strategy import TradingStrategy, pcontract, stock
+import plotting
 #from quantdigger.kernel.engine.series import NumberSeries
 
-def average(series, n):
-    """ 一个可选的平均线函数 """ 
-    ## @todo plot element
-    sum_ = 0
-    for i in range(0, n):
-        sum_ += series[i]
-    return sum_ / n
+#def average(series, n):
+    #""" 一个可选的平均线函数 """ 
+    ### @todo plot element
+    #sum_ = 0
+    #for i in range(0, n):
+        #sum_ += series[i]
+    #return sum_ / n
 
 
 class DemoStrategy(TradingStrategy):
@@ -35,56 +36,15 @@ class DemoStrategy(TradingStrategy):
         print self.datetime, self.b_upper, self.b_middler, self.b_lower
 
 
-def plot_result(price_data, indicators, signals, blotter):
-    """ 
-        显示回测结果。
-    """
+begin_dt, end_dt = None, None
+pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
+#pcon = stock('600848')
+simulator = ExecuteUnit(begin_dt, end_dt)
+algo = DemoStrategy([pcon], simulator)
+simulator.run()
 
-    import matplotlib
-    matplotlib.use('TkAgg')
-    import matplotlib.pyplot as plt
-    from quantdigger.plugin.mplotwidgets import techmplot
-    from quantdigger.plugin.mplotwidgets import widgets
-    from quantdigger.kernel.indicators.common import *
-
-    blotter.create_equity_curve_dataframe()
-    print blotter.output_summary_stats()
-
-    fig = plt.figure()
-    frame = techmplot.TechMPlot(fig,
-                                price_data,
-                                50          # 窗口显示k线数量。
-                                )
-
-    # 添加k线
-    kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
-    frame.add_widget(0, kwindow, True)
-    # 交易信号。
-    signal = TradingSignalPos(None, price_data, signals, lw=2)
-    frame.add_indicator(0, signal)
-
-    # 添加指标
-    k_axes, = frame
-    for indic in indicators:
-        indic.plot(k_axes)
-    frame.draw_window()
-
-    fig2 = plt.figure()
-    ax = fig2.add_axes((0.1, 0.1, 0.9, 0.9))
-    ax.plot(blotter.equity_curve.total)
-    plt.show()
-
-
-if __name__ == '__main__':
-    begin_dt, end_dt = None, None
-    pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
-    #pcon = stock('600848')
-    simulator = ExecuteUnit(begin_dt, end_dt)
-    algo = DemoStrategy([pcon], simulator)
-    simulator.run()
-
-    # 显示回测结果
-    plot_result(simulator.data[pcon],
-                algo._indicators,
-                algo.blotter.deal_positions,
-                algo.blotter)
+# 显示回测结果
+plotting.plot_result(simulator.data[pcon],
+            algo._indicators,
+            algo.blotter.deal_positions,
+            algo.blotter)
