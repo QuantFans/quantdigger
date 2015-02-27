@@ -183,7 +183,17 @@ class TradingStrategy(BarTracker):
         ))
 
     def position(self, contract=None):
-        pass    
+        """ 当前仓位。 """
+        try:
+            if not contract:
+                contract = self._main_contract
+            return self.blotter.current_positions[contract].total
+        except KeyError:
+            return 0
+
+    def cash(self):
+        """ 现金。 """
+        return self.blotter.current_holdings['cash']
 
 
 from quantdigger.kernel.datastruct import PContract, Contract, Period

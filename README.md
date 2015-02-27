@@ -28,8 +28,9 @@ class DemoStrategy(TradingStrategy):
     def __init__(self, pcontracts, exe):
         super(DemoStrategy, self).__init__(pcontracts, exe)
 
-        self.ma20 = MA(self, self.open, 20,'ma20', 'b', '1')
-        self.ma10 = MA(self, self.open, 10,'ma10', 'y', '1')
+        self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
+        self.ma10 = MA(self, self.close, 10,'ma10', 'y', '1')
+        self.b_upper, self.b_middler, self.b_lower = BOLL(self, self.close, 10,'boll10', 'y', '1')
         #self.ma2 = NumberSeries(self)
 
     def on_tick(self):
@@ -37,8 +38,11 @@ class DemoStrategy(TradingStrategy):
         #self.ma2.update(average(self.open, 10))
         if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
             self.buy('d', self.open, 1) 
-        elif self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
+        elif self.position() > 0 and self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
             self.sell('d', self.open, 1) 
+
+        print self.position(), self.cash()
+        print self.datetime, self.b_upper, self.b_middler, self.b_lower
 ~~~~
 
 运行结果
