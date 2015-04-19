@@ -12,7 +12,7 @@ def do_linux_dependency():
 	target = 'ta-lib-0.4.0-src.tar.gz'
 	util.download(url,target)
 	util.decompress(target,'.')
-	os.chdir('ta-lib-0.4.0-src')
+	os.chdir('ta-lib')
 	print('==========configure ta-lib============')
 	result = os.popen('./configure').readlines()
 	util.printCommandResult(result)
