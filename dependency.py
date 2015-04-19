@@ -4,7 +4,7 @@ import util
 def do_windows_dependency():
 	url = 'http://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-msvc.zip'
 	target = 'ta-lib-0.4.0-msvc.zip'
-	#util.download(url,target)
+	util.download(url,target)
 	util.decompressZip(target,'C:\\')
 
 def do_linux_dependency():
