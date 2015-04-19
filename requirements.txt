@@ -1,0 +1,5 @@
+numpy == 1.8.0
+pandas == 0.14.1
+python-dateutil == 1.5
+matplotlib == 1.1.0
+TA-Lib == 0.4.8

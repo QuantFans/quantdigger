@@ -7,7 +7,12 @@ QuantDigger是一个开源的股票/期货回测框架。
 =======
  * 建议安装[Anaconda](http://continuum.io/downloads), 这样可以一次性搞定所有依赖包。
  * 设置PYTHONPATH环境变量。
-
+ * 将PYTHONPAT下的Scripts目录添加到环境变量PATH中
+ * 支持通过pip安装：pip install QuantDigger
+ (可以手动安装pip：https://pypi.python.org/packages/source/p/pip/pip-6.0.8.tar.gz，也可以使用项目内的pip_install.py自动安装)
+    安装完成后，再执行python after_setup.py 来完成依赖包的安装)
+ * 支持将本项目从git获取后，执行full_install.py来完成安装
+ (full_install将先使用python setup.py 安装后，后续安装pip及依赖包)
 
 依赖库
 =======
