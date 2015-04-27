@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
  # event.py
-from flufl.enum import Enum
+#from flufl.enum import Enum
 class EventsPool(object):
     ## @todo 不能共享队列，因为有多策略，每个策略一个消息队列。
     """ 事件池。"""

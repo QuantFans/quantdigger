@@ -1,27 +1,38 @@
-#QuantDigger
+QuantDigger
 ============
-QuantDigger是一个开源的股票/期货回测框架。
+QuantDigger是由一群量化交易爱好者一起开发的开源的股票/期货回测框架
+主要用于学习和研究。欢迎大家提供宝贵意见，贡献代码＾＿＾．
+或者加入我们的python量化交易群--334555399．
+
+除了开发人员，还要特别感谢 vodkabuaa_ 给出的意见，
+ongbe_ 帮忙修复代码bug， tushare库的作者 Jimmy_ ，以及所有朋友的支持．
+
+**主要代码贡献者:**
+     deepfish_
+
+     TeaEra_
+
+     wondereamer_
+
+     HonePhy_
 
 安装
 ----
     
- * 设置PYTHONPATH环境变量。
- * 将PYTHONPATH下的Scripts目录添加到环境变量PATH中
-
-   - pip安装
+你可以选择pip安装
    
-     ::
+  ::
        
-         python install_pip.py  (如果已经安装了pip,略过这一步。)
-         pip install QuantDigger
-         python install_dependency.py
+      python install_pip.py  (如果已经安装了pip,略过这一步。)
+      pip install QuantDigger
+      python install_dependency.py
 
-   - github安装
+或者克隆github代码后本地安装
    
-     ::
+  ::
        
-         git clone https://github.com/QuantFans/quantdigger.git
-         python install.py  (会根据情况安装pip, 及依赖包)
+      git clone https://github.com/QuantFans/quantdigger.git
+      python install.py  (会根据情况安装pip, 及依赖包)
 
 
 依赖库
@@ -32,8 +43,9 @@ QuantDigger是一个开源的股票/期货回测框架。
 * matplotlib 
 * numpy
 * TA-Lib
+* logbook
 * pyqt (可选)
-* tushare (可选)
+* tushare_ (可选, 一个非常强大的股票信息抓取工具)
 
 策略DEMO
 --------
@@ -87,20 +99,33 @@ QuantDigger是一个开源的股票/期货回测框架。
 
 策略结果
 ~~~~~~~~
-main.py 
-k线和信号线_
+**main.py**
 
-.. _k线和信号线: https://github.com/QuantFans/quantdigger/blob/master/figure_signal.png
+* k线和信号线
 
+  .. image:: figure_signal.png
+     :width: 500px
 
-资金曲线。
+* 资金曲线。
+  
+  .. image:: figure_money.png
+     :width: 500px
 
-.. image:: blob/master/figure_money.png
+其它
+~~~~~~~~
+**mplot_demo.py  matplotlib画k线，指标线的demo。**
+  .. image:: plot.png
+     :width: 500px
 
+**pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。**
+  .. image:: pyquant.png
+     :width: 500px
 
-* mplot_demo.py  matplotlib画k线，指标线的demo。
-  https://github.com/QuantFans/quantdigger/blob/master/plot.png
-
-* pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。
-  https://github.com/QuantFans/quantdigger/blob/master/pyquant.png
-
+.. _TeaEra: https://github.com/TeaEra
+.. _deepfish: https://github.com/deepfish
+.. _wondereamer: https://github.com/wondereamer
+.. _HonePhy: https://github.com/HonePhy
+.. _tushare: https://github.com/waditu/tushare
+.. _Jimmy: https://github.com/jimmysoa
+.. _vodkabuaa: https://github.com/vodkabuaa
+.. _ongbe: https://github.com/ongbe

@@ -302,7 +302,7 @@ class TechMPlot(object):
         """ 状态栏信息显示 """
         index = x
         f = x % 1
-        index = x-f if f < 0.5 else x-f+1
+        index = x-f if f < 0.5 else min(x-f+1, len(self._data['open']) - 1)
         #print len(self.kwindow.rects.get_array())
         return "[pos=%d o=%.2f c=%.2f h=%.2f l=%.2f]" % (index,
                 self._data['open'][index], self._data['close'][index], self._data['high'][index],
