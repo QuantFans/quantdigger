@@ -1,5 +1,5 @@
-QuantDigger
-===========
+#QuantDigger
+============
 QuantDigger是一个开源的股票/期货回测框架。
 
 安装
@@ -88,12 +88,14 @@ QuantDigger是一个开源的股票/期货回测框架。
 策略结果
 ~~~~~~~~
 main.py 
-k线和信号线
-.. image:: https://github.com/QuantFans/quantdigger/blob/master/figure_signal.png
+k线和信号线_
+
+.. _k线和信号线: https://github.com/QuantFans/quantdigger/blob/master/figure_signal.png
 
 
 资金曲线。
-.. image:: https://github.com/QuantFans/quantdigger/blob/master/figure_money.png
+
+.. image:: blob/master/figure_money.png
 
 
 * mplot_demo.py  matplotlib画k线，指标线的demo。
@@ -101,3 +103,4 @@ k线和信号线
 
 * pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。
   https://github.com/QuantFans/quantdigger/blob/master/pyquant.png
+
