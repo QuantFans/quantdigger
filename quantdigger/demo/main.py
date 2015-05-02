@@ -1,7 +1,8 @@
 # -*- coding: utf8 -*-
 from quantdigger.kernel.engine.execute_unit import ExecuteUnit
 from quantdigger.kernel.indicators.common import MA, BOLL
-from quantdigger.kernel.engine.strategy import TradingStrategy, pcontract, stock
+from quantdigger.kernel.engine.strategy import TradingStrategy
+from quantdigger.util import  pcontract, stock
 import plotting
 #from quantdigger.kernel.engine.series import NumberSeries
 

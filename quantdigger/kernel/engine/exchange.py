@@ -21,7 +21,7 @@ class Exchange(object):
         self._strict = strict
 
     def make_market(self, bar):
-        """docstring for make_market""" 
+        """ 价格撮合""" 
         if self._open_orders:
             fill_orders = set()
             for order in self._open_orders:
@@ -77,84 +77,3 @@ class Exchange(object):
         self._datetime = dt
 
 
-#void Blotter::makeMarket(const TickData &tick) {
-    #std::vector<Order> deal_list;
-    #open_orders_locker_.lock();
-    #// 价格撮合。
-    #for(Order order : open_orders_){
-        #switch(order.deal_type) {
-            #case kLimit:
-                #/// @todo 可改进，使其更符合时间情况．
-                #/// @note 假设一定能在该价格买到，忽略了网络传输延迟．
-                #if (order.action == Kai &&
-                   #(order.direction==Duo && order.ask_price>=tick.price ||
-                    #order.direction==Kong && order.ask_price<=tick.price)) {
-                    #// 开仓.
-                    #order.deal_price = order.ask_price;
-                    #order.deal_dt = tick.dt;
-                    #deal_list.push_back(order);
-                #} else if(order.action == Ping &&
-                         #(order.direction==Duo && order.ask_price<=tick.price ||
-                          #order.direction==Kong && order.ask_price>=tick.price)) {
-                    #// 平仓.
-                    #order.deal_price = order.ask_price;
-                    #order.deal_dt = tick.dt;
-                    #deal_list.push_back(order);
-                #}
-                #break;
-            #case kAny:
-                #/// @note 假设一定能在该价格买到，实际成交价格会有出入．
-                #order.deal_price = tick.price;
-                #order.deal_dt = tick.dt;
-                #deal_list.push_back(order);
-                #break;
-            #default: ;
-        #}
-    #}
-    #open_orders_locker_.unlock();
-    #// 更新内部状态如订单状态，持仓量等．
-    #if (deal_list.size() > 0)
-        #update(deal_list);
-#}
-
-#void Blotter::makeMarket(const Bar &bar) {
-    #std::vector<Order> deal_list;
-    #open_orders_locker_.lock();
-    #// 价格撮合。
-    #for(Order order : open_orders_){
-        #switch(order.deal_type) {
-            #case kLimit:
-                #/// @note 限价单以最高和最低价格为成交的判断条件．
-                #if (order.action == Kai &&
-                   #(order.direction==Duo && order.ask_price>=bar.low ||
-                    #order.direction==Kong && order.ask_price<=bar.high)) {
-                    #// 开仓.
-                    #order.deal_price = order.ask_price;
-                    #order.deal_dt = bar.dt;     // Bar的结束时间做为交易成交时间.
-                    #deal_list.push_back(order);
-                #} else if(order.action == Ping &&
-                         #(order.direction==Duo && order.ask_price<=bar.high ||
-                          #order.direction==Kong && order.ask_price>=bar.low)) {
-                    #// 平仓.
-                    #order.deal_price = order.ask_price;
-                    #order.deal_dt = bar.dt;
-                    #deal_list.push_back(order);
-                #}
-                #break;
-            #case kAny:
-                #/// @note 市价单以最高或最低价格为成交价格．
-                #if (order.direction == Duo)
-                    #order.deal_price = bar.high;
-                #else
-                    #order.deal_price = bar.low;
-                #order.deal_dt = bar.dt;
-                #deal_list.push_back(order);
-                #break;
-            #default: LOG_ASSERT(false);
-        #}
-    #}
-    #open_orders_locker_.unlock();
-    #// 更新内部状态如订单状态，持仓量等．
-    #if (deal_list.size() > 0)
-        #update(deal_list);
-#}

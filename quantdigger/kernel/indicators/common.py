@@ -81,7 +81,9 @@ class RSI(IndicatorBase):
     def __init__(self, tracker, prices, n=14, name="RSI", fillcolor='b'):
         super(RSI, self).__init__(tracker, name)
         self.value = self._relative_strength(prices, n)
-        self.set_yrange([0, 100])
+        ## @todo 一种绘图风格
+        # 固定的y范围
+        self.stick_yrange([0, 100])
 
     def _relative_strength(self, prices, n=14):
         deltas = np.diff(prices)
@@ -131,7 +133,6 @@ class MACD(IndicatorBase):
     """"""
     def __init__(self, tracker, prices, nslow, nfast, name='MACD'):
         super(MACD, self).__init__(tracker, name)
-        self.set_yrange(prices)
         self.emaslow, self.emafast, self.macd = self._moving_average_convergence(prices, nslow=nslow, nfast=nfast)
         self.value = (self.emaslow, self.emafast, self.macd)
 
@@ -165,7 +166,7 @@ class Volume(IndicatorBase):
     @create_attributes
     def __init__(self, tracker, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(tracker, name)
-        self.set_yrange(volume)
+        self.value = transform2ndarray(volume)
         #self.name = name
         #self.volume = volume
         #self.open = open
@@ -198,7 +199,7 @@ class Candles(object):
         return value is lineCollection, barCollection
         """
         #super(Candles, self).__init__(tracker, name)
-        self.set_yrange(data.high.values, data.low.values)
+        self.set_yrange(data.low.values, data.high.values)
         self.data = data
         self.name = name
 
@@ -250,9 +251,9 @@ class Candles(object):
         #lineCollection, barCollection = None, None
         return lineCollection, barCollection
 
-    def set_yrange(self, upper, lower=[]):
-        self.upper = upper
-        self.lower = lower if len(lower)>0 else upper
+    def set_yrange(self, lower, upper=[]):
+        self.upper = upper if len(upper)>0 else lower
+        self.lower = lower
 
     def y_interval(self, w_left, w_right):
         if len(self.upper) == 2:

@@ -95,7 +95,7 @@ class BarTracker(Simulator):
 
 
 class TradingStrategy(BarTracker):
-    """docstring for TradingStrategy"""
+    """ 策略的基类 """
     def __init__(self, pcontracts, exe):
         super(TradingStrategy, self).__init__(pcontracts, exe)
         self._indicators = []
@@ -194,32 +194,3 @@ class TradingStrategy(BarTracker):
     def cash(self):
         """ 现金。 """
         return self.blotter.current_holdings['cash']
-
-
-from quantdigger.kernel.datastruct import PContract, Contract, Period
-def pcontract(exchange, contract, time_unit, unit_count):
-    """ 构建周期合约结构的便捷方式。
-    
-    Args:
-        exchange (str): 交易所
-        contract (str): 合约
-        time_unit (str): 时间单位
-        unit_count (int): 时间数目
-    
-    Returns:
-        PContract. 周期合约
-    """
-    return PContract(Contract(exchange, contract),
-                     Period(time_unit, unit_count))
-
-def stock(code):
-    """ 构建周期合约结构的便捷方式。
-    
-    Args:
-        code (str): 股票代码
-    
-    Returns:
-        PContract. 周期合约
-    """
-    return PContract(Contract('stock', code),
-                     Period('Days', 1))

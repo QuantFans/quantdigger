@@ -92,12 +92,13 @@ def create_attributes(method):
             if not self.upper:
                 upper = lower = []
                 if self.value.__class__.__name__ == 'tuple':
+                    # 多值指标
                     upper = [ max([value[i] for value in self.value ]) for i in xrange(0, len(self.value[0]))]
                     lower = [ min([value[i] for value in self.value ]) for i in xrange(0, len(self.value[0]))]
                 else:
                     upper = self.value
                     lower = self.value
-                self.set_yrange(upper, lower)
+                self.set_yrange(lower, upper)
             return rst
     return wrapper
 
@@ -176,9 +177,13 @@ class IndicatorBase(object):
         else:
             pass
 
-    def set_yrange(self, upper, lower):
-        self.upper = upper
+    def set_yrange(self, lower, upper):
         self.lower = lower
+        self.upper = upper
+
+    def stick_yrange(self, range_):
+        self.lower = range_
+        self.upper = range_
 
     def calcute_bound(self):
         """""" 
