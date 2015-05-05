@@ -76,7 +76,6 @@ class SimpleBlotter(Blotter):
     used to test simpler strategies such as BuyAndHoldStrategy.
     """
     def __init__(self, timeseries, events_pool, initial_capital=5000.0):
-        """docstring for __init__""" 
         self._timeseries = timeseries
         self.events = events_pool
         self._open_orders = list()
@@ -186,11 +185,11 @@ class SimpleBlotter(Blotter):
             else:
                 p.total -= trans.quantity 
         elif trans.kpp == 'p':
+            # 平仓
             if trans.direction == 'd':
                 p.total -= trans.quantity 
             else:
                 p.total += trans.quantity 
-            # 平仓
             to_delete = set()
             left_vol = trans.quantity
             for position in reversed(list(p.positions)):
@@ -237,10 +236,10 @@ class SimpleBlotter(Blotter):
 
     def update_fill(self, event):
         """
+        订单成交。
         Updates the portfolio current positions and holdings 
         from a FillEvent.
         """
-        print "on_fill_event" 
         assert event.type == Event.FILL
         t_order = None
         for i, order in enumerate(self._open_orders):
@@ -253,6 +252,7 @@ class SimpleBlotter(Blotter):
 
     def update_signal(self, event):
         """
+        处理交易系统产生的订单。
         Acts on a SignalEvent to generate new orders 
         based on the portfolio logic.
         """
@@ -268,7 +268,7 @@ class SimpleBlotter(Blotter):
         #self.generate_naive_order(event.orders)
 
     def valid_order(self, order):
-        """docstring for valid_order""" 
+        """ 判断订单是否合法 """ 
         if order.kpp == 'p':
             try:
                 pos = self.current_positions[order.contract]

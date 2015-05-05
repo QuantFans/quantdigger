@@ -11,7 +11,9 @@ class ExecuteUnit(object):
         self._strategies = []
         self.begin_dt = begin_dt
         self.end_dt = end_dt
+        # 不同周期合约数据。
         self.data = { }     # PContract -> pandas.DataFrame
+
         # 如果begin_dt, end_dt 等于None，做特殊处理。
         # accociate with a mplot widget
         #tracker.pcontracts
@@ -34,7 +36,6 @@ class ExecuteUnit(object):
                 algo.blotter.update_datetime(bar.datetime)
                 # ## @todo 未来支持多个合约。
                 algo.blotter.update_bar({algo._main_contract: bar})
-                ## 价格撮合。note: bar价格撮合要求撮合置于运算后面。
                 #algo.exchange.make_market(bar)
                 # 对新的价格运行算法。
                 algo.execute_strategy()

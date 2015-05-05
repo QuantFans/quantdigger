@@ -22,7 +22,7 @@ class BarTracker(Simulator):
     def __init__(self, pcontracts, exe):
         """ 初始化数据列表
         
-        每个Tracker都可能跟踪多个数据。
+        每个Tracker都可能跟踪多个数据(策略用到的周期合约数据集合)。
         其中第一个合约为@主合约
         Args:
             pcontracts (PContract list): 周期合约列表，长度至少唯一。
@@ -54,6 +54,8 @@ class BarTracker(Simulator):
 
     def prepare_execution(self, exe):
         """ 数据加载，关键数据变量初始化, 设置执行器。
+
+        执行单元添加本策略的时候被调用。
         
         Args:
             exe (ExecuteUnit): 执行器。
@@ -67,6 +69,7 @@ class BarTracker(Simulator):
 
     @property
     def container_day(self):
+        """ 为当天数据预留的空间  """
         return self._container_day
 
     def _init_main_data(self, pcontract):
@@ -92,6 +95,19 @@ class BarTracker(Simulator):
 
     def add_series(self, series):
         self._series.append(series)
+
+    def _open(self, pcon):
+        """docstring for open""" 
+        #self.open = NumberSeries(self, data.open, True)
+        #self.close = NumberSeries(self, data.close, True)
+        #self.high = NumberSeries(self, data.high, True)
+        #self.low = NumberSeries(self, data.low, True)
+        #self.volume = NumberSeries(self, data.volume, True)
+        pass
+
+    def data(self, pcon):
+        """docstring for dat""" 
+        pass
 
 
 class TradingStrategy(BarTracker):
@@ -130,6 +146,7 @@ class TradingStrategy(BarTracker):
 
         for indicator in self._indicators:
             indicator.calculate_latest_element()
+
         return Bar(self.datetime[0],
                    self.open[0], self.close[0],
                    self.high[0], self.low[0],
@@ -138,11 +155,8 @@ class TradingStrategy(BarTracker):
     def execute_strategy(self):
         self.on_tick()
         if self._orders:
-            self.generate_signals_event()
+            self.events_pool.put(SignalEvent(self._orders))
         self._orders = []
-
-    def generate_signals_event(self):
-        self.events_pool.put(SignalEvent(self._orders))
 
     def buy(self, direction, price, quantity, deal_type='limit'):
         """ 开仓

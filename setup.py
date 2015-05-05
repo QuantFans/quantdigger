@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import codecs
 import os
 import sys
