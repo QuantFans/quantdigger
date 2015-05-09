@@ -34,5 +34,5 @@ def plot_result(price_data, indicators, signals, blotter):
 
     fig2 = plt.figure()
     ax = fig2.add_axes((0.1, 0.1, 0.9, 0.9))
-    ax.plot(blotter.equity_curve.total)
+    ax.plot(blotter.equity_curve.equity)
     plt.show()

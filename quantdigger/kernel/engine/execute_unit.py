@@ -3,39 +3,55 @@ import Queue
 import pandas as pd
 from quantdigger.kernel.datasource import datamanager
 from quantdigger.errors import DataAlignError
-from event import Event
+from quantdigger.kernel.engine.strategy import BarTracker
+from quantdigger.kernel.engine.event import Event
 class ExecuteUnit(object):
     """ 策略执行的物理单元，支持多个策略同时运行。"""
-    def __init__(self, begin_dt=None, end_dt=None):
-        self._trackers = []  # multi algo, multi data
-        self._strategies = []
+    def __init__(self, pcontracts, begin_dt=None, end_dt=None):
+        """ 
+
+        每个执行单元都可能跟踪多个数据(策略用到的周期合约数据集合)。
+        其中第一个合约为@主合约
+        
+        Args:
+            pcontracts (PContract List): 周期合约列表
+        
+        """
         self.begin_dt = begin_dt
         self.end_dt = end_dt
         # 不同周期合约数据。
         self.data = { }     # PContract -> pandas.DataFrame
+        self.pcontracts = pcontracts
+        self.trackers = []
+        self._strategies = []
 
         # 如果begin_dt, end_dt 等于None，做特殊处理。
         # accociate with a mplot widget
         #tracker.pcontracts
-        #for pcontract in pcontracts:
-            #pass
-            ## load data
+        
+        self.load_data(pcontracts[0])
+        for pcon in pcontracts[1:]:
+            self.load_data(pcon)
+            BarTracker(self, pcon)
 
     def run(self):
         """""" 
         print 'running...'
-        curbar = 0
-        while curbar < self._data_length:
-            for tracker in self._trackers:
-                pass
+        bar_index = 0
+        while bar_index < self._data_length:
+            #
+            latest_bars = { }
+            for tracker in self.trackers:
+                bar = tracker.update_curbar(bar_index)
+                latest_bars[tracker._main_contract] = bar
             # 在回测中无需MARKET事件。
             # 这样可以加速回测速度。
             for algo in self._strategies:
-                bar = algo.update_curbar(curbar)
+                bar = algo.update_curbar(bar_index)
                 algo.exchange.update_datetime(bar.datetime)
                 algo.blotter.update_datetime(bar.datetime)
-                # ## @todo 未来支持多个合约。
-                algo.blotter.update_bar({algo._main_contract: bar})
+                latest_bars[algo._main_contract] = bar
+                algo.blotter.update_bar(latest_bars)
                 #algo.exchange.make_market(bar)
                 # 对新的价格运行算法。
                 algo.execute_strategy()
@@ -62,9 +78,7 @@ class ExecuteUnit(object):
                                 algo.blotter.update_fill(event)
                     # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
                     algo.exchange.make_market(bar)
-
-            curbar += 1
-            
+            bar_index += 1
 
     def load_data(self, pcontract):
         try:
@@ -79,17 +93,11 @@ class ExecuteUnit(object):
             self.data[pcontract] = data
             return data
 
-
     def add_tracker(self, tracker):
-        pass
-
+        self.trackers.append(tracker)
 
     def add_strategy(self, strategy):
-        strategy.prepare_execution(self)
         self._strategies.append(strategy)
-
-        for pcontract in strategy.pcontracts:
-            self.load_data(pcontract)
 
 
 #def plot_result(price_data, indicators, signals, blotter):

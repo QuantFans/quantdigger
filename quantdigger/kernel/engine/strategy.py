@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 import numpy as np
 
-from quantdigger.kernel.datastruct import Order, Bar
+from quantdigger.kernel.datastruct import Order, Bar, TradeSide, Direction, Contract
 from quantdigger.kernel.engine.exchange import Exchange
 from quantdigger.kernel.engine.event import SignalEvent
 from quantdigger.kernel.engine.series import NumberSeries, DateTimeSeries
@@ -17,54 +17,83 @@ class Simulator(object):
         self.blotter = SimpleBlotter(None, self.events_pool)
         self.exchange = Exchange(self.events_pool, strict=False)
 
+class CrossTrackerMixin(object):
+    """ 跨跟踪器数据引用 """
+    def open_(self, index):
+        assert(index >= 0)
+        if index == 0:
+            return self.open 
+        else:
+            return self._excution.trackers[index-1].open
+
+    def close_(self, index):
+        assert(index >= 0)
+        if index == 0:
+            return self.close 
+        else:
+            return self._excution.trackers[index-1].close
+
+    def high_(self, index):
+        assert(index >= 0)
+        if index == 0:
+            return self.high 
+        else:
+            return self._excution.trackers[index-1].high
+
+    def low_(self, index):
+        assert(index >= 0)
+        if index == 0:
+            return self.low 
+        else:
+            return self._excution.trackers[index-1].low
+
+    def volume_(self, index):
+        assert(index >= 0)
+        if index == 0:
+            return self.volume 
+        else:
+            return self._excution.trackers[index-1].volume
+
+    def datetime_(self, index):
+        assert(index >= 0)
+        if index == 0:
+            return self.datetime 
+        else:
+            return self._excution.trackers[index-1].datetime
     
+
 class BarTracker(Simulator):
-    def __init__(self, pcontracts, exe):
+    """ 跟踪器，可能是策略，策略用到的非主合约数据，独立指标。 """
+    def __init__(self, exe_unit, pcontract=None):
         """ 初始化数据列表
         
-        每个Tracker都可能跟踪多个数据(策略用到的周期合约数据集合)。
-        其中第一个合约为@主合约
         Args:
-            pcontracts (PContract list): 周期合约列表，长度至少唯一。
+            pcontract (PContract): 周期合约, 非空表示跟踪器，非策略。
         
         """
         super(BarTracker, self).__init__()
-        self._excution = None
-        # 如果一次性给出所有合约，加载可以更快。
-        self.pcontracts = pcontracts
+        self._excution = exe_unit
+        # tracker中用到的时间序列
         self._series = []
         try:
-            self._main_pcontract = self.pcontracts[0]
+            if pcontract:
+                self._main_pcontract = pcontract 
+                exe_unit.add_tracker(self)
+            else:
+                self._main_pcontract = exe_unit.pcontracts[0]
+                exe_unit.add_strategy(self)
             self._main_contract = self._main_pcontract.contract
+            self._data = exe_unit.data[self._main_pcontract]
+            self._container_day = np.zeros(shape=(self.length_day(self._main_pcontract), ), dtype = float)
+            self._init_main_data()
         except KeyError:
             ## @todo 提醒用户用法。
             raise KeyError
-        self._container_day = np.zeros(shape=(self.length_day(self._main_pcontract), ), dtype = float)
-        exe.add_strategy(self)
 
     def length_day(self, pcontract):
         """ 计算当天的数据量 """ 
         ## @todo local_data
         return 4
-
-    def set_pcontracts(self, pcontracts):
-        """ 在用户类的初始化中可被调用。 """
-        ## @todo property, set
-        self.pcontracts = pcontracts
-
-    def prepare_execution(self, exe):
-        """ 数据加载，关键数据变量初始化, 设置执行器。
-
-        执行单元添加本策略的时候被调用。
-        
-        Args:
-            exe (ExecuteUnit): 执行器。
-        
-        """
-        self._excution = exe
-        for pcontract in self.pcontracts:
-            self.get_data(pcontract)
-        self._init_main_data(self._main_pcontract)
 
 
     @property
@@ -72,19 +101,15 @@ class BarTracker(Simulator):
         """ 为当天数据预留的空间  """
         return self._container_day
 
-    def _init_main_data(self, pcontract):
-        data = self.get_data(pcontract)
+    def _init_main_data(self):
         # 预留了历史和当天的数据空间。
-        self.open = NumberSeries(self, data.open, True)
-        self.close = NumberSeries(self, data.close, True)
-        self.high = NumberSeries(self, data.high, True)
-        self.low = NumberSeries(self, data.low, True)
-        self.volume = NumberSeries(self, data.volume, True)
-        self.datetime = DateTimeSeries(self, data.index, True)
+        self.open = NumberSeries(self, self._data.open, True)
+        self.close = NumberSeries(self, self._data.close, True)
+        self.high = NumberSeries(self, self._data.high, True)
+        self.low = NumberSeries(self, self._data.low, True)
+        self.volume = NumberSeries(self, self._data.volume, True)
+        self.datetime = DateTimeSeries(self, self._data.index, True)
         self.curbar = 0
-
-    def get_data(self, pcontract):
-        return self._excution.load_data(pcontract)
 
     def on_tick(self):
         """""" 
@@ -98,27 +123,12 @@ class BarTracker(Simulator):
 
     def _open(self, pcon):
         """docstring for open""" 
-        #self.open = NumberSeries(self, data.open, True)
-        #self.close = NumberSeries(self, data.close, True)
-        #self.high = NumberSeries(self, data.high, True)
-        #self.low = NumberSeries(self, data.low, True)
-        #self.volume = NumberSeries(self, data.volume, True)
+        #self.open = NumberSeries(self, _data.open, True)
+        #self.close = NumberSeries(self, _data.close, True)
+        #self.high = NumberSeries(self, _data.high, True)
+        #self.low = NumberSeries(self, _data.low, True)
+        #self.volume = NumberSeries(self, _data.volume, True)
         pass
-
-    def data(self, pcon):
-        """docstring for dat""" 
-        pass
-
-
-class TradingStrategy(BarTracker):
-    """ 策略的基类 """
-    def __init__(self, pcontracts, exe):
-        super(TradingStrategy, self).__init__(pcontracts, exe)
-        self._indicators = []
-        self._orders = []
-
-    def add_indicator(self, indic):
-        self._indicators.append(indic)
 
     def update_curbar(self, index):
         """ 更新当前bar索引。
@@ -144,13 +154,24 @@ class TradingStrategy(BarTracker):
             serie.update_curbar(index)
             serie.duplicate_last_element()
 
-        for indicator in self._indicators:
-            indicator.calculate_latest_element()
-
         return Bar(self.datetime[0],
                    self.open[0], self.close[0],
                    self.high[0], self.low[0],
                    self.volume[0])
+
+direction_map = {
+        'long': Direction.LONG,
+        'short': Direction.SHORT }
+
+class TradingStrategy(BarTracker, CrossTrackerMixin):
+    """ 策略的基类 """
+    def __init__(self, exe):
+        super(TradingStrategy, self).__init__(exe, pcontract=None)
+        self._indicators = []
+        self._orders = []
+
+    def add_indicator(self, indic):
+        self._indicators.append(indic)
 
     def execute_strategy(self):
         self.on_tick()
@@ -158,26 +179,29 @@ class TradingStrategy(BarTracker):
             self.events_pool.put(SignalEvent(self._orders))
         self._orders = []
 
-    def buy(self, direction, price, quantity, deal_type='limit'):
+    def buy(self, direction, price, quantity, deal_type='limit', contract=None):
         """ 开仓
         
         Args:
-            direction (str): 多头('d'), 或者空头('k')
+            direction (str): 多头('long'), 或者空头('short')
             quantity (int): 数量
             price (float): 价格
             deal_type (str): 下单方式，限价单('limit'), 市价单('market')
         """
+        contract = None
+        con = Contract(contract) if contract else self._main_contract
+
         self._orders.append(Order(
                 self.datetime,
-                self._main_contract,
+                con,
                 deal_type,
-                'k',
-                direction,
+                TradeSide.KAI,
+                direction_map[direction.lower()],
                 float(price),
                 quantity
         ))
 
-    def sell(self, direction, price, quantity, deal_type='limit'):
+    def sell(self, direction, price, quantity, deal_type='limit', contract=None):
         """ 平仓
         
         Args:
@@ -186,12 +210,13 @@ class TradingStrategy(BarTracker):
             price (float): 价格
             deal_type (str): 下单方式，限价单('limit'), 市价单('market')
         """
+        con = Contract(contract) if contract else self._main_contract
         self._orders.append(Order(
                 self.datetime,
-                self._main_contract,
+                con,
                 deal_type,
-                'p',
-                direction,
+                TradeSide.PING,
+                direction_map[direction.lower()],
                 float(price),
                 quantity
         ))
@@ -208,3 +233,33 @@ class TradingStrategy(BarTracker):
     def cash(self):
         """ 现金。 """
         return self.blotter.current_holdings['cash']
+
+    def equity(self):
+        """ 当前权益 """
+        return self.blotter.current_holdings['equity']
+
+    def profit(self, contract=None):
+        """ 当前持仓的历史盈亏 """ 
+        pass
+
+    def day_profit(self, contract=None):
+        """ 当前持仓的浮动盈亏 """ 
+        pass
+
+
+    def update_curbar(self, index):
+        """ 更新当前bar索引。
+
+        更新注册过的serie变量的索引，
+        计算系列指标中的最新值。
+        
+        Args:
+            index (int): 当前bar索引。
+        
+        Raises:
+            SeriesIndexError
+        """
+        bar = super(TradingStrategy, self).update_curbar(index)
+        for indicator in self._indicators:
+            indicator.calculate_latest_element()
+        return bar

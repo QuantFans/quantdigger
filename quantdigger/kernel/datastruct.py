@@ -4,6 +4,20 @@
 from quantdigger.errors import PeriodTypeError
 from quantdigger import util
 
+class TradeSide(object):
+    BUY = 1
+    SHORT = 2
+    COVER = 3
+    SELL = 4
+    COVER_TODAY = 5
+    SELL_TODAY = 6
+    KAI = 7  # buy or short
+    PING = 8 # sell or cover
+
+class Direction(object):
+    LONG = 1
+    SHORT = 2
+
 class Position(object):
     """docstring for Position"""
     def __init__(self, order, transaction):
@@ -24,6 +38,10 @@ class Position(object):
     def assure_ratio(self):
         """ 保证金比例 """ 
         return self.transaction.assure_ratio
+
+    @property
+    def direction(self):
+        return self.transaction.direction
 
     #def order_time(self):
         #return self.order.datetime
@@ -80,6 +98,19 @@ class Transaction(object):
         else:
             self._hash =  hash(self.id)
             return self._hash
+
+    def profit(self, new_price):
+        """docstring for pro""" 
+        profit = 0
+        if self.direction == Direction.LONG:
+            profit += (new_price - self.price) * self.quantity
+        else:
+            profit += (self.price - new_price) * self.quantity
+        return profit
+
+    def deposit(self, new_price):
+        """docstring for deposit""" 
+        return self.price * self.quantity * self.assure_ratio
 
     
 class OrderID(object):
@@ -154,13 +185,20 @@ class Order(object):
     
 class Contract(object):
     """ 合约 """
-    def __init__(self, exch_type, code):
-        self.exch_type = exch_type  # 用'stock'表示中国股市
+    def __init__(self, str_contract):
+        info = str_contract.split('.')
+        if len(info) == 2:
+            code = info[0]
+            exchange = info[1]
+        else:
+            ## @todo 合约到市场的映射。
+            assert False
+        self.exch_type = exchange  # 用'stock'表示中国股市
         self.code = code
 
     def __str__(self):
         """""" 
-        return "%s-%s" % (self.exch_type, self.code)
+        return "%s.%s" % (self.code, self.exch_type)
 
     def __hash__(self):
         if hasattr(self, '_hash'):
@@ -181,13 +219,20 @@ class Period(object):
         #Months = "Months" 
         #Seasons = "Seasons" 
         #Years = "Years" 
-    periods = ["MilliSeconds", "Seconds", "Minutes", "Hours",
-               "Days", "Months", "Seasons", "Years"]    
-    def __init__(self, type_, length):
-        if type_ not in self.periods:
+    periods = ["MilliSecond", "Second", "Minute", "Hour",
+               "Day", "Month", "Season", "Year"]    
+
+    def __init__(self, str_period):
+        period = str_period.split('.')
+        if len(period) == 2:
+            unit_count = int(period[0])
+            time_unit = period[1]
+        else:
             raise PeriodTypeError
-        self._type = type_
-        self._length = length
+        if time_unit not in self.periods:
+            raise PeriodTypeError
+        self._type = time_unit
+        self._length = unit_count
 
     @property
     def type(self):
@@ -197,9 +242,8 @@ class Period(object):
     def length(self):
         return self._length
 
-
     def __str__(self):
-        return "%s-%d" % (self._type, self._length)
+        return "%d.%s" % (self._length, self._type)
 
     def __hash__(self):
         if hasattr(self, '_hash'):
@@ -207,6 +251,7 @@ class Period(object):
         else:
             self._hash =  hash(self.__str__())
             return self._hash
+
 
 
 class PContract(object):

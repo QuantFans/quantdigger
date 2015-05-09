@@ -17,8 +17,8 @@ import plotting
 
 class DemoStrategy(TradingStrategy):
     """ 策略实例 """
-    def __init__(self, pcontracts, exe):
-        super(DemoStrategy, self).__init__(pcontracts, exe)
+    def __init__(self, exe):
+        super(DemoStrategy, self).__init__(exe)
 
         self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
         self.ma10 = MA(self, self.close, 10,'ma10', 'y', '1')
@@ -29,23 +29,30 @@ class DemoStrategy(TradingStrategy):
         """ 策略函数，对每根Bar运行一次。""" 
         #self.ma2.update(average(self.open, 10))
         if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
-            self.buy('d', self.open, 1) 
+            self.buy('long', self.open, 1, contract = 'IF000.SHFE') 
         elif self.position() > 0 and self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
-            self.sell('d', self.open, 1) 
+            self.sell('long', self.open, 1) 
 
-        print self.position(), self.cash()
-        print self.datetime, self.b_upper, self.b_middler, self.b_lower
+        #print self.position(), self.cash()
+        #print self.datetime, self.b_upper, self.b_middler, self.b_lower
+        #print self.open_(1)[1], self.open
 
 
 begin_dt, end_dt = None, None
-pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
+pcon = pcontract('IF000.SHFE', '10.Minute')
 #pcon = stock('600848')
-simulator = ExecuteUnit(begin_dt, end_dt)
-algo = DemoStrategy([pcon], simulator)
+simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
+algo = DemoStrategy(simulator)
+#algo2 = DemoStrategy(simulator)
 simulator.run()
 
 # 显示回测结果
 plotting.plot_result(simulator.data[pcon],
-            algo._indicators,
-            algo.blotter.deal_positions,
-            algo.blotter)
+                            algo._indicators,
+                            algo.blotter.deal_positions,
+                            algo.blotter)
+
+#plotting.plot_result(simulator.data[pcon],
+            #algo2._indicators,
+            #algo2.blotter.deal_positions,
+            #algo2.blotter)
