@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 import Queue
 import pandas as pd
-from quantdigger.kernel.datasource import datamanager
+from quantdigger.kernel.datasource.data import local_data
 from quantdigger.errors import DataAlignError
 from quantdigger.kernel.engine.strategy import BarTracker
 from quantdigger.kernel.engine.event import Event
@@ -84,7 +84,7 @@ class ExecuteUnit(object):
         try:
             return self.data[pcontract]
         except KeyError:
-            data = datamanager.local_data.load_data(pcontract)
+            data = local_data.load_data(pcontract)
             if not hasattr(self, '_data_length'):
                 self._data_length = len(data) 
             elif self._data_length != len(data):
