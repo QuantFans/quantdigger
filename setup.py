@@ -79,21 +79,21 @@ DESCRIPTION = "量化交易PYTHON回测系统"
 AUTHOR = "QuantDigger"
 AUTHOR_EMAIL = "QuantDigger@QuantDigger.com"
 URL = "https://github.com/QuantFans/quantdigger"
-VERSION = __import__(PACKAGE).__version__
+VERSION = 0.1
 
 
 setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
-    long_description=read("quantdigger/README.rst"),
+    long_description=read("./README.rst"),
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     license="BSD",
     url=URL,
     packages=find_packages(),
     package_data=find_package_data(PACKAGE, only_in_packages=False),
-    scripts=['util.py','dependency.py','pip_install.py','after_setup.py','full_install.py'],
+    scripts=['util.py','dependency.py','install_pip.py','install.py','install_dependency.py'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

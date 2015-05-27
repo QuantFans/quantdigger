@@ -104,7 +104,7 @@ def create_attributes(method):
 
 
 class IndicatorBase(object):
-    """docstring for Indicator"""
+    """docstring for Indicator :py:class:`.IndicatorBase` """
     def __init__(self, tracker, name,  widget=None):
         """
         

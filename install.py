@@ -3,10 +3,12 @@ import util
 import os
 import re
 
+# install quantdigger
 result = os.popen('python setup.py install').readlines()
 util.printCommandResult(result)
 
 
+# install dependency
 result = os.popen('pip -V').read()
 reobj = re.compile("pip.+from.+", re.IGNORECASE)
 if reobj.search(result):
@@ -17,3 +19,4 @@ else:
 
 
 dependency.handle_dependency()
+
