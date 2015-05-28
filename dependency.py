@@ -56,7 +56,7 @@ def create_dependencies():
     for lib in libs:
         try:
             __import__(lib[0])
-            print lib[0], "****" 
+            print lib[0], "already installed!" 
         except ImportError:
             requirements += '%s\n' % lib[1]
     if requirements:

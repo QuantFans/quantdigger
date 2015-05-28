@@ -1,13 +1,13 @@
 QuantDigger
 ============
-QuantDiggerÊÇÓÉÒ»ÈºÁ¿»¯½»Ò×°®ºÃÕßÒ»Æğ¿ª·¢µÄ¿ªÔ´µÄ¹ÉÆ±/ÆÚ»õ»Ø²â¿ò¼Ü
-Ö÷ÒªÓÃÓÚÑ§Ï°ºÍÑĞ¾¿¡£»¶Ó­´ó¼ÒÌá¹©±¦¹óÒâ¼û£¬¹±Ï×´úÂë£Ş£ß£Ş£®
-»òÕß¼ÓÈëÎÒÃÇµÄpythonÁ¿»¯½»Ò×Èº--334555399£®
+QuantDiggeræ˜¯ç”±ä¸€ç¾¤é‡åŒ–äº¤æ˜“çˆ±å¥½è€…ä¸€èµ·å¼€å‘çš„å¼€æºçš„è‚¡ç¥¨/æœŸè´§å›æµ‹æ¡†æ¶
+ä¸»è¦ç”¨äºå­¦ä¹ å’Œç ”ç©¶ã€‚æ¬¢è¿å¤§å®¶æä¾›å®è´µæ„è§ï¼Œè´¡çŒ®ä»£ç ï¼¾ï¼¿ï¼¾ï¼
+æˆ–è€…åŠ å…¥æˆ‘ä»¬çš„pythoné‡åŒ–äº¤æ˜“ç¾¤--334555399ï¼
 
-³ıÁË¿ª·¢ÈËÔ±£¬»¹ÒªÌØ±ğ¸ĞĞ» vodkabuaa_ ¸ø³öµÄÒâ¼û£¬
-ongbe_ °ïÃ¦ĞŞ¸´´úÂëbug£¬ tushare¿âµÄ×÷Õß Jimmy_ £¬ÒÔ¼°ËùÓĞÅóÓÑµÄÖ§³Ö£®
+é™¤äº†å¼€å‘äººå‘˜ï¼Œè¿˜è¦ç‰¹åˆ«æ„Ÿè°¢ vodkabuaa_ ç»™å‡ºçš„æ„è§ï¼Œ
+ongbe_ å¸®å¿™ä¿®å¤ä»£ç bugï¼Œ tushareåº“çš„ä½œè€… Jimmy_ ï¼Œä»¥åŠæ‰€æœ‰æœ‹å‹çš„æ”¯æŒï¼
 
-**Ö÷Òª´úÂë¹±Ï×Õß:**
+**ä¸»è¦ä»£ç è´¡çŒ®è€…:**
      deepfish_
 
      TeaEra_
@@ -16,26 +16,26 @@ ongbe_ °ïÃ¦ĞŞ¸´´úÂëbug£¬ tushare¿âµÄ×÷Õß Jimmy_ £¬ÒÔ¼°ËùÓĞÅóÓÑµÄÖ§³Ö£®
 
      HonePhy_
 
-°²×°
+å®‰è£…
 ----
     
-Äã¿ÉÒÔÑ¡Ôñpip°²×°
+ä½ å¯ä»¥é€‰æ‹©pipå®‰è£… (æ¨è)
    
   ::
        
-      python install_pip.py  (Èç¹ûÒÑ¾­°²×°ÁËpip,ÂÔ¹ıÕâÒ»²½¡£)
+      python install_pip.py  (å¦‚æœå·²ç»å®‰è£…äº†pip,ç•¥è¿‡è¿™ä¸€æ­¥ã€‚)
       pip install QuantDigger
       python install_dependency.py
 
-»òÕß¿ËÂ¡github´úÂëºó±¾µØ°²×°
+æˆ–è€…å…‹éš†githubä»£ç åæœ¬åœ°å®‰è£…
    
   ::
        
       git clone https://github.com/QuantFans/quantdigger.git
-      python install.py  (»á¸ù¾İÇé¿ö°²×°pip, ¼°ÒÀÀµ°ü)
+      python install.py  (ä¼šæ ¹æ®æƒ…å†µå®‰è£…pip, åŠä¾èµ–åŒ…)
 
 
-ÒÀÀµ¿â
+ä¾èµ–åº“
 ------
 * Python 
 * pandas 
@@ -44,12 +44,12 @@ ongbe_ °ïÃ¦ĞŞ¸´´úÂëbug£¬ tushare¿âµÄ×÷Õß Jimmy_ £¬ÒÔ¼°ËùÓĞÅóÓÑµÄÖ§³Ö£®
 * numpy
 * TA-Lib
 * logbook
-* pyqt (¿ÉÑ¡)
-* tushare_ (¿ÉÑ¡, Ò»¸ö·Ç³£Ç¿´óµÄ¹ÉÆ±ĞÅÏ¢×¥È¡¹¤¾ß)
+* pyqt (å¯é€‰)
+* tushare_ (å¯é€‰, ä¸€ä¸ªéå¸¸å¼ºå¤§çš„è‚¡ç¥¨ä¿¡æ¯æŠ“å–å·¥å…·)
 
-²ßÂÔDEMO
+ç­–ç•¥DEMO
 --------
-Ô´Âë
+æºç 
 ~~~~
 .. code:: py
 
@@ -60,9 +60,9 @@ ongbe_ °ïÃ¦ĞŞ¸´´úÂëbug£¬ tushare¿âµÄ×÷Õß Jimmy_ £¬ÒÔ¼°ËùÓĞÅóÓÑµÄÖ§³Ö£®
 
 
     class DemoStrategy(TradingStrategy):
-        """ ²ßÂÔÀà """
+        """ ç­–ç•¥ç±» """
         def __init__(self, pcontracts, exe):
-            """ ³õÊ¼»¯Ö¸±ê±äÁ¿ """
+            """ åˆå§‹åŒ–æŒ‡æ ‡å˜é‡ """
             super(DemoStrategy, self).__init__(pcontracts, exe)
 
             self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
@@ -71,7 +71,7 @@ ongbe_ °ïÃ¦ĞŞ¸´´úÂëbug£¬ tushare¿âµÄ×÷Õß Jimmy_ £¬ÒÔ¼°ËùÓĞÅóÓÑµÄÖ§³Ö£®
             #self.ma2 = NumberSeries(self)
 
         def on_tick(self):
-            """ ²ßÂÔº¯Êı£¬¶ÔÃ¿¸ùBarÔËĞĞÒ»´Î¡£""" 
+            """ ç­–ç•¥å‡½æ•°ï¼Œå¯¹æ¯æ ¹Barè¿è¡Œä¸€æ¬¡ã€‚""" 
             #self.ma2.update(average(self.open, 10))
             if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
                 self.buy('d', self.open, 1) 
@@ -82,42 +82,42 @@ ongbe_ °ïÃ¦ĞŞ¸´´úÂëbug£¬ tushare¿âµÄ×÷Õß Jimmy_ £¬ÒÔ¼°ËùÓĞÅóÓÑµÄÖ§³Ö£®
             print self.datetime, self.b_upper, self.b_middler, self.b_lower
 
 
-    # ÔËĞĞ²ßÂÔ
+    # è¿è¡Œç­–ç•¥
     begin_dt, end_dt = None, None
     pcon = pcontract('SHFE', 'IF000', 'Minutes', 10)
-    #pcon = stock('600848')  ÀûÓÃtushareÔ¶³Ì¼ÓÔØ¹ÉÆ±Êı¾İ
+    #pcon = stock('600848')  åˆ©ç”¨tushareè¿œç¨‹åŠ è½½è‚¡ç¥¨æ•°æ®
     simulator = ExecuteUnit(begin_dt, end_dt)
     algo = DemoStrategy([pcon], simulator)
     simulator.run()
 
-    # ÏÔÊ¾»Ø²â½á¹û
+    # æ˜¾ç¤ºå›æµ‹ç»“æœ
     plotting.plot_result(simulator.data[pcon],
                 algo._indicators,
                 algo.blotter.deal_positions,
                 algo.blotter)
 
 
-²ßÂÔ½á¹û
+ç­–ç•¥ç»“æœ
 ~~~~~~~~
 **main.py**
 
-* kÏßºÍĞÅºÅÏß
+* kçº¿å’Œä¿¡å·çº¿
 
   .. image:: figure_signal.png
      :width: 500px
 
-* ×Ê½ğÇúÏß¡£
+* èµ„é‡‘æ›²çº¿ã€‚
   
   .. image:: figure_money.png
      :width: 500px
 
-ÆäËü
+å…¶å®ƒ
 ~~~~~~~~
-**mplot_demo.py  matplotlib»­kÏß£¬Ö¸±êÏßµÄdemo¡£**
+**mplot_demo.py  matplotlibç”»kçº¿ï¼ŒæŒ‡æ ‡çº¿çš„demoã€‚**
   .. image:: plot.png
      :width: 500px
 
-**pyquant.py »ùÓÚpyqt£¬ ¼¯³ÉÁËipythonºÍmatplotlibµÄdemo¡£**
+**pyquant.py åŸºäºpyqtï¼Œ é›†æˆäº†ipythonå’Œmatplotlibçš„demoã€‚**
   .. image:: pyquant.png
      :width: 500px
 

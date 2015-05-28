@@ -79,14 +79,14 @@ DESCRIPTION = "量化交易PYTHON回测系统"
 AUTHOR = "QuantDigger"
 AUTHOR_EMAIL = "QuantDigger@QuantDigger.com"
 URL = "https://github.com/QuantFans/quantdigger"
-VERSION = 0.1
+VERSION = 0.14
 
 
 setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
-    long_description=read("./README.rst"),
+    long_description=read("./README.rst").decode('utf-8'),
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     license="BSD",
