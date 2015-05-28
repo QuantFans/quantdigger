@@ -31,50 +31,59 @@ def install_talib_for_Darwin():
 	util.printCommandResult(result)
 
 def pip_download_install():
-        url = 'https://pypi.python.org/packages/source/p/pip/pip-6.0.8.tar.gz'
-        target = 'pip-6.0.8.tar.gz'
-        targetdir = 'pip-6.0.8'
-        print('============ downloading ' + target + ' from:' + url)
-        util.download(url,target)
-        print('============ extracting ' + target)
-        util.decompress(target,'.')
-        os.chdir(targetdir)
-        print('============ installing pip')
-        cmdResult = os.popen('python setup.py install').readlines()
-        util.printCommandResult(cmdResult)
-        print('============ installed,plese add pip to your path')
+    url = 'https://pypi.python.org/packages/source/p/pip/pip-6.0.8.tar.gz'
+    target = 'pip-6.0.8.tar.gz'
+    targetdir = 'pip-6.0.8'
+    print('============ downloading ' + target + ' from:' + url)
+    util.download(url,target)
+    print('============ extracting ' + target)
+    util.decompress(target,'.')
+    os.chdir(targetdir)
+    print('============ installing pip')
+    cmdResult = os.popen('python setup.py install').readlines()
+    util.printCommandResult(cmdResult)
+    print('============ installed,plese add pip to your path')
 
-#def create_dependencies():
-    #requirements = ''
-    #libs = [ ('numpy', 'numpy'),
-             #('pandas', 'pandas'),
-             #('dateutil', 'python-dateutil'),
-             #('matplotlib', 'matplotlib'),
-             #('talib' , 'talib') 
-    #]
-    #for lib in libs:
-        #try:
-            #__import__(lib[0])
-        #except ImportError:
-            ##requirements += '%s\n' % lib[1]
-            #pass
-    #print('Installing dependencies:')
-    #print(requirements)
-	#file = open('requirements.txt','w')
-	#file.write(requirements)
-	#file.close()
-	
+def create_dependencies():
+    requirements = ''
+    libs = [ ('numpy', 'numpy'),
+             ('pandas', 'pandas'),
+             ('dateutil', 'python-dateutil'),
+             ('matplotlib', 'matplotlib'),
+             ('logbook', 'logbook'),
+             ('talib' , 'TA-Lib == 0.4.8') 
+    ]
+    for lib in libs:
+        try:
+            __import__(lib[0])
+            print lib[0], "****" 
+        except ImportError:
+            requirements += '%s\n' % lib[1]
+    if requirements:
+        file = open('requirements.txt','w')
+        file.write(requirements)
+        file.close()
+    return requirements
+
 def handle_dependency():
-	#platform_name = platform.system()
-	#if (platform_name == "Windows"):
-		#install_talib_for_windows()
-	#elif (platform_name == "Linux"):
-		#install_talib_for_linux()
-	#elif (platform_name == "Darwin"):
-		#install_talib_for_Darwin()
-	#else:
-		#print('Failed to install ta-lib!')
-	print('pip install -r requirements.txt')
-	result = os.popen('pip install -r requirements.txt').readlines()
-	util.printCommandResult(result)
+    """docstring for fn""" 
+    platform_name = platform.system()
+    try:
+        if platform_name == 'Windows':
+            install_talib_for_windows() 
+        elif platform_name == 'Linux':
+            install_talib_for_linux() 
+        elif platform_name == 'Darwin':
+            install_talib_for_Darwin() 
+        else:
+            print('Failed to install ta-lib!')
+    except Exception, e:
+        print('Failed to install ta-lib!')
+        print(e)
 
+    dependencies = create_dependencies()
+    if dependencies:
+        print('pip install -r requirements.txt')
+        print(dependencies)
+        result = os.popen('pip install -r requirements.txt').readlines()
+        util.printCommandResult(result)

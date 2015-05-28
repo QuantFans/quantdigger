@@ -1,6 +1,1 @@
-numpy
-pandas
-python-dateutil
-matplotlib
 logbook
-TA-Lib == 0.4.8
