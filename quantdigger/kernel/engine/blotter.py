@@ -7,20 +7,35 @@ from quantdigger.kernel.datastruct import Position, TradeSide, Direction
 from performance import create_sharpe_ratio, create_drawdowns
 
 class Positions(object):
-    """docstring for Positions"""
+    """ 当前相同合约持仓集合(可能不同时间段下单)。
+
+    :ivar total: 持仓总数。
+    :ivar positions: 持仓集合。
+    :vartype positions: set
+    """
     def __init__(self):
         self.total = 0
         self.positions = set()
 
     def profit(self, new_price):
-        """docstring for pro""" 
+        """ 根据当前的价格计算盈亏。
+        
+           :param float new_price: 当前价格。
+           :return: 盈亏数额。
+           :rtype: float
+        """
         profit = 0
         for pos in self.positions:
             profit += pos.transaction.profit(new_price)
         return profit
 
     def deposit(self, new_price):
-        """docstring for pro""" 
+        """ 根据当前价格计算这笔交易的保证金。
+        
+           :param float new_price: 当前价格。
+           :return: 保证金。
+           :rtype: float
+        """
         deposit = 0
         for pos in self.positions:
             deposit += pos.transaction.deposit(new_price)
@@ -28,13 +43,19 @@ class Positions(object):
 
 
 class DealPosition(object):
-    """ 开仓，平仓对"""
+    """ 开仓，平仓对
+        
+        :ivar open: 开仓价
+        :vartype open: float
+        :ivar close: 平仓价
+        :vartype close: float
+    """
     def __init__(self, buy_trans, sell_trans):
         self.open = buy_trans
         self.close = sell_trans
 
     def profit(self):
-        """""" 
+        """ 盈亏额  """
         direction = self.open.order.direction
         if direction == Direction.LONG:
             return self.close.price - self.open.price
@@ -43,51 +64,50 @@ class DealPosition(object):
 
     @property
     def open_datetime(self):
+        """ 开仓时间 """
         return self.open.datetime
 
     @property
     def open_price(self):
+        """ 开仓价格 """
         return self.open.price
 
     @property
     def close_datetime(self):
+        """ 平仓时间 """
         return self.close.datetime
 
     @property
     def close_price(self):
+        """ 平仓价格 """
         return self.close.price
 
 
 class Blotter(object):
     """
-    订单管理
+    订单管理。
     """
-
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def update_signal(self, event):
         """
-        Acts on a SignalEvent to generate new orders 
-        based on the portfolio logic.
+        处理策略函数产生的下单事件。
         """
         raise NotImplementedError("Should implement update_signal()")
 
     @abstractmethod
     def update_fill(self, event):
         """
-        Updates the portfolio current positions and holdings 
-        from a FillEvent.
+        处理委托单成交事件。
         """
         raise NotImplementedError("Should implement update_fill()")
 
 
 class SimpleBlotter(Blotter):
     """
-    The SimpleBlotter object is designed to send orders to
-    a brokerage object with a constant quantity size blindly,
-    i.e. without any risk management or position sizing. It is
-    used to test simpler strategies such as BuyAndHoldStrategy.
+    简单的订单管理系统，直接给 :class:`quantdigger.kernel.engine.exchange.Exchange`
+    对象发订单，没有风控。
     """
     def __init__(self, timeseries, events_pool, initial_capital=5000.0):
         self._timeseries = timeseries
@@ -106,11 +126,9 @@ class SimpleBlotter(Blotter):
 
         self.all_positions = []    # 在所有时间点上的持仓 list of dict
         self.all_holdings = []   # 所有时间点上的资金 list of dict
-        self.deals = [] # 每笔交易
         self.deal_positions = []   # 开平仓对
 
     def _init_state(self):
-        """docstring for _init_state""" 
         self.all_positions = [{'datetime' : self._start_date }]
         self.current_holdings = {
                 'cash': self.initial_capital,
@@ -126,7 +144,7 @@ class SimpleBlotter(Blotter):
         }]
 
     def update_bar(self, bars):
-        """docstring for update_bar""" 
+        """ 当前bar数据更新。 """ 
         self._bars = bars
 
     def update_datetime(self, dt):
@@ -142,9 +160,7 @@ class SimpleBlotter(Blotter):
 
     def update_fill(self, event):
         """
-        订单成交。
-        Updates the portfolio current positions and holdings 
-        from a FillEvent.
+        处理委托单成交事件。
         """
         assert event.type == Event.FILL
         t_order = None
@@ -158,9 +174,7 @@ class SimpleBlotter(Blotter):
 
     def update_signal(self, event):
         """
-        处理交易系统产生的订单。
-        Acts on a SignalEvent to generate new orders 
-        based on the portfolio logic.
+        处理策略函数产生的下单事件。
         """
         assert event.type == Event.SIGNAL
         valid_orders = []
@@ -176,7 +190,7 @@ class SimpleBlotter(Blotter):
         #self.generate_naive_order(event.orders)
 
     def valid_order(self, order):
-        """ 判断订单是否合法 """ 
+        """ 判断订单是否合法。 """ 
         if order.kpp == TradeSide.PING:
             try:
                 pos = self.current_positions[order.contract]
@@ -194,7 +208,7 @@ class SimpleBlotter(Blotter):
         return True
 
     def _update_status(self, dt):
-        """ 更新历史持仓，当前权益"""
+        """ 更新历史持仓，当前权益。"""
         # 更新持仓历史。
         dp = { }
         dp['datetime'] = dt
@@ -279,8 +293,7 @@ class SimpleBlotter(Blotter):
 
     def create_equity_curve_dataframe(self):
         """
-        Creates a pandas DataFrame from the all_holdings
-        list of dictionaries.
+        创建资金曲线对象。
         """
         curve = pd.DataFrame(self.all_holdings)
         curve.set_index('datetime', inplace=True)
@@ -290,8 +303,7 @@ class SimpleBlotter(Blotter):
 
     def output_summary_stats(self):
         """
-        Creates a list of summary statistics for the portfolio such
-        as Sharpe Ratio and drawdown information.
+        统计夏普率， 回测等信息。
         """
         total_return = self.equity_curve['equity_curve'][-1]
         returns = self.equity_curve['returns']

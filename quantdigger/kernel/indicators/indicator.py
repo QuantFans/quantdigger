@@ -61,7 +61,7 @@ def override_attributes(method):
 
 
 def create_attributes(method):
-    # 根据构造函数的参数和默认参数构造属性。
+    """ 根据被修饰函数的参数构造属性。"""
     def wrapper(self, *args, **kwargs):
         magic = inspect.getargspec(method)
         arg_names = magic.args[1:]
@@ -104,27 +104,41 @@ def create_attributes(method):
 
 
 class IndicatorBase(object):
-    """docstring for Indicator :py:class:`.IndicatorBase` """
+    ## @todo 把绘图函数分类到父类中。
+    """
+    指标基类。每个指标的内部数据为序列变量。所以每个指标对象都会与一个跟踪器相关联，
+    负责更新其内部的序列变量。 如果是MA这样的单值指标, 重载函数可以使指标对象像序列变量一样被使用。
+    如果是多值指标，如布林带，那么会以元组的形式返回多一个序列变量。
+
+    :ivar name: 指标对象名称
+    :vartype name: str
+    :ivar upper: 坐标上界（绘图用）
+    :vartype upper: float
+    :ivar lower: 坐标上界（绘图用）
+    :vartype lower: float
+    :ivar _tracker: 关联跟踪器
+    :vartype _tracker: BarTracker
+    :ivar widget: 绘图容器，暂定Axes
+    :ivar value: 向量化运行结果, 用于处理历史数据。
+    :ivar _series: 单值指标的序列变量或多值指标的序列变量数组。
+    :ivar _algo: 逐步指标函数。
+    :ivar _args: 逐步指标函数的参数。
+    """
     def __init__(self, tracker, name,  widget=None):
-        """
-        
-        Args:
-            name (str): description
-            value (np.dataarray): 值
-            widget (widget): Axes or QtGui.Widget。
-        
-        """
         self.name = name
         # 可能是qt widget, Axes, WebUI
         self.widget = widget
         self.upper = self.lower = None
+        self.value = None
+        self._algo = None
+        self._args = None
         ## @todo 判断tracker是否为字符串。
         if tracker:
             self._added_to_tracker(tracker)
         self._tracker = tracker
 
     def calculate_latest_element(self):
-        """ 被tracker调用，确保series总是最新的。 """
+        """ 被tracker调用，确保内部序列变量总是最新的。 """
         s = self._series
         m = False
         if self._series.__class__.__name__ == 'list':
@@ -138,25 +152,21 @@ class IndicatorBase(object):
                 for i, v in enumerate(rst):
                     self._series[i].update(v)
 
-    def __size__(self):
-        """""" 
-        if self._series.__class__.__name__ == 'list':
-            return len(self._series[0])
-        else:
-            return len(self._series)
-
-    def _added_to_tracker(self, tracker):
-        if tracker:
-            tracker.add_indicator(self)
+    def plot(self, widget):
+        """ 如需绘制指标，则需重载此函数。 """
+        ## @todo 把plot_line等绘图函数分离到widget类中。
+        pass
 
     # api
     def plot_line(self, data, color, lw, style='line'):
         """ 画线    
-        
-        Args:
-            data (list): 浮点数组。
-            color (str): 颜色。
-            lw (int): 线宽。
+
+            :ivar data: 浮点数组。
+            :vartype data: list
+            :ivar color: 画线颜色
+            :vartype color: str 
+            :ivar lw: 线宽
+            :vartype lw: int
         """
         ## @todo 放到两个类中。
         def mplot_line(data, color, lw, style='line' ):
@@ -178,29 +188,45 @@ class IndicatorBase(object):
             pass
 
     def set_yrange(self, lower, upper):
+        """ 设置纵坐标范围。 """
         self.lower = lower
         self.upper = upper
 
-    def stick_yrange(self, range_):
-        self.lower = range_
-        self.upper = range_
+    def stick_yrange(self, y_range):
+        """ 固定纵坐标范围。如RSI指标。 
 
-    def calcute_bound(self):
-        """""" 
-        pass
+        :ivar y_range: 纵坐标范围。
+        :vartype y_range: list
+        """
+        self.lower = y_range
+        self.upper = y_range
 
     def y_interval(self, w_left, w_right):
+        """ 可视区域移动时候重新计算纵坐标范围。 """
         ## @todo 只存储上下界, 每次缩放的时候计算一次, 在移动时候无需计算。
         if len(self.upper) == 2:
             # 就两个值，分别代表上下界。
             return max(self.upper), min(self.lower) 
-
         ymax = np.max(self.upper[w_left: w_right])
         ymin = np.min(self.lower[w_left: w_right])
         return ymax, ymin
 
+    def __size__(self):
+        """""" 
+        if self._series.__class__.__name__ == 'list':
+            return len(self._series[0])
+        else:
+            return len(self._series)
+
+    def _added_to_tracker(self, tracker):
+        if tracker:
+            tracker.add_indicator(self)
+
+
     def __tuple__(self):
-        """docstring for __iter__""" 
+        """ 返回元组。某些指标，比如布林带有多个返回值。
+            这里以元组的形式返回多个序列变量。
+        """
         if self._series.__class__.__name__ == 'list':
             return tuple(self._series)
         else:

@@ -62,6 +62,19 @@ class Direction(object):
     """
     LONG = 1
     SHORT = 2
+    tdict = {'LONG': LONG,
+             'SHORT': SHORT 
+    }
+
+    @classmethod
+    def arg_to_type(self, arg):
+        """
+        把用户输入参数转化为系统类型。
+        """ 
+        if type(arg) == str:
+            return self.tdict[arg.upper()]
+        else:
+            return arg
 
         
 class Transaction(object):

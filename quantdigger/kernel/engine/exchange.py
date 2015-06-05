@@ -2,19 +2,13 @@
 from quantdigger.kernel.datastruct import Transaction
 from quantdigger.kernel.engine.event import FillEvent
 class Exchange(object):
-    """ 交易所 """
-    def __init__(self, events_pool, slippage = None, strict=False):
-        """ 
-        
-        Args:
-           events_pool (EventsPool): 策略内唯一的事件池。
-           slippage (Slippage): 滑点模型。
-           strict (Bool): 是否是严格的回测。
-        
-        Returns:
-            int. The result
-        Raises:
-        """
+    """ 模拟交易所。
+  
+        :ivar _slippage: 滑点模型。
+        :ivar _open_orders: 未成交订单。
+        :ivar events: 事件池。
+    """
+    def __init__(self, events_pool, slippage = None, strict=True):
         self._slippage = slippage
         self._open_orders = set()
         self.events = events_pool
@@ -58,20 +52,16 @@ class Exchange(object):
 
 
     def insert_order(self, order_event):
-        """docstring for place_order""" 
         pass
 
     def cancel_order(self, order):
-        """docstring for cancel_order""" 
         pass
 
     def update_order(self, event):
         """
         模拟交易所收到订单。
         """ 
-        print type(event.order)
         self._open_orders.add(event.order)
-        print 'on_order_event', len(self._open_orders) 
 
     def update_datetime(self, dt):
         self._datetime = dt

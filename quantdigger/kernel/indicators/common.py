@@ -7,9 +7,11 @@
 # @date 2015-12-23
 import talib
 import numpy as np
-from indicator import IndicatorBase, create_attributes, override_attributes, transform2ndarray
+from indicator import IndicatorBase, create_attributes, transform2ndarray
+import matplotlib.finance as finance
             
 class MA(IndicatorBase):
+    """ 移动平均线指标。 """
     ## @todo assure name is unique, it there are same names,
     # modify the repeat name.
     @create_attributes
@@ -47,6 +49,7 @@ class MA(IndicatorBase):
 
 
 class BOLL(IndicatorBase):
+    """ 布林带指标。 """
     ## @todo assure name is unique, it there are same names,
     # modify the repeat name.
     @create_attributes
@@ -56,12 +59,6 @@ class BOLL(IndicatorBase):
         # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
         # 转化为numpy.ndarray等能被指标函数处理的参数。
         self.value = self._boll(prices, n)
-        self._algo = self._iter_boll
-        self._args = (n,)
-
-    def _iter_boll(self, price, n):
-        """ 逐步运行。""" 
-        pass
 
     def _boll(self, data, n):
         """ 向量化运行的均值函数。 """
@@ -73,7 +70,6 @@ class BOLL(IndicatorBase):
         """ 绘图，参数可由UI调整。 """
         self.widget = widget
         #self.plot_line(self.value, self.color, self.lw, self.style)
-
 
 
 class RSI(IndicatorBase):
@@ -110,27 +106,24 @@ class RSI(IndicatorBase):
             rsi[i] = 100. - 100./(1.+rs)
         return rsi
 
-    @override_attributes
-    def plot(self, widget, fillcolor='b'):
-        self._mplot(widget, fillcolor)
-
-
-    def _mplot(self, ax, fillcolor):
+    def plot(self, widget):
         textsize = 9
-        ax.plot(self.value, color=fillcolor, lw=2)
-        ax.axhline(70, color=fillcolor, linestyle='-')
-        ax.axhline(30, color=fillcolor, linestyle='-')
-        ax.fill_between(self.value, 70, where=(self.value>=70), facecolor=fillcolor, edgecolor=fillcolor)
-        ax.fill_between(self.value, 30, where=(self.value<=30), facecolor=fillcolor, edgecolor=fillcolor)
-        ax.text(0.6, 0.9, '>70 = overbought', va='top', transform=ax.transAxes, fontsize=textsize, color = 'k')
-        ax.text(0.6, 0.1, '<30 = oversold', transform=ax.transAxes, fontsize=textsize, color = 'k')
-        ax.set_ylim(0, 100)
-        ax.set_yticks([30,70])
-        ax.text(0.025, 0.95, 'rsi (14)', va='top', transform=ax.transAxes, fontsize=textsize)
+        widget.plot(self.value, color=self.fillcolor, lw=2)
+        widget.axhline(70, color=self.fillcolor, linestyle='-')
+        widget.axhline(30, color=self.fillcolor, linestyle='-')
+        widget.fill_between(self.value, 70, where=(self.value>=70),
+                            facecolor=self.fillcolor, edgecolor=self.fillcolor)
+        widget.fill_between(self.value, 30, where=(self.value<=30),
+                            facecolor=self.fillcolor, edgecolor=self.fillcolor)
+        widget.text(0.6, 0.9, '>70 = overbought', va='top', transform=widget.transAxes, fontsize=textsize, color = 'k')
+        widget.text(0.6, 0.1, '<30 = oversold', transform=widget.transAxes, fontsize=textsize, color = 'k')
+        widget.set_ylim(0, 100)
+        widget.set_yticks([30,70])
+        widget.text(0.025, 0.95, 'rsi (14)', va='top', transform=widget.transAxes, fontsize=textsize)
 
 
 class MACD(IndicatorBase):
-    """"""
+    @create_attributes
     def __init__(self, tracker, prices, nslow, nfast, name='MACD'):
         super(MACD, self).__init__(tracker, name)
         self.emaslow, self.emafast, self.macd = self._moving_average_convergence(prices, nslow=nslow, nfast=nfast)
@@ -147,40 +140,28 @@ class MACD(IndicatorBase):
         
     def plot(self, widget):
         self.widget = widget
-        self._mplot(widget)
-
-    def _mplot(self, ax):
         fillcolor = 'darkslategrey'
         nema = 9
         ema9 = MA(self.macd, nema, type='exponential').value
-        ax.plot(self.macd, color='black', lw=2)
-        ax.plot(self.ema9, color='blue', lw=1)
-        ax.fill_between(self.macd-ema9, 0, alpha=0.5, facecolor=fillcolor, edgecolor=fillcolor)
+        widget.plot(self.macd, color='black', lw=2)
+        widget.plot(self.ema9, color='blue', lw=1)
+        widget.fill_between(self.macd-ema9, 0, alpha=0.5, facecolor=fillcolor, edgecolor=fillcolor)
 
     #def _qtplot(self, widget, fillcolor):
         #raise  NotImplementedError
 
-import matplotlib.finance as finance
 class Volume(IndicatorBase):
-    """docstring for Volume"""
+    """ 柱状图。 """
     @create_attributes
     def __init__(self, tracker, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(tracker, name)
         self.value = transform2ndarray(volume)
-        #self.name = name
-        #self.volume = volume
-        #self.open = open
-        #self.close = close
-        #self.colorup = colorup
-        #self.colordown = colordown
-        #self.width = width
 
-    @override_attributes
-    def plot(self, widget, colorup = 'r', colordown = 'b', width = 1):
-        """docstring for plot""" 
-        finance.volume_overlay(widget, self.open, self.close, self.volume, colorup, colordown, width)
+    def plot(self, widget):
+        finance.volume_overlay(widget, self.open, self.close, self.volume,
+                               self.colorup, self.colordown, self.width)
 
-
+# ------------------------------------------
 
 from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection

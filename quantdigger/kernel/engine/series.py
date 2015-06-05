@@ -2,17 +2,22 @@
 import numpy as np
 from quantdigger.errors import SeriesIndexError, BreakConstError
 
-class QuantSeries(object):
-    """ """
+class SeriesBase(object):
+    """ 序列变量的基类。
+    
+        :ivar _curbar: 当前Bar索引。
+        :vartype _curbar: int
+
+        :ivar _tracker: 负责维护次时间序列变量的跟踪器。
+        :vartype _tracker: BarTracker
+
+        :ivar _system_var: 是否是策略内置变量如Strategy.open, Strategy.close
+        :vartype _system_var: bool
+
+        :ivar data: 数据，类型为支持索引的数据结构，如list, ndarray, pandas.Series等。
+    """
     DEFAULT_VALUE = None
     def __init__(self, tracker, data=[], system_var=False):
-        """
-        Args:
-            tracker (BarTracker): 周期跟踪器
-            data (array): 支持index的数据结构，如list, ndarray, pandas.Series等。
-            system_var (bool): 是否是系统变量，如Strategy.open, Strategy.close等。
-        
-        """
         # 非向量化运行的普通序列变量的_length_history的值为0.
         self._length_history = len(data)
 
@@ -20,23 +25,27 @@ class QuantSeries(object):
         self._tracker = tracker
         self._system_var = system_var
         self._added_to_tracker(tracker, system_var)
+        self.data = data
 
     @property
     def length_history(self):
+        """ 历史数据长度。 """
         return self._length_history
 
     @property
     def curbar(self):
+        """ 当前Bar索引。 """
         return self._curbar
 
 
     def update_curbar(self, curbar):
-        """ 被tracker调用。 """
+        """ 更新当前Bar索引， 被tracker调用。 """
         self._curbar = curbar
 
 
     def _added_to_tracker(self, tracker, system_var):
-        """
+        """ 添加到跟踪器的时间序列变量列表。
+            
         如果是系统变量open,close,high,low,volume 
         那么tracker为None,不负责更新数据。
         系统变量的值有ExcuteUnit更新。 
@@ -59,7 +68,7 @@ class QuantSeries(object):
         return len(self.data)
 
     def duplicate_last_element(self):
-        """ 只有非系统系列变量才会运行这个 """
+        """ 更新非系统变量最后一个单元的值。 """
         # 非向量化运行。
         if self.length_history ==  0:
             if self._curbar == 0:
@@ -94,8 +103,8 @@ class QuantSeries(object):
             #return self.data[self._curbar - args[0]]
     
     
-class NumberSeries(QuantSeries):
-    """docstring for NumberSeries"""
+class NumberSeries(SeriesBase):
+    """ 数字序列变量"""
     DEFAULT_VALUE = 0.0
     value_type = float
     def __init__(self, tracker, data=[], system_var=False):
@@ -190,8 +199,8 @@ class NumberSeries(QuantSeries):
     def __rpow__(self, r):
         return self.data[self._curbar] ** float(r)
 
-class DateTimeSeries(QuantSeries):
-    """docstring for NumberSeries"""
+class DateTimeSeries(SeriesBase):
+    """ 时间序列变量 """
     ## @todo utc 技时起点
     DEFAULT_VALUE = 0.0
     def __init__(self, tracker, data=[], system_var=False):

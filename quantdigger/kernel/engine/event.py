@@ -2,8 +2,7 @@
  # event.py
 #from flufl.enum import Enum
 class EventsPool(object):
-    ## @todo 不能共享队列，因为有多策略，每个策略一个消息队列。
-    """ 事件池。"""
+    """ 事件池，每个策略有一个。"""
     _pool = []
     def __init__(self, container=None):
         """ container决定是否是线程安全的。
@@ -16,14 +15,19 @@ class EventsPool(object):
 
     def put(self, item):
         self._pool.append(item)
-        print len(self._pool)
 
     def get(self):
-        """docstring for get""" 
         return self._pool.pop(0)
 
 
 class Event(object):
+    """ 事件类型。
+
+    :ivar MARKET: 市场数据事件, 目前未用到。
+    :ivar SIGNAL: 交易信号事件, 由策略函数产生。
+    :ivar ORDER: 委托下单事件, 由下单控制器产生。
+    :ivar FILL: 订单成交事件, 由交易模拟器产生。
+    """
     MARKET = 1
     SIGNAL = 2
     ORDER = 3
@@ -32,8 +36,7 @@ class Event(object):
 
 class MarketEvent(object):
     """
-    Handles the event of receiving a new market update with 
-    corresponding bars.
+    市场数据到达事件。
     """
 
     def __init__(self):
@@ -45,47 +48,20 @@ class MarketEvent(object):
 
 class SignalEvent(object):
     """
-    Handles the event of sending a Signal from a Strategy object.
-    This is received by a Portfolio object and acted upon.
+    由策略函数产生的交易信号事件。
     """
     
     def __init__(self, orders):
-        """
-        Initialises the SignalEvent.
-
-        Parameters:
-        symbol - The ticker symbol, e.g. 'GOOG'.
-        datetime - The timestamp at which the signal was generated.
-        signal_type - 'LONG' or 'SHORT'.
-        """
-        
         self.type = Event.SIGNAL
         self.orders = orders
 
 
 class OrderEvent(object):
     """
-    Handles the event of sending an Order to an execution system.
-    The order contains a symbol (e.g. GOOG), a type (market or limit),
-    quantity and a direction.
+    委托下单事件。
     """
 
     def __init__(self, order):
-        """
-        Initialises the order type, setting whether it is
-        a Market order ('MKT') or Limit order ('LMT'), has
-        a quantity (integral) and its direction ('BUY' or
-        'SELL').
-
-        Parameters:
-        symbol - The instrument to trade.
-        order_type - 'MKT' or 'LMT' for Market or Limit.
-        quantity - Non-negative integer for quantity.
-        direction - 'BUY' or 'SELL' for long or short.
-        """
-        
-        # simbol 会比Contract好记。
-        # 让计算机处理simbol和contract的映射。
         self.type = Event.ORDER
         self.order = order
 
@@ -93,6 +69,7 @@ class OrderEvent(object):
 
 
 class FillEvent(object):
+    """ 委托成交事件。 """
     def __init__(self, transaction):
         self.type = Event.FILL
         self.transaction = transaction

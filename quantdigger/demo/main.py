@@ -25,7 +25,7 @@ class DemoStrategy(TradingStrategy):
         self.b_upper, self.b_middler, self.b_lower = BOLL(self, self.close, 10,'boll10', 'y', '1')
         #self.ma2 = NumberSeries(self)
 
-    def on_tick(self):
+    def on_bar(self):
         """ 策略函数，对每根Bar运行一次。""" 
         #self.ma2.update(average(self.open, 10))
         if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
@@ -33,24 +33,28 @@ class DemoStrategy(TradingStrategy):
         elif self.position() > 0 and self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
             self.sell('long', self.open, 1) 
 
+        # 夸品种数据引用
+        print self.open_(1)[1], self.open
         #print self.position(), self.cash()
         #print self.datetime, self.b_upper, self.b_middler, self.b_lower
-        #print self.open_(1)[1], self.open
 
+try:
+    begin_dt, end_dt = None, None
+    pcon = pcontract('IF000.SHFE', '10.Minute')
+    #pcon = stock('600848')
+    simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
+    algo = DemoStrategy(simulator)
+    #algo2 = DemoStrategy(simulator)
+    simulator.run()
 
-begin_dt, end_dt = None, None
-pcon = pcontract('IF000.SHFE', '10.Minute')
-#pcon = stock('600848')
-simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
-algo = DemoStrategy(simulator)
-#algo2 = DemoStrategy(simulator)
-simulator.run()
-
-# 显示回测结果
-plotting.plot_result(simulator.data[pcon],
-                            algo._indicators,
-                            algo.blotter.deal_positions,
-                            algo.blotter)
+    # 显示回测结果
+    plotting.plot_result(simulator.data[pcon],
+                                algo._indicators,
+                                algo.blotter.deal_positions,
+                                algo.blotter)
+    
+except Exception, e:
+    print e
 
 #plotting.plot_result(simulator.data[pcon],
             #algo2._indicators,

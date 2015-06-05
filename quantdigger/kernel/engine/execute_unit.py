@@ -6,17 +6,23 @@ from quantdigger.errors import DataAlignError
 from quantdigger.kernel.engine.strategy import BarTracker
 from quantdigger.kernel.engine.event import Event
 class ExecuteUnit(object):
-    """ 策略执行的物理单元，支持多个策略同时运行。"""
-    def __init__(self, pcontracts, begin_dt=None, end_dt=None):
-        """ 
-
+    """ 策略执行的物理单元，支持多个策略同时运行。
         每个执行单元都可能跟踪多个数据(策略用到的周期合约数据集合)。
-        其中第一个合约为@主合约
-        
-        Args:
-            pcontracts (PContract List): 周期合约列表
-        
-        """
+        其中第一个合约为"主合约" 。 每个执行器可加载多个策略,只要数据需求不超过pcontracts。
+
+        :ivar begin_dt: 策略执行的时间起点。
+        :vartype begin_dt: datetime
+        :ivar end_dt: 策略执行的时间终点。
+        :vartype end_dt: datetime
+        :ivar pcontracts: 策略用到的周期合约数据集合。
+        :vartype pcontracts: list
+        :ivar trackers: 策略用到的跟踪器集合。（和周期合约一一对应）
+        :vartype trackers: list
+        :ivar _strategies: 策略集合。
+        :vartype _strategies: list
+
+    """
+    def __init__(self, pcontracts, begin_dt=None, end_dt=None):
         self.begin_dt = begin_dt
         self.end_dt = end_dt
         # 不同周期合约数据。
@@ -30,6 +36,7 @@ class ExecuteUnit(object):
         #tracker.pcontracts
         
         self.load_data(pcontracts[0])
+        # 每个周期合约对应一个跟跟踪器。
         for pcon in pcontracts[1:]:
             self.load_data(pcon)
             BarTracker(self, pcon)
@@ -81,6 +88,12 @@ class ExecuteUnit(object):
             bar_index += 1
 
     def load_data(self, pcontract):
+        """ 加载周期合约数据
+        
+           :param PContract pcontract: 周期合约。
+           :return: 周期合约数据。
+           :rtype: pandas.DataFrame
+        """
         try:
             return self.data[pcontract]
         except KeyError:
@@ -94,9 +107,11 @@ class ExecuteUnit(object):
             return data
 
     def add_tracker(self, tracker):
+        """ 添加跟踪器。 """
         self.trackers.append(tracker)
 
     def add_strategy(self, strategy):
+        """ 添加策略。 """
         self._strategies.append(strategy)
 
 
