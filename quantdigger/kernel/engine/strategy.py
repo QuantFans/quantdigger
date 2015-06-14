@@ -1,7 +1,15 @@
 # -*- coding: utf8 -*-
 import numpy as np
 
-from quantdigger.kernel.datastruct import Order, Bar, TradeSide, Direction, Contract
+from quantdigger.kernel.datastruct import (
+    Order,
+    Bar,
+    TradeSide,
+    Direction,
+    Contract,
+    PriceType
+)
+
 from quantdigger.kernel.engine.exchange import Exchange
 from quantdigger.kernel.engine.event import SignalEvent
 from quantdigger.kernel.engine.series import NumberSeries, DateTimeSeries
@@ -110,7 +118,6 @@ class BarTracker(object):
         ## @todo local_data
         return 4
 
-
     @property
     def container_day(self):
         """ 为当天数据预留的空间  """
@@ -194,39 +201,39 @@ class TradingStrategy(BarTracker, CrossTrackerMixin):
             self.events_pool.put(SignalEvent(self._orders))
         self._orders = []
 
-    def buy(self, direction, price, quantity, deal_type='limit', contract=None):
+    def buy(self, direction, price, quantity, price_type='LMT', contract=None):
         """ 开仓。
         
            :param str/int direction: 下单方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
            :param float price: 价格。
            :param int quantity: 数量。
-           :param str/int deal_type: 下单价格类型。限价单 - 'limit' / 1；市价单 - 'market' / 2
+           :param str/int price_type: 下单价格类型。限价单 - 'lmt' / 1；市价单 - 'mkt' / 2
         """
         contract = None
         con = Contract(contract) if contract else self._main_contract
         self._orders.append(Order(
                 self.datetime,
                 con,
-                deal_type,
+                PriceType.arg_to_type(price_type),
                 TradeSide.KAI,
                 Direction.arg_to_type(direction),
                 float(price),
                 quantity
         ))
 
-    def sell(self, direction, price, quantity, deal_type='limit', contract=None):
+    def sell(self, direction, price, quantity, price_type='MKT', contract=None):
         """ 平仓。
         
            :param str/int direction: 下单方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
            :param float price: 价格。
            :param int quantity: 数量。
-           :param str/int deal_type: 下单价格类型。限价单 - 'limit' / 1；市价单 - 'market' / 2
+           :param str/int price_type: 下单价格类型。限价单 - 'lmt' / 1；市价单 - 'mkt' / 2
         """
         con = Contract(contract) if contract else self._main_contract
         self._orders.append(Order(
                 self.datetime,
                 con,
-                deal_type,
+                PriceType.arg_to_type(price_type),
                 TradeSide.PING,
                 Direction.arg_to_type(direction),
                 float(price),

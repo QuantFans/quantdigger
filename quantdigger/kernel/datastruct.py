@@ -47,11 +47,23 @@ class TradeSide(object):
             return arg
             
 
-class DealType(object):
+class PriceType(object):
     """ 下单类型 """
-    LIMIT = 1
-    MARKET = 2
+    LMT = 1
+    MKT = 2 
+    tdict = {'LMT': LMT,
+             'MKT': MKT
+    }
 
+    @classmethod
+    def arg_to_type(self, arg):
+        """
+        把用户输入参数转化为系统类型。
+        """ 
+        if type(arg) == str:
+            return self.tdict[arg.upper()]
+        else:
+            return arg
 
 class Direction(object):
     """
@@ -95,14 +107,14 @@ class Transaction(object):
     :ivar quantity: 成交数量。
     :vartype quantity: float
 
-    :ivar kpp: 开平仓标志。
-    :vartype kpp: :class:`TradeSide`
+    :ivar side: 开平仓标志。
+    :vartype side: :class:`TradeSide`
 
     :ivar datetime: 成交时间
     :vartype datetime: :class:`datetime`
 
-    :ivar type: 下单类型。
-    :vartype type: :class:`DealType`
+    :ivar price_type: 下单类型。
+    :vartype price_type: :class:`PriceType`
 
     :ivar commission: 佣金百分比
     :vartype commission: float
@@ -117,9 +129,9 @@ class Transaction(object):
             self.direction = order.direction
             self.price = order.price
             self.quantity = order.quantity
-            self.kpp = order.kpp
+            self.side = order.side
             self.datetime = order.datetime
-            self.type = order.type
+            self.price_type = order.price_type
         self.commission = 0
         self.assure_ratio = 1
 
@@ -207,24 +219,24 @@ class Order(object):
         :ivar quantity: 成交数量。
         :vartype quantity: float
 
-        :ivar kpp: 开平仓标志。
-        :vartype kpp: :class:`TradeSide`
+        :ivar side: 开平仓标志。
+        :vartype side: :class:`TradeSide`
 
         :ivar datetime: 成交时间
         :vartype datetime: :class:`datetime`
 
-        :ivar type: 下单类型。
-        :vartype type: :class:`DealType`
+        :ivar price_type: 下单类型。
+        :vartype price_type: :class:`PriceType`
     """
-    def __init__(self, dt, contract, type_, kpp, direction, price, quantity):
+    def __init__(self, dt, contract, type_, side, direction, price, quantity):
         self.id = OrderID.next_order_id()
         self.contract = contract
         self.direction = direction
         self.price = price
         self.quantity = quantity
-        self.kpp = kpp
+        self.side = side
         self.datetime = dt
-        self.type = type_
+        self.price_type = type_
 
     def print_order(self):
         #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \

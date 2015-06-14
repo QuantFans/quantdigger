@@ -191,7 +191,7 @@ class SimpleBlotter(Blotter):
 
     def valid_order(self, order):
         """ 判断订单是否合法。 """ 
-        if order.kpp == TradeSide.PING:
+        if order.side == TradeSide.PING:
             try:
                 pos = self.current_positions[order.contract]
                 if order.direction == Direction.LONG:
@@ -245,14 +245,14 @@ class SimpleBlotter(Blotter):
         """ 更新持仓 """
         p = self.current_positions.setdefault(trans.contract, Positions())
         new_pos = Position(order, trans)
-        if trans.kpp == TradeSide.KAI:
+        if trans.side == TradeSide.KAI:
             # 开仓
             p.positions.add(new_pos)
             if trans.direction == Direction.LONG:
                 p.total += trans.quantity 
             else:
                 p.total -= trans.quantity 
-        elif trans.kpp == TradeSide.PING:
+        elif trans.side == TradeSide.PING:
             # 平仓
             if trans.direction == Direction.LONG:
                 p.total -= trans.quantity 
@@ -288,7 +288,7 @@ class SimpleBlotter(Blotter):
         # 每笔佣金，和数目无关！
         self.current_holdings['commission'] += trans.commission
         # 平仓，更新历史持仓盈亏。
-        if trans.kpp == TradeSide.PING:
+        if trans.side == TradeSide.PING:
             self.current_holdings['history_profit'] += trans.profit(trans_cost)
 
     def create_equity_curve_dataframe(self):

@@ -4,21 +4,22 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from quantdigger.plugin.mplotwidgets import techmplot
-from quantdigger.plugin.mplotwidgets import widgets
-from quantdigger.kernel.indicators.common import *
+from quantdigger.widgets.mplotwidgets import widgets, mplots
+from quantdigger.kernel.indicators.common import MA, RSI, Volume
+
+
 from quantdigger.kernel.datasource.data import get_stock_signal_data
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 #import matplotlib.font_manager as font_manager
 fig = plt.figure()
-frame = techmplot.TechMPlot(fig, price_data, 50, 4,3,1)
+frame = widgets.MultiWidgets(fig, price_data, 50, 4,3,1)
 ax_candles, ax_rsi, ax_volume = frame
 
 # 添加k线和交易信号。
 kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
 candle_widget = frame.add_widget(0, kwindow, True)
-signal = TradingSignal(None, zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
+signal = mplots.TradingSignal(None, zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
 frame.add_indicator(0, signal)
 
 # 添加指标
@@ -26,7 +27,7 @@ ma = frame.add_indicator(0, MA(None, price_data.close, 20, 'MA20', 'y', 2))
 frame.add_indicator(0, MA(None, price_data.close, 30, 'MA30', 'b', 2))
 frame.add_indicator(1, RSI(None, price_data.close, 14, name='RSI', fillcolor='b'))
 frame.add_indicator(2, Volume(None, price_data.open, price_data.close, price_data.vol))
-frame.draw_window()
+frame.draw_widgets()
 
 # legend
 #props = font_manager.FontProperties(size=10)
@@ -38,7 +39,7 @@ frame.draw_window()
 
 # at most 5 ticks, pruning the upper and lower so they don't overlap
 # with other ticks
-ax_volume.yaxis.set_major_locator(techmplot.MyLocator(5, prune='both'))
+ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
 
 # sharex 所有所有的窗口都移动
 #frame.slider.add_observer(frame.rangew)

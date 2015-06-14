@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from quantdigger.kernel.datastruct import Transaction
+from quantdigger.kernel.datastruct import Transaction, PriceType, TradeSide, Direction
 from quantdigger.kernel.engine.event import FillEvent
 class Exchange(object):
     """ 模拟交易所。
@@ -12,6 +12,7 @@ class Exchange(object):
         self._slippage = slippage
         self._open_orders = set()
         self.events = events_pool
+        # strict 为False表示只关注信号源的可视化，而非实际成交情况。
         self._strict = strict
 
     def make_market(self, bar):
@@ -21,22 +22,22 @@ class Exchange(object):
             for order in self._open_orders:
                 transact = Transaction(order)
                 if self._strict:
-                    if order.type == 'limit':
+                    if order.price_type == PriceType.LMT:
                         # 限价单以最高和最低价格为成交的判断条件．
-                        if (order.kpp == 'k' and \
-                                 (order.direction == 'd' and order.price >= bar.low or \
-                                 order.direction == 'k' and order.price <= bar.high)) or \
-                           (order.kpp == 'p' and \
-                                 (order.direction == 'd' and order.price <= bar.high or \
-                                 order.direction == 'k' and order.price >= bar.low)):
+                        if (order.side == TradeSide.KAI and \
+                                 (order.direction == Direction.LONG and order.price >= bar.low or \
+                                 order.direction == Direction.SHORT and order.price <= bar.high)) or \
+                           (order.kpp == TradeSide.PING and \
+                                 (order.direction == Direction.LONG and order.price <= bar.high or \
+                                 order.direction == Direction.SHORT and order.price >= bar.low)):
                                 transact.price = order.price
                                 # Bar的结束时间做为交易成交时间.
                                 transact.datetime = bar.datetime
                                 fill_orders.add(order)
                                 self.events.put(FillEvent(transact)) 
-                    elif order.type == 'market':
+                    elif order.type == PriceType.MKT:
                         # 市价单以最高或最低价格为成交价格．
-                        if order.direction == 'd':
+                        if order.direction == Direction.LONG:
                             transact.price = bar.high
                         else:
                             transact.price = bar.low
