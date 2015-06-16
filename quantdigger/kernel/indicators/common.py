@@ -22,8 +22,8 @@ class MA(IndicatorBase):
         # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
         # 转化为numpy.ndarray等能被指标函数处理的参数。
         self.value = self._moving_average(prices, n)
-        self._algo = self._iter_moving_average
-        self._args = (n,)
+        #self._algo = self._iter_moving_average
+        #self._args = (n,)
 
     def _iter_moving_average(self, price, n):
         """ 逐步运行的均值函数。""" 

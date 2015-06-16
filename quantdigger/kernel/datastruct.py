@@ -48,7 +48,11 @@ class TradeSide(object):
             
 
 class PriceType(object):
-    """ 下单类型 """
+    """ 下单类型 
+
+    :ivar LMT: 限价单，值1.
+    :ivar MKT: 市价单，值2.
+    """
     LMT = 1
     MKT = 2 
     tdict = {'LMT': LMT,

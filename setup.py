@@ -79,7 +79,7 @@ DESCRIPTION = "量化交易PYTHON回测系统"
 AUTHOR = "QuantDigger"
 AUTHOR_EMAIL = "QuantDigger@QuantDigger.com"
 URL = "https://github.com/QuantFans/quantdigger"
-VERSION = 0.141
+VERSION = 0.15
 
 
 setup(

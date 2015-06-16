@@ -227,7 +227,7 @@ class Slider(AxesWidget):
 
 class CandleWindow(object):
     """
-    画蜡烛线。
+    蜡烛线控件。
 
     """
     def __init__(self, name, data, wdlength, min_wdlength):
@@ -324,7 +324,7 @@ class MyLocator(mticker.MaxNLocator):
 #plt.rc('axes', grid=True)
 class MultiWidgets(object):
     def __init__(self, fig, data, w_width, *args):
-        """ 一个多窗口联动控件。
+        """ 多窗口联动控件。
 
         Args:
 

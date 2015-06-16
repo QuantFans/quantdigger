@@ -45,24 +45,16 @@ class IndicatorBase(PlotingActions):
 
     :ivar name: 指标对象名称
     :vartype name: str
-    :ivar upper: 坐标上界（绘图用）
-    :vartype upper: float
-    :ivar lower: 坐标上界（绘图用）
-    :vartype lower: float
     :ivar _tracker: 关联跟踪器
     :vartype _tracker: BarTracker
-    :ivar widget: 绘图容器，暂定Axes
     :ivar value: 向量化运行结果, 用于处理历史数据。
     :ivar _series: 单值指标的序列变量或多值指标的序列变量数组。
     :ivar _algo: 逐步指标函数。
     :ivar _args: 逐步指标函数的参数。
     """
-    def __init__(self, tracker, name,  widget=None):
-        super(IndicatorBase, self).__init__(name)
+    def __init__(self, tracker, name='',  widget=None):
+        super(IndicatorBase, self).__init__(name, widget)
         self.name = name
-        # 可能是qt widget, Axes, WebUI
-        self.widget = widget
-        self.upper = self.lower = None
         self.value = None
         self._algo = None
         self._args = None

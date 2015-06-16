@@ -29,10 +29,21 @@ class QtWidget(object):
 
 
 class PlotingActions(object):
-    # api
-    def __init__(self, name):
+    """
+    系统会提基类。
+
+
+    :ivar upper: 坐标上界（绘图用）
+    :vartype upper: float
+    :ivar lower: 坐标上界（绘图用）
+    :vartype lower: float
+    :ivar widget: 绘图容器，暂定Axes
+    """
+    def __init__(self, name, widget):
         self.ax_widget = AxWidget(name)
         self.qt_widget = QtWidget(name)
+        self.widget = widget
+        self.upper = self.lower = None
 
     def plot_line(self, data, color, lw, style='line'):
         """ 画线    

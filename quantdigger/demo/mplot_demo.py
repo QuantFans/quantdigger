@@ -11,6 +11,7 @@ from quantdigger.kernel.indicators.common import MA, RSI, Volume
 from quantdigger.kernel.datasource.data import get_stock_signal_data
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
+
 #import matplotlib.font_manager as font_manager
 fig = plt.figure()
 frame = widgets.MultiWidgets(fig, price_data, 50, 4,3,1)

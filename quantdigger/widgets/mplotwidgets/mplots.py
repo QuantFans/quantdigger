@@ -72,15 +72,22 @@ def create_attributes(method):
     return wrapper
 
 class Candles(object):
+    """
+    画蜡烛线。
+    """
     def __init__(self, tracker, data, name='candle',  width = 0.6, colorup = 'r', colordown='g', lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
         vertical line.
 
 
         ax          : an Axes instance to plot to
+
         width       : the bar width in points
+
         colorup     : the color of the lines where close >= open
+
         colordown   : the color of the lines where close <  open
+
         alpha       : bar transparency
 
         return value is lineCollection, barCollection

@@ -38,25 +38,28 @@ class DemoStrategy(TradingStrategy):
         #print self.position(), self.cash()
         #print self.datetime, self.b_upper, self.b_middler, self.b_lower
 
-try:
-    begin_dt, end_dt = None, None
-    pcon = pcontract('IF000.SHFE', '10.Minute')
-    #pcon = stock('600848')
-    simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
-    algo = DemoStrategy(simulator)
-    #algo2 = DemoStrategy(simulator)
-    simulator.run()
+if __name__ == '__main__':
+    try:
+        begin_dt, end_dt = None, None
+        pcon = pcontract('IF000.SHFE', '10.Minute')
+        #pcon = stock('600848')
+        simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
+        algo = DemoStrategy(simulator)
+        algo = DemoStrategy(simulator)
+        #algo2 = DemoStrategy(simulator)
+        simulator.run()
 
-    # 显示回测结果
-    plotting.plot_result(simulator.data[pcon],
-                                algo._indicators,
-                                algo.blotter.deal_positions,
-                                algo.blotter)
-    
-except Exception, e:
-    print e
+        # 显示回测结果
+        plotting.plot_result(simulator.data[pcon],
+                                    algo._indicators,
+                                    algo.blotter.deal_positions,
+                                    algo.blotter)
 
-#plotting.plot_result(simulator.data[pcon],
-            #algo2._indicators,
-            #algo2.blotter.deal_positions,
-            #algo2.blotter)
+        #plotting.plot_result(simulator.data[pcon],
+                    #algo2._indicators,
+                    #algo2.blotter.deal_positions,
+                    #algo2.blotter)
+        
+    except Exception, e:
+        print e
+

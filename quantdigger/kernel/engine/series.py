@@ -53,7 +53,7 @@ class SeriesBase(object):
         if not system_var:
             tracker.add_series(self)
 
-    def update(self, v):
+    def append(self, v):
         """ 赋值操作
 
         非系统序列变量。
