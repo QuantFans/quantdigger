@@ -1,10 +1,8 @@
 # -*- coding: utf8 -*-
-import pandas as pd
 from abc import ABCMeta, abstractmethod
 
 from quantdigger.kernel.engine.event import OrderEvent, Event
 from quantdigger.kernel.datastruct import Position, TradeSide, Direction
-from performance import create_sharpe_ratio, create_drawdowns
 
 class Positions(object):
     """ 当前相同合约持仓集合(可能不同时间段下单)。
@@ -82,6 +80,11 @@ class DealPosition(object):
         """ 平仓价格 """
         return self.close.price
 
+    @property
+    def direction(self):
+        """ 空头还是多头 """
+        return self.open.order.direction
+
 
 class Blotter(object):
     """
@@ -124,12 +127,10 @@ class SimpleBlotter(Blotter):
         self.current_positions = {}  # 当前持仓 dict of list, 包含细节。
         self.current_holdings = {}  # 当前的资金 dict
 
-        self.all_positions = []    # 在所有时间点上的持仓 list of dict
         self.all_holdings = []   # 所有时间点上的资金 list of dict
         self.deal_positions = []   # 开平仓对
 
     def _init_state(self):
-        self.all_positions = [{'datetime' : self._start_date }]
         self.current_holdings = {
                 'cash': self.initial_capital,
                 'commission':  0.0,
@@ -158,62 +159,12 @@ class SimpleBlotter(Blotter):
         self._datetime = dt
         self._update_status(dt)
 
-    def update_fill(self, event):
-        """
-        处理委托单成交事件。
-        """
-        assert event.type == Event.FILL
-        t_order = None
-        for i, order in enumerate(self._open_orders):
-            if order.id == event.transaction.id:
-                t_order = self._open_orders.pop(i)
-                break
-        assert(t_order)
-        self._update_positions(t_order, event.transaction)
-        self._update_holdings(event.transaction)
-
-    def update_signal(self, event):
-        """
-        处理策略函数产生的下单事件。
-        """
-        assert event.type == Event.SIGNAL
-        valid_orders = []
-        for order in event.orders:
-            if self.valid_order(order):
-                self.events.put(OrderEvent(order)) 
-                valid_orders.append(order)
-            else:
-                assert False
-        self._open_orders.extend(valid_orders)
-        self.all_orders.extend(valid_orders)
-        #print "Receive %d signals!" % len(event.orders)
-        #self.generate_naive_order(event.orders)
-
-    def valid_order(self, order):
-        """ 判断订单是否合法。 """ 
-        if order.side == TradeSide.PING:
-            try:
-                pos = self.current_positions[order.contract]
-                if order.direction == Direction.LONG:
-                    ## @todo 自动改变合法仓位。
-                    if pos.total > 0:
-                        return True 
-                elif order.direction == Direction.SHORT:
-                    ## @todo 自动改变合法仓位。
-                    if pos.total < 0:
-                        return True 
-            except KeyError:
-                return False
-            return False
-        return True
-
     def _update_status(self, dt):
         """ 更新历史持仓，当前权益。"""
         # 更新持仓历史。
         dp = { }
         dp['datetime'] = dt
         dp.update(self.current_positions)
-        self.all_positions.append(dp)
 
         # 更新资金历史。
         ## @todo  由持仓历史推断资金历史。
@@ -239,6 +190,37 @@ class SimpleBlotter(Blotter):
         self.current_holdings['cash'] = dh['cash']
         self.current_holdings['equity'] = dh['equity']
         self.all_holdings.append(dh)
+
+    def update_signal(self, event):
+        """
+        处理策略函数产生的下单事件。
+        """
+        assert event.type == Event.SIGNAL
+        valid_orders = []
+        for order in event.orders:
+            if self._valid_order(order):
+                self.events.put(OrderEvent(order)) 
+                valid_orders.append(order)
+            else:
+                assert False
+        self._open_orders.extend(valid_orders)
+        self.all_orders.extend(valid_orders)
+        #print "Receive %d signals!" % len(event.orders)
+        #self.generate_naive_order(event.orders)
+
+    def update_fill(self, event):
+        """
+        处理委托单成交事件。
+        """
+        assert event.type == Event.FILL
+        t_order = None
+        for i, order in enumerate(self._open_orders):
+            if order.id == event.transaction.id:
+                t_order = self._open_orders.pop(i)
+                break
+        assert(t_order)
+        self._update_positions(t_order, event.transaction)
+        self._update_holdings(event.transaction)
 
     def _update_positions(self, order, trans):
         ## @todo 把复杂统计单独出来。
@@ -291,29 +273,21 @@ class SimpleBlotter(Blotter):
         if trans.side == TradeSide.PING:
             self.current_holdings['history_profit'] += trans.profit(trans_cost)
 
-    def create_equity_curve_dataframe(self):
-        """
-        创建资金曲线对象。
-        """
-        curve = pd.DataFrame(self.all_holdings)
-        curve.set_index('datetime', inplace=True)
-        curve['returns'] = curve['equity'].pct_change()
-        curve['equity_curve'] = (1.0+curve['returns']).cumprod()
-        self.equity_curve = curve
+    def _valid_order(self, order):
+        """ 判断订单是否合法。 """ 
+        if order.side == TradeSide.PING:
+            try:
+                pos = self.current_positions[order.contract]
+                if order.direction == Direction.LONG:
+                    ## @todo 自动改变合法仓位。
+                    if pos.total > 0:
+                        return True 
+                elif order.direction == Direction.SHORT:
+                    ## @todo 自动改变合法仓位。
+                    if pos.total < 0:
+                        return True 
+            except KeyError:
+                return False
+            return False
+        return True
 
-    def output_summary_stats(self):
-        """
-        统计夏普率， 回测等信息。
-        """
-        total_return = self.equity_curve['equity_curve'][-1]
-        returns = self.equity_curve['returns']
-        pnl = self.equity_curve['equity_curve']
-
-        sharpe_ratio = create_sharpe_ratio(returns)
-        max_dd, dd_duration = create_drawdowns(pnl)
-
-        stats = [("Total Return", "%0.2f%%" % ((total_return - 1.0) * 100.0)),
-                 ("Sharpe Ratio", "%0.2f" % sharpe_ratio),
-                 ("Max Drawdown", "%0.2f%%" % (max_dd * 100.0)),
-                 ("Drawdown Duration", "%d" % dd_duration)]
-        return stats

@@ -1,1 +1,3 @@
+pandas
 logbook
+TA-Lib == 0.4.8

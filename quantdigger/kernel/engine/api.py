@@ -51,7 +51,22 @@ class Trader(object):
         """ 撤单操作请求 """ 
         pass
 
-    
+    def on_transaction(self, trans):
+        """ 委托成交回调 """ 
+        pass
+
+    def on_tick(self, tick):
+        """ tick数据回调  """ 
+        pass
+
+    def on_captial(self, tick):
+        """ 资金查询回调  """ 
+        pass
+
+    def on_position(self, tick):
+        """ 持仓查询回调 """ 
+        pass
+
     
 class CtpTraderAPI(object):
     """  Ctp交易类 """
@@ -86,8 +101,24 @@ class CtpTraderAPI(object):
         """ 撤单操作请求 """ 
         pass
 
+    def on_transaction(self, trans):
+        """ 委托成交回调 """ 
+        pass
 
-class SimulateTrader(Trader):
+    def on_tick(self, tick):
+        """ tick数据回调  """ 
+        pass
+
+    def on_captial(self, tick):
+        """ 资金查询回调  """ 
+        pass
+
+    def on_position(self, tick):
+        """ 持仓查询回调 """ 
+        pass
+
+
+class SirulateTraderAPI(Trader):
     """ 模拟交易下单接口 """
     def __init__(self):
         pass
@@ -118,4 +149,20 @@ class SimulateTrader(Trader):
 
     def cancel_order(self, orderid):
         """ 撤单操作请求 """ 
+        pass
+
+    def on_transaction(self, trans):
+        """ 委托成交回调 """ 
+        pass
+
+    def on_tick(self, tick):
+        """ tick数据回调  """ 
+        pass
+
+    def on_captial(self, tick):
+        """ 资金查询回调  """ 
+        pass
+
+    def on_position(self, tick):
+        """ 持仓查询回调 """ 
         pass

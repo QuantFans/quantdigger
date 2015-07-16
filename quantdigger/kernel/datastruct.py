@@ -286,6 +286,18 @@ class Contract(object):
             self._hash =  hash(self.__str__())
             return self._hash
 
+    @classmethod
+    def get_trading_interval(self, contract):
+        """ 获取合约的交易时段。""" 
+        pass
+
+    @classmethod
+    def get_assure_ratio(self, contract):
+        """ 获取合约的交易时段。""" 
+        pass
+
+
+
 
 class Period(object):
     """ 周期 """
@@ -359,6 +371,7 @@ class PContract(object):
         else:
             self._hash =  hash(self.__str__())
             return self._hash
+
 
 class Position(object):
     """ 单笔仓位信息。

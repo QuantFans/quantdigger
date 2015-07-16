@@ -76,10 +76,10 @@ def find_package_data(
 PACKAGE = "quantdigger"
 NAME = "QuantDigger"
 DESCRIPTION = "量化交易PYTHON回测系统"
-AUTHOR = "QuantDigger"
-AUTHOR_EMAIL = "QuantDigger@QuantDigger.com"
+AUTHOR = "QuantFans"
+AUTHOR_EMAIL = "dingjie.wang@foxmail.com"
 URL = "https://github.com/QuantFans/quantdigger"
-VERSION = 0.152
+VERSION = 0.153
 
 
 setup(

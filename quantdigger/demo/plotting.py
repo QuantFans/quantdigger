@@ -3,14 +3,15 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
+from quantdigger.digger import statics
 
 def plot_result(price_data, indicators, signals, blotter):
     """ 
         显示回测结果。
     """
     try:
-        blotter.create_equity_curve_dataframe()
-        print blotter.output_summary_stats()
+        curve = statics.create_equity_curve_dataframe(blotter.all_holdings)
+        print statics.output_summary_stats(curve)
 
         fig = plt.figure()
         frame = widgets.MultiWidgets(fig,
@@ -33,7 +34,7 @@ def plot_result(price_data, indicators, signals, blotter):
 
         fig2 = plt.figure()
         ax = fig2.add_axes((0.1, 0.1, 0.9, 0.9))
-        ax.plot(blotter.equity_curve.equity)
+        ax.plot(curve.equity)
         plt.show()
 
     except Exception, e:
