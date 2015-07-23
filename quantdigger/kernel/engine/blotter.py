@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 from quantdigger.kernel.engine.event import OrderEvent, Event
 from quantdigger.kernel.datastruct import Position, TradeSide, Direction
+from quantdigger.util import engine_logger as logger
 
 class Positions(object):
     """ 当前相同合约持仓集合(可能不同时间段下单)。
@@ -27,17 +28,17 @@ class Positions(object):
             profit += pos.transaction.profit(new_price)
         return profit
 
-    def deposit(self, new_price):
+    def margin(self, new_price):
         """ 根据当前价格计算这笔交易的保证金。
         
            :param float new_price: 当前价格。
            :return: 保证金。
            :rtype: float
         """
-        deposit = 0
+        margin = 0
         for pos in self.positions:
-            deposit += pos.transaction.deposit(new_price)
-        return deposit
+            margin += pos.transaction.margin(new_price)
+        return margin
 
 
 class DealPosition(object):
@@ -56,9 +57,14 @@ class DealPosition(object):
         """ 盈亏额  """
         direction = self.open.order.direction
         if direction == Direction.LONG:
-            return self.close.price - self.open.price
+            return (self.close.price - self.open.price) * self.open.quantity
         else:
-            return self.open.price - self.close.price
+            return (self.open.price - self.close.price) * self.open.quantity
+
+    @property
+    def quantity(self):
+        """ 成交量 """
+        return self.open.quantity
 
     @property
     def open_datetime(self):
@@ -172,21 +178,28 @@ class SimpleBlotter(Blotter):
         dh['datetime'] = dt
         dh['commission'] = self.current_holdings['commission']
         profit = 0
-        deposit = 0
+        margin = 0
 
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
+        is_stock = True  # 默认是股票回测
         for contract, pos_info in self.current_positions.iteritems():
             new_price = self._bars[contract].close
             profit += pos_info.profit(new_price)
-            ## @bug 昨持仓的，可能是按昨日保证金，一天一结?
-            deposit += pos_info.deposit(new_price)
+            ## @todo 用昨日结算价计算保证金
+            margin += pos_info.margin(new_price)
+            if not contract.is_stock:
+                is_stock =  False   # 
 
         # 当前权益 = 初始资金 - 佣金 + 历史持仓盈亏 + 当前持仓历史盈亏
         dh['equity'] = self._init_captial - self.current_holdings['commission'] + self.current_holdings['history_profit'] + profit
-        dh['cash'] = dh['equity'] - deposit 
+        dh['cash'] = dh['equity'] - margin 
         if dh['cash'] < 0:
-            raise Exception('你已经破产!')
+            if not is_stock:
+                # 如果是期货需要追加保证金
+                ## @bug 如果同时交易期货和股票，就有问题。
+                raise Exception('需要追加保证金!')
+
         self.current_holdings['cash'] = dh['cash']
         self.current_holdings['equity'] = dh['equity']
         self.all_holdings.append(dh)
@@ -202,7 +215,7 @@ class SimpleBlotter(Blotter):
                 self.events.put(OrderEvent(order)) 
                 valid_orders.append(order)
             else:
-                assert False
+                assert(False and "无效合约")
         self._open_orders.extend(valid_orders)
         self.all_orders.extend(valid_orders)
         #print "Receive %d signals!" % len(event.orders)
@@ -255,8 +268,8 @@ class SimpleBlotter(Blotter):
                     break 
 
                 else:
-                    assert False
                     position.quantity -= left_vol
+                    to_delete.add(position)
                     left_vol = 0
                     break
             p.positions -= to_delete
@@ -287,7 +300,12 @@ class SimpleBlotter(Blotter):
                     if pos.total < 0:
                         return True 
             except KeyError:
+                # 没有持有该合约
+                logger.warn("不存在合约[%s]" % order.contract)
                 return False
             return False
+        elif order.side == TradeSide.KAI:
+            if self.current_holdings['cash'] < 0:
+                raise Exception('没有足够的资金开仓') 
         return True
 

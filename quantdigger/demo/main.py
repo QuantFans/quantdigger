@@ -3,6 +3,7 @@ from quantdigger.kernel.engine.execute_unit import ExecuteUnit
 from quantdigger.kernel.indicators.common import MA, BOLL
 from quantdigger.kernel.engine.strategy import TradingStrategy
 from quantdigger.util import  pcontract, stock
+from quantdigger.kernel.datastruct import Direction
 import plotting
 #from quantdigger.kernel.engine.series import NumberSeries
 
@@ -42,12 +43,20 @@ if __name__ == '__main__':
     try:
         begin_dt, end_dt = None, None
         pcon = pcontract('IF000.SHFE', '10.Minute')
-        #pcon = stock('600848')
+        #pcon = stock('600848')  # 通过tushare下载股票数据
         simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
         algo = DemoStrategy(simulator)
         algo = DemoStrategy(simulator)
         #algo2 = DemoStrategy(simulator)
         simulator.run()
+
+        for deal in algo.blotter.deal_positions:
+            # code...
+            print "----------------" 
+            print("开仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
+                (deal.open_datetime, deal.open_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
+            print("平仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
+                (deal.close_datetime, deal.close_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
 
         # 显示回测结果
         plotting.plot_result(simulator.data[pcon],

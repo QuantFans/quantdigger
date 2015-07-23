@@ -45,7 +45,20 @@ class TradeSide(object):
             return self.tdict[arg.upper()]
         else:
             return arg
-            
+
+
+class Captial(object):
+    """ 账号资金 """
+    def __init__(self, dt, contract, type_, side, direction, price, quantity):
+        self.broker_id = None
+        self.account_id = None
+        self.margin = None
+        self.position_profit = None
+        self.close_profit = None
+        self.trading_day = None
+        self.cash = None
+        self.equity = None
+
 
 class PriceType(object):
     """ 下单类型 
@@ -78,8 +91,12 @@ class Direction(object):
     """
     LONG = 1
     SHORT = 2
-    tdict = {'LONG': LONG,
+    arg2type = {'LONG': LONG,
              'SHORT': SHORT 
+    }
+
+    type2str = { LONG: 'LONG',
+                 SHORT: 'SHORT', 
     }
 
     @classmethod
@@ -88,13 +105,20 @@ class Direction(object):
         把用户输入参数转化为系统类型。
         """ 
         if type(arg) == str:
-            return self.tdict[arg.upper()]
+            return self.arg2type[arg.upper()]
         else:
             return arg
+
+    @classmethod
+    def type_to_str(self, type):
+        return self.type2str[type]
 
         
 class Transaction(object):
     """ 成交记录。
+
+    :ivar ref: 本地编号
+    :vartype ref: int
    
     :ivar id: 成交编号
     :vartype id: :class:`OrderID`
@@ -123,12 +147,13 @@ class Transaction(object):
     :ivar commission: 佣金百分比
     :vartype commission: float
 
-    :ivar assure_ratio: 保证金比例。
-    :vartype assure_ratio: float
+    :ivar margin_ratio: 保证金比例。
+    :vartype margin_ratio: float
     """
     def __init__(self, order=None):
         if order:
             self.id = order.id
+            self.ref = order.ref
             self.contract = order.contract
             self.direction = order.direction
             self.price = order.price
@@ -137,7 +162,7 @@ class Transaction(object):
             self.datetime = order.datetime
             self.price_type = order.price_type
         self.commission = 0
-        self.assure_ratio = 1
+        self.margin_ratio = 1
 
     def __hash__(self):
         if hasattr(self, '_hash'):
@@ -160,14 +185,15 @@ class Transaction(object):
             profit += (self.price - new_price) * self.quantity
         return profit
 
-    def deposit(self, new_price):
+    def margin(self, new_price):
         """ 根据当前价格计算这笔交易的保证金。
         
            :param float new_price: 当前价格。
            :return: 保证金。
            :rtype: float
         """
-        return self.price * self.quantity * self.assure_ratio
+        price = self.price if self.contract.is_stock else new_price
+        return price * self.quantity * self.margin_ratio
 
     
 class OrderID(object):
@@ -208,7 +234,10 @@ class OrderID(object):
 class Order(object):
     """ 订单 
 
-        :ivar id: 成交编号
+        :ivar ref: 本地编号
+        :vartype ref: int
+
+        :ivar id: 报单编号
         :vartype id: :class:`OrderID`
 
         :ivar contract: 合约。
@@ -233,6 +262,7 @@ class Order(object):
         :vartype price_type: :class:`PriceType`
     """
     def __init__(self, dt, contract, type_, side, direction, price, quantity):
+        self.ref = OrderID.next_order_id()
         self.id = OrderID.next_order_id()
         self.contract = contract
         self.direction = direction
@@ -274,6 +304,7 @@ class Contract(object):
             assert False
         self.exch_type = exchange  # 用'stock'表示中国股市
         self.code = code
+        self._is_stock = True if exchange == 'stock' else False
 
     def __str__(self):
         """""" 
@@ -286,17 +317,20 @@ class Contract(object):
             self._hash =  hash(self.__str__())
             return self._hash
 
+    @property
+    def is_stock(self):
+        """ 是否是股票""" 
+        return self._is_stock
+
     @classmethod
     def get_trading_interval(self, contract):
         """ 获取合约的交易时段。""" 
         pass
 
     @classmethod
-    def get_assure_ratio(self, contract):
+    def get_margin_ratio(self, contract):
         """ 获取合约的交易时段。""" 
         pass
-
-
 
 
 class Period(object):
@@ -387,21 +421,50 @@ class Position(object):
 
     @property
     def datetime(self):
+        """ 持仓日期 """
         return self.transaction.datetime
 
     @property
     def price(self):
-        """ 成交价格""" 
+        """ 成交价格 """ 
         return self.transaction.price
 
     @property
-    def assure_ratio(self):
+    def margin_ratio(self):
         """ 保证金比例 """ 
-        return self.transaction.assure_ratio
+        return self.transaction.margin_ratio
 
     @property
     def direction(self):
         return self.transaction.direction
+
+    @property
+    def margin(self, new_price):
+        """ 持仓的保证金占用 """
+        return self.transaction.margin(new_price);
+
+    def profit(self, new_price):
+        """ 持仓盈亏 """ 
+        return self.profit(new_price)
+
+    @property
+    def close_profit(self):
+        """ 平仓盈亏 """
+        pass
+
+    @property
+    def pre_margin(self, new_price):
+        """ 昨日保证金占用 """
+        pass
+
+    @property
+    def cost(self):
+        """ 持仓成本 """
+        return self.price * self.quantity
+
+
+
+
 
     #def order_time(self):
         #return self.order.datetime

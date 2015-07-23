@@ -48,43 +48,49 @@ class ExecuteUnit(object):
         while bar_index < self._data_length:
             #
             latest_bars = { }
-            for tracker in self.trackers:
-                bar = tracker.update_curbar(bar_index)
-                latest_bars[tracker._main_contract] = bar
-            # 在回测中无需MARKET事件。
-            # 这样可以加速回测速度。
-            for algo in self._strategies:
-                bar = algo.update_curbar(bar_index)
-                algo.exchange.update_datetime(bar.datetime)
-                algo.blotter.update_datetime(bar.datetime)
-                latest_bars[algo._main_contract] = bar
-                algo.blotter.update_bar(latest_bars)
-                #algo.exchange.make_market(bar)
-                # 对新的价格运行算法。
-                algo.execute_strategy()
-                while True:
-                   # 事件处理。 
-                    try:
-                        event = algo.events_pool.get()
-                    except Queue.Empty:
-                        break
-                    except IndexError:
-                        break
-                    else:
-                        if event is not None:
-                            #if event.type == 'MARKET':
-                                #strategy.calculate_signals(event)
-                                #port.update_timeindex(event)
-                            if event.type == Event.SIGNAL:
-                                algo.blotter.update_signal(event)
+            print bar_index
+            try:
+                for tracker in self.trackers:
+                    bar = tracker.update_curbar(bar_index)
+                    latest_bars[tracker._main_contract] = bar
+                # 在回测中无需MARKET事件。
+                # 这样可以加速回测速度。
+                for algo in self._strategies:
+                    bar = algo.update_curbar(bar_index)
+                    algo.exchange.update_datetime(bar.datetime)
+                    algo.blotter.update_datetime(bar.datetime)
+                    latest_bars[algo._main_contract] = bar
+                    algo.blotter.update_bar(latest_bars)
+                    #algo.exchange.make_market(bar)
+                    # 对新的价格运行算法。
+                    algo.execute_strategy()
+                    while True:
+                       # 事件处理。 
+                        try:
+                            event = algo.events_pool.get()
+                        except Queue.Empty:
+                            break
+                        except IndexError:
+                            break
+                        else:
+                            if event is not None:
+                                #if event.type == 'MARKET':
+                                    #strategy.calculate_signals(event)
+                                    #port.update_timeindex(event)
+                                if event.type == Event.SIGNAL:
+                                    algo.blotter.update_signal(event)
 
-                            elif event.type == Event.ORDER:
-                                algo.exchange.update_order(event)
+                                elif event.type == Event.ORDER:
+                                    algo.exchange.update_order(event)
 
-                            elif event.type == Event.FILL:
-                                algo.blotter.update_fill(event)
-                    # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
-                    algo.exchange.make_market(bar)
+                                elif event.type == Event.FILL:
+                                    algo.blotter.update_fill(event)
+                        # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
+                        algo.exchange.make_market(bar)
+
+            except Exception, e:
+                print(e)
+                raise
             bar_index += 1
 
     def load_data(self, pcontract):
