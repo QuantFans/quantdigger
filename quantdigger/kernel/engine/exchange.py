@@ -37,32 +37,38 @@ class Exchange(object):
                                 self.events.put(FillEvent(transact)) 
                     elif order.type == PriceType.MKT:
                         # 市价单以最高或最低价格为成交价格．
-                        if order.direction == Direction.LONG:
-                            transact.price = bar.high
-                        else:
-                            transact.price = bar.low
+                        if order.side == TradeSide.KAI:
+                            if order.direction == Direction.LONG:
+                                transact.price = bar.high
+                            else:
+                                transact.price = bar.low
+                        elif order.side == TradeSide.PING:
+                            if order.direction == Direction.LONG:
+                                transact.price = bar.low
+                            else:
+                                transact.price = bar.high
+
                         transact.datetime = bar.datetime
                         fill_orders.add(order)
                         self.events.put(FillEvent(transact)) 
                 else:
                     transact.datetime = bar.datetime
                     fill_orders.add(order)
+                    #
                     self.events.put(FillEvent(transact)) 
             if fill_orders:
                 self._open_orders -= fill_orders
 
 
-    def insert_order(self, order_event):
-        pass
-
-    def cancel_order(self, order):
-        pass
-
-    def update_order(self, event):
+    def insert_order(self, event):
         """
         模拟交易所收到订单。
         """ 
         self._open_orders.add(event.order)
+
+    def cancel_order(self, order):
+        pass
+
 
     def update_datetime(self, dt):
         self._datetime = dt

@@ -421,36 +421,22 @@ class Position(object):
 
     @property
     def datetime(self):
-        """ 持仓日期 """
+        """ 持仓日期, 单笔统计的时候才有 """
         return self.transaction.datetime
 
     @property
     def price(self):
-        """ 成交价格 """ 
+        """ 成交价格, 单笔统计的时候才有 """ 
         return self.transaction.price
 
     @property
-    def margin_ratio(self):
-        """ 保证金比例 """ 
-        return self.transaction.margin_ratio
-
-    @property
     def direction(self):
+        """ 多空 """
         return self.transaction.direction
-
-    @property
-    def margin(self, new_price):
-        """ 持仓的保证金占用 """
-        return self.transaction.margin(new_price);
 
     def profit(self, new_price):
         """ 持仓盈亏 """ 
         return self.profit(new_price)
-
-    @property
-    def close_profit(self):
-        """ 平仓盈亏 """
-        pass
 
     @property
     def pre_margin(self, new_price):
@@ -459,8 +445,24 @@ class Position(object):
 
     @property
     def cost(self):
-        """ 持仓成本 """
+        """ 单位持仓成本 """
         return self.price * self.quantity
+
+    #@property
+    #def close_profit(self):
+        #""" 平仓盈亏 """
+        #pass
+
+    #@property
+    #def margin(self, new_price):
+        #""" 持仓的保证金占用 """
+        #return self.transaction.margin(new_price);
+
+    #@property
+    #def margin_ratio(self):
+        #""" 保证金比例 """ 
+        #return self.transaction.margin_ratio
+
 
 
 

@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from quantdigger.kernel.engine.event import OrderEvent
 from abc import ABCMeta, abstractmethod
 
 class Trader(object):
@@ -13,10 +14,10 @@ class Trader(object):
         """ 连接器 """ 
         pass
 
-    @abstractmethod
-    def register_handlers(self, handlers):
-        """  注册回调函数 """ 
-        pass
+    #@abstractmethod
+    #def register_handlers(self, handlers):
+        #"""  注册回调函数 """ 
+        #pass
 
     @abstractmethod
     def query_contract(self, contract, sync=False):
@@ -118,10 +119,11 @@ class CtpTraderAPI(object):
         pass
 
 
-class SirulateTraderAPI(Trader):
+class SimulateTraderAPI(Trader):
     """ 模拟交易下单接口 """
-    def __init__(self):
-        pass
+    def __init__(self, blotter, events_pool):
+        self._blotter = blotter
+        self._events = events_pool
 
     def connect(self):
         """ 连接""" 
@@ -144,16 +146,16 @@ class SirulateTraderAPI(Trader):
         pass
 
     def order(self, order):
-        """ 下单请求    """
-        pass
+        """ 模拟下单 """
+        self._events.put(OrderEvent(order)) 
 
     def cancel_order(self, orderid):
         """ 撤单操作请求 """ 
         pass
 
     def on_transaction(self, trans):
-        """ 委托成交回调 """ 
-        pass
+        """ 模拟委托成交回调 """ 
+        self._blotter.update_fill(trans)
 
     def on_tick(self, tick):
         """ tick数据回调  """ 

@@ -48,7 +48,6 @@ class ExecuteUnit(object):
         while bar_index < self._data_length:
             #
             latest_bars = { }
-            print bar_index
             try:
                 for tracker in self.trackers:
                     bar = tracker.update_curbar(bar_index)
@@ -81,10 +80,11 @@ class ExecuteUnit(object):
                                     algo.blotter.update_signal(event)
 
                                 elif event.type == Event.ORDER:
-                                    algo.exchange.update_order(event)
+                                    algo.exchange.insert_order(event)
 
                                 elif event.type == Event.FILL:
-                                    algo.blotter.update_fill(event)
+                                    # 模拟交易接口收到报单成交
+                                    algo.blotter.api.on_transaction(event)
                         # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
                         algo.exchange.make_market(bar)
 

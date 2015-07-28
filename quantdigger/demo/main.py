@@ -53,8 +53,8 @@ if __name__ == '__main__':
         for deal in algo.blotter.deal_positions:
             # code...
             print "----------------" 
-            print("开仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
-                (deal.open_datetime, deal.open_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
+            print("开仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；") % \
+                (deal.open_datetime, deal.open_price, Direction.type_to_str(deal.direction), deal.quantity)
             print("平仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
                 (deal.close_datetime, deal.close_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
 

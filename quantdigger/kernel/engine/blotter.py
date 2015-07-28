@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 from quantdigger.kernel.engine.event import OrderEvent, Event
 from quantdigger.kernel.datastruct import Position, TradeSide, Direction
 from quantdigger.util import engine_logger as logger
+from api import SimulateTraderAPI
 
 class Positions(object):
     """ 当前相同合约持仓集合(可能不同时间段下单)。
@@ -120,11 +121,11 @@ class SimpleBlotter(Blotter):
     """
     def __init__(self, timeseries, events_pool, initial_capital=5000.0):
         self._timeseries = timeseries
-        self.events = events_pool
         self._open_orders = list()
         self._pre_settlement = 0     # 昨日结算价
         self._datetime = None # 当前时间
         self._init_captial = initial_capital
+        self.api = SimulateTraderAPI(self, events_pool) # 模拟交易接口
 
         # 用于分析策略性能数据
         self.all_orders = []
@@ -212,7 +213,7 @@ class SimpleBlotter(Blotter):
         valid_orders = []
         for order in event.orders:
             if self._valid_order(order):
-                self.events.put(OrderEvent(order)) 
+                self.api.order(order)
                 valid_orders.append(order)
             else:
                 assert(False and "无效合约")
