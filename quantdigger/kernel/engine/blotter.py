@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 
 from quantdigger.kernel.engine.event import OrderEvent, Event
-from quantdigger.kernel.datastruct import Position, TradeSide, Direction
+from quantdigger.kernel.datastruct import Position, TradeSide, Direction, PriceType
 from quantdigger.util import engine_logger as logger
 from api import SimulateTraderAPI
 
@@ -91,6 +91,7 @@ class SimpleBlotter(Blotter):
         dh['commission'] = self.current_holdings['commission']
         profit = 0
         margin = 0
+        order_margin = 0;
 
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
@@ -103,9 +104,14 @@ class SimpleBlotter(Blotter):
             if not contract.is_stock:
                 is_stock =  False   # 
 
+        # 计算限价报单的保证金占用
+        for order in self._open_orders:
+            assert(order.price_type == PriceType.LMT)
+            order_margin +=  order.order_margin()
+
         # 当前权益 = 初始资金 + 历史平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
         dh['equity'] = self._init_captial + self.current_holdings['history_profit'] + profit - self.current_holdings['commission'] 
-        dh['cash'] = dh['equity'] - margin 
+        dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
             if not is_stock:
                 # 如果是期货需要追加保证金

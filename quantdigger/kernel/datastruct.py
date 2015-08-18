@@ -278,6 +278,16 @@ class Order(object):
         self.datetime = dt
         self.price_type = type_
         self.hedge_type = hedge
+        self.margin_ratio = 1
+
+    def order_margin(self):
+        """ 计算这笔限价交易的保证金。
+        
+           :param float new_price: 当前价格。
+           :return: 保证金。
+           :rtype: float
+        """
+        return self.price * self.quantity * self.margin_ratio
 
     def print_order(self):
         #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \
