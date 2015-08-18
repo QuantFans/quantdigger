@@ -154,7 +154,7 @@ http://www.quantfans.com/doc/quantdigger/
 版本
 ~~~~
 
-**0.3版本 TODO**
+**TODO**
 
 * 清理旧代码和数据文件
 * 重新设计数据模块
