@@ -167,6 +167,7 @@ http://www.quantfans.com/doc/quantdigger/
 * 交易信号对的计算从回测代码中分离
 * 把回测金融指标移到digger/finace
 * 添加部分数据结构，添加部分数据结构字段
+* 添加几个mongodb相关的函数
     
 **0.15版本 2015-06-16**
 
