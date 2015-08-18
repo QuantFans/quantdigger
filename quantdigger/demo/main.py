@@ -3,7 +3,7 @@ from quantdigger.kernel.engine.execute_unit import ExecuteUnit
 from quantdigger.kernel.indicators.common import MA, BOLL
 from quantdigger.kernel.engine.strategy import TradingStrategy
 from quantdigger.util import  pcontract, stock
-from quantdigger.kernel.datastruct import Direction
+from quantdigger.digger import deals
 import plotting
 #from quantdigger.kernel.engine.series import NumberSeries
 
@@ -14,6 +14,7 @@ import plotting
     #for i in range(0, n):
         #sum_ += series[i]
     #return sum_ / n
+
 
 
 class DemoStrategy(TradingStrategy):
@@ -46,24 +47,33 @@ if __name__ == '__main__':
         #pcon = stock('600848')  # 通过tushare下载股票数据
         simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
         algo = DemoStrategy(simulator)
-        algo = DemoStrategy(simulator)
+        #algo1 = DemoStrategy(simulator)
         #algo2 = DemoStrategy(simulator)
         simulator.run()
 
-        for deal in algo.blotter.deal_positions:
-            # code...
-            print "----------------" 
-            print("开仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；") % \
-                (deal.open_datetime, deal.open_price, Direction.type_to_str(deal.direction), deal.quantity)
-            print("平仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
-                (deal.close_datetime, deal.close_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
+        #for deal in algo.blotter.deal_positions:
+            ## code...
+            #print("----------------")
+            #print("开仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；") % \
+                #(deal.open_datetime, deal.open_price, Direction.type_to_str(deal.direction), deal.quantity)
+            #print("平仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
+                #(deal.close_datetime, deal.close_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
 
         # 显示回测结果
+        a = {}
+        b = []
+        try:
+            for trans in algo.blotter.transactions:
+                deals.update_positions(a, b, trans);
+        except Exception, e:
+            print e
         plotting.plot_result(simulator.data[pcon],
                                     algo._indicators,
-                                    algo.blotter.deal_positions,
+                                    b,
                                     algo.blotter)
 
+        #print algo.blotter.pp
+        #print sum(algo.blotter.pp)
         #plotting.plot_result(simulator.data[pcon],
                     #algo2._indicators,
                     #algo2.blotter.deal_positions,

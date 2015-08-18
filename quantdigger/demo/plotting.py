@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
 from quantdigger.digger import finance
 
-def plot_result(price_data, indicators, signals, blotter):
+def plot_result(price_data, indicators, signals,
+        blotter):
     """ 
         显示回测结果。
     """

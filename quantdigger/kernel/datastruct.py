@@ -7,7 +7,7 @@ from quantdigger import util
 class TradeSide(object):
     """ 开平仓标志 
 
-    :ivar BUY: 都头开仓， 1
+    :ivar BUY: 多头开仓， 1
     :ivar SHORT: 空头开仓， 2
     :ivar COVER: 空头平仓，3
     :ivar SELL: 多头平仓，4
@@ -63,13 +63,35 @@ class Captial(object):
 class PriceType(object):
     """ 下单类型 
 
-    :ivar LMT: 限价单，值1.
-    :ivar MKT: 市价单，值2.
+    :ivar LMT: 限价单，值0.
+    :ivar MKT: 市价单，值1.
     """
-    LMT = 1
-    MKT = 2 
+    LMT = 0
+    MKT = 1 
     tdict = {'LMT': LMT,
              'MKT': MKT
+    }
+
+    @classmethod
+    def arg_to_type(self, arg):
+        """
+        把用户输入参数转化为系统类型。
+        """ 
+        if type(arg) == str:
+            return self.tdict[arg.upper()]
+        else:
+            return arg
+
+class HedgeType(object):
+    """ 下单类型 
+
+    :ivar SPEC: 投机，值0.
+    :ivar HEDG: 套保，值1.
+    """
+    SPEC = 0
+    HEDG = 1
+    tdict = {'SPEC': SPEC,
+             'HEDG': HEDG
     }
 
     @classmethod
@@ -149,6 +171,9 @@ class Transaction(object):
 
     :ivar margin_ratio: 保证金比例。
     :vartype margin_ratio: float
+
+    :ivar hedge_type: 交易类型。
+    :vartype hedge_type: :class:`PriceType`
     """
     def __init__(self, order=None):
         if order:
@@ -161,6 +186,7 @@ class Transaction(object):
             self.side = order.side
             self.datetime = order.datetime
             self.price_type = order.price_type
+            self.hedge_type = order.hedge_type
         self.commission = 0
         self.margin_ratio = 1
 
@@ -171,29 +197,6 @@ class Transaction(object):
             self._hash =  hash(self.id)
             return self._hash
 
-    def profit(self, new_price):
-        """ 根据当前的价格计算盈亏。
-        
-           :param float new_price: 当前价格。
-           :return: 盈亏数额。
-           :rtype: float
-        """
-        profit = 0
-        if self.direction == Direction.LONG:
-            profit += (new_price - self.price) * self.quantity
-        else:
-            profit += (self.price - new_price) * self.quantity
-        return profit
-
-    def margin(self, new_price):
-        """ 根据当前价格计算这笔交易的保证金。
-        
-           :param float new_price: 当前价格。
-           :return: 保证金。
-           :rtype: float
-        """
-        price = self.price if self.contract.is_stock else new_price
-        return price * self.quantity * self.margin_ratio
 
     
 class OrderID(object):
@@ -260,8 +263,11 @@ class Order(object):
 
         :ivar price_type: 下单类型。
         :vartype price_type: :class:`PriceType`
+
+        :ivar hedge_type: 交易类型。
+        :vartype hedge_type: :class:`HedgeType`
     """
-    def __init__(self, dt, contract, type_, side, direction, price, quantity):
+    def __init__(self, dt, contract, type_, side, direction, price, quantity, hedge = HedgeType.SPEC):
         self.ref = OrderID.next_order_id()
         self.id = OrderID.next_order_id()
         self.contract = contract
@@ -271,6 +277,7 @@ class Order(object):
         self.side = side
         self.datetime = dt
         self.price_type = type_
+        self.hedge_type = hedge
 
     def print_order(self):
         #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \
@@ -330,7 +337,7 @@ class Contract(object):
     @classmethod
     def get_margin_ratio(self, contract):
         """ 获取合约的交易时段。""" 
-        pass
+        return 1
 
 
 class Period(object):
@@ -359,6 +366,7 @@ class Period(object):
 
         self._type = time_unit
         self._length = unit_count
+
 
     @property
     def type(self):
@@ -410,84 +418,61 @@ class PContract(object):
 class Position(object):
     """ 单笔仓位信息。
 
-    :ivar order: 委托单信息。
-    :ivar transaction: 成交信息。
-    :ivar quantity: 单笔数目。
+    :ivar contract: 合约。
+    :ivar quantity: 数目。
+    :ivar cost: 成本价。
+    :ivar direction: 开仓方向。
+    :ivar margin_ratio: 保证金比例。
     """
-    def __init__(self, order, transaction):
-        self.order = order
-        self.transaction = transaction
-        self.quantity = transaction.quantity
-
-    @property
-    def datetime(self):
-        """ 持仓日期, 单笔统计的时候才有 """
-        return self.transaction.datetime
-
-    @property
-    def price(self):
-        """ 成交价格, 单笔统计的时候才有 """ 
-        return self.transaction.price
-
-    @property
-    def direction(self):
-        """ 多空 """
-        return self.transaction.direction
+    def __init__(self, trans):
+        self.contract = trans.contract
+        self.quantity = 0;
+        self.cost = 0;
+        self.direction = trans.direction
+        self.margin_ratio = trans.margin_ratio
 
     def profit(self, new_price):
-        """ 持仓盈亏 """ 
-        return self.profit(new_price)
+        """ 根据当前的价格计算盈亏。
+        
+           :param float new_price: 当前价格。
+           :return: 盈亏数额。
+           :rtype: float
+        """
+        profit = 0
+        if self.direction == Direction.LONG:
+            profit += (new_price - self.cost) * self.quantity
+        else:
+            profit += (self.cost - new_price) * self.quantity
+        return profit
 
     @property
-    def pre_margin(self, new_price):
+    def pre_margin(self):
         """ 昨日保证金占用 """
         pass
 
-    @property
-    def cost(self):
-        """ 单位持仓成本 """
-        return self.price * self.quantity
-
-    #@property
-    #def close_profit(self):
-        #""" 平仓盈亏 """
-        #pass
-
-    #@property
-    #def margin(self, new_price):
-        #""" 持仓的保证金占用 """
-        #return self.transaction.margin(new_price);
-
-    #@property
-    #def margin_ratio(self):
-        #""" 保证金比例 """ 
-        #return self.transaction.margin_ratio
-
-
-
-
-
-
-    #def order_time(self):
-        #return self.order.datetime
-
-    #def order_price(self):
-        #pass
+    def position_margin(self, new_price):
+        """ 根据当前价格计算这笔交易的保证金。
+        
+           :param float new_price: 当前价格。
+           :return: 保证金。
+           :rtype: float
+        """
+        price = self.cost if self.contract.is_stock else new_price
+        return price * self.quantity * self.margin_ratio
 
     def __hash__(self):
         if hasattr(self, '_hash'):
             return self._hash
         else:
-            self._hash =  hash(util.time2int(self.datetime))
+            self._hash =  hash(self.contract)
             return self._hash
 
     def __str__(self):
         rst = """
                 Position:
-                   datetime - %s
-                   price - %f
+                   cost - %f
                    quantity - %d
-               """ % (str(self.datetime), self.price, self.quantity)
+               """ % (self.cost, self.quantity)
         return rst
 
 

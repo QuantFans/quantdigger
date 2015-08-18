@@ -250,7 +250,7 @@ class TradingStrategy(BarTracker, CrossTrackerMixin):
         try:
             if not contract:
                 contract = self._main_contract
-            return self.blotter.current_positions[contract].total
+            return self.blotter.current_positions[contract].quantity
         except KeyError:
             return 0
 
