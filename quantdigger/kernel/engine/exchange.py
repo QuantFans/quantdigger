@@ -16,6 +16,8 @@ class Exchange(object):
         self._strict = strict
 
     def make_market(self, bar):
+        ## @bug 开仓资金是否足够的验证
+        ## @todo 
         """ 价格撮合""" 
         if self._open_orders:
             fill_orders = set()
