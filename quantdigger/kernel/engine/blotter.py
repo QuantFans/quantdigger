@@ -196,7 +196,7 @@ class SimpleBlotter(Blotter):
             logger.warn("下单仓位问题")
             return False
         elif order.side == TradeSide.KAI:
-            if self.current_holdings['cash'] < 0:
+            if self.current_holdings['cash'] < order.price:
                 raise Exception('没有足够的资金开仓') 
         return True
 
