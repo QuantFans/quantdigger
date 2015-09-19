@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 import numpy as np
 from quantdigger.errors import SeriesIndexError, BreakConstError
 
@@ -123,22 +123,22 @@ class NumberSeries(SeriesBase):
 
     #
     def __eq__(self, r):
-        self.data[self._curbar] == float(r)
+        return self.data[self._curbar] == float(r)
 
     def __lt__(self, r):
-        self.data[self._curbar] < float(r)
+        return self.data[self._curbar] < float(r)
 
     def __le__(self, r):
-        self.data[self._curbar] <= float(r)
+        return self.data[self._curbar] <= float(r)
 
     def __ne__(self, r):
-        self.data[self._curbar] != float(r)
+        return self.data[self._curbar] != float(r)
 
     def __gt__(self, r):
-        self.data[self._curbar] > float(r)
+        return self.data[self._curbar] > float(r)
 
     def __ge__(self, r):
-        self.data[self._curbar] >= float(r)
+        return self.data[self._curbar] >= float(r)
 
     #
     def __iadd__(self, r):
@@ -182,22 +182,22 @@ class NumberSeries(SeriesBase):
 
     #
     def __radd__(self, r):
-        return self.data[self._curbar] + float(r)
+        return float(r) + self.data[self._curbar]
 
     def __rsub__(self, r):
-        return self.data[self._curbar] - float(r)
+        return float(r) - self.data[self._curbar]
 
     def __rmul__(self, r):
-        return self.data[self._curbar] * float(r)
+        return float(r) * self.data[self._curbar]
 
     def __rdiv__(self, r):
-        return self.data[self._curbar] / float(r)
+        return float(r) / self.data[self._curbar]
 
     def __rmod__(self, r):
-        return self.data[self._curbar] % float(r)
+        return float(r) % self.data[self._curbar]
 
     def __rpow__(self, r):
-        return self.data[self._curbar] ** float(r)
+        return float(r) ** self.data[self._curbar]
 
 class DateTimeSeries(SeriesBase):
     """ 时间序列变量 """
