@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 from quantdigger.kernel.engine.execute_unit import ExecuteUnit
 from quantdigger.kernel.indicators.common import MA, BOLL
 from quantdigger.kernel.engine.strategy import TradingStrategy
@@ -80,5 +80,7 @@ if __name__ == '__main__':
                     #algo2.blotter)
         
     except Exception, e:
-        print e
+        import traceback
+        print traceback.format_exc()
+        #print e
 

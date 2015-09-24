@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 import Queue
 import pandas as pd
 from quantdigger.kernel.datasource.data import local_data
@@ -56,6 +56,8 @@ class ExecuteUnit(object):
                 # 这样可以加速回测速度。
                 for algo in self._strategies:
                     bar = algo.update_curbar(bar_index)
+                    if not self.__bar_in_datetime_range(bar, self.begin_dt, self.end_dt):
+                        continue
                     algo.exchange.update_datetime(bar.datetime)
                     algo.blotter.update_datetime(bar.datetime)
                     latest_bars[algo._main_contract] = bar
@@ -119,3 +121,11 @@ class ExecuteUnit(object):
     def add_strategy(self, strategy):
         """ 添加策略。 """
         self._strategies.append(strategy)
+
+    def __bar_in_datetime_range(self, bar, begin_dt, end_dt):
+        """ 判断一个bar是否在时间范围内 """
+        if begin_dt is not None and bar.datetime < begin_dt:
+            return False
+        if end_dt is not None and bar.datetime > end_dt:
+            return False
+        return True
