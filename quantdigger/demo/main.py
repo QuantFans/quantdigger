@@ -21,6 +21,7 @@ class DemoStrategy(TradingStrategy):
     """ 策略实例 """
     def __init__(self, exe):
         super(DemoStrategy, self).__init__(exe)
+        print 'start: ', self.datetime[0]
 
         self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
         self.ma10 = MA(self, self.close, 10,'ma10', 'y', '1')
@@ -42,7 +43,7 @@ class DemoStrategy(TradingStrategy):
 
 if __name__ == '__main__':
     try:
-        begin_dt, end_dt = None, None
+        begin_dt, end_dt = '2010-04-30', '2010-06-01'
         pcon = pcontract('IF000.SHFE', '10.Minute')
         #pcon = stock('600848')  # 通过tushare下载股票数据
         simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
