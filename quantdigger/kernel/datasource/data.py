@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 import pandas as pd
 import os
 import datetime as dt
@@ -417,6 +417,31 @@ class QuoteCache(object):
         pass
         #contract2
 
+def _try_datestring_to_datetime(s):
+    import datetime
+    if s is None:
+        return None
+    if type(s) == datetime.datetime:
+        return s
+    try:
+        return datetime.datetime.strptime(s, '%Y-%m-%d')
+    except ValueError:
+        return datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+
+def _filter_by_datetime_range(data, start, end):
+    start = _try_datestring_to_datetime(start)
+    end = _try_datestring_to_datetime(end)
+    if start is None:
+        if end is None:
+            return data
+        else:
+            return data[data.index <= end]
+    else:
+        if end is None:
+            return data[data.index >= start]
+        else:
+            return data[(data.index >= start) & (data.index <= end)]
+
 class LocalData(object):
     """ 本地数据数据接口类。
     
@@ -437,14 +462,17 @@ class LocalData(object):
         if pcontract.contract.exch_type == 'stock':
             import tushare as ts
             # 使用tushare接口
-            print "load stock data with tushare..." 
-            data = ts.get_hist_data(pcontract.contract.code)
+            print "load stock data with tushare... (start=%s,end=%s)" % (dt_start, dt_end)
+            data = ts.get_hist_data(pcontract.contract.code,
+                                    start=dt_start,
+                                    end=dt_end)
             return process_tushare_data(data)
         else:
             # 期货数据
             fname = ''.join([str(pcontract), ".csv"])
             try:
                 data = pd.read_csv(fname, index_col=0, parse_dates=True)
+                data = _filter_by_datetime_range(data, dt_start, dt_end)
                 assert data.index.is_unique
             except Exception:
                 #print u"**Warning: File \"%s\" doesn't exist!"%fname

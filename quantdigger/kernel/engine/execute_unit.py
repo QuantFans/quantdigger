@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 import Queue
 import pandas as pd
 from quantdigger.kernel.datasource.data import local_data
@@ -103,7 +103,7 @@ class ExecuteUnit(object):
         try:
             return self.data[pcontract]
         except KeyError:
-            data = local_data.load_data(pcontract)
+            data = local_data.load_data(pcontract, self.begin_dt, self.end_dt)
             if not hasattr(self, '_data_length'):
                 self._data_length = len(data) 
             elif self._data_length != len(data):
