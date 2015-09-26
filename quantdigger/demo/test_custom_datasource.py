@@ -22,9 +22,7 @@ class DemoStrategy(TradingStrategy):
         self.mabig = MA(self, self.close, 10,'mabig', 'b', '1')
         self.masmall = MA(self, self.close, 5,'masmall', 'y', '1')
         self.b_upper, self.b_middler, self.b_lower = BOLL(self, self.close, 10,'boll10', 'y', '1')
-        self.stoploss = None
         self.num_cont = 0
-        self.num_stoploss = 0
         self.num_win = 0
 
     def __determine_position(self):
@@ -39,12 +37,13 @@ class DemoStrategy(TradingStrategy):
             quantity = self.__determine_position()
             if quantity > 0:
                 self.buy('long', self.open, quantity, contract = code)
-                self.buy_price = self.open
+                self.buy_price = float(self.open)
                 self.num_cont += 1
                 print 'buy', self.datetime[0].date(), self.open, quantity
         elif self.position() > 0 and self.masmall[1] < self.mabig[1]:
             self.sell('long', self.open, self.position())
             print 'sel', self.datetime[0].date(), self.open, self.position()
+            print '---'
             if self.open > self.buy_price:
                 self.num_win += 1
 
@@ -57,7 +56,7 @@ if __name__ == '__main__':
     simulator.run()
     #print 'close: ', algo.close.data
     #print 'close length: ', algo.close.length_history
-    print 'total: %s, win: %s, stoploss: %s' % (algo.num_cont, algo.num_win, algo.num_stoploss)
+    print 'total: %s, win: %s' % (algo.num_cont, algo.num_win)
 
     # 显示回测结果
     a = {}
