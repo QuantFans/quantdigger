@@ -417,20 +417,9 @@ class QuoteCache(object):
         pass
         #contract2
 
-def _try_datestring_to_datetime(s):
-    import datetime
-    if s is None:
-        return None
-    if type(s) == datetime.datetime:
-        return s
-    try:
-        return datetime.datetime.strptime(s, '%Y-%m-%d')
-    except ValueError:
-        return datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
-
 def _filter_by_datetime_range(data, start, end):
-    start = _try_datestring_to_datetime(start)
-    end = _try_datestring_to_datetime(end)
+    start = pd.to_datetime(start)
+    end = pd.to_datetime(end)
     if start is None:
         if end is None:
             return data
