@@ -20,11 +20,14 @@ class ExecuteUnit(object):
         :vartype trackers: list
         :ivar _strategies: 策略集合。
         :vartype _strategies: list
+        :ivar datasource: 数据源。
+        :vartype datasource: has method 'load_data'
 
     """
-    def __init__(self, pcontracts, begin_dt=None, end_dt=None):
+    def __init__(self, pcontracts, begin_dt=None, end_dt=None, datasource=None):
         self.begin_dt = begin_dt
         self.end_dt = end_dt
+        self.datasource = datasource
         # 不同周期合约数据。
         self.data = { }     # PContract -> pandas.DataFrame
         self.pcontracts = pcontracts
@@ -103,7 +106,13 @@ class ExecuteUnit(object):
         try:
             return self.data[pcontract]
         except KeyError:
-            data = local_data.load_data(pcontract, self.begin_dt, self.end_dt)
+            data = None
+            if self.datasource is not None:
+                data = self.datasource.load_data(pcontract, self.begin_dt, self.end_dt)
+            # self.datasource is None 或者 datasource 没有读到数据
+            if data is None:
+                print 'using default datasource.'
+                data = local_data.load_data(pcontract, self.begin_dt, self.end_dt)
             if not hasattr(self, '_data_length'):
                 self._data_length = len(data) 
             elif self._data_length != len(data):
