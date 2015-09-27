@@ -10,7 +10,7 @@ import pdb
 
 import ds163
 
-code = '600331'
+code = '600096'
 
 class DemoStrategy(TradingStrategy):
     """ 策略实例 """
@@ -49,9 +49,9 @@ class DemoStrategy(TradingStrategy):
 
 if __name__ == '__main__':
     pcon = stock(code)
-    simulator = ExecuteUnit([pcon], None, '2015-07-01',
+    simulator = ExecuteUnit([pcon], None, '2015-07-02',
                             # 使用自定义的数据源
-                            datasource=ds163.Stock163Source())
+                            datasource=ds163.CachedStock163Source('163cache'))
     algo = DemoStrategy(simulator)
     simulator.run()
     #print 'close: ', algo.close.data
