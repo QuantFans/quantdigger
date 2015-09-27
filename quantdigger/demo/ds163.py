@@ -109,7 +109,7 @@ class LocalFsCache(object):
 
     def load_data(self, pcontract, dt_start, dt_end):
         key = self.__to_key(pcontract)
-        if self.__has(key, dt_start, dt_end):
+        if not self.__has(key, dt_start, dt_end):
             raise CachedDataSource.LoadCacheFailed()
         path = self.__key_to_path(key)
         try:
@@ -124,7 +124,7 @@ class LocalFsCache(object):
         try:
             old_data = self.__do_load_data(path)
             # 合并新旧数据
-            data = pd.concat([old_data, data]).drop_duplicates(take_last=True)
+            data = pd.concat([old_data, data]).reset_index().drop_duplicates('datetime', take_last=True).set_index('datetime')
         except IOError:
             pass
         self.__do_save_data(data, path)
@@ -134,14 +134,6 @@ class LocalFsCache(object):
     def __check_base_path(self):
         if not os.path.isdir(self.base_path):
             os.makedirs(self.base_path)
-
-    def __se_to_datetime(self, dt_start, dt_end):
-        dt_start = pd.to_datetime(dt_start)
-        if dt_end is None:
-            dt_end = pd.to_datetime(datetime.datetime.today().date())
-        else:
-            dt_end = pd.to_datetime(dt_end)
-        return dt_start, dt_end
 
     def __load_meta(self):
         try:
@@ -164,17 +156,22 @@ class LocalFsCache(object):
             start, end = self.meta[key]
             start = pd.to_datetime(start)
             end = pd.to_datetime(end)
-            dt_start, dt_end = self.__se_to_datetime(dt_start, dt_end)
+            dt_start = pd.to_datetime(dt_start)
+            today = pd.to_datetime(datetime.datetime.today().date())
+            if dt_end is None:
+                dt_end = today
+            else:
+                dt_end = min(pd.to_datetime(dt_end), today)
             return cb(self, key, dt_start, dt_end, start, end)
         except KeyError:
-            return cb(self, key, dt_start, dt_end)
+            return keyerror_cb(self, key, dt_start, dt_end)
 
     def __has(self, key, dt_start, dt_end):
         def cb(s, key, dt_start, dt_end, start, end):
             return (start is None or dt_start is not None and dt_start >= start) and dt_end <= end
         def keyerror_cb(s, key, dt_start, dt_end):
             return False
-        self.__do_with_meta_key(key, dt_start, dt_end, cb, keyerror_cb)
+        return self.__do_with_meta_key(key, dt_start, dt_end, cb, keyerror_cb)
 
     def __update_meta(self, key, dt_start, dt_end):
         def cb(s, key, dt_start, dt_end, start, end):

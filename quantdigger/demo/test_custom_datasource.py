@@ -39,17 +39,17 @@ class DemoStrategy(TradingStrategy):
                 self.buy('long', self.open, quantity, contract = code)
                 self.buy_price = float(self.open)
                 self.num_cont += 1
-                print 'buy', self.datetime[0].date(), self.open, quantity
+                #print 'buy', self.datetime[0].date(), self.open, quantity
         elif self.position() > 0 and self.masmall[1] < self.mabig[1]:
             self.sell('long', self.open, self.position())
-            print 'sel', self.datetime[0].date(), self.open, self.position()
-            print '---'
+            #print 'sel', self.datetime[0].date(), self.open, self.position()
+            #print '---'
             if self.open > self.buy_price:
                 self.num_win += 1
 
 if __name__ == '__main__':
     pcon = stock(code)
-    simulator = ExecuteUnit([pcon], None, '2015-07-02',
+    simulator = ExecuteUnit([pcon], None, '2015-08-02',
                             # 使用自定义的数据源
                             datasource=ds163.CachedStock163Source('163cache'))
     algo = DemoStrategy(simulator)
