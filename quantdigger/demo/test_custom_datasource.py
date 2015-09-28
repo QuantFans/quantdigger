@@ -18,8 +18,8 @@ class DemoStrategy(TradingStrategy):
         super(DemoStrategy, self).__init__(exe)
         print 'start: ', self.datetime[0]
 
-        self.mabase = MA(self, self.close, 100,'mabase', 'r', '1')
-        self.mabig = MA(self, self.close, 10,'mabig', 'b', '1')
+        #self.mabase = MA(self, self.close, 100,'mabase', 'r', '1')
+        self.mabig = MA(self, self.close, 20,'mabig', 'b', '1')
         self.masmall = MA(self, self.close, 5,'masmall', 'y', '1')
         self.b_upper, self.b_middler, self.b_lower = BOLL(self, self.close, 10,'boll10', 'y', '1')
         self.num_cont = 0
@@ -33,23 +33,25 @@ class DemoStrategy(TradingStrategy):
     def on_bar(self):
         """ 策略函数，对每根Bar运行一次。"""
         if self.volume == 0: return # 这天没有成交量，跳过
-        if self.position() == 0 and self.masmall[2] <= self.mabig[2] and self.masmall[1] > self.mabig[1]:
+        if self.position() == 0 and self.masmall[1] <= self.mabig[1] and self.masmall > self.mabig:
             quantity = self.__determine_position()
             if quantity > 0:
-                self.buy('long', self.open, quantity, contract = code)
-                self.buy_price = float(self.open)
+                price = self.close[0]
+                self.buy('long', price, quantity, contract = code)
+                self.buy_price = price
                 self.num_cont += 1
-                #print 'buy', self.datetime[0].date(), self.open, quantity
-        elif self.position() > 0 and self.masmall[1] < self.mabig[1]:
-            self.sell('long', self.open, self.position())
-            #print 'sel', self.datetime[0].date(), self.open, self.position()
+                #print 'buy', self.datetime[0].date(), price, quantity
+        elif self.position() > 0 and self.masmall < self.mabig:
+            price = self.close[0]
+            self.sell('long', price, self.position())
+            #print 'sel', self.datetime[0].date(), price, self.position()
             #print '---'
-            if self.open > self.buy_price:
+            if price > self.buy_price:
                 self.num_win += 1
 
 if __name__ == '__main__':
     pcon = stock(code)
-    simulator = ExecuteUnit([pcon], None, '2015-08-02',
+    simulator = ExecuteUnit([pcon], None, #'2015-08-02',
                             # 使用自定义的数据源
                             datasource=ds163.CachedStock163Source('163cache'))
     algo = DemoStrategy(simulator)

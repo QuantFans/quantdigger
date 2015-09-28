@@ -28,19 +28,25 @@ def _dt_to_string(dt):
     return pd.to_datetime(dt).strftime('%Y%m%d')
 
 def _query_data(code, dt_start, dt_end):
-    qs = 'code=0' + code
+    qs_part2 = ''
     if dt_start is not None:
-        qs += '&start=' + _dt_to_string(dt_start)
+        qs_part2 += '&start=' + _dt_to_string(dt_start)
     if dt_end is not None:
-        qs += '&end=' + _dt_to_string(dt_end)
-    qs += '&fields=' + ';'.join(map(lambda i: i[0], _FIELDS))
-    url = '%s?%s' % (_HOST, qs)
-    return urllib2.urlopen(url).read()
+        qs_part2 += '&end=' + _dt_to_string(dt_end)
+    qs_part2 += '&fields=' + ';'.join(map(lambda i: i[0], _FIELDS))
+    for i in [0, 1]:
+        qs_part1 = 'code=%s%s' % (i, code)
+        url = '%s?%s' % (_HOST, qs_part1 + qs_part2)
+        content = urllib2.urlopen(url).read()
+        parts = content.split('\n', 1)
+        if len(parts) < 2 or parts[1].strip() == '':
+            continue
+        return parts[0], parts[1]
+    raise Exception('没有%s(%s ~ %s)的数据' % (code, dt_start, dt_end))
 
-def _post_process(content):
-    buf = content.split('\n', 1)
-    buf[0] = ','.join(['datetime', 'code', 'name'] + map(lambda i: i[1], _FIELDS))
-    new_content = '\n'.join(buf)
+def _post_process(title, rows):
+    new_title = ','.join(['datetime', 'code', 'name'] + map(lambda i: i[1], _FIELDS))
+    new_content = '\n'.join([new_title, rows])
     data = pd.read_csv(io.BytesIO(new_content), index_col=0, parse_dates=True)
     data = data[data.volume != 0]  # 过滤没有交易的交易日
     return data.iloc[::-1]  # reverse
@@ -55,8 +61,8 @@ class Stock163Source(object):
         if pcontract.contract.exch_type != 'stock':
             # 只有股票数据
             return None
-        content = _query_data(pcontract.contract.code, dt_start, dt_end)
-        data = _post_process(content)
+        title, rows = _query_data(pcontract.contract.code, dt_start, dt_end)
+        data = _post_process(title, rows)
         assert data.index.is_unique
         return data
 
@@ -152,16 +158,16 @@ class LocalFsCache(object):
 
     # __has和__update_meta或许该抽象一下
     def __do_with_meta_key(self, key, dt_start, dt_end, cb, keyerror_cb):
+        dt_start = pd.to_datetime(dt_start)
+        today = pd.to_datetime(datetime.datetime.today().date())
+        if dt_end is None:
+            dt_end = today
+        else:
+            dt_end = min(pd.to_datetime(dt_end), today)
         try:
             start, end = self.meta[key]
             start = pd.to_datetime(start)
             end = pd.to_datetime(end)
-            dt_start = pd.to_datetime(dt_start)
-            today = pd.to_datetime(datetime.datetime.today().date())
-            if dt_end is None:
-                dt_end = today
-            else:
-                dt_end = min(pd.to_datetime(dt_end), today)
             return cb(self, key, dt_start, dt_end, start, end)
         except KeyError:
             return keyerror_cb(self, key, dt_start, dt_end)
