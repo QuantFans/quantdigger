@@ -426,7 +426,7 @@ def tick2period(code,period,start,end):
         df1= df1.truncate(before=date+' 9:30', after=date+' 11:30') #remove non-trade time
         df1=df1.append(df3)
         if np.isnan(df1.ix[0,'close']): #use last day's close as initial price if there is no deal after open
-            from datetime import timedelta,datetime
+            from datetime import timedelta
             aDay = timedelta(days=-10)  #get enough days to ensure at least one trading day is involved
             pre  = (pd.to_datetime(date) + aDay).strftime('%Y-%m-%d')
             df1.ix[0,'close'] = ts.get_hist_data(code,start=pre,end=date).ix[-2,'close']

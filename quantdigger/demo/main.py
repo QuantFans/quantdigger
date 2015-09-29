@@ -45,7 +45,7 @@ if __name__ == '__main__':
     try:
         #begin_dt, end_dt = '2010-04-30', '2010-06-01'
         #pcon = pcontract('IF000.SHFE', '10.Minute')
-        begin_dt, end_dt = '2015-04-30', '2015-06-01'
+        begin_dt, end_dt = '2015-05-25', '2015-06-01'
         pcon = stock('600848','10.Minute')  # 通过tushare下载股票数据
         simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
         algo = DemoStrategy(simulator)
