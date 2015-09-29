@@ -8,6 +8,8 @@ import pickle
 import datetime
 import pandas as pd
 
+import cache as cc
+
 _FIELDS = [
     ('TCLOSE',       'close'),
     ('HIGH',         'high'),
@@ -67,147 +69,8 @@ class Stock163Source(object):
         return data
 
 
-class CachedDataSource(object):
-    '''带缓存的数据源'''
-    def __init__(self, datasource, cache):
-        self.datasource = datasource
-        self.cache = cache
-
-    def load_data(self, pcontract, dt_start=None, dt_end=None):
-        try:
-            print 'try loading from cache'
-            return self.cache.load_data(pcontract, dt_start, dt_end)
-        except CachedDataSource.LoadCacheFailed:
-            print 'load from source'
-            data = self.datasource.load_data(pcontract, dt_start, dt_end)
-            # dt_end is None 的情况下可能会出现bug
-            self.cache.save_data(data, pcontract, dt_start, dt_end)
-            return data
-
-    class LoadCacheFailed(Exception):
-        pass
-
-
-def _filter_by_datetime_range(data, start, end):
-    # TODO: 先copy过来用，后面再抽象
-    start = pd.to_datetime(start)
-    end = pd.to_datetime(end)
-    if start is None:
-        if end is None:
-            return data
-        else:
-            return data[data.index <= end]
-    else:
-        if end is None:
-            return data[data.index >= start]
-        else:
-            return data[(data.index >= start) & (data.index <= end)]
-
-
-class LocalFsCache(object):
-    '''
-    本地文件系统缓存
-    '''
-
-    def __init__(self, base_path):
-        self.base_path = base_path
-        self.__load_meta()
-
-    def load_data(self, pcontract, dt_start, dt_end):
-        key = self.__to_key(pcontract)
-        if not self.__has(key, dt_start, dt_end):
-            raise CachedDataSource.LoadCacheFailed()
-        path = self.__key_to_path(key)
-        try:
-            data = self.__do_load_data(path)
-            return _filter_by_datetime_range(data, dt_start, dt_end)
-        except IOError:
-            raise CachedDataSource.LoadCacheFailed()
-
-    def save_data(self, data, pcontract, dt_start, dt_end):
-        key = self.__to_key(pcontract)
-        path = self.__key_to_path(key)
-        try:
-            old_data = self.__do_load_data(path)
-            # 合并新旧数据
-            data = pd.concat([old_data, data]).reset_index().drop_duplicates('datetime', take_last=True).set_index('datetime')
-        except IOError:
-            pass
-        self.__do_save_data(data, path)
-        self.__update_meta(key, dt_start, dt_end)
-        self.__save_meta()
-
-    def __check_base_path(self):
-        if not os.path.isdir(self.base_path):
-            os.makedirs(self.base_path)
-
-    def __load_meta(self):
-        try:
-            with open(self.__meta_path(), 'rb') as f:
-                self.meta = pickle.load(f)
-        except IOError:
-            self.meta = {}
-
-    def __save_meta(self):
-        self.__check_base_path()
-        with open(self.__meta_path(), 'wb') as f:
-            pickle.dump(self.meta, f)
-
-    def __meta_path(self):
-        return os.path.join(self.base_path, '_meta')
-
-    # __has和__update_meta或许该抽象一下
-    def __do_with_meta_key(self, key, dt_start, dt_end, cb, keyerror_cb):
-        dt_start = pd.to_datetime(dt_start)
-        today = pd.to_datetime(datetime.datetime.today().date())
-        if dt_end is None:
-            dt_end = today
-        else:
-            dt_end = min(pd.to_datetime(dt_end), today)
-        try:
-            start, end = self.meta[key]
-            start = pd.to_datetime(start)
-            end = pd.to_datetime(end)
-            return cb(self, key, dt_start, dt_end, start, end)
-        except KeyError:
-            return keyerror_cb(self, key, dt_start, dt_end)
-
-    def __has(self, key, dt_start, dt_end):
-        def cb(s, key, dt_start, dt_end, start, end):
-            return (start is None or dt_start is not None and dt_start >= start) and dt_end <= end
-        def keyerror_cb(s, key, dt_start, dt_end):
-            return False
-        return self.__do_with_meta_key(key, dt_start, dt_end, cb, keyerror_cb)
-
-    def __update_meta(self, key, dt_start, dt_end):
-        def cb(s, key, dt_start, dt_end, start, end):
-            if dt_start is None or start is None:
-                new_start = None
-            else:
-                new_start = min(dt_start, start)
-            new_end = max(dt_end, end)
-            s.meta[key] = new_start, new_end
-        def keyerror_cb(s, key, dt_start, dt_end):
-            s.meta[key] = dt_start, dt_end
-        self.__do_with_meta_key(key, dt_start, dt_end, cb, keyerror_cb)
-
-    def __do_load_data(self, path):
-        return pd.read_csv(path, index_col=0, parse_dates=True)
-
-    def __do_save_data(self, data, path):
-        self.__check_base_path()
-        data.to_csv(path)  # TODO: encoding?
-
-    def __to_key(self, pcontract):
-        return pcontract.contract.exch_type + pcontract.contract.code
-
-    def __key_to_path(self, key):
-        path = os.path.join(self.base_path, key + '.csv')
-        return path
-
-
-class CachedStock163Source(CachedDataSource):
+class CachedStock163Source(cc.CachedDatasource):
     def __init__(self, base_path):
         datasource = Stock163Source()
-        cache = LocalFsCache(base_path)
+        cache = cc.LocalFsCache(base_path)
         super(CachedStock163Source, self).__init__(datasource, cache)
