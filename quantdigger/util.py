@@ -27,15 +27,16 @@ def pcontract(contract, period):
     return PContract(Contract(contract),
                      Period(period))
 
-def stock(code):
+def stock(code,period='1.Day'):
     """ 构建周期合约结构的便捷方式。
     
     Args:
-        code (str): 股票代码
-    
+        code (str) : 股票代码
+        period(str): 回测周期
+
     Returns:
         PContract. 周期合约
     """
     from quantdigger.kernel.datastruct import PContract, Contract, Period
     return PContract(Contract('%s.stock' %  code),
-                     Period('1.Day'))
+                     Period(period))
