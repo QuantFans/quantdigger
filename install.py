@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import dependency
 import util
 import os
