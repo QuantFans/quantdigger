@@ -4,7 +4,7 @@ import os
 import datetime as dt
 from quantdigger.errors import FileDoesNotExist
 
-home = os.path.join('/Users/alan/Work/Quant/quantdigger/quantdigger/kernel/' , 'datasource', 'data')
+home = os.path.join('/home/wondereamer/github/quantdigger/quantdigger/kernel/' , 'datasource', 'data')
 
 # prepare data
 def get_stock_signal_data():

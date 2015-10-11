@@ -89,7 +89,7 @@ class Slider(AxesWidget):
         self.valinit = valinit
         self.ax = ax
         self.width = width
-        # 滑动条
+        # 滑动条的形状
         self.poly = ax.axvspan(valmax-self.width/2,valmax+self.width/2, 0, 1, **kwargs)
         self.name = name
         #axhspan
@@ -352,7 +352,7 @@ class MultiWidgets(object):
         self._w_width_min = 50
         self._bottom = 0.05
         self._slider_height = 0.1
-        self._bigger_picture_height = 0.3
+        self._bigger_picture_height = 0.3    # 鸟瞰图高度
         self._top = self._bottom + self._slider_height
 
         self._init_slider()
