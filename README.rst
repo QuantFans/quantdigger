@@ -12,14 +12,6 @@ QuantDigger目前是一个基于python的量化回测框架。作者最初是因
 除了开发人员，还要特别感谢北京的 vodkabuaa_ 和国元证券的王林峰给出的意见， ongbe_ 帮忙修复代码bug， tushare_ 库的作者 Jimmy_ 和深大的邓志浩帮忙推荐
 这个库，以及所有朋友的支持。
 
-**主要代码贡献者:**
-     deepfish_
-
-     TeaEra_
-
-     wondereamer_
-
-     HonePhy_
 
 文档
 ----

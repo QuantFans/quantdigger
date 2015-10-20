@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 import numpy as np
 
-from quantdigger.kernel.datastruct import (
+from quantdigger.datastruct import (
     Order,
     Bar,
     TradeSide,
@@ -10,9 +10,9 @@ from quantdigger.kernel.datastruct import (
     PriceType
 )
 
-from quantdigger.kernel.engine.exchange import Exchange
-from quantdigger.kernel.engine.event import SignalEvent
-from quantdigger.kernel.engine.series import NumberSeries, DateTimeSeries
+from quantdigger.engine.exchange import Exchange
+from quantdigger.engine.event import SignalEvent
+from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.util import engine_logger as logger
 
 from blotter import SimpleBlotter

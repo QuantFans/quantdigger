@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from quantdigger.kernel.engine.execute_unit import ExecuteUnit
-from quantdigger.kernel.indicators.common import MA, BOLL
-from quantdigger.kernel.engine.strategy import TradingStrategy
+from quantdigger.engine.execute_unit import ExecuteUnit
+from quantdigger.indicators.common import MA, BOLL
+from quantdigger.engine.strategy import TradingStrategy
 from quantdigger.util import  pcontract, stock
 from quantdigger.digger import deals
 import plotting
-#from quantdigger.kernel.engine.series import NumberSeries
 
 #def average(series, n):
     #""" 一个可选的平均线函数 """ 
@@ -43,10 +42,10 @@ class DemoStrategy(TradingStrategy):
 
 if __name__ == '__main__':
     try:
-        #begin_dt, end_dt = '2010-04-30', '2010-06-01'
-        #pcon = pcontract('IF000.SHFE', '10.Minute')
-        begin_dt, end_dt = '2015-05-25', '2015-06-01'
-        pcon = stock('600848','10.Minute')  # 通过tushare下载股票数据
+        pcon = pcontract('IF000.SHFE', '10.Minute')
+        begin_dt, end_dt = None, None
+        #begin_dt, end_dt = '2015-05-25', '2015-06-01'
+        #pcon = stock('600848','10.Minute')  # 通过tushare下载股票数据
         simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
         algo = DemoStrategy(simulator)
         #algo1 = DemoStrategy(simulator)
@@ -74,12 +73,6 @@ if __name__ == '__main__':
                                     b,
                                     algo.blotter)
 
-        #print algo.blotter.pp
-        #print sum(algo.blotter.pp)
-        #plotting.plot_result(simulator.data[pcon],
-                    #algo2._indicators,
-                    #algo2.blotter.deal_positions,
-                    #algo2.blotter)
         
     except Exception, e:
         import traceback

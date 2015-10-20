@@ -63,7 +63,7 @@ class SeriesBase(object):
             raise BreakConstError 
         self.data[self._curbar] = v
         
-    def __size__(self):
+    def __len__(self):
         """""" 
         return len(self.data)
 

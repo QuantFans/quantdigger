@@ -1,9 +1,17 @@
 # -*- coding: utf8 -*-
+##
+# @file mplots.py
+# @brief 绘制k线，交易信号连线。
+# @author wondereamer
+# @version 2.0
+# @date 2015-10-19
+
+
 import numpy as np
 import inspect
 from matplotlib.colors import colorConverter
 from matplotlib.collections import LineCollection, PolyCollection
-from quantdigger.kernel.engine import series
+from quantdigger.engine import series
 
 def override_attributes(method):
     # 如果plot函数不带绘图参数，则使用属性值做为参数。
@@ -62,8 +70,10 @@ def create_attributes(method):
                 upper = lower = []
                 if isinstance(self.value, tuple):
                     # 多值指标
-                    upper = [ max([value[i] for value in self.value ]) for i in xrange(0, len(self.value[0]))]
-                    lower = [ min([value[i] for value in self.value ]) for i in xrange(0, len(self.value[0]))]
+                    upper = [ max([value[i] for value in self.value ]) 
+                                 for i in xrange(0, len(self.value[0]))]
+                    lower = [ min([value[i] for value in self.value ]) 
+                                  for i in xrange(0, len(self.value[0]))]
                 else:
                     upper = self.value
                     lower = self.value

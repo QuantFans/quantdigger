@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from quantdigger.kernel.engine.event import OrderEvent
+from quantdigger.engine.event import OrderEvent
 from abc import ABCMeta, abstractmethod
 
 class Trader(object):

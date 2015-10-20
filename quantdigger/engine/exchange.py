@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-from quantdigger.kernel.datastruct import Transaction, PriceType, TradeSide, Direction
-from quantdigger.kernel.engine.event import FillEvent
+from quantdigger.datastruct import Transaction, PriceType, TradeSide, Direction
+from quantdigger.engine.event import FillEvent
 class Exchange(object):
     """ 模拟交易所。
   

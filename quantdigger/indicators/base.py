@@ -1,15 +1,14 @@
 # -*- coding: utf8 -*-
-##
-# @file indicator.py
-# @brief 
+# @file base.py
+# @brief 指标基类
 # @author wondereamer
 # @version 0.1
-# @date 2015-02-22
+# @date 2015-12-23
 
 import numpy as np
 import pandas
-from quantdigger.kernel.engine import series
-from quantdigger.widgets.plotting import PlotingActions
+from quantdigger.engine import series
+from quantdigger.widgets.plotting import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
 def transform2ndarray(data):
@@ -36,7 +35,7 @@ def transform2ndarray(data):
     #return _algo
 
 
-class IndicatorBase(PlotingActions):
+class IndicatorBase(PlotInterface):
     ## @todo 把绘图函数分类到父类中。
     """
     指标基类。每个指标的内部数据为序列变量。所以每个指标对象都会与一个跟踪器相关联，
@@ -198,4 +197,3 @@ class IndicatorBase(PlotingActions):
     #def __ifloordiv__(self, r):
         #self._data[self._curbar] %= r
         #return self
-

@@ -4,6 +4,18 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
 from quantdigger.digger import finance
+from matplotlib.ticker import Formatter
+
+def xticks_to_display(data_length):
+    #print(r.index[0].weekday())
+    interval = data_length / 5
+    v = 0
+    xticks = []
+    for i in range(0, 6):
+        xticks.append(v)
+        v += interval
+    return xticks
+
 
 def plot_result(price_data, indicators, signals,
         blotter):
@@ -34,9 +46,26 @@ def plot_result(price_data, indicators, signals,
         frame.draw_widgets()
 
         fig2 = plt.figure()
-        ax = fig2.add_axes((0.1, 0.1, 0.9, 0.9))
+        ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))
+        delta = curve.index[1] - curve.index[0]
+        ax.xaxis.set_major_formatter(TimeFormatter(curve.index, '%Y-%m-%d' ))
+        ax.set_xticks(xticks_to_display(len(curve)))
         ax.plot(curve.equity)
         plt.show()
 
     except Exception, e:
         print(e)
+
+class TimeFormatter(Formatter):
+    #def __init__(self, dates, fmt='%Y-%m-%d'):
+    # 分类 －－format
+    def __init__(self, dates, fmt='%Y-%m-%d %H:%M'):
+        self.dates = dates
+        self.fmt = fmt
+
+    def __call__(self, x, pos=0):
+        'Return the label for time x at position pos'
+        ind = int(round(x))
+        if ind>=len(self.dates) or ind<0: return ''
+
+        return self.dates[ind].strftime(self.fmt)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
 
-from quantdigger.kernel.engine.event import OrderEvent, Event
-from quantdigger.kernel.datastruct import Position, TradeSide, Direction, PriceType
+from quantdigger.engine.event import OrderEvent, Event
+from quantdigger.datastruct import Position, TradeSide, Direction, PriceType
 from quantdigger.util import engine_logger as logger
 from api import SimulateTraderAPI
 
