@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import Queue
 import pandas as pd
-from quantdigger.kernel.datasource.data import local_data
+from quantdigger.datasource.data import local_data
 from quantdigger.errors import DataAlignError
-from quantdigger.kernel.engine.strategy import BarTracker
-from quantdigger.kernel.engine.event import Event
+from quantdigger.engine.strategy import BarTracker
+from quantdigger.engine.event import Event
 class ExecuteUnit(object):
     """ 策略执行的物理单元，支持多个策略同时运行。
         每个执行单元都可能跟踪多个数据(策略用到的周期合约数据集合)。

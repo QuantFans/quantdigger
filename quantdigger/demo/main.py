@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from quantdigger.kernel.engine.execute_unit import ExecuteUnit
-from quantdigger.kernel.indicators.common import MA, BOLL
-from quantdigger.kernel.engine.strategy import TradingStrategy
+from quantdigger.engine.execute_unit import ExecuteUnit
+from quantdigger.indicators.common import MA, BOLL
+from quantdigger.engine.strategy import TradingStrategy
 from quantdigger.util import  pcontract, stock
 from quantdigger.digger import deals
 import plotting
-#from quantdigger.kernel.engine.series import NumberSeries
 
 #def average(series, n):
     #""" 一个可选的平均线函数 """ 

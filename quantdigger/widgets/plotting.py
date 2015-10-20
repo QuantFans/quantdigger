@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 ##
 # @file plotting.py
-# @brief 
+# @brief 统一绘图接口, 帮助指标类的绘图。
 # @author wondereamer
 # @version 0.15
 # @date 2015-06-13
@@ -28,10 +28,9 @@ class QtWidget(object):
         raise NotImplementedError
 
 
-class PlotingActions(object):
+class PlotInterface(object):
     """
-    系统会提基类。
-
+    系统绘图基类。
 
     :ivar upper: 坐标上界（绘图用）
     :vartype upper: float

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from quantdigger.kernel.engine.execute_unit import ExecuteUnit
+from quantdigger.engine.execute_unit import ExecuteUnit
 from quantdigger.util import stock
 from quantdigger.digger import deals
 import plotting

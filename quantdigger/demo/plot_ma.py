@@ -2,8 +2,8 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from quantdigger.kernel.indicators.common import MA
-from quantdigger.kernel.datasource.data import csv2frame
+from quantdigger.indicators.common import MA
+from quantdigger.datasource.data import csv2frame
 
 # 创建画布
 fig, ax = plt.subplots()

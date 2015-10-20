@@ -23,7 +23,7 @@ def pcontract(contract, period):
        :return: 周期合约
        :rtype: PContract
     """
-    from quantdigger.kernel.datastruct import PContract, Contract, Period
+    from quantdigger.datastruct import PContract, Contract, Period
     return PContract(Contract(contract),
                      Period(period))
 
@@ -37,6 +37,10 @@ def stock(code,period='1.Day'):
     Returns:
         PContract. 周期合约
     """
-    from quantdigger.kernel.datastruct import PContract, Contract, Period
+    from quantdigger.datastruct import PContract, Contract, Period
     return PContract(Contract('%s.stock' %  code),
                      Period(period))
+
+def formatTimeTicks():
+    """ 格式化时间显示""" 
+    pass

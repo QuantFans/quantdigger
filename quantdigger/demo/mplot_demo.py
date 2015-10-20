@@ -5,10 +5,10 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
-from quantdigger.kernel.indicators.common import MA, RSI, Volume
+from quantdigger.indicators.common import MA, RSI, Volume
 
 
-from quantdigger.kernel.datasource.data import get_stock_signal_data
+from quantdigger.datasource.data import get_stock_signal_data
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 

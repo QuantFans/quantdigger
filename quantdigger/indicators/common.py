@@ -2,14 +2,16 @@
 ##
 # @file common.py
 # @brief 
-# @author dingjie.wang@foxmail.com
+# @author wondereamer
 # @version 0.1
 # @date 2015-12-23
 import talib
 import numpy as np
-from indicator import IndicatorBase, transform2ndarray
 import matplotlib.finance as finance
 from quantdigger.widgets.mplotwidgets.mplots import create_attributes
+from quantdigger.indicators.base import IndicatorBase, transform2ndarray
+
+
             
 class MA(IndicatorBase):
     """ 移动平均线指标。 """

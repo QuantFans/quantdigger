@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from quantdigger.kernel.indicators.common import MA, BOLL
-from quantdigger.kernel.engine.strategy import TradingStrategy
+from quantdigger.indicators.common import MA, BOLL
+from quantdigger.engine.strategy import TradingStrategy
 import pdb
 import fw
 

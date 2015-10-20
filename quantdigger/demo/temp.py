@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #import matplotlib
 #matplotlib.use('TkAgg')
 #import datetime
@@ -53,18 +54,19 @@
 
 
 
-from __future__ import print_function
 import numpy
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 
-from quantdigger.kernel.datasource.data import csv2frame
+from quantdigger.datasource.data import csv2frame
 
 r = csv2frame("IF000.SHFE-10.Minute.csv")
 
 
 class MyFormatter(Formatter):
     #def __init__(self, dates, fmt='%Y-%m-%d'):
+    # 分类 －－format
     def __init__(self, dates, fmt='%m-%d %H:%M'):
         self.dates = dates
         self.fmt = fmt
@@ -73,7 +75,6 @@ class MyFormatter(Formatter):
         'Return the label for time x at position pos'
         ind = int(round(x))
         if ind>=len(self.dates) or ind<0: return ''
-        print(ind)
 
         return self.dates[ind].strftime(self.fmt)
 
@@ -83,7 +84,30 @@ fig, ax = plt.subplots()
 
 ax.xaxis.set_major_formatter(formatter)
 ax.set_xlim(10, 100)
+# 分类 -- xticks 的时间间隔
+# 停止的时候决定tick显示哪个
+ax.set_xticks([20,40])
+
 
 ax.plot(numpy.arange(len(r)), r.close )
 #fig.autofmt_xdate()
-plt.show()
+#plt.show()
+print("-----------")
+#dates = pd.Series(pd.date_range('2015-01-01', '2016-12-31'))  # Timestamps
+dates = pd.Series(r.index)  # Timestamps
+today = pd.Timestamp('now')                                   # Timestamp
+print(dates.dt.year[0])
+print(dates.dt.year[1])
+print(dates.dt.hour[0])
+print(dates.dt.hour[1])
+print(dates.dt.minute[0])
+print(dates.dt.minute[1])
+print(dates.dt.minute[2])
+print("******")
+print(r.index[0].year)
+print(r.index[0].weekday())
+print(r.index[30].weekday())
+print("******")
+#print(dates[(dates.dt.year == today.year) & 
+    #(dates.dt.month == today.month) &
+    #(dates.dt.day == today.day)])

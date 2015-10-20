@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from quantdigger.kernel.datastruct import TradeSide, Direction
+from quantdigger.datastruct import TradeSide, Direction
 class PositionsDetail(object):
     """ 当前相同合约持仓集合(可能不同时间段下单)。
 

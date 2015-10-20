@@ -1,4 +1,12 @@
 # -*- coding: gbk -*-
+##
+# @file stock_plot.py
+# @brief 一些绘制统计信息的函数。
+# @author wondreamer
+# @version 2.0
+# @date 2015-10-19
+
+
 import matplotlib
 matplotlib.use("TKAgg")
 from matplotlib.widgets import Cursor
