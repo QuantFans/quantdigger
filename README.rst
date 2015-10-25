@@ -39,7 +39,7 @@ http://www.quantfans.com/doc/quantdigger/
 
 依赖库
 ------
-* Python 
+* Python (2.x, **暂不支持3.x**)
 * pandas 
 * python-dateutil 
 * matplotlib 
