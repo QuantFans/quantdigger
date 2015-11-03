@@ -8,8 +8,7 @@
 import talib
 import numpy as np
 import matplotlib.finance as finance
-from quantdigger.widgets.mplotwidgets.mplots import create_attributes
-from quantdigger.indicators.base import IndicatorBase, transform2ndarray
+from quantdigger.indicators.base import IndicatorBase, transform2ndarray, create_attributes
 
 
             

@@ -2,7 +2,6 @@
 
 #from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
-from quantdigger import util
 
 class TradeSide(object):
     """ 开平仓标志 
@@ -25,24 +24,24 @@ class TradeSide(object):
     KAI = 7
     PING = 8
 
-    tdict = {
-        'BUY': 1,
-        'SHORT': 2,
-        'COVER': 3,
-        'SELL': 4,
-        'COVER_TODAY': 5,
-        'SELL_TODAY': 6,
-        'KAI': 7,
-        'PING': 8
-    }
 
     @classmethod
     def arg_to_type(self, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
+        tdict = {
+            'BUY': 1,
+            'SHORT': 2,
+            'COVER': 3,
+            'SELL': 4,
+            'COVER_TODAY': 5,
+            'SELL_TODAY': 6,
+            'KAI': 7,
+            'PING': 8
+        }
         if type(arg) == str:
-            return self.tdict[arg.upper()]
+            return tdict[arg.upper()]
         else:
             return arg
 
@@ -63,44 +62,43 @@ class Captial(object):
 class PriceType(object):
     """ 下单类型 
 
-    :ivar LMT: 限价单，值0.
-    :ivar MKT: 市价单，值1.
+    :ivar LMT: 限价单 - 0.
+    :ivar MKT: 市价单 - 1.
     """
     LMT = 0
     MKT = 1 
-    tdict = {'LMT': LMT,
-             'MKT': MKT
-    }
 
     @classmethod
     def arg_to_type(self, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
+        tdict = {'LMT': self.LMT,
+                 'MKT': self.MKT
+        }
         if type(arg) == str:
-            return self.tdict[arg.upper()]
+            return tdict[arg.upper()]
         else:
             return arg
 
 class HedgeType(object):
     """ 下单类型 
 
-    :ivar SPEC: 投机，值0.
-    :ivar HEDG: 套保，值1.
+    :ivar SPEC: 投机 - 0.
+    :ivar HEDG: 套保 - 1.
     """
     SPEC = 0
     HEDG = 1
-    tdict = {'SPEC': SPEC,
-             'HEDG': HEDG
-    }
 
     @classmethod
     def arg_to_type(self, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
+        tdict = {'SPEC': self.SPEC,
+                 'HEDG': self.HEDG }
         if type(arg) == str:
-            return self.tdict[arg.upper()]
+            return tdict[arg.upper()]
         else:
             return arg
 
@@ -108,72 +106,48 @@ class Direction(object):
     """
     多空方向。
 
-    :ivar LONG: 多头，值1.
-    :ivar SHORT: 空头，值2.
+    :ivar LONG: 多头 - 1.
+    :ivar SHORT: 空头 - 2.
     """
     LONG = 1
     SHORT = 2
-    arg2type = {'LONG': LONG,
-             'SHORT': SHORT 
-    }
-
-    type2str = { LONG: 'LONG',
-                 SHORT: 'SHORT', 
-    }
 
     @classmethod
     def arg_to_type(self, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
+        arg2type = {'LONG': self.LONG,
+                 'SHORT': self.SHORT 
+        }
         if type(arg) == str:
-            return self.arg2type[arg.upper()]
+            return arg2type[arg.upper()]
         else:
             return arg
 
     @classmethod
     def type_to_str(self, type):
-        return self.type2str[type]
+        type2str = { self.LONG: 'LONG',
+                     self.SHORT: 'SHORT'}
+    
+        return type2str[type]
 
         
 class Transaction(object):
     """ 成交记录。
 
     :ivar ref: 本地编号
-    :vartype ref: int
-   
     :ivar id: 成交编号
-    :vartype id: :class:`OrderID`
-
     :ivar contract: 合约。
-    :vartype contract: :class:`Contract`
-
     :ivar direction: 多空方向。
-    :vartype direction: :class:`Direction`
-
     :ivar price: 成交价格。
-    :vartype price: float
-
     :ivar quantity: 成交数量。
-    :vartype quantity: float
-
     :ivar side: 开平仓标志。
-    :vartype side: :class:`TradeSide`
-
     :ivar datetime: 成交时间
-    :vartype datetime: :class:`datetime`
-
     :ivar price_type: 下单类型。
-    :vartype price_type: :class:`PriceType`
-
     :ivar commission: 佣金百分比
-    :vartype commission: float
-
     :ivar margin_ratio: 保证金比例。
-    :vartype margin_ratio: float
-
     :ivar hedge_type: 交易类型。
-    :vartype hedge_type: :class:`PriceType`
     """
     def __init__(self, order=None):
         if order:
@@ -238,34 +212,15 @@ class Order(object):
     """ 订单 
 
         :ivar ref: 本地编号
-        :vartype ref: int
-
         :ivar id: 报单编号
-        :vartype id: :class:`OrderID`
-
         :ivar contract: 合约。
-        :vartype contract: :class:`Contract`
-
         :ivar direction: 多空方向。
-        :vartype direction: :class:`Direction`
-
         :ivar price: 成交价格。
-        :vartype price: float
-
         :ivar quantity: 成交数量。
-        :vartype quantity: float
-
         :ivar side: 开平仓标志。
-        :vartype side: :class:`TradeSide`
-
         :ivar datetime: 成交时间
-        :vartype datetime: :class:`datetime`
-
         :ivar price_type: 下单类型。
-        :vartype price_type: :class:`PriceType`
-
         :ivar hedge_type: 交易类型。
-        :vartype hedge_type: :class:`HedgeType`
     """
     def __init__(self, dt, contract, type_, side, direction, price, quantity, hedge = HedgeType.SPEC):
         self.ref = OrderID.next_order_id()
@@ -280,7 +235,7 @@ class Order(object):
         self.hedge_type = hedge
         self.margin_ratio = 1
 
-    def order_margin(self):
+    def order_margin(self, new_price):
         """ 计算这笔限价交易的保证金。
         
            :param float new_price: 当前价格。
@@ -306,10 +261,7 @@ class Contract(object):
     """ 合约。
    
     :ivar exch_type: 市场类型。
-    :vartype exch_type: str
-
     :ivar code: 合约代码
-    :vartype code: str
     """
     def __init__(self, str_contract):
         info = str_contract.split('.')
@@ -442,12 +394,15 @@ class Position(object):
         self.margin_ratio = trans.margin_ratio
 
     def profit(self, new_price):
-        """ 根据当前的价格计算盈亏。
+        """ 根据最新价格计算持仓盈亏。
         
-           :param float new_price: 当前价格。
-           :return: 盈亏数额。
-           :rtype: float
+        Args:
+            new_price (float): 最新价格。
+        
+        Returns:
+            float. 盈亏数额
         """
+
         profit = 0
         if self.direction == Direction.LONG:
             profit += (new_price - self.cost) * self.quantity
@@ -463,9 +418,11 @@ class Position(object):
     def position_margin(self, new_price):
         """ 根据当前价格计算这笔交易的保证金。
         
-           :param float new_price: 当前价格。
-           :return: 保证金。
-           :rtype: float
+        Args:
+            new_price (float): 最新价格。
+        
+        Returns:
+            float. 保证金占用
         """
         price = self.cost if self.contract.is_stock else new_price
         return price * self.quantity * self.margin_ratio
@@ -490,22 +447,11 @@ class Bar(object):
     """Bar数据。
 
     :ivar open: 开盘价。
-    :vartype open: float
-
     :ivar close: 收盘价。
-    :vartype close: float
-
     :ivar high: 最高价。
-    :vartype high: float
-
     :ivar low: 最低价。
-    :vartype low: float
-
     :ivar datetime: 开盘时间。
-    :vartype datetime: datetime
-
     :ivar vol: 成交量。
-    :vartype vol: float
     """
     def __init__(self, dt, open, close, high, low, vol):
         self.datetime = dt

@@ -23,9 +23,10 @@ class DealPosition(object):
         :ivar close: 平仓价
         :vartype close: float
     """
-    def __init__(self, buy_trans, sell_trans):
+    def __init__(self, buy_trans, sell_trans, quantity):
         self.open = buy_trans
         self.close = sell_trans
+        self._quantity = quantity;
 
     def profit(self):
         """ 盈亏额  """
@@ -38,7 +39,7 @@ class DealPosition(object):
     @property
     def quantity(self):
         """ 成交量 """
-        return self.open.quantity
+        return self._quantity
 
     @property
     def open_datetime(self):
@@ -67,8 +68,11 @@ class DealPosition(object):
 
 
 def update_positions(current_positions, deal_positions, trans):
-    ## @todo 把复杂统计单独出来。
-    """ 更新持仓 """
+    """ 更新持仓 
+        current_positions: 当前持仓
+        deal_positions: 开平仓对
+    """
+    ## @todo 区分多空
     p = current_positions.setdefault(trans.contract, PositionsDetail())
     if trans.side == TradeSide.KAI:
         # 开仓
@@ -80,20 +84,22 @@ def update_positions(current_positions, deal_positions, trans):
         left_vol = trans.quantity
         last_index = -1
         for position in reversed(p.positions):
-            deal_positions.append(DealPosition(position, trans))
             if position.quantity < left_vol:
                 # 还需从之前的仓位中平。
                 left_vol -= position.quantity
                 last_index -= 1
+                deal_positions.append(DealPosition(position, trans, position.quantity))
 
             elif position.quantity == left_vol:
                 left_vol -= position.quantity
                 last_index -= 1
+                deal_positions.append(DealPosition(position, trans, position.quantity))
                 break 
 
             else:
                 position.quantity -= left_vol
                 left_vol = 0
+                deal_positions.append(DealPosition(position, trans, left_vol))
                 break
 
         p.positions = p.positions[0 : last_index]

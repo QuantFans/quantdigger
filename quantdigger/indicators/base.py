@@ -7,6 +7,7 @@
 
 import numpy as np
 import pandas
+import inspect
 from quantdigger.engine import series
 from quantdigger.widgets.plotting import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
@@ -21,6 +22,50 @@ def transform2ndarray(data):
     if type(data) != np.ndarray:
         raise  DataFormatError
     return data
+
+def create_attributes(method):
+    """ 根据被修饰函数的参数构造属性。"""
+    def wrapper(self, *args, **kwargs):
+        magic = inspect.getargspec(method)
+        arg_names = magic.args[1:]
+        # 默认参数
+        default =  dict((x, y) for x, y in zip(magic.args[-len(magic.defaults):], magic.defaults))
+        # 调用参数
+        method_args = { }
+        for i, arg in enumerate(args):
+            method_args[arg_names[i]] = arg
+        method_args.update(kwargs)
+        # 
+        default.update(method_args)
+        # 属性创建
+        for key, value in default.iteritems():
+            setattr(self, key, value)
+        # 构造函数
+        rst =  method(self, *args, **kwargs)
+        if not hasattr(self, 'value'):
+            raise Exception("每个指标都必须有value属性，代表指标值！")
+        else:
+            # 序列变量
+            if self.tracker:
+                if isinstance(self.value, tuple):
+                    self._series = [series.NumberSeries(self.tracker, value) for value in self.value]
+                else:
+                    self._series = series.NumberSeries(self.tracker, self.value)
+            # 绘图中的y轴范围未被设置，使用默认值。
+            if not self.upper:
+                upper = lower = []
+                if isinstance(self.value, tuple):
+                    # 多值指标
+                    upper = [ max([value[i] for value in self.value ]) 
+                                 for i in xrange(0, len(self.value[0]))]
+                    lower = [ min([value[i] for value in self.value ]) 
+                                  for i in xrange(0, len(self.value[0]))]
+                else:
+                    upper = self.value
+                    lower = self.value
+                self.set_yrange(lower, upper)
+            return rst
+    return wrapper
 
 # 带参数decorator
 #def invoke_algo(algo, *arg):
@@ -76,7 +121,6 @@ class IndicatorBase(PlotInterface):
                 rst = apply(self._algo, self._args)
                 for i, v in enumerate(rst):
                     self._series[i].update(v)
-
 
     def __size__(self):
         """""" 

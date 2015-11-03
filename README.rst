@@ -55,9 +55,9 @@ http://www.quantfans.com/doc/quantdigger/
 ~~~~
 .. code:: py
 
-    from quantdigger.kernel.engine.execute_unit import ExecuteUnit
-    from quantdigger.kernel.indicators.common import MA, BOLL
-    from quantdigger.kernel.engine.strategy import TradingStrategy
+    from quantdigger.engine.execute_unit import ExecuteUnit
+    from quantdigger.indicators.common import MA, BOLL
+    from quantdigger.engine.strategy import TradingStrategy
     from quantdigger.util import  pcontract
     import plotting
 
@@ -113,22 +113,22 @@ http://www.quantfans.com/doc/quantdigger/
 
 * k线和信号线
 
-  .. image:: figure_signal.png
+  .. image:: images/figure_signal.png
      :width: 500px
 
 * 资金曲线。
   
-  .. image:: figure_money.png
+  .. image:: images/figure_money.png
      :width: 500px
 
 其它
 ~~~~~~~~
 **mplot_demo.py  matplotlib画k线，指标线的demo。**
-  .. image:: plot.png
+  .. image:: images/plot.png
      :width: 500px
 
 **pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。**
-  .. image:: pyquant.png
+  .. image:: images/pyquant.png
      :width: 500px
 
 .. _TeaEra: https://github.com/TeaEra

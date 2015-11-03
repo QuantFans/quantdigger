@@ -31,7 +31,7 @@ class Blotter(object):
 
 class SimpleBlotter(Blotter):
     """
-    简单的订单管理系统，直接给 :class:`quantdigger.kernel.engine.exchange.Exchange`
+    简单的订单管理系统，直接给 :class:`quantdigger.engine.exchange.Exchange`
     对象发订单，没有风控。
     """
     def __init__(self, timeseries, events_pool, initial_capital=5000.0):
@@ -155,8 +155,8 @@ class SimpleBlotter(Blotter):
 
 
     def _update_positions(self, order, trans):
-        ## @todo 把复杂统计单独出来。
         """ 更新持仓 """
+        ## @todo 区分多空
         pos = self.current_positions.setdefault(trans.contract, Position(trans))
         if trans.side == TradeSide.KAI:
             # 开仓

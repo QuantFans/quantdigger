@@ -79,7 +79,7 @@ DESCRIPTION = "量化交易PYTHON回测系统"
 AUTHOR = "QuantFans"
 AUTHOR_EMAIL = "dingjie.wang@foxmail.com"
 URL = "https://github.com/QuantFans/quantdigger"
-VERSION = "0.2.00" 
+VERSION = "0.2.1" 
 
 
 setup(

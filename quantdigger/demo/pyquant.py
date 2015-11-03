@@ -6,9 +6,9 @@ from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 from PyQt4 import QtGui, QtCore
 from plugin.qtwidgets.techwidget import TechWidget
-from quantdigger.kernel.datasource import data
+from quantdigger.datasource import data
 from plugin.mplotwidgets import widgets
-from quantdigger.kernel.indicators import sys_indicator as indicator
+from quantdigger.indicators import sys_indicator as indicator
 price_data, entry_x, entry_y, exit_x, exit_y, colors = data.get_stock_signal_data()
 
 class EmbedIPython(RichIPythonWidget):

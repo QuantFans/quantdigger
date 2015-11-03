@@ -6,9 +6,36 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
 from quantdigger.indicators.common import MA, RSI, Volume
+from quantdigger.digger import sugar
+import pandas as pd
 
 
-from quantdigger.datasource.data import get_stock_signal_data
+# prepare data
+def get_stock_signal_data():
+    from matplotlib.colors import colorConverter
+
+    signal_data = pd.read_csv('./data/signal_IF000.csv', index_col=0, parse_dates=True)
+    price_data = pd.read_csv('./data/IF000.csv' , index_col=0, parse_dates=True)
+    info = sugar.process_signal(signal_data, price_data)
+    entry_x = []
+    entry_y = info['entry_price'].tolist()
+    exit_x = []
+    exit_y = info['exit_price'].tolist()
+    colors = []
+    for t in info.index:
+        entry_x.append(price_data.index.searchsorted(t))
+    for t in info['exit_datetime'].values:
+        exit_x.append(price_data.index.searchsorted(t))
+    for i in range(len(info)):
+        tr = info.ix[i]
+        if tr['islong']:
+            c = 'r' if tr['exit_price']>tr['entry_price'] else 'b'
+        else:
+            c = 'r' if tr['exit_price']<tr['entry_price'] else 'b'
+        r,g,b = colorConverter.to_rgb(c)
+        colors.append((r,g,b,1))
+    return price_data, entry_x, entry_y, exit_x, exit_y, colors
+
 price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 

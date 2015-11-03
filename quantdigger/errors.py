@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-class QuantDiggerError(Exception):
+class QError(Exception):
     msg = None
 
     def __init__(self, *args, **kwargs):
@@ -17,35 +17,38 @@ class QuantDiggerError(Exception):
     __repr__ = __str__
 
 
-class DataFormatError(QuantDiggerError):
+class DataFormatError(QError):
     """
     """
     msg = "错误的数据格式！" 
 
 
-class FileDoesNotExist(QuantDiggerError):
+class FileDoesNotExist(QError):
     """
     当本地文件不存在的时候触发。
     """
     msg = "不存在文件:{file}" 
 
 
-class PeriodTypeError(QuantDiggerError):
+class PeriodTypeError(QError):
     msg = "不存在该周期！" 
 
 
-class DataAlignError(QuantDiggerError):
+class DataAlignError(QError):
     msg = "数据没有对齐！" 
 
-class SeriesIndexError(QuantDiggerError):
+class SeriesIndexError(QError):
     msg = "序列变量索引越界！" 
 
-class BreakConstError(QuantDiggerError):
+class BreakConstError(QError):
     msg = "不能对常量赋值！" 
+
+class ArgumentError(QError):
+    msg = "参数错误！" 
     
 
 
-class WrongDataForTransform(QuantDiggerError):
+class WrongDataForTransform(QError):
     """
     Raised whenever a rolling transform is called on an event that
     does not have the necessary properties.
@@ -53,7 +56,7 @@ class WrongDataForTransform(QuantDiggerError):
     msg = "{transform} requires {fields}. Event cannot be processed."
 
 
-class UnsupportedSlippageModel(QuantDiggerError):
+class UnsupportedSlippageModel(QError):
     """
     Raised if a user script calls the override_slippage magic
     with a slipage object that isn't a VolumeShareSlippage or
@@ -65,7 +68,7 @@ Please use VolumeShareSlippage or FixedSlippage.
 """.strip()
 
 
-class OverrideSlippagePostInit(QuantDiggerError):
+class OverrideSlippagePostInit(QError):
     # Raised if a users script calls override_slippage magic
     # after the initialize method has returned.
     msg = """
@@ -74,7 +77,7 @@ You may only call override_slippage in your initialize method.
 """.strip()
 
 
-class RegisterTradingControlPostInit(QuantDiggerError):
+class RegisterTradingControlPostInit(QError):
     # Raised if a user's script register's a trading control after initialize
     # has been run.
     msg = """
@@ -83,7 +86,7 @@ Trading controls may only be set in your initialize method.
 """.strip()
 
 
-class UnsupportedCommissionModel(QuantDiggerError):
+class UnsupportedCommissionModel(QError):
     """
     Raised if a user script calls the override_commission magic
     with a commission object that isn't a PerShare, PerTrade or
@@ -95,7 +98,7 @@ Please use PerShare or PerTrade.
 """.strip()
 
 
-class OverrideCommissionPostInit(QuantDiggerError):
+class OverrideCommissionPostInit(QError):
     """
     Raised if a users script calls override_commission magic
     after the initialize method has returned.
@@ -106,7 +109,7 @@ You may only call override_commission in your initialize method.
 """.strip()
 
 
-class TransactionWithNoVolume(QuantDiggerError):
+class TransactionWithNoVolume(QError):
     """
     Raised if a transact call returns a transaction with zero volume.
     """
@@ -115,7 +118,7 @@ Transaction {txn} has a volume of zero.
 """.strip()
 
 
-class TransactionWithWrongDirection(QuantDiggerError):
+class TransactionWithWrongDirection(QError):
     """
     Raised if a transact call returns a transaction with a direction that
     does not match the order.
@@ -125,7 +128,7 @@ Transaction {txn} not in same direction as corresponding order {order}.
 """.strip()
 
 
-class TransactionWithNoAmount(QuantDiggerError):
+class TransactionWithNoAmount(QError):
     """
     Raised if a transact call returns a transaction with zero amount.
     """
@@ -134,7 +137,7 @@ Transaction {txn} has an amount of zero.
 """.strip()
 
 
-class TransactionVolumeExceedsOrder(QuantDiggerError):
+class TransactionVolumeExceedsOrder(QError):
     """
     Raised if a transact call returns a transaction with a volume greater than
 the corresponding order.
@@ -144,7 +147,7 @@ Transaction volume of {txn} exceeds the order volume of {order}.
 """.strip()
 
 
-class UnsupportedOrderParameters(QuantDiggerError):
+class UnsupportedOrderParameters(QError):
     """
     Raised if a set of mutually exclusive parameters are passed to an order
     call.
@@ -152,7 +155,7 @@ class UnsupportedOrderParameters(QuantDiggerError):
     msg = "{msg}"
 
 
-class BadOrderParameters(QuantDiggerError):
+class BadOrderParameters(QError):
     """
     Raised if any impossible parameters (nan, negative limit/stop)
     are passed to an order call.
@@ -160,14 +163,14 @@ class BadOrderParameters(QuantDiggerError):
     msg = "{msg}"
 
 
-class OrderDuringInitialize(QuantDiggerError):
+class OrderDuringInitialize(QError):
     """
     Raised if order is called during initialize()
     """
     msg = "{msg}"
 
 
-class TradingControlViolation(QuantDiggerError):
+class TradingControlViolation(QError):
     """
     Raised if an order would violate a constraint set by a TradingControl.
     """
@@ -176,7 +179,7 @@ Order for {amount} shares of {sid} violates trading constraint {constraint}.
 """.strip()
 
 
-class IncompatibleHistoryFrequency(QuantDiggerError):
+class IncompatibleHistoryFrequency(QError):
     """
     Raised when a frequency is given to history which is not supported.
     At least, not yet.

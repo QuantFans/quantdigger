@@ -66,6 +66,11 @@ if __name__ == '__main__':
         try:
             for trans in algo.blotter.transactions:
                 deals.update_positions(a, b, trans);
+            print("******************")
+            print(a)
+            print("******************")
+            print(b)
+            print("******************")
         except Exception, e:
             print e
         plotting.plot_result(simulator.data[pcon],
