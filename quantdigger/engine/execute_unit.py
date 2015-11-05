@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import Queue
 import pandas as pd
-from quantdigger.datasource.data import local_data
+from datetime import datetime
+from quantdigger.datasource.data import data_manager
 from quantdigger.errors import DataAlignError
 from quantdigger.engine.strategy import BarTracker
 from quantdigger.engine.event import Event
@@ -11,23 +12,17 @@ class ExecuteUnit(object):
         其中第一个合约为"主合约" 。 每个执行器可加载多个策略,只要数据需求不超过pcontracts。
 
         :ivar begin_dt: 策略执行的时间起点。
-        :vartype begin_dt: datetime
         :ivar end_dt: 策略执行的时间终点。
-        :vartype end_dt: datetime
         :ivar pcontracts: 策略用到的周期合约数据集合。
-        :vartype pcontracts: list
         :ivar trackers: 策略用到的跟踪器集合。（和周期合约一一对应）
-        :vartype trackers: list
         :ivar _strategies: 策略集合。
-        :vartype _strategies: list
         :ivar datasource: 数据源。
-        :vartype datasource: has method 'load_data'
 
     """
-    def __init__(self, pcontracts, begin_dt=None, end_dt=None, datasource=None):
+    def __init__(self, pcontracts, begin_dt=datetime(1970,1,1),
+                 end_dt=datetime(2100,1,1)):
         self.begin_dt = begin_dt
         self.end_dt = end_dt
-        self.datasource = datasource
         # 不同周期合约数据。
         self.data = { }     # PContract -> pandas.DataFrame
         self.pcontracts = pcontracts
@@ -38,10 +33,10 @@ class ExecuteUnit(object):
         # accociate with a mplot widget
         #tracker.pcontracts
         
-        self.load_data(pcontracts[0])
+        self.load_data(pcontracts[0], begin_dt, end_dt)
         # 每个周期合约对应一个跟跟踪器。
         for pcon in pcontracts[1:]:
-            self.load_data(pcon)
+            self.load_data(pcon, begin_dt, end_dt)
             BarTracker(self, pcon)
 
     def run(self):
@@ -96,23 +91,21 @@ class ExecuteUnit(object):
                 raise
             bar_index += 1
 
-    def load_data(self, pcontract):
+    def load_data(self, pcontract, dt_start=datetime(1970,1,1), dt_end=datetime(2100,1,1)):
         """ 加载周期合约数据
         
-           :param PContract pcontract: 周期合约。
-           :return: 周期合约数据。
-           :rtype: pandas.DataFrame
+        Args:
+            pcontract (PContract): 周期合约
+            dt_start(datetime): 开始时间
+            dt_end(datetime): 结束时间
+        
+        Returns:
+            pd.DataFrame. k线数据
         """
         try:
             return self.data[pcontract]
         except KeyError:
-            data = None
-            if self.datasource is not None:
-                data = self.datasource.load_data(pcontract, self.begin_dt, self.end_dt)
-            # self.datasource is None 或者 datasource 没有读到数据
-            if data is None:
-                print 'using default datasource.'
-                data = local_data.load_data(pcontract, self.begin_dt, self.end_dt)
+            data = data_manager.load_bars(pcontract, self.begin_dt, self.end_dt)
             if not hasattr(self, '_data_length'):
                 self._data_length = len(data) 
             elif self._data_length != len(data):

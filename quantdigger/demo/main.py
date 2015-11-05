@@ -43,10 +43,9 @@ class DemoStrategy(TradingStrategy):
 if __name__ == '__main__':
     try:
         pcon = pcontract('IF000.SHFE', '10.Minute')
-        begin_dt, end_dt = None, None
         #begin_dt, end_dt = '2015-05-25', '2015-06-01'
         #pcon = stock('600848','10.Minute')  # 通过tushare下载股票数据
-        simulator = ExecuteUnit([pcon, pcon], begin_dt, end_dt)
+        simulator = ExecuteUnit([pcon, pcon])
         algo = DemoStrategy(simulator)
         #algo1 = DemoStrategy(simulator)
         #algo2 = DemoStrategy(simulator)

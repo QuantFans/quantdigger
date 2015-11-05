@@ -47,7 +47,17 @@ class TradeSide(object):
 
 
 class Captial(object):
-    """ 账号资金 """
+    """ 账号资金 
+
+    :ivar broker_id: 经纪商
+    :ivar account_id: 交易账号
+    :ivar margin: 保证金占用
+    :ivar position_profit: 持仓盈亏
+    :ivar close_profit: 平仓盈亏
+    :ivar trading_day: 交易日
+    :ivar equity: 当前权益
+    :ivar cash: 可用资金
+    """
     def __init__(self, dt, contract, type_, side, direction, price, quantity):
         self.broker_id = None
         self.account_id = None
@@ -237,10 +247,12 @@ class Order(object):
 
     def order_margin(self, new_price):
         """ 计算这笔限价交易的保证金。
+
+        Args:
+            new_price (float): 最新价格。
         
-           :param float new_price: 当前价格。
-           :return: 保证金。
-           :rtype: float
+        Returns:
+            float. 保证金占用
         """
         return self.price * self.quantity * self.margin_ratio
 
@@ -416,7 +428,7 @@ class Position(object):
         pass
 
     def position_margin(self, new_price):
-        """ 根据当前价格计算这笔交易的保证金。
+        """ 根据当前价格计算这保证金占用。
         
         Args:
             new_price (float): 最新价格。
