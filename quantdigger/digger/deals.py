@@ -66,7 +66,6 @@ class DealPosition(object):
         """ 空头还是多头 """
         return self.open.direction
 
-
 def update_positions(current_positions, deal_positions, trans):
     """ 更新持仓 
         current_positions: 当前持仓
@@ -78,11 +77,12 @@ def update_positions(current_positions, deal_positions, trans):
         # 开仓
         p.positions.append(trans)
         p.total += trans.quantity 
+
     elif trans.side == TradeSide.PING:
         # 平仓
         p.total -= trans.quantity 
         left_vol = trans.quantity
-        last_index = -1
+        last_index = 0
         for position in reversed(p.positions):
             if position.quantity < left_vol:
                 # 还需从之前的仓位中平。
@@ -101,6 +101,6 @@ def update_positions(current_positions, deal_positions, trans):
                 left_vol = 0
                 deal_positions.append(DealPosition(position, trans, left_vol))
                 break
-
-        p.positions = p.positions[0 : last_index]
-        assert(left_vol == 0)
+        if last_index != 0:
+            p.positions = p.positions[0 : last_index]
+        assert(left_vol == 0) # 会被catch捕获 AssertError

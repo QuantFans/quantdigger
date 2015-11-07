@@ -4,6 +4,7 @@ import time
 import pandas as pd
 from quantdigger.errors import ArgumentError
 
+
 def csv2frame(fname):
     return pd.read_csv(fname, index_col=0, parse_dates=True)
 
@@ -54,6 +55,8 @@ def tick2period(code,period,start,end):
     return  dfout
 
 
+
+
 def encode2id(period, dt):
     """ 把周期和时间编码成13位的整数id
     
@@ -65,12 +68,7 @@ def encode2id(period, dt):
     Returns:
         int. id
     """
-    # 确保13位
-    st = str(int(time.mktime(dt.timetuple())*1000))
-    count = 13 - len(st)
-    for i in range(0, count):
-        st = '0' + st
-    prefix = {
+    db_period = {
             '1.Minute': '101',
             '3.Minute': '102',
             '5.Minute': '103',
@@ -84,7 +82,16 @@ def encode2id(period, dt):
             '1.Season': '111',
             '1.Year': '112'
             }
+    # 确保13位
+    strperiod = str(period)
+    if strperiod not in db_period:
+        raise "错误类型"
+    utime = int(time.mktime(dt.timetuple())*1000)
+    id = str(utime)
+    count = 13 - len(id)
+    for i in range(0, count):
+        id = '0' + id
     try:
-        return int(prefix[str(period)] + st)
+        return int(db_period[strperiod] + id), utime
     except KeyError:
         raise ArgumentError()

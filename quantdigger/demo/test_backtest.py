@@ -51,29 +51,19 @@ if __name__ == '__main__':
         #algo2 = DemoStrategy(simulator)
         simulator.run()
 
-        #for deal in algo.blotter.deal_positions:
-            ## code...
-            #print("----------------")
-            #print("开仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；") % \
-                #(deal.open_datetime, deal.open_price, Direction.type_to_str(deal.direction), deal.quantity)
-            #print("平仓时间: %s；成交价格: %f；买卖方向: %s；成交量: %d；盈亏: %f；") % \
-                #(deal.close_datetime, deal.close_price, Direction.type_to_str(deal.direction), deal.quantity, deal.profit())
 
         # 显示回测结果
-        positions = {}
-        signals = [] 
-        for trans in algo.blotter.transactions:
-            deals.update_positions(positions, signals, trans);
-
-        print "plotting.."
-        plotting.plot_result(simulator.data[pcon],
-                                    algo._indicators,
-                                    signals,
-                                    algo.blotter)
-
-        
-    except Exception, e:
-        import traceback
-        print traceback.format_exc()
-        #print e
+        from quantdigger.datastruct import TradeSide
+        ping = 0
+        kai = 0
+        for t in algo.blotter.transactions:
+            if t.side == TradeSide.PING:
+                ping += t.quantity
+            elif t.side == TradeSide.KAI:
+                kai += t.quantity
+            else:
+                raise "error" 
+        print "ping: ", ping
+        print "kai: ", kai
+        assert kai >= ping
 

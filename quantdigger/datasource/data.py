@@ -22,8 +22,6 @@ class LocalData(object):
         self._sql = SqlLiteSource(''.join([os.getcwd(), os.sep, 'data', os.sep, 'digger.db']))
 
     def load_bars(self, pcontract, dt_start, dt_end):
-        dt_start = pd.to_datetime(dt_start)
-        dt_end = pd.to_datetime(dt_end)
         if pcontract.contract.exch_type == 'stock':
             return []
         else:
@@ -87,7 +85,7 @@ class DataManager(object):
         self._loc_data = LocalData()
         self._srv_data = ServerData()
 
-    def load_bars(self, pcontract, dt_start=datetime(1970,1,1), dt_end=datetime(2100,1,1)):
+    def load_bars(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
         """  加载k时间范围的k线数据。
         
         Args:
@@ -100,6 +98,10 @@ class DataManager(object):
         Returns:
             DataFrame. 
         """
+        if type(dt_start) == str:
+            dt_start = datetime.strptime(dt_start, "%Y-%m-%d")
+        if type(dt_end) == str:
+            dt_end = datetime.strptime(dt_end, "%Y-%m-%d")
         data = self._loc_data.load_bars(pcontract, dt_start, dt_end)
         if len(data) == 0:
             return self._srv_data.load_bars(pcontract, dt_start, dt_end) 

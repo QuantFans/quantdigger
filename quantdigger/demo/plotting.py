@@ -4,6 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
 from quantdigger.digger import finance
+from datetime import datetime
 from matplotlib.ticker import Formatter
 
 def xticks_to_display(data_length):
@@ -23,6 +24,8 @@ def plot_result(price_data, indicators, signals,
         显示回测结果。
     """
     try:
+        dts = map(lambda x : datetime.fromtimestamp(x / 1000), price_data.index)
+        price_data.index = dts
         curve = finance.create_equity_curve_dataframe(blotter.all_holdings)
         print finance.output_summary_stats(curve)
 

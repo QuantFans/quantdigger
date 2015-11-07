@@ -341,7 +341,6 @@ class Period(object):
         self._type = time_unit
         self._length = unit_count
 
-
     @property
     def type(self):
         """
@@ -378,7 +377,7 @@ class PContract(object):
         self.period = period
 
     def __str__(self):
-        """ return string like 'SHEF-IF000-Minutes-10'  """
+        """ return string like 'IF000.SHEF-10.Minutes'  """
         return "%s-%s" % (self.contract, self.period)
 
     def __hash__(self):

@@ -42,7 +42,6 @@ class SeriesBase(object):
         """ 更新当前Bar索引， 被tracker调用。 """
         self._curbar = curbar
 
-
     def _added_to_tracker(self, tracker, system_var):
         """ 添加到跟踪器的时间序列变量列表。
             
@@ -199,6 +198,7 @@ class NumberSeries(SeriesBase):
     def __rpow__(self, r):
         return float(r) ** self.data[self._curbar]
 
+from datetime import datetime
 class DateTimeSeries(SeriesBase):
     """ 时间序列变量 """
     ## @todo utc 技时起点
@@ -214,3 +214,17 @@ class DateTimeSeries(SeriesBase):
             #self.data = np.append(data, tracker.container_day)
         #else:
         self.data = data
+
+    def __getitem__(self, index):
+        try:
+            i = self._curbar - index
+            if i < 0:
+                return self.DEFAULT_VALUE
+            else:
+                # index >= len(self.data)
+                return datetime.fromtimestamp(self.data[i]/1000)
+        except SeriesIndexError:
+            raise SeriesIndexError
+
+    def __str__(self):
+        return str(datetime.fromtimestamp(self.data[0]/1000))

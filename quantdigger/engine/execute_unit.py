@@ -11,32 +11,32 @@ class ExecuteUnit(object):
         每个执行单元都可能跟踪多个数据(策略用到的周期合约数据集合)。
         其中第一个合约为"主合约" 。 每个执行器可加载多个策略,只要数据需求不超过pcontracts。
 
-        :ivar begin_dt: 策略执行的时间起点。
-        :ivar end_dt: 策略执行的时间终点。
+        :ivar dt_begin: 策略执行的时间起点。
+        :ivar dt_end: 策略执行的时间终点。
         :ivar pcontracts: 策略用到的周期合约数据集合。
         :ivar trackers: 策略用到的跟踪器集合。（和周期合约一一对应）
         :ivar _strategies: 策略集合。
         :ivar datasource: 数据源。
 
     """
-    def __init__(self, pcontracts, begin_dt=datetime(1970,1,1),
-                 end_dt=datetime(2100,1,1)):
-        self.begin_dt = begin_dt
-        self.end_dt = end_dt
+    def __init__(self, pcontracts, dt_start=datetime(1980,1,1),
+                 dt_end=datetime(2100,1,1)):
+        self.dt_start = dt_start
+        self.dt_end = dt_end
         # 不同周期合约数据。
         self.data = { }     # PContract -> pandas.DataFrame
         self.pcontracts = pcontracts
         self.trackers = []
         self._strategies = []
 
-        # 如果begin_dt, end_dt 等于None，做特殊处理。
+        # 如果begin_dt, dt_end 等于None，做特殊处理。
         # accociate with a mplot widget
         #tracker.pcontracts
         
-        self.load_data(pcontracts[0], begin_dt, end_dt)
+        self.load_data(pcontracts[0], dt_start, dt_end)
         # 每个周期合约对应一个跟跟踪器。
         for pcon in pcontracts[1:]:
-            self.load_data(pcon, begin_dt, end_dt)
+            self.load_data(pcon, dt_start, dt_end)
             BarTracker(self, pcon)
 
     def run(self):
@@ -91,7 +91,7 @@ class ExecuteUnit(object):
                 raise
             bar_index += 1
 
-    def load_data(self, pcontract, dt_start=datetime(1970,1,1), dt_end=datetime(2100,1,1)):
+    def load_data(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
         """ 加载周期合约数据
         
         Args:
@@ -105,7 +105,7 @@ class ExecuteUnit(object):
         try:
             return self.data[pcontract]
         except KeyError:
-            data = data_manager.load_bars(pcontract, self.begin_dt, self.end_dt)
+            data = data_manager.load_bars(pcontract, dt_start, self.dt_end)
             if not hasattr(self, '_data_length'):
                 self._data_length = len(data) 
             elif self._data_length != len(data):

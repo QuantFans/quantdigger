@@ -56,8 +56,8 @@ http://www.quantfans.com/doc/quantdigger/
 .. code:: py
 
     from quantdigger.engine.execute_unit import ExecuteUnit
-    from quantdigger.indicators.common import MA, BOLL
     from quantdigger.engine.strategy import TradingStrategy
+    from quantdigger.indicators.common import MA, BOLL
     from quantdigger.util import  pcontract
     import plotting
 
