@@ -53,6 +53,7 @@ http://www.quantfans.com/doc/quantdigger/
 常见问题
 --------
 * windows下ta-lib安装错误
+
   解压后在quantdigger目录下运行
   ::
 
