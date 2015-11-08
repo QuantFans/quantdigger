@@ -20,7 +20,7 @@ class LocalData(object):
         """ 
         self._csv = CsvSource(''.join([os.getcwd(), os.sep, 'data', os.sep]))
         self._sql = SqlLiteSource(''.join([os.getcwd(), os.sep, 'data', os.sep, 'digger.db']))
-        self._db = self._sql # 设置数据源
+        self._db = self._csv # 设置数据源
 
     def load_bars(self, pcontract, dt_start, dt_end):
         if pcontract.contract.exch_type == 'stock':
