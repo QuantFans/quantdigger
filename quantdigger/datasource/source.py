@@ -14,12 +14,13 @@ class SqlLiteSource(object):
         self.cursor = self.db.cursor()
     
     def load_bars(self, pcontract, dt_start, dt_end):
-        ustart, u = datautil.encode2id(pcontract.period, dt_start)
-        uend, u = datautil.encode2id(pcontract.period, dt_end)
+        id_start, u = datautil.encode2id(pcontract.period, dt_start)
+        id_end, u = datautil.encode2id(pcontract.period, dt_end)
         table = string.replace(str(pcontract.contract), '.', '_')
         #rows = self.cursor.execute("SELECT * FROM %s" % table) 
         ## @todo 使用参数dt_start, dt_end
-        sql = "SELECT utime, open, close, high, low, volume FROM %s" % table
+        sql = "SELECT utime, open, close, high, low, volume FROM {tb} \
+                WHERE {start}<=id AND id<={end}".format(tb=table, start=id_start, end=id_end)
         data =  pd.read_sql_query(sql, self.db, index_col='utime')
         return data
 

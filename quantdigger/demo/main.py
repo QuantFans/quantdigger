@@ -45,7 +45,7 @@ if __name__ == '__main__':
         pcon = pcontract('BB.SHFE', '1.Minute')
         #begin_dt, end_dt = '2015-05-25', '2015-06-01'
         #pcon = stock('600848','10.Minute')  # 通过tushare下载股票数据
-        simulator = ExecuteUnit([pcon, pcon])
+        simulator = ExecuteUnit([pcon, pcon], '2013-12-12', '2013-12-25')
         algo = DemoStrategy(simulator)
         #algo1 = DemoStrategy(simulator)
         #algo2 = DemoStrategy(simulator)
@@ -64,8 +64,10 @@ if __name__ == '__main__':
         signals = [] 
         for trans in algo.blotter.transactions:
             deals.update_positions(positions, signals, trans);
-
-        print "plotting.."
+        #d =  simulator.data[pcon]['close']
+        #for i in d:
+            #print i
+        #assert False
         plotting.plot_result(simulator.data[pcon],
                                     algo._indicators,
                                     signals,

@@ -655,11 +655,16 @@ class MultiWidgets(object):
                     if self._data.index[i].month != self._data.index[i-1].month:
                         xticks.append(i)
                 elif delta.seconds == 60:
-                    if self._data.index[i].hour != self._data.index[i-1].hour:
+                    # 一分钟的以小时为显示单位
+                    if self._data.index[i].hour != self._data.index[i-1].hour and \
+                       self._data.index[i].day == self._data.index[i-1].day:
                         xticks.append(i)
                 else:
                     if self._data.index[i].day != self._data.index[i-1].day:
+                        # 其它日内以天为显示单位
                         xticks.append(i)
+            else:
+                xticks.append(0)
         return xticks
 
 

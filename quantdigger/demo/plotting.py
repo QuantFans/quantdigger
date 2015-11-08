@@ -24,11 +24,14 @@ def plot_result(price_data, indicators, signals,
         显示回测结果。
     """
     try:
+        print "summary.." 
         dts = map(lambda x : datetime.fromtimestamp(x / 1000), price_data.index)
         price_data.index = dts
+        print dts[-1]
         curve = finance.create_equity_curve_dataframe(blotter.all_holdings)
         print finance.output_summary_stats(curve)
 
+        print "plotting.."
         fig = plt.figure()
         frame = widgets.MultiWidgets(fig,
                                     price_data,
@@ -47,10 +50,11 @@ def plot_result(price_data, indicators, signals,
         for indic in indicators:
             indic.plot(k_axes)
         frame.draw_widgets()
-
+        
+        # 画资金曲线
+        #print curve.equity
         fig2 = plt.figure()
         ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))
-        delta = curve.index[1] - curve.index[0]
         ax.xaxis.set_major_formatter(TimeFormatter(curve.index, '%Y-%m-%d' ))
         ax.set_xticks(xticks_to_display(len(curve)))
         ax.plot(curve.equity)

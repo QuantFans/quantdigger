@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from quantdigger.datasource.source import CsvSource, SqlLiteSource
 from quantdigger.datasource.datautil import tick2period
 
@@ -20,12 +20,13 @@ class LocalData(object):
         """ 
         self._csv = CsvSource(''.join([os.getcwd(), os.sep, 'data', os.sep]))
         self._sql = SqlLiteSource(''.join([os.getcwd(), os.sep, 'data', os.sep, 'digger.db']))
+        self._db = self._sql # 设置数据源
 
     def load_bars(self, pcontract, dt_start, dt_end):
         if pcontract.contract.exch_type == 'stock':
             return []
         else:
-            return self._csv.load_bars(pcontract, dt_start, dt_end);
+            return self._db.load_bars(pcontract, dt_start, dt_end);
 
     def loadTickData(self):
         raise NotImplementedError
@@ -86,7 +87,7 @@ class DataManager(object):
         self._srv_data = ServerData()
 
     def load_bars(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
-        """  加载k时间范围的k线数据。
+        """  加载时间范围[dt_start, dt_end]的k线数据。
         
         Args:
             pcontract (PContract): 周期合约
@@ -102,6 +103,7 @@ class DataManager(object):
             dt_start = datetime.strptime(dt_start, "%Y-%m-%d")
         if type(dt_end) == str:
             dt_end = datetime.strptime(dt_end, "%Y-%m-%d")
+        dt_end += timedelta(days=1)
         data = self._loc_data.load_bars(pcontract, dt_start, dt_end)
         if len(data) == 0:
             return self._srv_data.load_bars(pcontract, dt_start, dt_end) 
