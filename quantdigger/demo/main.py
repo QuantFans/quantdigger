@@ -76,6 +76,7 @@ if __name__ == '__main__':
         
     except Exception, e:
         import traceback
+        print e
         print traceback.format_exc()
         #print e
 

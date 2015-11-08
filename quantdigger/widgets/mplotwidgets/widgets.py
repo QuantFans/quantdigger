@@ -405,6 +405,7 @@ class MultiWidgets(object):
         for ax in self.axes:
             ax.get_yaxis().get_major_formatter().set_useOffset(False)
             #ax.get_yaxis().get_major_formatter().set_scientific(False)
+        print "333333" 
             
 
     @property
@@ -613,7 +614,6 @@ class MultiWidgets(object):
             else:
                 self._fig.add_axes(rect)
             bottom += unit * ratio
-
         temp = self._user_axes()
         temp.reverse()
         self._axes = temp
@@ -698,16 +698,21 @@ class MultiWidgets(object):
         for i in range(0, len(self.axes)):
             all_ymax = []
             all_ymin = []
-            for plot in self._subwidget2plots[i]:
-                ymax, ymin = plot.y_interval(w_left, w_right)
-                ## @todo move ymax, ymin 计算到plot中去。
-                all_ymax.append(ymax)
-                all_ymin.append(ymin)
-            ymax = max(all_ymax)
-            ymin = min(all_ymin)
-            ymax += self.voffset
-            ymin -= self.voffset
-            self.axes[i].set_ylim((ymin, ymax))
+            try:
+                plots = self._subwidget2plots[i]
+            except KeyError:
+                pass
+            else:
+                for plot in plots:
+                    ymax, ymin = plot.y_interval(w_left, w_right)
+                    ## @todo move ymax, ymin 计算到plot中去。
+                    all_ymax.append(ymax)
+                    all_ymin.append(ymin)
+                ymax = max(all_ymax)
+                ymin = min(all_ymin)
+                ymax += self.voffset
+                ymin -= self.voffset
+                self.axes[i].set_ylim((ymin, ymax))
         #self.axes[i].autoscale_view()
 
 
