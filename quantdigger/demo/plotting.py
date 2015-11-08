@@ -56,6 +56,8 @@ def plot_result(price_data, indicators, signals,
         fig2 = plt.figure()
         ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))
         ax.xaxis.set_major_formatter(TimeFormatter(curve.index, '%Y-%m-%d' ))
+        ax.get_yaxis().get_major_formatter().set_useOffset(False)
+        #ax.get_yaxis().get_major_formatter().set_scientific(False)
         ax.set_xticks(xticks_to_display(len(curve)))
         ax.plot(curve.equity)
         plt.show()

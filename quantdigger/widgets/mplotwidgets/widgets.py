@@ -402,6 +402,10 @@ class MultiWidgets(object):
         self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(data.index, '%Y-%m-%d'))
         self._slider_ax.set_xticks(self._slider_xticks_to_display())
+        for ax in self.axes:
+            ax.get_yaxis().get_major_formatter().set_useOffset(False)
+            #ax.get_yaxis().get_major_formatter().set_scientific(False)
+            
 
     @property
     def axes(self):
@@ -599,7 +603,7 @@ class MultiWidgets(object):
         if len(args) ==  0:
             args = (1,) 
         total_units = sum(args)
-        unit = (1.0 - self._top) / total_units
+        unit = (0.95 - self._top) / total_units
         bottom = self._top
         for i, ratio in enumerate(args):
             rect = [self._left, bottom, self._width, unit * ratio]
@@ -617,6 +621,7 @@ class MultiWidgets(object):
             ax.grid(True)
         for ax in self._axes[1:]:
             ax.set_xticklabels([])
+
 
     def _user_axes(self):
         # 返回用户添加的窗口
