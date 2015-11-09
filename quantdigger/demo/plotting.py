@@ -35,8 +35,6 @@ def plot_result(price_data, indicators, signals,
     frame = widgets.MultiWidgets(fig,
                                 price_data,
                                 50,         # 窗口显示k线数量。
-                                100,
-                                100
                                 )
 
     # 添加k线
@@ -47,9 +45,9 @@ def plot_result(price_data, indicators, signals,
     frame.add_indicator(0, signal)
 
     ## 添加指标
-    k_axes, t_axes = frame
+    k_axes,  = frame
     for indic in indicators:
-        indic.plot(t_axes)
+        indic.plot(k_axes)
     frame.draw_widgets()
     
     # 画资金曲线
