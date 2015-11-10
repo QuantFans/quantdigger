@@ -36,25 +36,27 @@ def get_stock_signal_data():
         colors.append((r,g,b,1))
     return price_data, entry_x, entry_y, exit_x, exit_y, colors
 
-price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
+#price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 
+price_data = pd.read_csv('./data/IF000.csv', index_col=0, parse_dates=True)
 #import matplotlib.font_manager as font_manager
+print len(price_data)
 fig = plt.figure()
-frame = widgets.MultiWidgets(fig, price_data, 50, 4,3,1)
-ax_candles, ax_rsi, ax_volume = frame
+frame = widgets.MultiWidgets(fig, price_data, 50, 4, 1)
+ax_candles,  ax_volume = frame.get_subwidgets()
 
 # 添加k线和交易信号。
 kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
 candle_widget = frame.add_widget(0, kwindow, True)
-signal = mplots.TradingSignal(None, zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
-frame.add_indicator(0, signal)
+#signal = mplots.TradingSignal(None, zip(zip(entry_x,entry_y),zip(exit_x,exit_y)), c=colors, lw=2)
+#frame.add_indicator(0, signal)
 
 # 添加指标
 ma = frame.add_indicator(0, MA(None, price_data.close, 20, 'MA20', 'y', 2))
 frame.add_indicator(0, MA(None, price_data.close, 30, 'MA30', 'b', 2))
-frame.add_indicator(1, RSI(None, price_data.close, 14, name='RSI', fillcolor='b'))
-frame.add_indicator(2, Volume(None, price_data.open, price_data.close, price_data.vol))
+#frame.add_indicator(1, RSI(None, price_data.close, 14, name='RSI', fillcolor='b'))
+frame.add_indicator(1, Volume(None, price_data.open, price_data.close, price_data.vol))
 frame.draw_widgets()
 
 # legend

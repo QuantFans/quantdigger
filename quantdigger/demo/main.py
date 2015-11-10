@@ -21,7 +21,6 @@ class DemoStrategy(TradingStrategy):
     def __init__(self, exe):
         super(DemoStrategy, self).__init__(exe)
         print 'start: ', self.datetime[0]
-
         self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
         self.ma10 = MA(self, self.close, 10,'ma10', 'y', '1')
         self.b_upper, self.b_middler, self.b_lower = BOLL(self, self.close, 10,'boll10', 'y', '1')

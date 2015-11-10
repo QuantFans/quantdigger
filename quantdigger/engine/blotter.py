@@ -110,7 +110,8 @@ class SimpleBlotter(Blotter):
             order_margin +=  order.order_margin()
 
         # 当前权益 = 初始资金 + 历史平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
-        dh['equity'] = self._init_captial + self.current_holdings['history_profit'] + profit - self.current_holdings['commission'] 
+        dh['equity'] = self._init_captial + self.current_holdings['history_profit'] + profit - \
+                       self.current_holdings['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
             if not is_stock:

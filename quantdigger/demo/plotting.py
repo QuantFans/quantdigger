@@ -4,6 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
 from quantdigger.digger import finance
+from quantdigger.indicators.common import Volume
 from datetime import datetime
 from matplotlib.ticker import Formatter
 
@@ -32,9 +33,9 @@ def plot_result(price_data, indicators, signals,
 
     print "plotting.."
     fig = plt.figure()
-    frame = widgets.MultiWidgets(fig,
-                                price_data,
-                                50,         # 窗口显示k线数量。
+    frame = widgets.MultiWidgets(fig, price_data,
+                                50         # 窗口显示k线数量。
+                                #4, 1     # 两个1:1大小的窗口
                                 )
 
     # 添加k线
@@ -43,22 +44,25 @@ def plot_result(price_data, indicators, signals,
     ## 交易信号。
     signal = mplots.TradingSignalPos(None, price_data, signals, lw=2)
     frame.add_indicator(0, signal)
+    ## @bug indicators导致的双水平线!
+    ## @todo 完mplot_demo上套。
+    #frame.add_indicator(0, Volume(None, price_data.open, price_data.close, price_data.volume))
 
     ## 添加指标
-    k_axes,  = frame
     for indic in indicators:
-        indic.plot(k_axes)
+        frame.add_indicator(0, indic)
+
     frame.draw_widgets()
     
     # 画资金曲线
     #print curve.equity
-    fig2 = plt.figure()
-    ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))
-    ax.xaxis.set_major_formatter(TimeFormatter(curve.index, '%Y-%m-%d' ))
-    ax.get_yaxis().get_major_formatter().set_useOffset(False)
-    #ax.get_yaxis().get_major_formatter().set_scientific(False)
-    ax.set_xticks(xticks_to_display(len(curve)))
-    ax.plot(curve.equity)
+    #fig2 = plt.figure()
+    #ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))
+    #ax.xaxis.set_major_formatter(TimeFormatter(curve.index, '%Y-%m-%d' ))
+    #ax.get_yaxis().get_major_formatter().set_useOffset(False)
+    ##ax.get_yaxis().get_major_formatter().set_scientific(False)
+    #ax.set_xticks(xticks_to_display(len(curve)))
+    #ax.plot(curve.equity)
     plt.show()
 
 

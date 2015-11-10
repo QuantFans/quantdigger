@@ -15,6 +15,7 @@ from quantdigger.errors import SeriesIndexError, DataFormatError
 def transform2ndarray(data):
     """ 如果是序列变量，返回ndarray """
     if isinstance(data, series.NumberSeries):
+        ## @todo 减少深拷贝
         data = data.data[:data.length_history]
     elif isinstance(data, pandas.Series):
         # 处理pandas.Series

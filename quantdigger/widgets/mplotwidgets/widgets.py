@@ -388,13 +388,17 @@ class MultiWidgets(object):
 
         self._init_slider()
         self._init_widgets(*args)
-        for ax in self.axes:
-            ax.format_coord = self._format_coord 
         self._connect()
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
-                                    color='r', lw=2, horizOn=True,
+                                    color='b', lw=2, horizOn=True,
                                     vertOn=True)
 
+        for ax in self.axes:
+            ax.get_yaxis().get_major_formatter().set_useOffset(False)
+            #ax.get_yaxis().get_major_formatter().set_scientific(False)
+
+        for ax in self.axes:
+            ax.format_coord = self._format_coord 
         delta = (data.index[1] - data.index[0])
         self._fmt = slider_strtime_format(delta)
         self._formatter = TimeFormatter(data.index, strtime_format(delta))
@@ -402,10 +406,6 @@ class MultiWidgets(object):
         self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(data.index, '%Y-%m-%d'))
         self._slider_ax.set_xticks(self._slider_xticks_to_display())
-        for ax in self.axes:
-            ax.get_yaxis().get_major_formatter().set_useOffset(False)
-            #ax.get_yaxis().get_major_formatter().set_scientific(False)
-        print "333333" 
             
 
     @property
@@ -550,17 +550,19 @@ class MultiWidgets(object):
         self._update_widgets()
 
     def on_enter_axes(self, event):
+        return
         #event.inaxes.patch.set_facecolor('yellow')
         # 只有当前axes会闪烁。
         if event.inaxes is self._slider_ax: #or event.inaxes is self._bigger_picture:
             self._cursor = None
             event.canvas.draw()
             return 
-        #self.cross_cursor = Cursor(event.inaxes, useblit=True, color='red', linewidth=2, vertOn=True, horizOn=True)
 
     def on_leave_axes(self, event):
+        return
         if event.inaxes is self._slider_ax:
-            self._cursor = MultiCursor(self._fig.canvas, self.axes, color='r', lw=2, horizOn=True, vertOn=True)
+            # 进入后会创建_slider_cursor,离开后复原
+            self._cursor = MultiCursor(self._fig.canvas, self.axes, color='b', lw=2, horizOn=True, vertOn=True)
             event.canvas.draw()
 
     def _connect(self):
@@ -633,9 +635,10 @@ class MultiWidgets(object):
         f = x % 1
         index = x-f if f < 0.5 else min(x-f+1, len(self._data['open']) - 1)
         #print len(self.kwindow.rects.get_array())
-        return "[dt=%s pos=%d o=%.2f c=%.2f h=%.2f l=%.2f]" % (
+       
+        ## @note 字符串太长会引起闪烁
+        return "[dt=%s o=%.2f c=%.2f h=%.2f l=%.2f]" % (
                 self._data.index[index].strftime(self._fmt),
-                index,
                 self._data['open'][index],
                 self._data['close'][index],
                 self._data['high'][index],
@@ -672,8 +675,7 @@ class MultiWidgets(object):
                 xticks.append(0)
         return xticks
 
-
-    def __iter__(self):
+    def get_subwidgets(self):
         """ 返回子窗口。 """
         return self.axes.__iter__()
 
@@ -732,6 +734,7 @@ class TimeFormatter(Formatter):
         return self.dates[ind].strftime(self.fmt)
 
 
+        #self.cross_cursor = Cursor(event.inaxes, useblit=True, color='red', linewidth=2, vertOn=True, horizOn=True)
 
 #print("-----------")
 #print("******")
