@@ -2,10 +2,13 @@ import os
 import platform
 import util
 def install_talib_for_windows():
-	url = 'http://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-msvc.zip'
-	target = 'ta-lib-0.4.0-msvc.zip'
-	util.download(url,target)
-	util.decompressZip(target,'C:\\')
+	#url = 'http://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-msvc.zip'
+	#target = 'ta-lib-0.4.0-msvc.zip'
+	#util.download(url,target)
+	#util.decompressZip(target,'C:\\')
+        cmd = 'pip install quantdigger\lib\TA_Lib-0.4.9-cp27-none-win_amd64.whl'
+        result = os.popen(cmd).readlines()
+        util.printCommandResult(result)
 
 def install_talib_for_linux():
 	url = 'http://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz'
@@ -44,19 +47,21 @@ def pip_download_install():
     util.printCommandResult(cmdResult)
     print('============ installed,plese add pip to your path')
 
-def create_dependencies():
+def create_dependencies(platform):
     requirements = ''
     libs = [ ('numpy', 'numpy'),
              ('pandas', 'pandas'),
              ('dateutil', 'python-dateutil'),
              ('matplotlib', 'matplotlib'),
-             ('logbook', 'logbook'),
-             ('talib' , 'TA-Lib == 0.4.8') 
+             ('logbook', 'logbook')
+#             ('talib' , 'TA-Lib == 0.4.8') 
     ]
+    if platform != 'Windows':
+        libs.append(('talib', 'TA-Lib == 0.4.8'))
     for lib in libs:
         try:
             __import__(lib[0])
-            print lib[0], "already installed!" 
+            print lib[0], "already installed!"
         except ImportError:
             requirements += '%s\n' % lib[1]
     if requirements:
@@ -81,7 +86,7 @@ def handle_dependency():
         print('Failed to install ta-lib!')
         print(e)
 
-    dependencies = create_dependencies()
+    dependencies = create_dependencies(platform_name)
     if dependencies:
         print('pip install -r requirements.txt')
         print(dependencies)
