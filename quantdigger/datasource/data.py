@@ -11,6 +11,7 @@ class QuoteCache(object):
         pass
 
 
+
 class LocalData(object):
     """ 本地数据代理根据配置决定数据源的类型,
         比如sqlite, csv, pytable
@@ -20,13 +21,13 @@ class LocalData(object):
         """ 
         self._csv = CsvSource(''.join([os.getcwd(), os.sep, 'data', os.sep]))
         self._sql = SqlLiteSource(''.join([os.getcwd(), os.sep, 'data', os.sep, 'digger.db']))
-        self._db = self._csv # 设置数据源
+        self._src = self._sql # 设置数据源
 
-    def load_bars(self, pcontract, dt_start, dt_end):
+    def load_bars(self, pcontract, dt_start, dt_end, window_size):
         if pcontract.contract.exch_type == 'stock':
             return []
         else:
-            return self._db.load_bars(pcontract, dt_start, dt_end);
+            return self._src.load_bars(pcontract, dt_start, dt_end, window_size);
 
     def loadTickData(self):
         raise NotImplementedError
@@ -63,6 +64,7 @@ class ServerData(object):
                                start=dt_start,
                                end=dt_end)
         else:
+                
             #日线直接调用
             data = ts.get_hist_data(pcontract.contract.code,
                                     start=dt_start,
@@ -86,7 +88,8 @@ class DataManager(object):
         self._loc_data = LocalData()
         self._srv_data = ServerData()
 
-    def load_bars(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
+    def load_bars(self, pcontract, dt_start=datetime(1980,1,1),
+                  dt_end=datetime(2100,1,1), window_size=0):
         """  加载时间范围[dt_start, dt_end]的k线数据。
         
         Args:
@@ -104,7 +107,7 @@ class DataManager(object):
         if type(dt_end) == str:
             dt_end = datetime.strptime(dt_end, "%Y-%m-%d")
         dt_end += timedelta(days=1)
-        data = self._loc_data.load_bars(pcontract, dt_start, dt_end)
+        data = self._loc_data.load_bars(pcontract, dt_start, dt_end, window_size)
         if len(data) == 0:
             return self._srv_data.load_bars(pcontract, dt_start, dt_end) 
         else:

@@ -106,9 +106,9 @@ class BarTracker(object):
                 self._main_pcontract = exe_unit.pcontracts[0]
                 exe_unit.add_strategy(self)
             self._main_contract = self._main_pcontract.contract
-            self._data = exe_unit.data[self._main_pcontract]
+            self._data = exe_unit.data[str(self._main_pcontract)]
             self._container_day = np.zeros(shape=(self.length_day(self._main_pcontract), ), dtype = float)
-            self._init_main_data()
+            #self._init_main_data()
         except KeyError:
             ## @todo 提醒用户用法。
             raise KeyError

@@ -5,23 +5,25 @@
 # @version 0.1
 # @date 2015-12-23
 
+import inspect
 import numpy as np
 import pandas
-import inspect
 from quantdigger.engine import series
 from quantdigger.widgets.plotting import PlotInterface
-from quantdigger.errors import SeriesIndexError, DataFormatError
+from quantdigger.errors import DataFormatError
 
 def transform2ndarray(data):
-    """ 如果是序列变量，返回ndarray """
+    """ 如果是序列变量，返回ndarray
+        ,浅拷贝
+    """
     if isinstance(data, series.NumberSeries):
-        ## @todo 减少深拷贝
-        data = data.data[:data.length_history]
+        data = data.data
+        #data = data.data[:len(data)]
     elif isinstance(data, pandas.Series):
         # 处理pandas.Series
         data = np.asarray(data)
     if type(data) != np.ndarray:
-        raise  DataFormatError
+        raise  DataFormatError(type=type(data))
     return data
 
 def create_attributes(method):
@@ -38,20 +40,26 @@ def create_attributes(method):
         method_args.update(kwargs)
         # 
         default.update(method_args)
+        name = ''
         # 属性创建
         for key, value in default.iteritems():
+            if key == 'name':
+                name = value
             setattr(self, key, value)
-        # 构造函数
+        # 运行构造函数
         rst =  method(self, *args, **kwargs)
         if not hasattr(self, 'value'):
             raise Exception("每个指标都必须有value属性，代表指标值！")
         else:
-            # 序列变量
-            if self.tracker:
-                if isinstance(self.value, tuple):
-                    self._series = [series.NumberSeries(self.tracker, value) for value in self.value]
-                else:
-                    self._series = series.NumberSeries(self.tracker, self.value)
+            if isinstance(self.value, tuple):
+                self.series = [series.NumberSeries(value, len(value), name, self) for value in self.value]
+            else:
+                self.series = [series.NumberSeries(self.value, len(self.value), name, self)]
+                # 输出
+                for s in self.series:
+                    if series.g_rolling:
+                        s.reset_data([], 1+series.g_window)
+            
             # 绘图中的y轴范围未被设置，使用默认值。
             if not self.upper:
                 upper = lower = []
@@ -89,73 +97,86 @@ class IndicatorBase(PlotInterface):
     如果是多值指标，如布林带，那么会以元组的形式返回多一个序列变量。
 
     :ivar name: 指标对象名称
-    :vartype name: str
-    :ivar _tracker: 关联跟踪器
-    :vartype _tracker: BarTracker
     :ivar value: 向量化运行结果, 用于处理历史数据。
-    :ivar _series: 单值指标的序列变量或多值指标的序列变量数组。
+    :ivar series: 单值指标的序列变量或多值指标的序列变量数组。
     :ivar _algo: 逐步指标函数。
     :ivar _args: 逐步指标函数的参数。
     """
-    def __init__(self, tracker, name='',  widget=None):
+    def __init__(self, data, n, name='',  widget=None):
         super(IndicatorBase, self).__init__(name, widget)
         self.name = name
-        self.value = None
-        self._algo = None
-        self._args = None
-        ## @todo 判断tracker是否为字符串。
-        if tracker:
-            self._added_to_tracker(tracker)
-        self._tracker = tracker
+        if isinstance(data, series.NumberSeries) and series.g_rolling:
+            # set input ordered
+            data.set_shift()
+            # 指标周期
+            data.reset_data([], n+series.g_window)
+            #(curbar, values)
+            self._cache = [(-1, None)] * (series.g_window+1)
+        self._rolling_args = None
+        self.value = []    # 输出
 
-    def calculate_latest_element(self):
-        """ 被tracker调用，确保内部序列变量总是最新的。 """
-        s = self._series
-        m = False
-        if isinstance(self._series, list):
-            s = self._series[0] 
-            m = True
-        if s.curbar >= s.length_history:
-            if not m:
-                self._series.update(apply(self._algo, self._args))
+    def compute_element(self, cache_index, rolling_index):
+        """ 计算一个回溯值, 被Series延迟调用。
+        
+        Args:
+            cache_index (.int): 缓存索引
+            rolling_index (.int): 回溯索引
+
+        """
+        if series.g_rolling:
+            rolling_index = min(len(self.data)-1, self.series[0].curbar)
+            values = None
+            if self._cache[cache_index][0] == self.curbar:
+                values = self._cache[cache_index][1]
             else:
-                rst = apply(self._algo, self._args)
-                for i, v in enumerate(rst):
-                    self._series[i].update(v)
+                self._rolling_data = transform2ndarray(self.data)  # 输入
+                # 指标一次返回多个值
+                args =  (self._rolling_data, ) + self._rolling_args + (rolling_index,)
+                values = apply(self._rolling_algo, args)
+                self._cache[cache_index] = (self.curbar, values)
+            for i, v in enumerate(values):
+                self.series[i].update(v)
+        else:
+            ## @todo 如果不是历史数据，还是要计算
+            return
+
+    @property
+    def curbar(self):
+        return self.series[0].curbar
 
     def __size__(self):
         """""" 
-        if isinstance(self._series, list):
-            return len(self._series[0])
-        else:
-            return len(self._series)
+        return len(self.series[0])
+    
+    def debug_data(self):
+        """ 主要用于调试""" 
+        return [s.data for s in self.series]
 
     def _added_to_tracker(self, tracker):
         if tracker:
             tracker.add_indicator(self)
 
-
     def __tuple__(self):
         """ 返回元组。某些指标，比如布林带有多个返回值。
             这里以元组的形式返回多个序列变量。
         """
-        if isinstance(self._series, list):
-            return tuple(self._series)
+        if isinstance(self.series, list):
+            return tuple(self.series)
         else:
-            return (self._series,)
+            return (self.series,)
 
     #def __iter__(self):
         #"""docstring for __iter__""" 
-        #if self._series.__class__.__name__ == 'list':
-            #return tuple(self._series)
+        #if self.series.__class__.__name__ == 'list':
+            #return tuple(self.series)
         #else:
-            #return (self._series,)
+            #return (self.series,)
 
     def __float__(self):
-        return self._series[0]
+        return self.series[0][0]
 
     def __str__(self):
-        return str(self._series[0])
+        return str(self.series[0][0])
 
     #
     def __eq__(self, r):
@@ -176,59 +197,56 @@ class IndicatorBase(PlotInterface):
     def __ge__(self, other):
         return float(self) >= float(other)
 
-    # 以下都是单值函数。
+    ## @note 以下都是单值函数。
     def __getitem__(self, index):
         # 大于当前的肯定被运行过。
-        if index >= 0:
-            return self._series[index]
-        else:
-            raise SeriesIndexError
+        return self.series[0][index]
 
     #
     def __add__(self, r):
-        return self._series[0] + float(r)
+        return self.series[0][0] + float(r)
 
     def __sub__(self, r):
-        return self._series[0] - float(r)
+        return self.series[0][0] - float(r)
 
     def __mul__(self, r):
-        return self._series[0] * float(r)
+        return self.series[0][0] * float(r)
 
     def __div__(self, r):
-        return self._series[0] / float(r)
+        return self.series[0][0] / float(r)
 
     def __mod__(self, r):
-        return self._series[0] % float(r)
+        return self.series[0][0] % float(r)
 
     def __pow__(self, r):
-        return self._series[0] ** float(r)
+        return self.series[0][0] ** float(r)
 
     #
     def __radd__(self, r):
-        return self._series[0] + float(r)
+        return self.series[0][0] + float(r)
 
     def __rsub__(self, r):
-        return self._series[0] - float(r)
+        return self.series[0][0] - float(r)
 
     def __rmul__(self, r):
-        return self._series[0] * float(r)
+        return self.series[0][0] * float(r)
 
     def __rdiv__(self, r):
-        return self._series[0] / float(r)
+        return self.series[0][0] / float(r)
 
     def __rmod__(self, r):
-        return self._series[0] % float(r)
+        return self.series[0][0] % float(r)
 
     def __rpow__(self, r):
-        return self._series[0] ** float(r)
+        return self.series[0][0] ** float(r)
 
     ## 不该被改变。
     #def __iadd__(self, r):
-        #self._series[0] += r
+        #self.series[0] += r
         #return self
 
     #def __isub__(self, r):
-        #self._series[0] -= r
+        #self.series[0] -= r
         #return self
 
     #def __imul__(self, r):

@@ -9,45 +9,34 @@ import talib
 import numpy as np
 import matplotlib.finance as finance
 from quantdigger.indicators.base import IndicatorBase, transform2ndarray, create_attributes
-
-
-            
+from quantdigger.engine import series
 class MA(IndicatorBase):
     """ 移动平均线指标。 """
-    ## @todo assure name is unique, it there are same names,
-    # modify the repeat name.
     @create_attributes
-    def __init__(self, tracker, prices, n, name='MA', color='y', lw=1, style="line"):
-        super(MA, self).__init__(tracker, name)
+    def __init__(self, data, n, name='MA',
+                 color='y', lw=1, style="line"):
+        super(MA, self).__init__(data, n, name)
+        # 数据转化成ta-lib能处理的格式
         # self.value为任何支持index的数据结构。
         # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
         # 转化为numpy.ndarray等能被指标函数处理的参数。
-        self.value = self._moving_average(prices, n)
-        #self._algo = self._iter_moving_average
-        #self._args = (n,)
+        if not series.g_rolling:
+            # 向量化运行的均值函数
+            data = transform2ndarray(data)
+            self.value = talib.SMA(data, n)
+        # 支持逐步运行必须函数的参数
+        self._rolling_args = (n,)
 
-    def _iter_moving_average(self, price, n):
-        """ 逐步运行的均值函数。""" 
-        pass
-
-    def _moving_average(self, data, n):
-        """ 向量化运行的均值函数。 """
-        data = transform2ndarray(data)
-        return talib.SMA(data, n)
+    def _rolling_algo(self, data, n, i):
+        """ 逐步运行函数。""" 
+        ## @todo 用了向量化方法，速度降低
+        return (talib.SMA(data, n)[i], )
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """
         self.widget = widget
         self.plot_line(self.value, self.color, self.lw, self.style)
 
-    #@override_attributes
-    #def plot(self, widget, color='y', lw=2, style="line"):
-        #""" 绘图，参数可由UI调整。 
-        ### @note 构造函数中的绘图参数需与函数
-           #的绘图函数一致。这样函数参数可覆盖默认的属性参数。
-        #"""
-        #self.widget = widget
-        #self.plot_line(self.value, color, lw, style)
 
 
 class BOLL(IndicatorBase):
@@ -67,6 +56,10 @@ class BOLL(IndicatorBase):
         data = transform2ndarray(data)
         upper, middle, lower =  talib.BBANDS(data, n, 2, 2)
         return (upper, middle, lower)
+
+    def _iter_boll(self, data, n):
+        #return (upper, middle, lower)
+        return
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """

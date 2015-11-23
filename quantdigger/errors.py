@@ -20,7 +20,7 @@ class QError(Exception):
 class DataFormatError(QError):
     """
     """
-    msg = "错误的数据格式！" 
+    msg = "{type}--错误的数据格式！" 
 
 
 class FileDoesNotExist(QError):

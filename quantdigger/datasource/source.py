@@ -5,24 +5,63 @@ import string
 from quantdigger.errors import FileDoesNotExist
 from quantdigger.datasource import datautil
 
+class SourceWrapper(object):
+    def __init__(self, data, cursor, max_length):
+        self.data = data
+        self.cursor = cursor
+        self._max_length = max_length
+
+    def __len__(self):
+        # 总长度
+        return self._max_length
+
+class SqliteSourceWrapper(SourceWrapper):
+    def __init__(self, data, cursor, max_length):
+        super(SqliteSourceWrapper, self).__init__(data, cursor, max_length)
+
+    def rolling_foward(self):
+        # cursor为None说明是向量运算
+        if self.cursor:
+            return self.cursor.fetchone()
+        return None
+
 class SqlLiteSource(object):
     """
     """
     def __init__(self, fname):
         import sqlite3
         self.db = sqlite3.connect(fname)
+        ## @todo remove self.cursor
         self.cursor = self.db.cursor()
     
-    def load_bars(self, pcontract, dt_start, dt_end):
+    def load_bars(self, pcontract, dt_start, dt_end, window_size):
+        cursor = self.db.cursor()
         id_start, u = datautil.encode2id(pcontract.period, dt_start)
         id_end, u = datautil.encode2id(pcontract.period, dt_end)
         table = string.replace(str(pcontract.contract), '.', '_')
-        #rows = self.cursor.execute("SELECT * FROM %s" % table) 
-        ## @todo 使用参数dt_start, dt_end
+        #
+        sql = "SELECT COUNT(*) FROM {tb} \
+                WHERE {start}<=id AND id<={end}".format(tb=table, start=id_start, end=id_end)
+        max_length = cursor.execute(sql).fetchone()[0]
+        #
         sql = "SELECT utime, open, close, high, low, volume FROM {tb} \
                 WHERE {start}<=id AND id<={end}".format(tb=table, start=id_start, end=id_end)
-        data =  pd.read_sql_query(sql, self.db, index_col='utime')
-        return data
+                
+        if window_size == 0:
+            data = pd.read_sql_query(sql, self.db, index_col='utime')
+            ## @todo
+            return SqliteSourceWrapper(data, None, len(data))
+        else:
+            cursor.execute(sql)
+            data = pd.DataFrame({
+                'open': [],
+                'close': [],
+                'high': [],
+                'low': [],
+                'volume': []
+                })
+            data.index = []
+            return SqliteSourceWrapper(data, cursor, max_length)
 
     def read_csv(self, path):
         """ 导入路径path下所有csv数据文件到sqlite中，每个文件对应数据库中的一周表格。
