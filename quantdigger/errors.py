@@ -22,6 +22,10 @@ class DataFormatError(QError):
     """
     msg = "{type}--错误的数据格式！" 
 
+class DataFieldError(QError):
+    """
+    """
+    msg = "错误的数据字段: {error_fields}\n正确的字段为: {right_fields} " 
 
 class FileDoesNotExist(QError):
     """

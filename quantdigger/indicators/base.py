@@ -10,7 +10,7 @@ import numpy as np
 import pandas
 from quantdigger.engine import series
 from quantdigger.widgets.plotting import PlotInterface
-from quantdigger.errors import DataFormatError
+from quantdigger.errors import SeriesIndexError, DataFormatError
 
 def transform2ndarray(data):
     """ 如果是序列变量，返回ndarray
@@ -51,17 +51,24 @@ def create_attributes(method):
         if not hasattr(self, 'value'):
             raise Exception("每个指标都必须有value属性，代表指标值！")
         else:
-            if isinstance(self.value, tuple):
-                self.series = [series.NumberSeries(value, len(value), name, self) for value in self.value]
+            if isinstance(self.value, dict):
+                ## @todo 去掉多值情况
+                self.series = {key: series.NumberSeries(value, len(value), name,
+                                self, float('nan')) for key, value in self.value.iteritems()}
+                for key, value in self.series.iteritems():
+                    setattr(self, key, value)
+                self.multi_value = True
             else:
-                self.series = [series.NumberSeries(self.value, len(self.value), name, self)]
-                # 输出
+                self.series = [series.NumberSeries(self.value, len(self.value),
+                                name, self, float('nan'))]
+                self.multi_value = False
+            # 输出
+            if series.g_rolling:
                 for s in self.series:
-                    if series.g_rolling:
                         s.reset_data([], 1+series.g_window)
             
             # 绘图中的y轴范围未被设置，使用默认值。
-            if not self.upper:
+            if not self._upper:
                 upper = lower = []
                 if isinstance(self.value, tuple):
                     # 多值指标
@@ -105,6 +112,7 @@ class IndicatorBase(PlotInterface):
     def __init__(self, data, n, name='',  widget=None):
         super(IndicatorBase, self).__init__(name, widget)
         self.name = name
+        self.count = 0
         if isinstance(data, series.NumberSeries) and series.g_rolling:
             # set input ordered
             data.set_shift()
@@ -120,14 +128,14 @@ class IndicatorBase(PlotInterface):
         
         Args:
             cache_index (.int): 缓存索引
-            rolling_index (.int): 回溯索引
 
+            rolling_index (.int): 回溯索引
         """
         if series.g_rolling:
             rolling_index = min(len(self.data)-1, self.series[0].curbar)
             values = None
             if self._cache[cache_index][0] == self.curbar:
-                values = self._cache[cache_index][1]
+                values = self._cache[cache_index][1] # 缓存命中
             else:
                 self._rolling_data = transform2ndarray(self.data)  # 输入
                 # 指标一次返回多个值
@@ -137,7 +145,7 @@ class IndicatorBase(PlotInterface):
             for i, v in enumerate(values):
                 self.series[i].update(v)
         else:
-            ## @todo 如果不是历史数据，还是要计算
+            ## @todo 如果是实时数据，还是要计算
             return
 
     @property
@@ -156,21 +164,34 @@ class IndicatorBase(PlotInterface):
         if tracker:
             tracker.add_indicator(self)
 
-    def __tuple__(self):
-        """ 返回元组。某些指标，比如布林带有多个返回值。
-            这里以元组的形式返回多个序列变量。
-        """
-        if isinstance(self.series, list):
-            return tuple(self.series)
-        else:
-            return (self.series,)
-
-    #def __iter__(self):
-        #"""docstring for __iter__""" 
-        #if self.series.__class__.__name__ == 'list':
+    #def __tuple__(self):
+        #""" 返回元组。某些指标，比如布林带有多个返回值。
+            #这里以元组的形式返回多个序列变量。
+        #"""
+        #if isinstance(self.series, list):
             #return tuple(self.series)
         #else:
             #return (self.series,)
+
+    #def __iter__(self):
+        #return self
+
+    #def next(self):
+        #"""docstring for next""" 
+        #iter(self.series)
+
+    def __getitem__(self, index):
+        # 解析多元值, 返回series
+        # python 3.x 有这种机制？
+        #print self.name, index
+        #print self.series[0].data
+        if self.multi_value:
+            return self.series[index]
+        # 返回单变量的值。
+        if index >= 0:
+            return self.series[0][index]
+        else:
+            raise SeriesIndexError
 
     def __float__(self):
         return self.series[0][0]
@@ -196,11 +217,6 @@ class IndicatorBase(PlotInterface):
 
     def __ge__(self, other):
         return float(self) >= float(other)
-
-    ## @note 以下都是单值函数。
-    def __getitem__(self, index):
-        # 大于当前的肯定被运行过。
-        return self.series[0][index]
 
     #
     def __add__(self, r):

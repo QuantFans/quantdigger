@@ -63,14 +63,10 @@ if __name__ == '__main__':
         signals = [] 
         for trans in algo.blotter.transactions:
             deals.update_positions(positions, signals, trans);
-        #d =  simulator.data[pcon]['close']
-        #for i in d:
-            #print i
-        #assert False
         plotting.plot_result(simulator.data[pcon],
                                     algo._indicators,
                                     signals,
-                                    algo.blotter)
+                                    algo.blotter.all_holdings)
 
         
     except Exception, e:

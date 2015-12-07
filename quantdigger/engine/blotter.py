@@ -66,9 +66,9 @@ class SimpleBlotter(Blotter):
             'equity': self.initial_capital
         }]
 
-    def update_bar(self, bars):
+    def update_ticks(self, ticks):
         """ 当前bar数据更新。 """ 
-        self._bars = bars
+        self._ticks = ticks
 
     def update_datetime(self, dt):
         """
@@ -97,7 +97,7 @@ class SimpleBlotter(Blotter):
         # 以close价格替代市场价格。
         is_stock = True  # 默认是股票回测
         for contract, pos in self.current_positions.iteritems():
-            new_price = self._bars[contract].close
+            new_price = self._ticks[contract]
             profit += pos.profit(new_price)
             ## @todo 用昨日结算价计算保证金
             margin += pos.position_margin(new_price)
@@ -134,7 +134,7 @@ class SimpleBlotter(Blotter):
                 self.api.order(order)
                 valid_orders.append(order)
             else:
-                assert(False and "无效合约")
+                continue
         self._open_orders.extend(valid_orders)
         self.all_orders.extend(valid_orders)
         #print "Receive %d signals!" % len(event.orders)
@@ -193,6 +193,7 @@ class SimpleBlotter(Blotter):
             except KeyError:
                 # 没有持有该合约
                 logger.warn("不存在合约[%s]" % order.contract)
+                #assert False
                 return False
             logger.warn("下单仓位问题")
             return False

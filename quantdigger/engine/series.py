@@ -5,8 +5,7 @@ g_rolling = None # 是否滚动
 g_window = 0
 
 class SeriesBase(object):
-    DEFAULT_VALUE = None
-    def __init__(self, data=[], wsize=0, name='', indic=None):
+    def __init__(self, data=[], wsize=0, name='', indic=None, default=None):
         """ 序列变量的基类。 
         name用来跟踪
         """
@@ -15,10 +14,11 @@ class SeriesBase(object):
         self._shift = False
         self._window_size = wsize
         self._indic = indic
+        self._default = default
         #print self._indic
         self.name = name
         if len(data) == 0:
-            self.data = np.array([self.DEFAULT_VALUE] * self._window_size)
+            self.data = np.array([self._default] * self._window_size)
         else:
             self.data = data
 
@@ -36,7 +36,7 @@ class SeriesBase(object):
         """
         self._window_size = max(self._window_size, wsize)
         if len(data) == 0:
-            self.data = np.array([self.DEFAULT_VALUE] * self._window_size)
+            self.data = np.array([self._default] * self._window_size)
         else:
             # 序列系统变量
             self.data = data
@@ -107,13 +107,12 @@ class NumberSeries(SeriesBase):
     """ 数字序列变量"""
     DEFAULT_VALUE = 0.0
     value_type = float
-    def __init__(self, data=[], wsize=0, name='', indic=None):
-        super(NumberSeries, self).__init__(data, wsize, name, indic)
+    def __init__(self, data=[], wsize=0, name='', indic=None, default=0.0):
+        super(NumberSeries, self).__init__(data, wsize, name, indic, default)
         return 
 
     def __float__(self):
         return self[0]
-
     #
     def __eq__(self, r):
         return self[0] == float(r)
@@ -197,7 +196,7 @@ class NumberSeries(SeriesBase):
         try:
             if g_rolling:
                 if index > g_window or index<0:
-                    return self.DEFAULT_VALUE
+                    return self._default
                 if self._shift:
                     # 输入
                     return self.data[self._index-index]
@@ -210,31 +209,32 @@ class NumberSeries(SeriesBase):
             else:
                 i = self._curbar - index
                 if i < 0 or index<0:
-                    return self.DEFAULT_VALUE
+                    return self._default
                 else:
                     return self.data[i]
         except SeriesIndexError:
             raise SeriesIndexError
 
-
-from datetime import datetime
+import datetime
 class DateTimeSeries(SeriesBase):
     """ 时间序列变量 """
-    DEFAULT_VALUE = 0.0
+    DEFAULT_VALUE = datetime.datetime(1980,1,1)
     def __init__(self, data=[], wsize=0, name=''):
-        super(DateTimeSeries, self).__init__(data, wsize, name)
+        super(DateTimeSeries, self).__init__(data, wsize, name,
+                                default=self.DEFAULT_VALUE)
         return
 
     def __getitem__(self, index):
         try:
             i = self._curbar - index
             if g_rolling and (index > g_window or index < 0):
-                return self.DEFAULT_VALUE
+                return self._default
             if i < 0 or index < 0:
-                return self.DEFAULT_VALUE
-            return datetime.fromtimestamp(self.data[i%self._window_size]/1000)
+                return self._default
+            #return datetime.fromtimestamp(self.data[i%self._window_size]/1000)
+            return self.data[i%self._window_size]
         except SeriesIndexError:
             raise SeriesIndexError
 
     def __str__(self):
-        return str(datetime.fromtimestamp(self.data[self._index]/1000))
+        return str(self.data[self._index])

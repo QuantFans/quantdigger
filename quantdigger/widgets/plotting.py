@@ -32,8 +32,8 @@ class PlotInterface(object):
     """
     系统绘图基类。
 
-    :ivar upper: 坐标上界（绘图用）
-    :vartype upper: float
+    :ivar _upper: 坐标上界（绘图用）
+    :vartype _upper: float
     :ivar lower: 坐标上界（绘图用）
     :vartype lower: float
     :ivar widget: 绘图容器，暂定Axes
@@ -42,7 +42,7 @@ class PlotInterface(object):
         self.ax_widget = AxWidget(name)
         self.qt_widget = QtWidget(name)
         self.widget = widget
-        self.upper = self.lower = None
+        self._upper = self._lower = None
 
     def plot_line(self, data, color, lw, style='line'):
         """ 画线    
@@ -71,8 +71,8 @@ class PlotInterface(object):
 
     def set_yrange(self, lower, upper):
         """ 设置纵坐标范围。 """
-        self.lower = lower
-        self.upper = upper
+        self._lower = lower
+        self._upper = upper
 
     def stick_yrange(self, y_range):
         """ 固定纵坐标范围。如RSI指标。 
@@ -80,17 +80,17 @@ class PlotInterface(object):
         :ivar y_range: 纵坐标范围。
         :vartype y_range: list
         """
-        self.lower = y_range
-        self.upper = y_range
+        self._lower = y_range
+        self._upper = y_range
 
     def y_interval(self, w_left, w_right):
         """ 可视区域移动时候重新计算纵坐标范围。 """
         ## @todo 只存储上下界, 每次缩放的时候计算一次, 在移动时候无需计算。
-        if len(self.upper) == 2:
+        if len(self._upper) == 2:
             # 就两个值，分别代表上下界。
-            return max(self.upper), min(self.lower) 
-        ymax = np.max(self.upper[w_left: w_right])
-        ymin = np.min(self.lower[w_left: w_right])
+            return max(self._upper), min(self._lower) 
+        ymax = np.max(self._upper[w_left: w_right])
+        ymin = np.min(self._lower[w_left: w_right])
         return ymax, ymin
     
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import pandas as pd
+import time
 from datetime import datetime, timedelta
 from quantdigger.datasource.source import CsvSource, SqlLiteSource
 from quantdigger.datasource.datautil import tick2period
@@ -19,15 +20,34 @@ class LocalData(object):
     def __init__(self):
         """
         """ 
-        self._csv = CsvSource(''.join([os.getcwd(), os.sep, 'data', os.sep]))
-        self._sql = SqlLiteSource(''.join([os.getcwd(), os.sep, 'data', os.sep, 'digger.db']))
+        self._csv = CsvSource(os.path.join(os.getcwd(), 'data'))
+        self._sql = SqlLiteSource(os.path.join(os.getcwd(), 'data', 'digger.db'))
         self._src = self._sql # 设置数据源
 
     def load_bars(self, pcontract, dt_start, dt_end, window_size):
+        """ 获取本地历史数据    
+        
+        Args:
+            pcontract (PContract): 周期合约
+
+            dt_start (datetime): 数据的开始时间
+
+            dt_end (datetime): 数据的结束时间
+
+            window_size (int): 窗口大小，0表示大小为数据长度。
+        
+        Returns:
+            SourceWrapper. 数据
+        """
         if pcontract.contract.exch_type == 'stock':
             return []
         else:
             return self._src.load_bars(pcontract, dt_start, dt_end, window_size);
+
+    def load_data(self, pcontract, dt_start=datetime(1980,1,1),
+                  dt_end=datetime(2100,1,1), window_size=0):
+        """ 返回DataFrame数据 """
+        return self.load_bars(pcontract, dt_start, dt_end, window_size).data
 
     def loadTickData(self):
         raise NotImplementedError
@@ -100,7 +120,7 @@ class DataManager(object):
             dt_end(datetime): 结束时间
         
         Returns:
-            DataFrame. 
+            SourceWrapper.
         """
         if type(dt_start) == str:
             dt_start = datetime.strptime(dt_start, "%Y-%m-%d")

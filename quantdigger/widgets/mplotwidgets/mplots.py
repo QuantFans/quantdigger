@@ -131,7 +131,7 @@ class Candles(object):
 
 class TradingSignal(object):
     """ 从信号坐标(时间， 价格)中绘制交易信号。 """
-    def __init__(self, tracker, signal, name="Signal", c=None, lw=2):
+    def __init__(self, signal, name="Signal", c=None, lw=2):
         #self.set_yrange(price)
         #self.signal=signal
         #self.c = c
@@ -151,9 +151,10 @@ class TradingSignal(object):
 
 class TradingSignalPos(object):
     """ 从价格和持仓数据中绘制交易信号图。 """
-    def __init__(self, tracker, price_data, deals, name="Signal", c=None, lw=2):
+    def __init__(self, price_data, deals, name="Signal", c=None, lw=2):
         self.signal = []
         self.colors = []
+        price_data['row'] = [i for i in xrange(0, len(price_data))]
         for deal in deals:
             # ((x0, y0), (x1, y1))
             p = ((price_data.row[deal.open_datetime], deal.open_price),

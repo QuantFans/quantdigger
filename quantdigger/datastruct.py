@@ -380,6 +380,11 @@ class PContract(object):
         """ return string like 'IF000.SHEF-10.Minutes'  """
         return "%s-%s" % (self.contract, self.period)
 
+    @classmethod
+    def from_string(self, strpc):
+        t = strpc.split('-')
+        return PContract(Contract(t[0]), Period(t[1]))
+
     def __hash__(self):
         if hasattr(self, '_hash'):
             return self._hash

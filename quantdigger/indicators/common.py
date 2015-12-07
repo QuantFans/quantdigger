@@ -44,22 +44,28 @@ class BOLL(IndicatorBase):
     ## @todo assure name is unique, it there are same names,
     # modify the repeat name.
     @create_attributes
-    def __init__(self, tracker, prices, n, name='BOLL', color='y', lw=1, style="line"):
-        super(BOLL, self).__init__(tracker, name)
+    def __init__(self, data, n, name='BOLL', color='y', lw=1, style="line"):
+        super(BOLL, self).__init__(data, n, name)
         # self.value为任何支持index的数据结构。
         # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
         # 转化为numpy.ndarray等能被指标函数处理的参数。
-        self.value = self._boll(prices, n)
+        if not series.g_rolling:
+            # 向量化运行的均值函数
+            data = transform2ndarray(data)
+            u, m, l = talib.BBANDS(data, n, 2, 2)
+            self.value = {
+                    'upper': u,
+                    'middler': m,
+                    'lower': l
+                    }
+        # 支持逐步运行必须函数的参数
+        self._rolling_args = (n,)
 
-    def _boll(self, data, n):
-        """ 向量化运行的均值函数。 """
-        data = transform2ndarray(data)
+    def _rolling_algo(self, data, n, i):
+        """ 逐步运行函数。""" 
+        ## @todo 用了向量化方法，速度降低
         upper, middle, lower =  talib.BBANDS(data, n, 2, 2)
         return (upper, middle, lower)
-
-    def _iter_boll(self, data, n):
-        #return (upper, middle, lower)
-        return
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """
