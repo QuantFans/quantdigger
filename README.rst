@@ -50,17 +50,9 @@ http://www.quantfans.com/doc/quantdigger/
 * tushare_ (可选, 一个非常强大的股票信息抓取工具)
 
 
-常见问题
---------
-* windows下ta-lib安装错误
-
-  解压后在quantdigger目录下运行
-  ::
-
-      pip install quantdigger\lib\TA_Lib-0.4.9-cp27-none-win_amd64.whl
-
 策略组合DEMO
 ------------
+
 源码
 ~~~~
 .. code:: py
@@ -141,7 +133,6 @@ http://www.quantfans.com/doc/quantdigger/
 
 策略结果
 ~~~~~~~~
-**main.py**
 
 * k线和信号线
 
