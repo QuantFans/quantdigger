@@ -2,6 +2,8 @@
 import pandas as pd
 import os
 import unittest
+from logbook import Logger
+logger = Logger('test')
 
 class TestDataSource(unittest.TestCase):
     def test_local_data(self):
@@ -14,9 +16,11 @@ class TestDataSource(unittest.TestCase):
         fname = os.path.join(os.getcwd(), 'data', 'CC.SHFE-1.Minute.csv')
         source = pd.read_csv(fname, parse_dates='datetime', index_col='datetime')
         self.assertFalse(source.equals(target), '本地数据接口负测试失败！')
+
         fname = os.path.join(os.getcwd(), 'data', 'BB.SHFE-1.Minute.csv')
         source = pd.read_csv(fname, parse_dates='datetime', index_col='datetime')
         self.assertTrue(source.equals(target), '本地数据接口正测试失败！')
+        logger.info('----------------- 本地数据接口测试成功 -------------------')
 
 if __name__ == '__main__':
     unittest.main()

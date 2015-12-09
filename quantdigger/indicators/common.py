@@ -151,11 +151,12 @@ class MACD(IndicatorBase):
     #def _qtplot(self, widget, fillcolor):
         #raise  NotImplementedError
 
-class Volume(IndicatorBase):
+from quantdigger.widgets.widget_plot import PlotInterface
+class Volume(PlotInterface):
     """ 柱状图。 """
     @create_attributes
-    def __init__(self, tracker, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
-        super(Volume, self).__init__(tracker, name)
+    def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
+        super(Volume, self).__init__(name, None)
         self.value = transform2ndarray(volume)
 
     def plot(self, widget):

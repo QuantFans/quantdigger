@@ -2,10 +2,156 @@
 from abc import ABCMeta, abstractmethod
 
 from quantdigger.engine.event import OrderEvent, Event
-from quantdigger.datastruct import Position, TradeSide, Direction, PriceType
-from quantdigger.util import engine_logger as logger
+from quantdigger.datastruct import Position, TradeSide, Direction, PriceType, OneDeal
+from quantdigger.util import elogger as logger
+from quantdigger.datastruct import PContract
 from api import SimulateTraderAPI
 
+class Profile(object):
+    """ 组合结果 """
+    def __init__(self, blotters, dcontexts, pcon, i):
+        self._blts = blotters # 组合内所有策略的blotter
+        self._dcontexts = dcontexts   # 所有数据上下文
+        self.i = i   # 对应于第几个组合
+        self._main_pcontract = pcon
+
+    def name(self, j):
+        return self._blts[j].name
+
+    def transactions(self, j=None):
+        """ 第j个策略的所有成交明细, 默认返回组合的成交明细。
+        
+        Args:
+            j (int): 第j个策略
+        
+        Returns:
+            list. [Transaction, ..]
+        """
+        if j != None:
+            return self._blts[j].transactions
+        trans = []
+        for blt in self._blts:
+            trans.append(blt.transactions)
+        ## @TODO 时间排序
+        return trans
+
+    def deals(self, j=None):
+        """ 第j个策略的每笔交易(一开一平), 默认返回组合的每笔交易。
+        
+        Args:
+            j (int): 第j个策略
+        
+        Returns:
+            list. [OneDeal, ..]
+        """
+        """ 交易信号对 """ 
+        positions = {}
+        deals = [] 
+        if j != None:
+            for trans in self.transactions(j):
+                update_positions(positions, deals, trans)
+        else:
+            for i in range(0, len(self._blts)):
+                 deals += self.deals(i)
+        return deals
+
+    def all_holdings(self, j=None):
+        """ 第j个策略的账号历史, 默认返回组合的账号历史。
+        
+        Args:
+            j (int): 第j个策略
+        
+        Returns:
+            list. [{'cash', 'commission', 'equity', 'datetime'}, ..]
+        """
+        if j != None:
+            return self._blts[j].all_holdings
+        if len(self._blts) == 1:
+            return self._blts[0].all_holdings
+        import copy
+        holdings = copy.deepcopy(self._blts[0].all_holdings)
+        #print self._blts[0].all_holdings
+        #print self._blts[1].all_holdings
+        for i, hd in enumerate(holdings):
+            for blt in self._blts[1:]:
+                rhd = blt.all_holdings[i]
+                hd['cash'] += rhd['cash']
+                hd['commission'] += rhd['commission']
+                hd['equity'] += rhd['equity']
+        return holdings
+                
+
+    def current_positions(self, j):
+        """ 当前持仓
+        
+        Args:
+            j (int): 第j个策略
+        
+        Returns:
+            dict. { Contract: Position }
+        """
+        ## @TODO 组合持仓
+        return self._blts[j].current_positions
+
+    def current_holdings(self, j=None):
+        """ 当前账号情况
+        
+        Args:
+            j (int): 第j个策略
+        
+        Returns:
+            dict. {'cash', 'commission', 'history_profit', 'equity' }
+        """
+        if j != None:
+            return self._blts[j].current_holdings
+        if len(self._blts) == 1:
+            return self._blts[0].current_holdings
+        import copy
+        holdings = copy.deepcopy(self._blts[0].current_holdings)
+        for blt in self._blts[1:]:
+            rhd = blt.current_holdings
+            holdings['cash'] += rhd['cash']
+            holdings['commission'] += rhd['commission']
+            holdings['equity'] += rhd['equity']
+            holdings['history_profit'] += rhd['history_profit']
+        return holdings
+
+    def indicators(self, j=None, strpcon=None):
+        """ 返回第j个策略的指标, 默认返回组合的所有指标。
+        
+        Args:
+            j (int): 第j个策略
+
+            strpcon (str): 周期合约
+        
+        Returns:
+            dict. {指标名:指标}
+        """
+        pcon = self._main_pcontract
+        if strpcon:
+            pcon = PContract.from_string(strpcon) 
+        if j != None:
+            return self._dcontexts[pcon].indicators[self.i][j]
+        rst = { }
+        for j in range(0, len(self._blts)):
+            rst.update(self._dcontexts[pcon].indicators[self.i][j])
+        return rst
+            
+
+    def data(self, strpcon=None):
+        """ 周期合约数据
+        
+        Args:
+            strpcon (str): 周期合约，如'BB.SHFE-1.Minute' 
+        
+        Returns:
+            pd.DataFrame. 数据
+        """
+        pcon = self._main_pcontract
+        if strpcon:
+            pcon = PContract.from_string(strpcon) 
+        return self._dcontexts[pcon].raw_data
+    
 
 
 class Blotter(object):
@@ -13,6 +159,9 @@ class Blotter(object):
     订单管理。
     """
     __metaclass__ = ABCMeta
+
+    def __init__(self, name):
+        self.name = name
 
     @abstractmethod
     def update_signal(self, event):
@@ -34,19 +183,22 @@ class SimpleBlotter(Blotter):
     简单的订单管理系统，直接给 :class:`quantdigger.engine.exchange.Exchange`
     对象发订单，没有风控。
     """
-    def __init__(self, timeseries, events_pool, initial_capital=5000.0):
-        self._timeseries = timeseries
+    def __init__(self, name, events_pool, settings={ }):
+        super(SimpleBlotter, self).__init__(name)
+
         self._open_orders = list()
         self._pre_settlement = 0     # 昨日结算价
         self._datetime = None # 当前时间
-        self._init_captial = initial_capital
         self.api = SimulateTraderAPI(self, events_pool) # 模拟交易接口
 
         # 用于分析策略性能数据
         self.all_orders = []
-        self.initial_capital = initial_capital    # 初始权益
+        if settings:
+            self._captial =  settings['captial'] # 初始权益
+        else:
+            self._captial = 5000.0
 
-        self.current_positions = {}  # 当前持仓 dict of list, 包含细节。
+        self.current_positions = {}  # Contract -> Position
         self.current_holdings = {}  # 当前的资金 dict
         self.all_holdings = []   # 所有时间点上的资金 list of dict
         self.transactions = []
@@ -54,17 +206,11 @@ class SimpleBlotter(Blotter):
 
     def _init_state(self):
         self.current_holdings = {
-                'cash': self.initial_capital,
+                'cash': self._captial,
                 'commission':  0.0,
                 'history_profit':  0.0,
-                'equity': self.initial_capital
+                'equity': self._captial
         }
-        self.all_holdings = [{
-            'datetime': self._start_date,
-            'cash': self.initial_capital,
-            'commission':  0.0,
-            'equity': self.initial_capital
-        }]
 
     def update_ticks(self, ticks):
         """ 当前bar数据更新。 """ 
@@ -110,7 +256,7 @@ class SimpleBlotter(Blotter):
             order_margin +=  order.order_margin()
 
         # 当前权益 = 初始资金 + 历史平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
-        dh['equity'] = self._init_captial + self.current_holdings['history_profit'] + profit - \
+        dh['equity'] = self._captial + self.current_holdings['history_profit'] + profit - \
                        self.current_holdings['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
@@ -201,4 +347,58 @@ class SimpleBlotter(Blotter):
             if self.current_holdings['cash'] < order.price * order.quantity:
                 raise Exception('没有足够的资金开仓') 
         return True
+
+def update_positions(current_positions, deal_positions, trans):
+    """ 更新持仓 
+        current_positions: 当前持仓
+        deal_positions: 开平仓对
+    """
+    ## @todo 区分多空
+    class PositionsDetail(object):
+        """ 当前相同合约持仓集合(可能不同时间段下单)。
+
+        :ivar cost: 持仓成本。
+        :ivar total: 持仓总数。
+        :ivar positions: 持仓集合。
+        :vartype positions: list
+        """
+        def __init__(self):
+            self.total = 0
+            self.positions = []
+            self.cost = 0
+
+    p = current_positions.setdefault(trans.contract, PositionsDetail())
+    if trans.side == TradeSide.KAI:
+        # 开仓
+        p.positions.append(trans)
+        p.total += trans.quantity 
+
+    elif trans.side == TradeSide.PING:
+        # 平仓
+        p.total -= trans.quantity 
+        left_vol = trans.quantity
+        last_index = 0
+        for position in reversed(p.positions):
+            if position.quantity < left_vol:
+                # 还需从之前的仓位中平。
+                left_vol -= position.quantity
+                last_index -= 1
+                deal_positions.append(OneDeal(position, trans, position.quantity))
+
+            elif position.quantity == left_vol:
+                left_vol -= position.quantity
+                last_index -= 1
+                deal_positions.append(OneDeal(position, trans, position.quantity))
+                break 
+
+            else:
+                position.quantity -= left_vol
+                left_vol = 0
+                deal_positions.append(OneDeal(position, trans, left_vol))
+                break
+        if last_index != 0:
+            p.positions = p.positions[0 : last_index]
+        assert(left_vol == 0) # 会被catch捕获 AssertError
+
+
 

@@ -9,8 +9,6 @@ import talib
 import numpy as np
 from logbook import Logger
 logger = Logger('test')
-
-
 class TestSeries(unittest.TestCase):
         
     def test_case(self):
@@ -22,7 +20,7 @@ class TestSeries(unittest.TestCase):
         on_exit = {
                 'dlist': [],
                 'series': [],
-                'dtseries': [],
+                'dtseries': []
                 }
         ## @todo 在多合约中测试on_final, on_exit
 
@@ -64,6 +62,9 @@ class TestSeries(unittest.TestCase):
                 svar.append(ctx.svar[0])
 
             def on_final(self, ctx):
+                #print len(ctx.dlist), ctx.curbar
+                #print 'dlist:',  ctx.dlist
+                #print 'series:', ctx.series.data
                 return
 
             def on_exit(self, ctx):
@@ -74,7 +75,7 @@ class TestSeries(unittest.TestCase):
                 return
 
         ## @todo 滚动的时候无法通过测试
-        set_symbols(['BB.SHFE-1.Minute'], 0)
+        set_pcontracts([pcontract('BB.SHFE', '1.Minute')], 0)
         add_strategy([DemoStrategy('A1')])
         run()
         self.assertTrue(all(true_test), "系统序列变量转化错误!")
@@ -192,7 +193,7 @@ class TestIndicator(unittest.TestCase):
                 return
 
         ## @todo 滚动的时候无法通过测试
-        set_symbols(['BB.SHFE-1.Minute'], 0)
+        set_pcontracts([pcontract('BB.SHFE', '1.Minute')], 0)
         add_strategy([DemoStrategy('A1')])
         run()
         self.assertTrue(all(true_test), "指标转化错误!")
@@ -292,98 +293,7 @@ class TestIndicator(unittest.TestCase):
         logger.info('----------------- 多值指标回溯测试成功 -------------------')
 
 
-class TestMultipleCombination(unittest.TestCase):
-    """ 多组合策略测试 """
-        
-    def test_case(self):
-        on_exit = {
-                'strategy': [],
-                }
 
-        on_final = {
-                'strategy': [],
-                }
-        on_bar = {
-                'combination': set(),
-                'count': 0
-                }
-
-        class DemoStrategy(Strategy):
-            
-            def on_init(self, ctx):
-                """初始化数据""" 
-                return
-
-            def on_bar(self, ctx):
-                #print ctx.strategy, ctx.pcontract
-                on_bar['combination'].add((str(ctx.pcontract), ctx.strategy))
-                on_bar['count'] += 1
-                pass
-
-            def on_final(self, ctx):
-                on_final['strategy'].append(ctx.strategy)
-
-            def on_exit(self, ctx):
-                on_exit['strategy'].append(ctx.strategy)
-                return
-
-        simulator = set_symbols(['BB.SHFE-1.Minute', 'AA.SHFE-1.Minute'], 0)
-        add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
-        add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
-        run()
-
-        fname = os.path.join(os.getcwd(), 'data', 'BB.SHFE-1.Minute.csv')
-        blen = len(pd.read_csv(fname))
-        fname = os.path.join(os.getcwd(), 'data', 'AA.SHFE-1.Minute.csv')
-        alen = len(pd.read_csv(fname))
-        sample = set([
-                ('BB.SHFE-1.Minute', 'A1'),
-                ('BB.SHFE-1.Minute', 'A2'),
-                ('AA.SHFE-1.Minute', 'A1'),
-                ('AA.SHFE-1.Minute', 'A2'),
-                ('BB.SHFE-1.Minute', 'B1'),
-                ('BB.SHFE-1.Minute', 'B2'),
-                ('AA.SHFE-1.Minute', 'B1'),
-                ('AA.SHFE-1.Minute', 'B2')
-        ])
-        self.assertTrue(on_bar['combination'] == sample)
-        sample.pop()
-        self.assertFalse(on_bar['combination'] == sample)
-        self.assertTrue(on_bar['count'] == alen*4 + blen*4)
-        self.assertFalse(on_bar['count'] == alen*3 + blen*4)
-        self.assertTrue(['A1', 'A2', 'B1', 'B2']*max(blen, alen) == on_final['strategy'],
-                        'on_final测试失败！')
-        self.assertFalse(['C1', 'A2', 'B1', 'B2']*max(blen, alen) == on_final['strategy'],
-                        'on_final测试失败！')
-        self.assertTrue(['A1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
-        self.assertFalse(['C1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
-        logger.info('----------------- 多组合策略测试成功！ -------------------')
-
-        # Context单元测试
-        context = simulator.context
-        data_contexts = []
-        strategies = [['A1', 'A2'], ['B1', 'B2']]
-        for pcon,  dctx in context._data_contexts.iteritems():
-            self.assertTrue(pcon == dctx.pcontract, "Context数据上下文出错")
-            data_contexts.append(str(dctx.pcontract))
-        for i, sctx in enumerate(context._strategy_contexts):
-            self.assertTrue(strategies[i] == [s.name for s in sctx], "Context策略上下文出错")
-        ## @todo 资金配比测试 
-
-
-class TestSimulator(unittest.TestCase):
-    """ 多组合策略测试 """
-        
-    def test_case(self):
-        ## @todo profile
-            # all_holdings 长度一样
-            # signals 盈利
-
-        ## @todo 回测案例
-        # 隔天第一根买卖，很容易计算结果。
-
-        ## @TODO deals DemoStrategy2
-        pass
 
 if __name__ == '__main__':
     unittest.main()

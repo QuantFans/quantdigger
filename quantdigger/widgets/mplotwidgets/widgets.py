@@ -349,8 +349,8 @@ class MyLocator(mticker.MaxNLocator):
     def __call__(self, *args, **kwargs):
         return mticker.MaxNLocator.__call__(self, *args, **kwargs)
 
-#plt.rc('axes', grid=True)
 class MultiWidgets(object):
+    """ 多窗口控件 """
     def __init__(self, fig, data, w_width, *args):
         """ 多窗口联动控件。
 
@@ -365,8 +365,6 @@ class MultiWidgets(object):
             *args (tuple): 窗口布局。
         
         """
-
-
 
         self.name = "MultiWidgets" 
         self._fig = fig
@@ -389,6 +387,7 @@ class MultiWidgets(object):
         self._init_slider()
         self._init_widgets(*args)
         self._connect()
+
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
                                     color='b', lw=2, horizOn=True,
                                     vertOn=True)
@@ -406,7 +405,6 @@ class MultiWidgets(object):
         self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(data.index, '%Y-%m-%d'))
         self._slider_ax.set_xticks(self._slider_xticks_to_display())
-            
 
     @property
     def axes(self):
@@ -472,8 +470,6 @@ class MultiWidgets(object):
 
             indicator  (Indicator): 指标.
 
-            if_twinx  (Bool): 是否是独立坐标。
-
         Returns:
 
             Indicator. 传进来的指标变量。
@@ -511,7 +507,9 @@ class MultiWidgets(object):
         """ 滑块事件处理。 """
         if event.name == "button_press_event":
             self._bigger_picture.set_zorder(1000)
-            self._slider_cursor = MultiCursor(self._fig.canvas, [self._slider_ax, self._bigger_picture], color='r', lw=2, horizOn=False, vertOn=True)
+            self._slider_cursor = MultiCursor(self._fig.canvas,
+                                    [self._slider_ax, self._bigger_picture], color='r',
+                                    lw=2, horizOn=False, vertOn=True)
         elif event.name == "button_release_event":
             self._bigger_picture.set_zorder(0)
             del self._slider_cursor
@@ -519,8 +517,8 @@ class MultiWidgets(object):
         elif event.name == "motion_notify_event":
             pass
         # 遍历axes中的每个indicator，计算显示区间。
-        self._w_right = int(val)
-        self._w_left = max(0, self._w_right-self._w_width)
+        self._w_left = int(val)
+        self._w_right = min(self._w_left+self._w_width, self._data_length+3)
         self.axes[0].set_xlim(self._w_left, self._w_right)
         self._update_widgets()
 

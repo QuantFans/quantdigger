@@ -2,8 +2,8 @@
 from logbook import Logger
 import time
 
-engine_logger = Logger('engine')
-data_logger = Logger('data')
+elogger = Logger('engine')
+dlogger = Logger('data')
 
 def time2int(t):
      """ datetime转化为整数。

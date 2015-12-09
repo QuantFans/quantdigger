@@ -53,10 +53,10 @@ candle_widget = frame.add_widget(0, kwindow, True)
 #frame.add_indicator(0, signal)
 
 # 添加指标
-ma = frame.add_indicator(0, MA(None, price_data.close, 20, 'MA20', 'y', 2))
-frame.add_indicator(0, MA(None, price_data.close, 30, 'MA30', 'b', 2))
+ma = frame.add_indicator(0, MA(price_data.close, 20, 'MA20', 'y', 2))
+frame.add_indicator(0, MA(price_data.close, 30, 'MA30', 'b', 2))
 #frame.add_indicator(1, RSI(None, price_data.close, 14, name='RSI', fillcolor='b'))
-frame.add_indicator(1, Volume(None, price_data.open, price_data.close, price_data.vol))
+frame.add_indicator(1, Volume(price_data.open, price_data.close, price_data.vol))
 frame.draw_widgets()
 
 # legend

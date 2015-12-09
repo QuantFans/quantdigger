@@ -59,6 +59,7 @@ class DataContext(object):
         """
         new_row, self.curbar  = self.wrapper.rolling_foward()
         if not new_row:
+            self.curbar -= 1
             return False
 
         # 为当天数据预留空间, 改变g_window或者一次性分配
@@ -180,9 +181,9 @@ class DataContext(object):
 
 class StrategyContext(object):
     """ 策略组合"""
-    def __init__(self, name, settings=None):
+    def __init__(self, name, settings={ }):
         self.events_pool = EventsPool()
-        self.blotter = SimpleBlotter(None, self.events_pool)
+        self.blotter = SimpleBlotter(name, self.events_pool, settings)
         self.exchange = Exchange(self.events_pool, strict=False)
         self.name = name
         self._orders = []
@@ -316,29 +317,29 @@ class StrategyContext(object):
 
 class Context(object):
     """ 上下文"""
-    def __init__(self, bars, ticks):
-        self._bars = bars     # str(PContract) -> DataWrapper
-        self._bar_context = None
-        self._strategy_context = None
-        self._all_strategy_context = []
+    def __init__(self, data, ticks):
+        self._data_contexts = data     # str(PContract) -> DataWrapper
+        self._cur_data_context = None
+        self._strategy_contexts = []
+        self._cur_strategy_context = None
         self._datetime = None  # 全局时间
         self._ticks = ticks
 
     def add_strategy_context(self, ctxs):
-        self._all_strategy_context.append(ctxs)
+        self._strategy_contexts.append(ctxs)
 
     def switch_to_contract(self, pcon):
-        self._bar_context = self._bars[pcon]
+        self._cur_data_context = self._data_contexts[pcon]
 
     def switch_to_strategy(self, i, j):
-        self._bar_context.i, self._bar_context.j  = i, j
-        self._strategy_context = self._all_strategy_context[i][j]
+        self._cur_data_context.i, self._cur_data_context.j  = i, j
+        self._cur_strategy_context = self._strategy_contexts[i][j]
 
     def update_strategy_context(self, i, j):
-        self._strategy_context.update(self._datetime, self._ticks)
+        self._cur_strategy_context.update(self._datetime, self._ticks)
 
     def process_signals(self):
-        self._strategy_context.process_signals(self._bar_context.bar)
+        self._cur_strategy_context.process_signals(self._cur_data_context.bar)
 
     def rolling_foward(self):
         """
@@ -346,78 +347,89 @@ class Context(object):
         """
         # 为当天数据预留空间, 改变g_window或者一次性分配
         #self.data = np.append(data, tracker.container_day)
-        data = self._bar_context.rolling_foward()
-        ## @todo 时间格式优化
-        self._datetime = self._bar_context.datetime[0] 
-        self._ticks[self._bar_context.contract] = self._bar_context.close[0]
+        data = self._cur_data_context.rolling_foward()
+        self._datetime = self._cur_data_context.datetime[0] 
+        self._ticks[self._cur_data_context.contract] = self._cur_data_context.close[0]
         return data
         
     def update_user_vars(self):
         """
         更新用户在策略中定义的变量, 如指标等。
         """
-        self._bar_context.update_user_vars()
+        self._cur_data_context.update_user_vars()
+
+    @property
+    def strategy(self):
+        return self._cur_strategy_context.name
+
+    @property
+    def pcontract(self):
+        return self._cur_data_context.pcontract
+
+    @property
+    def symbol(self):
+        return str(self._cur_data_context.pcontract.contract)
 
     @property
     def curbar(self):
-        return self._bar_context.curbar + 1
+        return self._cur_data_context.curbar + 1
 
     @property
     def open(self):
-        return self._bar_context.open
+        return self._cur_data_context.open
 
     @property
     def close(self):
-        return self._bar_context.close
+        return self._cur_data_context.close
 
     @property
     def high(self):
-        return self._bar_context.high
+        return self._cur_data_context.high
 
     @property
     def low(self):
-        return self._bar_context.low
+        return self._cur_data_context.low
 
     @property
     def volume(self):
-        return self._bar_context.volume
+        return self._cur_data_context.volume
     
     @property
     def datetime(self):
-        return self._bar_context.datetime
+        return self._cur_data_context.datetime
 
     def __getitem__(self, strpcon):
         """ 获取跨品种合约 """
-        return self._bars[strpcon]
+        return self._data_contexts[strpcon]
 
     def __getattr__(self, name):
-        return self._bar_context.get_item(name)
+        return self._cur_data_context.get_item(name)
 
     def __setattr__(self, name, value):
-        if name in ['_bars', '_bar_context', '_strategy_context',
-                    '_all_strategy_context', '_datetime', '_ticks']:
+        if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
+                    '_strategy_contexts', '_datetime', '_ticks']:
             super(Context, self).__setattr__(name, value)
         else:
-            self._bar_context.add_item(name, value)
+            self._cur_data_context.add_item(name, value)
 
     def buy(self, direction, price, quantity, price_type='LMT', contract=None):
         ## @todo 判断是否在on_final中运行，是的话不允许默认值。
-        contract = contract if contract else self._bar_context.contract 
-        self._strategy_context.buy(direction, price, quantity, price_type, contract)
+        contract = contract if contract else self._cur_data_context.contract 
+        self._cur_strategy_context.buy(direction, price, quantity, price_type, contract)
 
     def sell(self, direction, price, quantity, price_type='MKT', contract=None):
-        contract = contract if contract else self._bar_context.contract 
-        self._strategy_context.sell(direction, price, quantity, price_type, contract)
+        contract = contract if contract else self._cur_data_context.contract 
+        self._cur_strategy_context.sell(direction, price, quantity, price_type, contract)
 
     def position(self, contract=None):
-        contract = contract if contract else self._bar_context.contract 
-        return self._strategy_context.position(contract)
+        contract = contract if contract else self._cur_data_context.contract 
+        return self._cur_strategy_context.position(contract)
 
     def cash(self):
-        return self._strategy_context.cash()
+        return self._cur_strategy_context.cash()
 
     def equity(self):
-        return self._strategy_context.equity()
+        return self._cur_strategy_context.equity()
 
     def profit(self, contract=None):
         pass

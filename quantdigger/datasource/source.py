@@ -10,6 +10,7 @@ from quantdigger.datasource import datautil
 
 
 class SourceWrapper(object):
+    """ 数据源包装器，使相关数据源支持逐步读取操作 """
     def __init__(self, pcontract, data, cursor, max_length=0):
         """
         max_length=0，表示逐步模式
@@ -23,8 +24,13 @@ class SourceWrapper(object):
     def __len__(self):
         return self._max_length
 
+    def  rolling_foward(self):
+        """ 读取下一个数据""" 
+        raise NotImplementedError
+
 
 class SqliteSourceWrapper(SourceWrapper):
+    """ sqlite数据源包装器，使其支持逐步操作 """
     def __init__(self, pcontract, data, cursor, max_length=0):
         super(SqliteSourceWrapper, self).__init__(pcontract, data, cursor, max_length)
 
@@ -41,6 +47,7 @@ class SqliteSourceWrapper(SourceWrapper):
 
 
 class CsvSourceWrapper(SourceWrapper):
+    """ Csv数据源包装器，使其支持逐步操作 """
     def __init__(self, pcontract, data, cursor, max_length=0):
         super(CsvSourceWrapper, self).__init__(pcontract, data, cursor, max_length)
 
@@ -67,6 +74,7 @@ def convert_datetime(tf):
 
 class SqlLiteSource(object):
     """
+    Sqlite数据源。
     """
     def __init__(self, fname):
         import sqlite3
@@ -110,7 +118,7 @@ class SqlLiteSource(object):
 
         DateFrame(index, open, close, low, high, vol)
 
-        >>> sql.import_csv(os.getcwd())
+        >>> sql.read_csv(os.getcwd())
         """
 
         for path, dirs, files in os.walk(path):
@@ -167,6 +175,7 @@ class SqlLiteSource(object):
 
 class CsvSource(object):
     """
+    Csv数据源。
     (datetime, open, close, high, low, volume)
     """
     def __init__(self, root):

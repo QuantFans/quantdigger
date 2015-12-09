@@ -9,7 +9,7 @@ import inspect
 import numpy as np
 import pandas
 from quantdigger.engine import series
-from quantdigger.widgets.plotting import PlotInterface
+from quantdigger.widgets.widget_plot import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
 def transform2ndarray(data):
@@ -122,6 +122,10 @@ class IndicatorBase(PlotInterface):
             self._cache = [(-1, None)] * (series.g_window+1)
         self._rolling_args = None
         self.value = []    # 输出
+
+    def _rolling_algo(self, data, n, i):
+        """ 逐步运行函数。""" 
+        raise NotImplementedError
 
     def compute_element(self, cache_index, rolling_index):
         """ 计算一个回溯值, 被Series延迟调用。

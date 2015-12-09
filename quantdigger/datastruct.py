@@ -381,8 +381,8 @@ class PContract(object):
         return "%s-%s" % (self.contract, self.period)
 
     @classmethod
-    def from_string(self, strpc):
-        t = strpc.split('-')
+    def from_string(self, strpcon):
+        t = strpcon.split('-')
         return PContract(Contract(t[0]), Period(t[1]))
 
     def __hash__(self):
@@ -476,3 +476,58 @@ class Bar(object):
         self.high = high
         self.low = low
         self.volume = vol
+
+
+class OneDeal(object):
+    """ 每笔交易（一开，一平)
+        
+        :ivar open: 开仓价
+        :vartype open: float
+        :ivar close: 平仓价
+        :vartype close: float
+    """
+
+
+    def __init__(self, buy_trans, sell_trans, quantity):
+        self.open = buy_trans
+        self.close = sell_trans
+        self._quantity = quantity;
+
+    def profit(self):
+        """ 盈亏额  """
+        direction = self.open.direction
+        if direction == Direction.LONG:
+            return (self.close.price - self.open.price) * self.open.quantity
+        else:
+            return (self.open.price - self.close.price) * self.open.quantity
+
+    @property
+    def quantity(self):
+        """ 成交量 """
+        return self._quantity
+
+    @property
+    def open_datetime(self):
+        """ 开仓时间 """
+        return self.open.datetime
+
+    @property
+    def open_price(self):
+        """ 开仓价格 """
+        return self.open.price
+
+    @property
+    def close_datetime(self):
+        """ 平仓时间 """
+        return self.close.datetime
+
+    @property
+    def close_price(self):
+        """ 平仓价格 """
+        return self.close.price
+
+    @property
+    def direction(self):
+        """ 空头还是多头 """
+        return self.open.direction
+

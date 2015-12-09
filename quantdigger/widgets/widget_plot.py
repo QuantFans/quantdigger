@@ -67,7 +67,7 @@ class PlotInterface(object):
     def plot(self, widget):
         """ 如需绘制指标，则需重载此函数。 """
         ## @todo 把plot_line等绘图函数分离到widget类中。
-        pass
+        raise NotImplementedError
 
     def set_yrange(self, lower, upper):
         """ 设置纵坐标范围。 """

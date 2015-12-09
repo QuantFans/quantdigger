@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
+##
+# @file data.py
+# @brief 本地数据，远程数据，数据控制模块
+# @author wondereamer
+# @version 0.2
+# @date 2015-12-09
+
+
 import os
 import pandas as pd
-import time
 from datetime import datetime, timedelta
 from quantdigger.datasource.source import CsvSource, SqlLiteSource
 from quantdigger.datasource.datautil import tick2period
-
 
 class QuoteCache(object):
     def __init__(self, arg):
         pass
 
-
-
 class LocalData(object):
-    """ 本地数据代理根据配置决定数据源的类型,
+    """ 
+    本地数据代理根据配置决定数据源的类型,
         比如sqlite, csv, pytable
     """
     def __init__(self):
@@ -22,7 +27,7 @@ class LocalData(object):
         """ 
         self._csv = CsvSource(os.path.join(os.getcwd(), 'data'))
         self._sql = SqlLiteSource(os.path.join(os.getcwd(), 'data', 'digger.db'))
-        self._src = self._sql # 设置数据源
+        self._src = self._csv # 设置数据源
 
     def load_bars(self, pcontract, dt_start, dt_end, window_size):
         """ 获取本地历史数据    
