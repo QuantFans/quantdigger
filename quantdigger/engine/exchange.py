@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 from quantdigger.datastruct import Transaction, PriceType, TradeSide, Direction
 from quantdigger.engine.event import FillEvent
+from quantdigger.util import elogger as logger
 class Exchange(object):
     """ 模拟交易所。
   
@@ -15,13 +16,19 @@ class Exchange(object):
         # strict 为False表示只关注信号源的可视化，而非实际成交情况。
         self._strict = strict
 
-    def make_market(self, bar):
-        ## @bug 开仓资金是否足够的验证
-        ## @todo 
+    def make_market(self, bars):
         """ 价格撮合""" 
         if self._open_orders:
             fill_orders = set()
             for order in self._open_orders:
+                try:
+                    bar = bars[order.contract]
+                except KeyError:
+                    logger.error('对不存在的合约下单')
+                    continue
+                # 未运行到。
+                if bar.datetime == None:
+                    continue
                 transact = Transaction(order)
                 if self._strict:
                     if order.price_type == PriceType.LMT:

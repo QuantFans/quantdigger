@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import string
 import time
+from quantdigger.engine import series
 from quantdigger.errors import FileDoesNotExist, DataFieldError
 from quantdigger.datasource import datautil
 
@@ -97,7 +98,7 @@ class SqlLiteSource(object):
                 WHERE {start}<=id AND id<={end}".format(tb=table, start=id_start, end=id_end)
                 
         data = pd.read_sql_query(sql, self.db, index_col='datetime')
-        if window_size == 0:
+        if not series.g_rolling:
             data = pd.read_sql_query(sql, self.db, index_col='datetime')
             ## @todo
             return SqliteSourceWrapper(pcontract, data, None, len(data))
@@ -183,7 +184,7 @@ class CsvSource(object):
     
     def load_bars(self, pcontract, dt_start, dt_end, window_size):
         fname = os.path.join(self._root, str(pcontract) + ".csv")
-        if window_size == 0:
+        if not series.g_rolling:
             try:
                 data = pd.read_csv(fname, index_col=0, parse_dates=True)
             except IOError:

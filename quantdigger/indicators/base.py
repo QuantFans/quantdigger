@@ -8,6 +8,7 @@
 import inspect
 import numpy as np
 import pandas
+from collections import OrderedDict
 from quantdigger.engine import series
 from quantdigger.widgets.widget_plot import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
@@ -53,8 +54,12 @@ def create_attributes(method):
         else:
             if isinstance(self.value, dict):
                 ## @todo 去掉多值情况
-                self.series = {key: series.NumberSeries(value, len(value), name,
-                                self, float('nan')) for key, value in self.value.iteritems()}
+                self.series = OrderedDict()
+                for key, value in self.value.iteritems():
+                    self.series[key] = series.NumberSeries(value, len(value),
+                                                        name, self, float('nan'))
+
+
                 for key, value in self.series.iteritems():
                     setattr(self, key, value)
                 self.multi_value = True
@@ -64,7 +69,11 @@ def create_attributes(method):
                 self.multi_value = False
             # 输出
             if series.g_rolling:
-                for s in self.series:
+                if self.multi_value:
+                    for key, value in self.series.iteritems():
+                        value.reset_data([], 1+series.g_window)
+                else:
+                    for s in self.series:
                         s.reset_data([], 1+series.g_window)
             
             # 绘图中的y轴范围未被设置，使用默认值。
@@ -131,12 +140,12 @@ class IndicatorBase(PlotInterface):
         """ 计算一个回溯值, 被Series延迟调用。
         
         Args:
-            cache_index (.int): 缓存索引
+            cache_index (int): 缓存索引
 
-            rolling_index (.int): 回溯索引
+            rolling_index (int): 回溯索引
         """
         if series.g_rolling:
-            rolling_index = min(len(self.data)-1, self.series[0].curbar)
+            rolling_index = min(len(self.data)-1, self.curbar)
             values = None
             if self._cache[cache_index][0] == self.curbar:
                 values = self._cache[cache_index][1] # 缓存命中
@@ -146,23 +155,31 @@ class IndicatorBase(PlotInterface):
                 args =  (self._rolling_data, ) + self._rolling_args + (rolling_index,)
                 values = apply(self._rolling_algo, args)
                 self._cache[cache_index] = (self.curbar, values)
+
             for i, v in enumerate(values):
-                self.series[i].update(v)
+                if self.multi_value:
+                    self.series.values()[i].update(v) 
+                else:
+                    self.series[i].update(v)
         else:
             ## @todo 如果是实时数据，还是要计算
             return
 
     @property
     def curbar(self):
+        if self.multi_value:
+            return self.series.itervalues().next().curbar
         return self.series[0].curbar
 
     def __size__(self):
         """""" 
+        if self.multi_value:
+            return len(self.series.itervalues().next())
         return len(self.series[0])
     
-    def debug_data(self):
-        """ 主要用于调试""" 
-        return [s.data for s in self.series]
+    #def debug_data(self):
+        #""" 主要用于调试""" 
+        #return [s.data for s in self.series]
 
     def _added_to_tracker(self, tracker):
         if tracker:

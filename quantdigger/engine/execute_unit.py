@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import numpy as np
 from quantdigger.datasource.data import data_manager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import series, blotter
@@ -18,19 +19,22 @@ class ExecuteUnit(object):
 
     """
     def __init__(self, pcontracts, window_size=0, dt_start=datetime(1980,1,1),
-                 dt_end=datetime(2100,1,1)):
+            dt_end=datetime(2100,1,1), spec_date = { }): # 'symbol':[,]
         series.g_rolling = False if window_size == 0 else True
         series.g_window = window_size
-        self.dt_start = dt_start
-        self.dt_end = dt_end
         self.all_data = { }     # PContract -> DataWrapper
         self.ticks = { }
         self.pcontracts = pcontracts
         self._combs = []
-        self._window_size = window_size
+        self._window_size = window_size + 1
         for pcon in pcontracts:
+            if pcon in spec_date:
+                dt_start = spec_date[pcon][0]
+                dt_end = spec_date[pcon][1]
+            assert(dt_start < dt_end)
             self.load_data(pcon, dt_start, dt_end)
             self.ticks[pcon.contract] = 0
+
         self.context = Context(self.all_data, self.ticks)
 
     def _init_strategies(self):
@@ -73,18 +77,11 @@ class ExecuteUnit(object):
         # todo 对单策略优化
         has_next = True
         # 遍历每个数据轮, 次数为数据的最大长度
+        for pcon, data in self.all_data.iteritems():
+            ## @todo 时间对齐
+            self.context.switch_to_contract(pcon)
+            self.context.rolling_foward()
         while True:
-            for pcon, data in self.all_data.iteritems():
-                ## @todo 时间对齐
-                self.context.switch_to_contract(pcon)
-                has_next = self.context.rolling_foward()
-                if not has_next:
-                    # 策略退出后的处理
-                    for i, combination in enumerate(self._combs):
-                        for j, s in enumerate(combination):
-                            self.context.switch_to_strategy(i, j)
-                            s.on_exit(self.context)
-                    return
             # 组合遍历
             for i, combination in enumerate(self._combs):
                 # 遍历数据轮的所有合约
@@ -100,7 +97,18 @@ class ExecuteUnit(object):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
                     s.on_final(self.context)
-                    self.context.process_signals()
+                    self.context.process_trading_events()
+
+            for pcon, data in self.all_data.iteritems():
+                self.context.switch_to_contract(pcon)
+                has_next = self.context.rolling_foward()
+                if not has_next:
+                    # 策略退出后的处理
+                    for i, combination in enumerate(self._combs):
+                        for j, s in enumerate(combination):
+                            self.context.switch_to_strategy(i, j)
+                            s.on_exit(self.context)
+                    return
                     
     def load_data(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
         """ 加载周期合约数据
@@ -118,9 +126,8 @@ class ExecuteUnit(object):
         try:
             return self.all_data[str(pcontract)]
         except KeyError:
-            ## @todo 时间对齐，长度确认
-            data = data_manager.load_bars(pcontract, dt_start, self.dt_end, self._window_size)
-            self.all_data[pcontract] = DataContext(data, self._window_size)
-            self._data_length = len(data)
-            return data
+            wrapper = data_manager.load_bars(pcontract, dt_start, dt_end, self._window_size)
+            window_size = len(wrapper.data) if not series.g_rolling else self._window_size
+            self.all_data[pcontract] = DataContext(wrapper, window_size)
+            return wrapper
 

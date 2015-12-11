@@ -73,6 +73,8 @@ class SeriesBase(object):
             while i < self._window_size:
                 self.data[i-1]=self.data[i]
                 i+=1
+        #print "****************" 
+        #print v
         self.data[self._index] = v
 
     def __len__(self):

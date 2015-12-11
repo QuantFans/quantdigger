@@ -8,6 +8,7 @@
 import talib
 import numpy as np
 import matplotlib.finance as finance
+from collections import OrderedDict
 from quantdigger.indicators.base import IndicatorBase, transform2ndarray, create_attributes
 from quantdigger.engine import series
 class MA(IndicatorBase):
@@ -49,6 +50,11 @@ class BOLL(IndicatorBase):
         # self.value为任何支持index的数据结构。
         # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
         # 转化为numpy.ndarray等能被指标函数处理的参数。
+        self.value = OrderedDict([
+                ('upper', []),
+                ('middler', []),
+                ('lower', [])
+                ])
         if not series.g_rolling:
             # 向量化运行的均值函数
             data = transform2ndarray(data)
@@ -65,7 +71,7 @@ class BOLL(IndicatorBase):
         """ 逐步运行函数。""" 
         ## @todo 用了向量化方法，速度降低
         upper, middle, lower =  talib.BBANDS(data, n, 2, 2)
-        return (upper, middle, lower)
+        return (upper[i], middle[i], lower[i])
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """

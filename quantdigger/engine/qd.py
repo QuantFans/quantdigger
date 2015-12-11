@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from quantdigger.engine.execute_unit import ExecuteUnit
-from datetime import datetime
-from quantdigger.engine.series import NumberSeries
+import datetime
+from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.indicators.common import *
 from quantdigger.datastruct import PContract
 
 # 系统角色
 g_simulator = None
 def set_symbols(pcons, window_size,
-                    dt_start=datetime(1980,1,1),
-                    dt_end=datetime(2100,1,1)):
+                    dt_start=datetime.datetime(1980,1,1),
+                    dt_end=datetime.datetime(2100,1,1)):
     """ 添加数据
 
     Args:
@@ -118,3 +118,6 @@ class Strategy(object):
     def on_exit(self, ctx):
         # 停在最后一根bar
         return
+
+#__all__ = ['set_symbols', 'add_strategy', 'run', 'buy', 'sell',
+        #'position', 'cash', 'equity', 'profit', 'day_profit', 'Strategy']

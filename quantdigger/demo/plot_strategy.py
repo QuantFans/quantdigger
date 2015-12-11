@@ -11,6 +11,12 @@
 #from quantdigger.util import  pcontract
 from quantdigger.engine.qd import *
 
+boll = {
+        'upper': [],
+        'middler': [],
+        'lower': []
+        }
+
 class DemoStrategy(Strategy):
     """ 策略A1 """
     
@@ -18,6 +24,8 @@ class DemoStrategy(Strategy):
         """初始化数据""" 
         ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2) #, 'ma20', 'b', '1')
         ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2) #, 'ma20', 'b', '1')
+        ctx.boll = BOLL(ctx.close, 2)
+        pass
 
     def on_bar(self, ctx):
         if ctx.curbar > 20:
@@ -26,6 +34,11 @@ class DemoStrategy(Strategy):
             elif ctx.position() > 0 and ctx.ma10[1] > ctx.ma20[1] and \
                  ctx.ma10 < ctx.ma20:
                 ctx.sell('long', ctx.close, 1) 
+
+        boll['upper'].append(ctx.boll['upper'][0])
+        boll['middler'].append(ctx.boll['middler'][0])
+        boll['lower'].append(ctx.boll['lower'][0])
+        pass
 
     def on_final(self, ctx):
         return

@@ -127,9 +127,7 @@ class Profile(object):
         Returns:
             dict. {指标名:指标}
         """
-        pcon = self._main_pcontract
-        if strpcon:
-            pcon = PContract.from_string(strpcon) 
+        pcon = PContract.from_string(strpcon) if strpcon else self._main_pcontract
         if j != None:
             return self._dcontexts[pcon].indicators[self.i][j]
         rst = { }
@@ -212,9 +210,10 @@ class SimpleBlotter(Blotter):
                 'equity': self._captial
         }
 
-    def update_ticks(self, ticks):
-        """ 当前bar数据更新。 """ 
+    def update_data(self, ticks, bars):
+        """ 当前价格数据更新。 """ 
         self._ticks = ticks
+        self._bars = bars
 
     def update_datetime(self, dt):
         """
