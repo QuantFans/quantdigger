@@ -138,6 +138,3 @@ class DataManager(object):
         else:
             return data
 
-data_manager = DataManager()
-
-    

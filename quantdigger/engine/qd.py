@@ -109,13 +109,16 @@ class Strategy(object):
         return
 
     def on_bar(self, ctx):
+        """ 逐合约逐根k线运行 """
         return
 
     def on_final(self, ctx):
+        """ 逐根k线运行 """
         # 停在最后一个合约处
         return
 
     def on_exit(self, ctx):
+        """ 策略结束前运行 """
         # 停在最后一根bar
         return
 

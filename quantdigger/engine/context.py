@@ -1,10 +1,11 @@
 # -*- coding: utf8 -*-
 import Queue
+import datetime
 from quantdigger.engine import series
-from series import NumberSeries, DateTimeSeries
 from quantdigger.indicators.base import IndicatorBase
 from quantdigger.engine.exchange import Exchange
 from quantdigger.engine.event import SignalEvent
+from quantdigger.engine.series import NumberSeries, DateTimeSeries
 #from quantdigger.util import engine_logger as logger
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.event import EventsPool
@@ -14,8 +15,8 @@ from quantdigger.datastruct import (
     TradeSide,
     Direction,
     PriceType,
-    Contract,
     PContract,
+    Contract,
     Bar
 )
 
@@ -39,6 +40,8 @@ class DataContext(object):
         self.j = -1   # 第j个策略
         self.curbar = 0
         self.bar = Bar(None, None, None, None, None, None)
+        self.last_row = []
+        self.last_date = datetime.datetime(2100,1,1)
 
     @property
     def raw_data(self):
@@ -54,18 +57,10 @@ class DataContext(object):
     def contract(self):
         return self.wrapper.pcontract.contract
 
-    def rolling_foward(self):
-        ## @todo next
-        """ 
-        滚动读取下一步的数据。
-        """
-        new_row, self.curbar = self.wrapper.rolling_foward()
-        if not new_row:
-            self.curbar -= 1
-            return False, None
-
+    def update_system_vars(self):
         # 为当天数据预留空间, 改变g_window或者一次性分配
         #self.data = np.append(data, tracker.container_day)
+        self.curbar = self.last_curbar
         self.open.update_curbar(self.curbar)
         self.close.update_curbar(self.curbar)
         self.high.update_curbar(self.curbar)
@@ -74,19 +69,33 @@ class DataContext(object):
         self.datetime.update_curbar(self.curbar)
         # 更新数据源
         if series.g_rolling:
-            self.datetime.update(new_row[0])
-            self.open.update(new_row[1])
-            self.close.update(new_row[2])
-            self.high.update(new_row[3])
-            self.low.update(new_row[4])
-            self.volume.update(new_row[5])
+            self.datetime.update(self.last_row[0])
+            self.open.update(self.last_row[1])
+            self.close.update(self.last_row[2])
+            self.high.update(self.last_row[3])
+            self.low.update(self.last_row[4])
+            self.volume.update(self.last_row[5])
 
-        self.bar.datetime = self.datetime[0]
-        self.bar.open = self.open[0]
-        self.bar.close = self.close[0]
-        self.bar.high = self.high[0]
-        self.bar.low = self.low[0]
-        self.bar.volume = self.volume[0]
+        self.bar = Bar(self.datetime[0], self.open[0], self.close[0],
+                        self.high[0], self.low[0], self.volume[0])
+        self.last_row = []
+        return
+
+    def rolling_foward(self):
+        ## @todo next
+        """ 
+        滚动读取下一步的数据。
+        """
+        new_row, self.last_curbar = self.wrapper.rolling_foward()
+        if not new_row:
+            self.last_curbar -= 1
+            return False, None
+        if series.g_rolling:
+            self.last_row = new_row
+            self.last_date = self.last_row[0]
+        else:
+            self.last_row = [1] # mark
+            self.last_date = self.wrapper.data.index[self.last_curbar]
         return True, new_row
 
     def update_user_vars(self):
@@ -191,7 +200,7 @@ class StrategyContext(object):
         self._orders = []
         self._datetime = None
 
-    def update(self, dt, ticks, bars):
+    def update_environment(self, dt, ticks, bars):
         """ 更新模拟交易所和订单管理器的环境。
         
         Args:
@@ -239,7 +248,6 @@ class StrategyContext(object):
             self.exchange.make_market(self.blotter._bars)
             maked = True
 
-
     def buy(self, direction, price, quantity, price_type, contract):
         self._orders.append(Order(
                 ## @todo 时间放到blotter中设置
@@ -285,13 +293,16 @@ class StrategyContext(object):
 
 class Context(object):
     """ 上下文"""
-    def __init__(self, data, ticks):
-        self._data_contexts = data     # PContract -> DataContext
+    def __init__(self, data):
+        self._data_contexts = { }       # PContract: DataContext
+        for key, value in data.iteritems():
+            self._data_contexts[key] = value
         self._cur_data_context = None
         self._strategy_contexts = []
         self._cur_strategy_context = None
-        self._datetime = None  # 全局时间
-        self._ticks = ticks
+        self.last_date = datetime.datetime(2100,1,1)
+        self._ticks = { } # Contract: float
+        self._bars = { }  # Contract: Bar
 
     def add_strategy_context(self, ctxs):
         self._strategy_contexts.append(ctxs)
@@ -299,37 +310,57 @@ class Context(object):
     def switch_to_contract(self, pcon):
         self._cur_data_context = self._data_contexts[pcon]
 
+    def time_aligned(self):
+        #print self._cur_data_context.last_date, self.last_date
+        return self._cur_data_context.last_date == self.last_date
+
     def switch_to_strategy(self, i, j):
         self._cur_data_context.i, self._cur_data_context.j  = i, j
         self._cur_strategy_context = self._strategy_contexts[i][j]
 
-    def update_strategy_context(self, i, j):
-        self._cur_strategy_context.update(self._datetime, self._ticks, self._bars)
+    def update_strategy_environment(self, i, j):
+        self._cur_strategy_context.update_environment(self.last_date, self._ticks, self._bars)
 
     def process_trading_events(self):
         self._cur_strategy_context.process_trading_events()
 
     def rolling_foward(self):
         """
-        更新当前bar上下文，最新tick价格，环境时间。
+        更新最新tick价格，最新bar价格, 环境时间。
         """
         # 为当天数据预留空间, 改变g_window或者一次性分配
         #self.data = np.append(data, tracker.container_day)
+        if self._cur_data_context.last_row:
+            # 等待的重启动
+            self.last_date = min(self._cur_data_context.last_date, self.last_date) # 回测系统时间
+            return True
         hasnext, data = self._cur_data_context.rolling_foward()
-        self._datetime = self._cur_data_context.datetime[0] 
+        #print self._cur_data_context.pcontract, self._cur_data_context.last_row, hasnext
+        if not hasnext:
+            return False 
+        self.last_date = min(self._cur_data_context.last_date, self.last_date) # 回测系统时间
         self._ticks[self._cur_data_context.contract] = self._cur_data_context.close[0]
-        self._bars = { }
-        for pcon, dcontext in self._data_contexts.iteritems():
-            oldbar = self._bars.setdefault(pcon.contract, dcontext.bar)
-            if dcontext.bar.datetime > oldbar.datetime:
-                self._bars[pcon.contract] = dcontext.bar # 处理不同周期时间滞后
-        return hasnext
-        
+        self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
+        oldbar = self._bars.setdefault(self._cur_data_context.contract, self._cur_data_context.bar)
+        if self._cur_data_context.bar.datetime > oldbar.datetime:
+             # 处理不同周期时间滞后
+            self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
+        return True
+
+    def reset(self):
+            self.last_date = datetime.datetime(2100,1,1)
+
     def update_user_vars(self):
         """
         更新用户在策略中定义的变量, 如指标等。
         """
         self._cur_data_context.update_user_vars()
+
+    def update_system_vars(self):
+        """
+        更新用户在策略中定义的变量, 如指标等。
+        """
+        self._cur_data_context.update_system_vars()
 
     @property
     def strategy(self):
@@ -386,14 +417,20 @@ class Context(object):
         ## @TODO 
         #if type(strpcon) == str:
             #pass 
-        return self._data_contexts[strpcon]
+        #self._cur_data_context = self._data_contexts[pcon]
+
+        ## @TODO 字典，str做key
+        tt = PContract.from_string(strpcon)
+        for key, value in self._data_contexts.iteritems():
+            if str(key) == str(tt):
+                return value
 
     def __getattr__(self, name):
         return self._cur_data_context.get_item(name)
 
     def __setattr__(self, name, value):
         if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
-                    '_strategy_contexts', '_datetime', '_ticks', '_bars']:
+                    '_strategy_contexts', 'last_date', '_ticks', '_bars', 'i', 'j']:
             super(Context, self).__setattr__(name, value)
         else:
             self._cur_data_context.add_item(name, value)
