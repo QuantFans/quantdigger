@@ -208,6 +208,6 @@ class CsvSource(object):
             cursor = csv.reader(open(fname, 'rb'))
             fmt = ['datetime', 'open', 'close', 'high', 'low', 'volume']
             header = cursor.next()
-            if header != fmt:
+            if header[0:6] != fmt:
                 raise DataFieldError(error_fields=header, right_fields=fmt)
             return CsvSourceWrapper(pcontract, data, cursor, window_size)

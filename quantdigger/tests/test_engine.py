@@ -8,6 +8,7 @@ import numpy as np
 from logbook import Logger
 from quantdigger.engine.qd import *
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
+from pprint import pprint
 
 logger = Logger('test')
 window_size = 3
@@ -366,33 +367,24 @@ class TestMultipleCombination(unittest.TestCase):
         self.assertFalse(['C1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
         logger.info('-- 多组合策略测试成功 --')
 
-        # Context单元测试
-        context = simulator.context
-        data_contexts = []
-        strategies = [['A1', 'A2'], ['B1', 'B2']]
-        for pcon,  dctx in context._data_contexts.iteritems():
-            self.assertTrue(pcon == dctx.pcontract, "Context数据上下文出错")
-            data_contexts.append(str(dctx.pcontract))
-        for i, sctx in enumerate(context._strategy_contexts):
-            self.assertTrue(strategies[i] == [s.name for s in sctx], "Context策略上下文出错")
-        ## @todo 资金配比测试 
-        logger.info('***** 多组合策略测试结束 *****\n')
 
-
-class TestMultipleCombinationT(unittest.TestCase):
-    """ 多组合策略测试 """
+class TestDiffPeriod(unittest.TestCase):
+    """ 跨周期多组合策略测试 
+    主要测试时间对齐
+    """
         
     def test_case(self):
-        logger.info('***** 多组合策略测试2开始 *****')
+        logger.info('***** 跨周期多组合策略测试开始 *****')
         on_exit = {
                 'strategy': [],
                 }
 
         on_final = {
                 'strategy': [],
+                'diffPeriod': [],
                 }
         on_bar = {
-                'combination': set(),
+                'diffPeriod': [],
                 'count': 0
                 }
 
@@ -403,84 +395,81 @@ class TestMultipleCombinationT(unittest.TestCase):
                 return
 
             def on_bar(self, ctx):
-                #print ctx.strategy, ctx.pcontract
-                on_bar['combination'].add((str(ctx.pcontract), ctx.strategy))
                 on_bar['count'] += 1
-                #print ctx.symbol, ctx.datetime
+                on_bar['diffPeriod'].append("%s %s %s %s"%(ctx.pcontract,
+                    ctx.strategy, ctx.datetime, ctx.curbar))
                 pass
 
             def on_final(self, ctx):
                 on_final['strategy'].append(ctx.strategy)
-                print "*******" 
                 t = ctx['oneday.SHFE-1.Minute']
-                print "***", t.pcontract, t.datetime
-                t = ctx['TWODAY.SHFE-1.Minute']
-                print "***", t.pcontract, t.datetime, t.close
+                on_final['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
+                t = ctx['TWODAY.SHFE-2.Second']
+                on_final['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
 
             def on_exit(self, ctx):
                 on_exit['strategy'].append(ctx.strategy)
                 return
 
-        simulator = set_symbols(['oneday.SHFE-1.Minute', 'TWODAY.SHFE-1.Minute'], window_size)
-        add_strategy([DemoStrategy('A1')])
-        #add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
+        set_symbols(['oneday.SHFE-1.Minute', 'TWODAY.SHFE-2.Second'], window_size)
+        add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
+        add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()
 
-        fname = os.path.join(os.getcwd(), 'data', 'BB.SHFE-1.Minute.csv')
+        # on_bar
+        fname = os.path.join(os.getcwd(), 'data', 'oneday.SHFE-1.Minute.csv')
         blen = len(pd.read_csv(fname))
-        fname = os.path.join(os.getcwd(), 'data', 'TWODAY.SHFE-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', 'TWODAY.SHFE-2.Second.csv')
         alen = len(pd.read_csv(fname))
-        sample = set([
-                ('BB.SHFE-1.Minute', 'A1'),
-                ('BB.SHFE-1.Minute', 'A2'),
-                ('AA.SHFE-1.Minute', 'A1'),
-                ('AA.SHFE-1.Minute', 'A2'),
-                ('BB.SHFE-1.Minute', 'B1'),
-                ('BB.SHFE-1.Minute', 'B2'),
-                ('AA.SHFE-1.Minute', 'B1'),
-                ('AA.SHFE-1.Minute', 'B2')
-        ])
-        #self.assertTrue(on_bar['combination'] == sample)
-        #sample.pop()
-        #self.assertFalse(on_bar['combination'] == sample)
-        #self.assertTrue(on_bar['count'] == alen*4 + blen*4)
-        #self.assertFalse(on_bar['count'] == alen*3 + blen*4)
+        self.assertTrue(on_bar['count'] == alen*4 + blen*4)
+        self.assertFalse(on_bar['count'] == alen*3 + blen*4)
+        fname = os.path.join(os.getcwd(), 'data', 'diffPeriodOnBar.txt')
+        with open(fname) as f:
+            source =  f.readlines()
+            assert(len(source)>0 and source[0] != "")
+            i = 0
+            for t in on_bar['diffPeriod']:
+                if source[i].startswith('*'):
+                    i+=1
+                self.assertTrue(t == source[i].strip('\n'), "跨周期合约on_bar失败")
+                i+=1
 
-        #self.assertTrue(['A1', 'A2', 'B1', 'B2']*max(blen, alen) == on_final['strategy'],
-                        #'on_final测试失败！')
-        #self.assertFalse(['C1', 'A2', 'B1', 'B2']*max(blen, alen) == on_final['strategy'],
-                        #'on_final测试失败！')
+        # on_final
+        fname = os.path.join(os.getcwd(), 'data', 'diffPeriod.txt')
+        with open(fname) as f:
+            source =  f.readlines()
+            assert(len(source)>0 and source[0] != "")
+            i = 0
+            for t in on_final['diffPeriod']:
+                if source[i].startswith('*'):
+                    i+=1
+                self.assertTrue(t == source[i].strip('\n'), "跨周期合约引用失败")
+                i+=1
+        self.assertTrue(['A1', 'A2', 'B1', 'B2'] * 6498 == on_final['strategy'],
+                        'on_final测试失败！')
+        self.assertFalse(['C1', 'A2', 'B1', 'B2'] * 6498 == on_final['strategy'],
+                        'on_final测试失败！')
 
-        #self.assertTrue(['A1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
-        #self.assertFalse(['C1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
+        # on_exit
+        self.assertTrue(['A1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
+        self.assertFalse(['C1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
+        logger.info('-- 跨周期多组合策略测试成功 --')
 
-        logger.info('-- 多组合策略测试成功 --')
+        logger.info('***** 跨周期多组合策略测试结束 *****\n')
 
-        ## Context单元测试
-        #context = simulator.context
-        #data_contexts = []
-        #strategies = [['A1', 'A2'], ['B1', 'B2']]
-        #for pcon,  dctx in context._data_contexts.iteritems():
-            #self.assertTrue(pcon == dctx.pcontract, "Context数据上下文出错")
-            #data_contexts.append(str(dctx.pcontract))
-        #for i, sctx in enumerate(context._strategy_contexts):
-            #self.assertTrue(strategies[i] == [s.name for s in sctx], "Context策略上下文出错")
-        ## @todo 资金配比测试 
-        logger.info('***** 多组合策略2测试结束 *****\n')
-
-class TestSimulator(unittest.TestCase):
-    """ 多组合策略测试 """
+#class TestSimulator(unittest.TestCase):
+    #""" 多组合策略测试 """
         
-    def test_case(self):
+    #def test_case(self):
         ## @todo profile
-            # all_holdings 长度一样
-            # signals 盈利
+             #all_holdings 长度一样
+             #signals 盈利
 
         ## @todo 回测案例
-        # 隔天第一根买卖，很容易计算结果。
+         #隔天第一根买卖，很容易计算结果。
 
         ## @TODO deals DemoStrategy2
-        pass
+        #pass
 
 if __name__ == '__main__':
     unittest.main()

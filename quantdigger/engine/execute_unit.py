@@ -76,7 +76,6 @@ class ExecuteUnit(object):
         has_next = True
         # 遍历每个数据轮, 次数为数据的最大长度
         for pcon, data in self.all_data.iteritems():
-            ## @todo 时间对齐
             self.context.switch_to_contract(pcon)
             self.context.rolling_foward()
         while True:
@@ -87,29 +86,28 @@ class ExecuteUnit(object):
                     self.context.update_system_vars()
                     # 组合遍历
                     for i, combination in enumerate(self._combs):
-                        # 原子策略遍历
+                        # 策略遍历
                         for j, s in enumerate(combination):
                             self.context.switch_to_strategy(i, j)
                             self.context.update_strategy_environment(i, j)
                             self.context.update_user_vars()
                             s.on_bar(self.context)
-
+            # 每轮数据的最后处理
+            #print "*********" 
             for i, combination in enumerate(self._combs):
-                # 每轮数据的最后处理
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
-                    # 只有在on_final引用其它数据才有保证。
+                    # 只有在on_final引用跨合约数据才有保证。
                     s.on_final(self.context)
                     self.context.process_trading_events()
-
             self.context.last_date = datetime(2100,1,1)
+            # 
             toremove = []
             for pcon, data in self.all_data.iteritems():
                 self.context.switch_to_contract(pcon)
                 has_next = self.context.rolling_foward()
                 if not has_next:
                     toremove.append(pcon)
-
             if toremove:
                 for key in toremove:
                     del self.all_data[key]
@@ -121,7 +119,6 @@ class ExecuteUnit(object):
                             s.on_exit(self.context)
                     return
                  
-                ## @TODO 所有has_next 为空，才正在退出。
                     
     def load_data(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
         """ 加载周期合约数据

@@ -10,6 +10,7 @@ from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.event import EventsPool
 from quantdigger.engine.event import Event
+from quantdigger.util import elogger as logger
 from quantdigger.datastruct import (
     Order,
     TradeSide,
@@ -38,7 +39,7 @@ class DataContext(object):
         self.datetime = DateTimeSeries(data.index, self.window_size, 'datetime')
         self.i = -1   # 第i个组合
         self.j = -1   # 第j个策略
-        self.curbar = 0
+        self._curbar = -1
         self.bar = Bar(None, None, None, None, None, None)
         self.last_row = []
         self.last_date = datetime.datetime(2100,1,1)
@@ -48,6 +49,10 @@ class DataContext(object):
         if series.g_rolling:
             assert(False and '逐步运算不存在历史数据')
         return self.wrapper.data
+
+    @property
+    def curbar(self):
+        return self._curbar + 1
 
     @property
     def pcontract(self):
@@ -60,13 +65,13 @@ class DataContext(object):
     def update_system_vars(self):
         # 为当天数据预留空间, 改变g_window或者一次性分配
         #self.data = np.append(data, tracker.container_day)
-        self.curbar = self.last_curbar
-        self.open.update_curbar(self.curbar)
-        self.close.update_curbar(self.curbar)
-        self.high.update_curbar(self.curbar)
-        self.low.update_curbar(self.curbar)
-        self.volume.update_curbar(self.curbar)
-        self.datetime.update_curbar(self.curbar)
+        self._curbar = self.last_curbar
+        self.open.update_curbar(self._curbar)
+        self.close.update_curbar(self._curbar)
+        self.high.update_curbar(self._curbar)
+        self.low.update_curbar(self._curbar)
+        self.volume.update_curbar(self._curbar)
+        self.datetime.update_curbar(self._curbar)
         # 更新数据源
         if series.g_rolling:
             self.datetime.update(self.last_row[0])
@@ -96,6 +101,9 @@ class DataContext(object):
         else:
             self.last_row = [1] # mark
             self.last_date = self.wrapper.data.index[self.last_curbar]
+        if self.datetime[0] >= self.last_date and self.curbar != 0:
+            logger.error('合约[%s] 数据时间逆序或冗余' % self.pcontract)
+            assert(False)
         return True, new_row
 
     def update_user_vars(self):
@@ -106,7 +114,7 @@ class DataContext(object):
             pass
         else:
             for key, s in siter:
-                s.update_curbar(self.curbar)
+                s.update_curbar(self._curbar)
                 s.duplicate_last_element()
         try:
             indic_iter = self.indicators[self.i][self.j].iteritems()
@@ -116,10 +124,10 @@ class DataContext(object):
             for key, indic in indic_iter:
                 if indic.multi_value:
                     for key, value in indic.series.iteritems():
-                        value.update_curbar(self.curbar)
+                        value.update_curbar(self._curbar)
                 else:
                     for s in indic.series:
-                        s.update_curbar(self.curbar)
+                        s.update_curbar(self._curbar)
 
     def add_series(self, key, s):
         """ 添加on_init中初始化的序列变量    
@@ -311,8 +319,8 @@ class Context(object):
         self._cur_data_context = self._data_contexts[pcon]
 
     def time_aligned(self):
-        #print self._cur_data_context.last_date, self.last_date
-        return self._cur_data_context.last_date == self.last_date
+        return (self._cur_data_context.datetime[0] < self.last_date or
+            self._cur_data_context.curbar == 0)
 
     def switch_to_strategy(self, i, j):
         self._cur_data_context.i, self._cur_data_context.j  = i, j
@@ -331,8 +339,8 @@ class Context(object):
         # 为当天数据预留空间, 改变g_window或者一次性分配
         #self.data = np.append(data, tracker.container_day)
         if self._cur_data_context.last_row:
-            # 等待的重启动
-            self.last_date = min(self._cur_data_context.last_date, self.last_date) # 回测系统时间
+            # 回测系统时间
+            self.last_date = min(self._cur_data_context.last_date, self.last_date)
             return True
         hasnext, data = self._cur_data_context.rolling_foward()
         #print self._cur_data_context.pcontract, self._cur_data_context.last_row, hasnext
@@ -380,7 +388,7 @@ class Context(object):
     @property
     def curbar(self):
         """ 当前是第几根k线, 从0开始 """
-        return self._cur_data_context.curbar + 1
+        return self._cur_data_context.curbar
 
     @property
     def open(self):
