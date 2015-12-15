@@ -71,7 +71,7 @@ class DemoStrategy2(Strategy):
 
 if __name__ == '__main__':
     set_symbols(['BB.SHFE-1.Minute'], 0)
-    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')], { 'captial': 5000,
+    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')], { 'captial': 50000,
                               'ratio': [0.2, 0.8] })
     run()
 

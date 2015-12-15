@@ -21,7 +21,7 @@ class ExecuteUnit(object):
             dt_end=datetime(2100,1,1), spec_date = { }): # 'symbol':[,]
         series.g_rolling = False if window_size == 0 else True
         series.g_window = window_size
-        self.all_data = { }     # PContract -> DataWrapper
+        self.all_data = { }     # str(PContract): DataWrapper
         self.finished_data = []
         self.pcontracts = pcontracts
         self._combs = []
@@ -89,11 +89,9 @@ class ExecuteUnit(object):
                         # 策略遍历
                         for j, s in enumerate(combination):
                             self.context.switch_to_strategy(i, j)
-                            self.context.update_strategy_environment(i, j)
                             self.context.update_user_vars()
                             s.on_bar(self.context)
             # 每轮数据的最后处理
-            #print "*********" 
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
@@ -120,11 +118,11 @@ class ExecuteUnit(object):
                     return
                  
                     
-    def load_data(self, pcontract, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
+    def load_data(self, strpcon, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
         """ 加载周期合约数据
         
         Args:
-            pcontract (PContract): 周期合约
+            strpcon (str): 周期合约
 
             dt_start(datetime): 开始时间
 
@@ -134,10 +132,10 @@ class ExecuteUnit(object):
             pd.DataFrame. k线数据
         """
         try:
-            return self.all_data[str(pcontract)]
+            return self.all_data[strpcon]
         except KeyError:
-            wrapper = self._data_manager.load_bars(pcontract, dt_start, dt_end, self._window_size)
+            wrapper = self._data_manager.load_bars(strpcon, dt_start, dt_end, self._window_size)
             window_size = len(wrapper.data) if not series.g_rolling else self._window_size
-            self.all_data[pcontract] = DataContext(wrapper, window_size)
+            self.all_data[strpcon] = DataContext(wrapper, window_size)
             return wrapper
 

@@ -36,7 +36,7 @@ class Exchange(object):
                         if (order.side == TradeSide.KAI and \
                                  (order.direction == Direction.LONG and order.price >= bar.low or \
                                  order.direction == Direction.SHORT and order.price <= bar.high)) or \
-                           (order.kpp == TradeSide.PING and \
+                           (order.side == TradeSide.PING and \
                                  (order.direction == Direction.LONG and order.price <= bar.high or \
                                  order.direction == Direction.SHORT and order.price >= bar.low)):
                                 transact.price = order.price
@@ -44,7 +44,7 @@ class Exchange(object):
                                 transact.datetime = bar.datetime
                                 fill_orders.add(order)
                                 self.events.put(FillEvent(transact)) 
-                    elif order.type == PriceType.MKT:
+                    elif order.price_type == PriceType.MKT:
                         # 市价单以最高或最低价格为成交价格．
                         if order.side == TradeSide.KAI:
                             if order.direction == Direction.LONG:
@@ -76,10 +76,5 @@ class Exchange(object):
         self._open_orders.add(event.order)
 
     def cancel_order(self, order):
+        ## @TODO 撤单
         pass
-
-
-    def update_datetime(self, dt):
-        self._datetime = dt
-
-

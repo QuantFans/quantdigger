@@ -6,17 +6,15 @@ from quantdigger.indicators.base import IndicatorBase
 from quantdigger.engine.exchange import Exchange
 from quantdigger.engine.event import SignalEvent
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
-#from quantdigger.util import engine_logger as logger
 from quantdigger.engine.blotter import SimpleBlotter
-from quantdigger.engine.event import EventsPool
-from quantdigger.engine.event import Event
+from quantdigger.engine.event import Event, EventsPool
 from quantdigger.util import elogger as logger
+from quantdigger.errors import TradingError
 from quantdigger.datastruct import (
     Order,
     TradeSide,
     Direction,
     PriceType,
-    PContract,
     Contract,
     Bar
 )
@@ -203,23 +201,16 @@ class StrategyContext(object):
     def __init__(self, name, settings={ }):
         self.events_pool = EventsPool()
         self.blotter = SimpleBlotter(name, self.events_pool, settings)
-        self.exchange = Exchange(self.events_pool, strict=False)
+        self.exchange = Exchange(self.events_pool, strict=True)
         self.name = name
         self._orders = []
         self._datetime = None
 
     def update_environment(self, dt, ticks, bars):
-        """ 更新模拟交易所和订单管理器的环境。
-        
-        Args:
-            dt (datetime): 时间戳
-
-            ticks (dict): 所有订阅合约的最新价格
-        
-        """
-        self.exchange.update_datetime(dt)
-        self.blotter.update_datetime(dt)
+        """ 更新模拟交易所和订单管理器的数据，时间,持仓 """ 
         self.blotter.update_data(ticks, bars)
+        self.blotter.update_datetime(dt)
+        self.blotter.update_status(dt)
         self._datetime = dt
         return
 
@@ -244,7 +235,11 @@ class StrategyContext(object):
                         #strategy.calculate_signals(event)
                         #port.update_timeindex(event)
                     if event.type == Event.SIGNAL:
-                        self.blotter.update_signal(event)
+                        try:
+                            self.blotter.update_signal(event)
+                        except TradingError as e:
+                            logger.debug(e)
+                            return
 
                     elif event.type == Event.ORDER:
                         self.exchange.insert_order(event)
@@ -302,7 +297,7 @@ class StrategyContext(object):
 class Context(object):
     """ 上下文"""
     def __init__(self, data):
-        self._data_contexts = { }       # PContract: DataContext
+        self._data_contexts = { }       # str(PContract): DataContext
         for key, value in data.iteritems():
             self._data_contexts[key] = value
         self._cur_data_context = None
@@ -326,10 +321,9 @@ class Context(object):
         self._cur_data_context.i, self._cur_data_context.j  = i, j
         self._cur_strategy_context = self._strategy_contexts[i][j]
 
-    def update_strategy_environment(self, i, j):
-        self._cur_strategy_context.update_environment(self.last_date, self._ticks, self._bars)
 
     def process_trading_events(self):
+        self._cur_strategy_context.update_environment(self.last_date, self._ticks, self._bars)
         self._cur_strategy_context.process_trading_events()
 
     def rolling_foward(self):
@@ -343,16 +337,9 @@ class Context(object):
             self.last_date = min(self._cur_data_context.last_date, self.last_date)
             return True
         hasnext, data = self._cur_data_context.rolling_foward()
-        #print self._cur_data_context.pcontract, self._cur_data_context.last_row, hasnext
         if not hasnext:
             return False 
         self.last_date = min(self._cur_data_context.last_date, self.last_date) # 回测系统时间
-        self._ticks[self._cur_data_context.contract] = self._cur_data_context.close[0]
-        self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
-        oldbar = self._bars.setdefault(self._cur_data_context.contract, self._cur_data_context.bar)
-        if self._cur_data_context.bar.datetime > oldbar.datetime:
-             # 处理不同周期时间滞后
-            self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
         return True
 
     def reset(self):
@@ -369,6 +356,13 @@ class Context(object):
         更新用户在策略中定义的变量, 如指标等。
         """
         self._cur_data_context.update_system_vars()
+        self._ticks[self._cur_data_context.contract] = self._cur_data_context.close[0]
+        self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
+        oldbar = self._bars.setdefault(self._cur_data_context.contract,
+                                            self._cur_data_context.bar)
+        if self._cur_data_context.bar.datetime > oldbar.datetime:
+             # 处理不同周期时间滞后
+            self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
 
     @property
     def strategy(self):
@@ -428,10 +422,11 @@ class Context(object):
         #self._cur_data_context = self._data_contexts[pcon]
 
         ## @TODO 字典，str做key
-        tt = PContract.from_string(strpcon)
-        for key, value in self._data_contexts.iteritems():
-            if str(key) == str(tt):
-                return value
+        return self._data_contexts[strpcon]
+        #tt = PContract.from_string(strpcon)
+        #for key, value in self._data_contexts.iteritems():
+            #if str(key) == str(tt):
+                #return value
 
     def __getattr__(self, name):
         return self._cur_data_context.get_item(name)
@@ -457,11 +452,11 @@ class Context(object):
 
             symbol (str): 合约
         """
-        ## @todo 判断是否在on_final中运行，是的话不允许默认值。
+        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         self._cur_strategy_context.buy(direction, price, quantity, price_type, contract)
 
-    def sell(self, direction, price, quantity, price_type='MKT', symbol=None):
+    def sell(self, direction, price, quantity, price_type='LMT', symbol=None):
         """ 平仓。
         
         Args:
@@ -475,6 +470,7 @@ class Context(object):
 
            symbol (str): 合约
         """
+        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         self._cur_strategy_context.sell(direction, price, quantity, price_type, contract)
 

@@ -9,10 +9,9 @@ class TestDataSource(unittest.TestCase):
     def test_local_data(self):
         logger.info('***** 数据测试开始 *****')
         from quantdigger.datasource.data import LocalData
-        from quantdigger.util import  pcontract
         """ 测试本地数据接口 """ 
         db = LocalData()
-        target = db.load_data(pcontract('BB.SHFE', '1.Minute'))
+        target = db.load_data('BB.SHFE-1.Minute')
 
         fname = os.path.join(os.getcwd(), 'data', 'CC.SHFE-1.Minute.csv')
         source = pd.read_csv(fname, parse_dates='datetime', index_col='datetime')

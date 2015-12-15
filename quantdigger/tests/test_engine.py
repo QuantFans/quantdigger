@@ -8,7 +8,6 @@ import numpy as np
 from logbook import Logger
 from quantdigger.engine.qd import *
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
-from pprint import pprint
 
 logger = Logger('test')
 window_size = 3
@@ -335,7 +334,7 @@ class TestMultipleCombination(unittest.TestCase):
                 on_exit['strategy'].append(ctx.strategy)
                 return
 
-        simulator = set_symbols(['BB.SHFE-1.Minute', 'AA.SHFE-1.Minute'], window_size)
+        set_symbols(['BB.SHFE-1.Minute', 'AA.SHFE-1.Minute'], window_size)
         add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
         add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()
@@ -457,19 +456,20 @@ class TestDiffPeriod(unittest.TestCase):
 
         logger.info('***** 跨周期多组合策略测试结束 *****\n')
 
-#class TestSimulator(unittest.TestCase):
-    #""" 多组合策略测试 """
+class TestSimulator(unittest.TestCase):
+    """ 多组合策略测试 """
         
-    #def test_case(self):
-        ## @todo profile
+    def test_case(self):
+        # @todo profile
              #all_holdings 长度一样
              #signals 盈利
 
-        ## @todo 回测案例
+        # @todo 回测案例
          #隔天第一根买卖，很容易计算结果。
 
-        ## @TODO deals DemoStrategy2
-        #pass
+        # @TODO deals DemoStrategy2
+        ## @TODO 成交加几个点
+        pass
 
 if __name__ == '__main__':
     unittest.main()

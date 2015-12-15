@@ -12,6 +12,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from quantdigger.datasource.source import CsvSource, SqlLiteSource
 from quantdigger.datasource.datautil import tick2period
+from quantdigger.datastruct import PContract
 
 class QuoteCache(object):
     def __init__(self, arg):
@@ -29,11 +30,11 @@ class LocalData(object):
         self._sql = SqlLiteSource(os.path.join(os.getcwd(), 'data', 'digger.db'))
         self._src = self._csv # 设置数据源
 
-    def load_bars(self, pcontract, dt_start, dt_end, window_size):
+    def load_bars(self, strpcon, dt_start, dt_end, window_size):
         """ 获取本地历史数据    
         
         Args:
-            pcontract (PContract): 周期合约
+            strpcon (str): 周期合约
 
             dt_start (datetime): 数据的开始时间
 
@@ -44,6 +45,7 @@ class LocalData(object):
         Returns:
             SourceWrapper. 数据
         """
+        pcontract = PContract.from_string(strpcon)
         if pcontract.contract.exch_type == 'stock':
             return []
         else:
@@ -69,7 +71,8 @@ class ServerData(object):
     def __init__(self):
         pass
 
-    def load_bars(self, pcontract, dt_start, dt_end):
+    def load_bars(self, strpcon, dt_start, dt_end):
+        pcontract = PContract.from_string(strpcon)
         if pcontract.contract.exch_type == 'stock':
             return self.load_tushare_bars(pcontract, dt_start, dt_end)
         else:
@@ -113,12 +116,12 @@ class DataManager(object):
         self._loc_data = LocalData()
         self._srv_data = ServerData()
 
-    def load_bars(self, pcontract, dt_start=datetime(1980,1,1),
+    def load_bars(self, strpcon , dt_start=datetime(1980,1,1),
                   dt_end=datetime(2100,1,1), window_size=0):
         """  加载时间范围[dt_start, dt_end]的k线数据。
         
         Args:
-            pcontract (PContract): 周期合约
+            strpcon (str): 周期合约
 
             dt_start(datetime): 开始时间
 
@@ -132,9 +135,9 @@ class DataManager(object):
         if type(dt_end) == str:
             dt_end = datetime.strptime(dt_end, "%Y-%m-%d")
         dt_end += timedelta(days=1)
-        data = self._loc_data.load_bars(pcontract, dt_start, dt_end, window_size)
+        data = self._loc_data.load_bars(strpcon, dt_start, dt_end, window_size)
         if len(data) == 0:
-            return self._srv_data.load_bars(pcontract, dt_start, dt_end) 
+            return self._srv_data.load_bars(strpcon, dt_start, dt_end) 
         else:
             return data
 

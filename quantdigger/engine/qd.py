@@ -23,10 +23,8 @@ def set_symbols(pcons, window_size,
     
     """
     global g_simulator
-    new_pcons = []
-    for pcon in pcons:
-        new_pcons.append(PContract.from_string(pcon))
-    g_simulator = ExecuteUnit(new_pcons, window_size, dt_start, dt_end)
+    ## @TODO pcon格式验证
+    g_simulator = ExecuteUnit(pcons, window_size, dt_start, dt_end)
     return g_simulator
 
 def add_strategy(algos, settings = { }):

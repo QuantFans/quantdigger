@@ -17,6 +17,11 @@ class QError(Exception):
     __repr__ = __str__
 
 
+class TradingError(QError):
+    """
+    """
+    msg = "交易警告：{err}" 
+
 class DataFormatError(QError):
     """
     """

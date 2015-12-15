@@ -371,7 +371,7 @@ class TestMultipleCombination2(unittest.TestCase):
         data_contexts = []
         strategies = [['A1', 'A2'], ['B1', 'B2']]
         for pcon,  dctx in context._data_contexts.iteritems():
-            self.assertTrue(pcon == dctx.pcontract, "Context数据上下文出错")
+            self.assertTrue(pcon == str(dctx.pcontract), "Context数据上下文出错")
             data_contexts.append(str(dctx.pcontract))
         for i, sctx in enumerate(context._strategy_contexts):
             self.assertTrue(strategies[i] == [s.name for s in sctx], "Context策略上下文出错")

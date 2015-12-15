@@ -5,17 +5,18 @@ from quantdigger.engine.event import OrderEvent, Event
 from quantdigger.datastruct import Position, TradeSide, Direction, PriceType, OneDeal
 from quantdigger.util import elogger as logger
 from quantdigger.datastruct import PContract
+from quantdigger.errors import TradingError
 from api import SimulateTraderAPI
 
 class Profile(object):
     """ 组合结果 """
-    def __init__(self, blotters, dcontexts, pcon, i):
+    def __init__(self, blotters, dcontexts, strpcon, i):
         self._blts = blotters # 组合内所有策略的blotter
         self._dcontexts = { }
         for key, value in dcontexts.iteritems():
             self._dcontexts[key] = value
         self.i = i   # 对应于第几个组合
-        self._main_pcontract = pcon
+        self._main_pcontract = strpcon
 
     def name(self, j):
         return self._blts[j].name
@@ -129,7 +130,7 @@ class Profile(object):
         Returns:
             dict. {指标名:指标}
         """
-        pcon = PContract.from_string(strpcon) if strpcon else self._main_pcontract
+        pcon = strpcon if strpcon else self._main_pcontract
         if j != None:
             return self._dcontexts[pcon].indicators[self.i][j]
         rst = { }
@@ -139,7 +140,7 @@ class Profile(object):
             
 
     def data(self, strpcon=None):
-        """ 周期合约数据
+        """ 周期合约数据, 只有向量运行才有意义。
         
         Args:
             strpcon (str): 周期合约，如'BB.SHFE-1.Minute' 
@@ -226,9 +227,8 @@ class SimpleBlotter(Blotter):
             self._start_date = dt
             self._init_state()
         self._datetime = dt
-        self._update_status(dt)
 
-    def _update_status(self, dt):
+    def update_status(self, dt):
         """ 更新历史持仓，当前权益。"""
 
         # 更新资金历史。
@@ -254,7 +254,7 @@ class SimpleBlotter(Blotter):
         # 计算限价报单的保证金占用
         for order in self._open_orders:
             assert(order.price_type == PriceType.LMT)
-            order_margin +=  order.order_margin()
+            order_margin +=  order.order_margin(new_price)
 
         # 当前权益 = 初始资金 + 历史平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
         dh['equity'] = self._captial + self.current_holdings['history_profit'] + profit - \
@@ -346,7 +346,7 @@ class SimpleBlotter(Blotter):
             return False
         elif order.side == TradeSide.KAI:
             if self.current_holdings['cash'] < order.price * order.quantity:
-                raise Exception('没有足够的资金开仓') 
+                raise TradingError(err='没有足够的资金开仓') 
         return True
 
 def update_positions(current_positions, deal_positions, trans):
