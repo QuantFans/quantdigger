@@ -11,7 +11,9 @@ class Profile(object):
     """ 组合结果 """
     def __init__(self, blotters, dcontexts, pcon, i):
         self._blts = blotters # 组合内所有策略的blotter
-        self._dcontexts = dcontexts   # 所有数据上下文
+        self._dcontexts = { }
+        for key, value in dcontexts.iteritems():
+            self._dcontexts[key] = value
         self.i = i   # 对应于第几个组合
         self._main_pcontract = pcon
 
