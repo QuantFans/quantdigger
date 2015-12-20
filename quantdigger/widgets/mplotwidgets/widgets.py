@@ -9,7 +9,7 @@ def strtime_format(delta):
     if delta.days >= 1:
         return '%Y-%m'
     elif delta.seconds == 60:
-        return '%H:%M'
+        return '%m-%d %H:%M'
     else:
         # 日内其它分钟
         return '%m-%d'

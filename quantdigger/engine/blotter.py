@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
-
-from quantdigger.engine.event import OrderEvent, Event
-from quantdigger.datastruct import Position, TradeSide, Direction, PriceType, OneDeal
+from datetime import datetime
+from quantdigger.engine import series
 from quantdigger.util import elogger as logger
-from quantdigger.datastruct import PContract
 from quantdigger.errors import TradingError
-from api import SimulateTraderAPI
+from quantdigger.engine.api import SimulateTraderAPI
+from quantdigger.engine.event import Event
+from quantdigger.datastruct import (
+    Direction, 
+    OneDeal,
+    Order,
+    PContract,
+    Position, 
+    PositionKey,
+    PriceType, 
+    TradeSide,
+    Transaction,
+)
+
 
 class Profile(object):
     """ 组合结果 """
@@ -52,7 +63,7 @@ class Profile(object):
         deals = [] 
         if j != None:
             for trans in self.transactions(j):
-                update_positions(positions, deals, trans)
+                _update_positions(positions, deals, trans)
         else:
             for i in range(0, len(self._blts)):
                  deals += self.deals(i)
@@ -84,19 +95,18 @@ class Profile(object):
         return holdings
                 
 
-    def current_positions(self, j):
-        """ 当前持仓
+    #def current_positions(self, j):
+        #""" 当前持仓
         
-        Args:
-            j (int): 第j个策略
+        #Args:
+            #j (int): 第j个策略
         
-        Returns:
-            dict. { Contract: Position }
-        """
-        ## @TODO 组合持仓
-        return self._blts[j].current_positions
+        #Returns:
+            #dict. { Contract: Position }
+        #"""
+        #return self._blts[j].current_positions.values()
 
-    def current_holdings(self, j=None):
+    def holding(self, j=None):
         """ 当前账号情况
         
         Args:
@@ -106,13 +116,13 @@ class Profile(object):
             dict. {'cash', 'commission', 'history_profit', 'equity' }
         """
         if j != None:
-            return self._blts[j].current_holdings
+            return self._blts[j].holding
         if len(self._blts) == 1:
-            return self._blts[0].current_holdings
+            return self._blts[0].holding
         import copy
-        holdings = copy.deepcopy(self._blts[0].current_holdings)
+        holdings = copy.deepcopy(self._blts[0].holding)
         for blt in self._blts[1:]:
-            rhd = blt.current_holdings
+            rhd = blt.holding
             holdings['cash'] += rhd['cash']
             holdings['commission'] += rhd['commission']
             holdings['equity'] += rhd['equity']
@@ -148,6 +158,8 @@ class Profile(object):
         Returns:
             pd.DataFrame. 数据
         """
+        if series.g_rolling:
+            assert(False and '只有向量运行才存在数据') 
         pcon = self._main_pcontract
         if strpcon:
             pcon = PContract.from_string(strpcon) 
@@ -186,27 +198,61 @@ class SimpleBlotter(Blotter):
     """
     def __init__(self, name, events_pool, settings={ }):
         super(SimpleBlotter, self).__init__(name)
-
         self._open_orders = list()
+        self._all_orders = []
         self._pre_settlement = 0     # 昨日结算价
         self._datetime = None # 当前时间
+        self.positions = {}  # Contract: Position
+        self.holding = {}  # 当前的资金 dict
+        self._all_holdings = []   # 所有时间点上的资金 list of dict
+        self._all_transactions = []
         self.api = SimulateTraderAPI(self, events_pool) # 模拟交易接口
-
-        # 用于分析策略性能数据
-        self.all_orders = []
         if settings:
             self._captial =  settings['captial'] # 初始权益
         else:
             self._captial = 5000.0
 
-        self.current_positions = {}  # Contract -> Position
-        self.current_holdings = {}  # 当前的资金 dict
-        self.all_holdings = []   # 所有时间点上的资金 list of dict
-        self.transactions = []
-        self.pp = []
+    @property
+    def all_holdings(self):
+        """ 账号历史情况，最后一根k线处平所有仓位。""" 
+        if self.positions:
+            self._force_close() 
+        return self._all_holdings
+
+    @property
+    def transactions(self):
+        """ 成交明细，最后一根k线处平所有仓位。""" 
+        if self.positions:
+            self._force_close() 
+        return self._all_transactions
+
+
+    def _force_close(self):
+        """ 在回测的最后一根k线以close价格强平持仓位。""" 
+        force_trans = []
+        price_type = self._all_transactions[-1].price_type if self._all_transactions else PriceType.LMT 
+        for pos in self.positions.values():
+            order = Order(
+                    self._datetime,
+                    pos.contract,
+                    price_type,
+                    TradeSide.PING,
+                    pos.direction,
+                    self._ticks[pos.contract],
+                    pos.quantity
+            )
+            force_trans.append(Transaction(order))
+        for trans in force_trans:
+            self._update_holding(trans)
+            self._update_positions(trans)
+        if force_trans:
+            self.update_status(trans.datetime, False)
+        self.positions = { }
+        return
+
 
     def _init_state(self):
-        self.current_holdings = {
+        self.holding = {
                 'cash': self._captial,
                 'commission':  0.0,
                 'history_profit':  0.0,
@@ -224,18 +270,20 @@ class SimpleBlotter(Blotter):
         """
         # 
         if self._datetime == None:
+            self._datetime = dt
             self._start_date = dt
             self._init_state()
+        elif self._datetime.date() != dt.date():
+            self._open_orders = []
         self._datetime = dt
 
-    def update_status(self, dt):
+    def update_status(self, dt, append=True):
         """ 更新历史持仓，当前权益。"""
 
         # 更新资金历史。
-        ## @todo  由持仓历史推断资金历史。
         dh = { }
         dh['datetime'] = dt
-        dh['commission'] = self.current_holdings['commission']
+        dh['commission'] = self.holding['commission']
         profit = 0
         margin = 0
         order_margin = 0;
@@ -243,22 +291,23 @@ class SimpleBlotter(Blotter):
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
         is_stock = True  # 默认是股票回测
-        for contract, pos in self.current_positions.iteritems():
-            new_price = self._ticks[contract]
+        for key, pos in self.positions.iteritems():
+            new_price = self._ticks[key.contract]
             profit += pos.profit(new_price)
-            ## @todo 用昨日结算价计算保证金
+            ## @TODO 用昨日结算价计算保证金
             margin += pos.position_margin(new_price)
-            if not contract.is_stock:
+            if not key.contract.is_stock:
                 is_stock =  False   # 
 
         # 计算限价报单的保证金占用
         for order in self._open_orders:
             assert(order.price_type == PriceType.LMT)
+            new_price = self._ticks[order.contract]
             order_margin +=  order.order_margin(new_price)
 
-        # 当前权益 = 初始资金 + 历史平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
-        dh['equity'] = self._captial + self.current_holdings['history_profit'] + profit - \
-                       self.current_holdings['commission'] 
+        # 当前权益 = 初始资金 + 累积平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
+        dh['equity'] = self._captial + self.holding['history_profit'] + profit - \
+                       self.holding['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
             if not is_stock:
@@ -266,9 +315,12 @@ class SimpleBlotter(Blotter):
                 ## @bug 如果同时交易期货和股票，就有问题。
                 raise Exception('需要追加保证金!')
 
-        self.current_holdings['cash'] = dh['cash']
-        self.current_holdings['equity'] = dh['equity']
-        self.all_holdings.append(dh)
+        self.holding['cash'] = dh['cash']
+        self.holding['equity'] = dh['equity']
+        if append:
+            self._all_holdings.append(dh)
+        else:
+            self._all_holdings[-1] = dh
 
     def update_signal(self, event):
         """
@@ -278,12 +330,13 @@ class SimpleBlotter(Blotter):
         valid_orders = []
         for order in event.orders:
             if self._valid_order(order):
+                order.datetime = self._datetime
                 self.api.order(order)
                 valid_orders.append(order)
             else:
                 continue
         self._open_orders.extend(valid_orders)
-        self.all_orders.extend(valid_orders)
+        self._all_orders.extend(valid_orders)
         #print "Receive %d signals!" % len(event.orders)
         #self.generate_naive_order(event.orders)
 
@@ -298,14 +351,16 @@ class SimpleBlotter(Blotter):
                 t_order = self._open_orders.pop(i)
                 break
         assert(t_order)
-        self._update_positions(t_order, event.transaction)
-        self._update_holdings(event.transaction)
+        self._update_holding(event.transaction)
+        self._update_positions(event.transaction)
 
 
-    def _update_positions(self, order, trans):
+    def _update_positions(self, trans):
         """ 更新持仓 """
-        ## @todo 区分多空
-        pos = self.current_positions.setdefault(trans.contract, Position(trans))
+        poskey = PositionKey(trans.contract, trans.direction)
+        pos = self.positions.setdefault(poskey, Position(trans))
+        #print len(self.positions)
+        #print pos.contract, pos.quantity
         if trans.side == TradeSide.KAI:
             # 开仓
             pos.cost = (pos.cost*pos.quantity + trans.price*trans.quantity) / (pos.quantity+trans.quantity)
@@ -313,28 +368,29 @@ class SimpleBlotter(Blotter):
         elif trans.side == TradeSide.PING:
             # 平仓
             pos.quantity -= trans.quantity
+            if pos.quantity == 0:
+                del self.positions[poskey] 
 
-
-    def _update_holdings(self, trans):
+    def _update_holding(self, trans):
         """
-        更新资金
+        更新佣金和平仓盈亏。
         """
         # 每笔佣金，和数目无关！
-        self.current_holdings['commission'] += trans.commission
+        self.holding['commission'] += trans.commission
         # 平仓，更新历史持仓盈亏。
         if trans.side == TradeSide.PING:
+            poskey = PositionKey(trans.contract, trans.direction)
             multi = 1 if trans.direction == Direction.LONG else -1
-            profit = (trans.price-self.current_positions[trans.contract].cost) * trans.quantity * multi
-            self.current_holdings['history_profit'] += profit
-            self.pp.append(profit)
-
-        self.transactions.append(trans)
+            profit = (trans.price-self.positions[poskey].cost) * trans.quantity * multi
+            self.holding['history_profit'] += profit
+        self._all_transactions.append(trans)
 
     def _valid_order(self, order):
         """ 判断订单是否合法。 """ 
         if order.side == TradeSide.PING:
             try:
-                pos = self.current_positions[order.contract]
+                poskey = PositionKey(order.contract, order.direction)
+                pos = self.positions[poskey]
                 if pos.quantity >= order.quantity:
                     return True 
             except KeyError:
@@ -345,16 +401,17 @@ class SimpleBlotter(Blotter):
             logger.warn("下单仓位问题")
             return False
         elif order.side == TradeSide.KAI:
-            if self.current_holdings['cash'] < order.price * order.quantity:
+            if self.holding['cash'] < order.price * order.quantity:
                 raise TradingError(err='没有足够的资金开仓') 
         return True
 
-def update_positions(current_positions, deal_positions, trans):
+kai = 0
+ping = 0
+def _update_positions(current_positions, deal_positions, trans):
     """ 更新持仓 
         current_positions: 当前持仓
         deal_positions: 开平仓对
     """
-    ## @todo 区分多空
     class PositionsDetail(object):
         """ 当前相同合约持仓集合(可能不同时间段下单)。
 
@@ -367,8 +424,9 @@ def update_positions(current_positions, deal_positions, trans):
             self.total = 0
             self.positions = []
             self.cost = 0
-
-    p = current_positions.setdefault(trans.contract, PositionsDetail())
+    assert trans.quantity>0
+    poskey = PositionKey(trans.contract, trans.direction)
+    p = current_positions.setdefault(poskey, PositionsDetail())
     if trans.side == TradeSide.KAI:
         # 开仓
         p.positions.append(trans)
@@ -376,10 +434,12 @@ def update_positions(current_positions, deal_positions, trans):
 
     elif trans.side == TradeSide.PING:
         # 平仓
-        p.total -= trans.quantity 
+        assert(len(p.positions)>0 and '所平合约没有持仓')
         left_vol = trans.quantity
         last_index = 0
+        p.total -= trans.quantity
         for position in reversed(p.positions):
+            print position.quantity, p.total
             if position.quantity < left_vol:
                 # 还需从之前的仓位中平。
                 left_vol -= position.quantity
@@ -400,6 +460,10 @@ def update_positions(current_positions, deal_positions, trans):
         if last_index != 0:
             p.positions = p.positions[0 : last_index]
         assert(left_vol == 0) # 会被catch捕获 AssertError
+        #if mark:
+            #print '------------' 
+            #print len(p.positions)
+            #assert False
 
 
 

@@ -240,3 +240,33 @@ class DateTimeSeries(SeriesBase):
 
     def __str__(self):
         return str(self.data[self._index])
+
+    def __eq__(self, r):
+        if isinstance(r, DateTimeSeries):
+            return self[0] == r[0]
+        return self[0] == r
+
+    def __lt__(self, r):
+        if isinstance(r, DateTimeSeries):
+            return self[0] < r[0]
+        return self[0] < r
+
+    def __le__(self, r):
+        if isinstance(r, DateTimeSeries):
+            return self[0] <= r[0]
+        return self[0] <= r
+
+    def __ne__(self, r):
+        if isinstance(r, DateTimeSeries):
+            return self[0] != r[0]
+        return self[0] != r
+
+    def __gt__(self, r):
+        if isinstance(r, DateTimeSeries):
+            return self[0] > r[0]
+        return self[0] > r
+
+    def __ge__(self, r):
+        if isinstance(r, DateTimeSeries):
+            return self[0] >= r[0]
+        return self[0] >= r

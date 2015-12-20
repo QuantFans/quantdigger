@@ -16,7 +16,7 @@ def xticks_to_display(data_length):
     return xticks
 
 
-def plot_strategy(price_data, indicators, signals):
+def plot_strategy(price_data, indicators={ }, deals=[]):
     """ 
         显示回测结果。
     """
@@ -31,8 +31,9 @@ def plot_strategy(price_data, indicators, signals):
     kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
     frame.add_widget(0, kwindow, True)
     ## 交易信号。
-    signal = mplots.TradingSignalPos(price_data, signals, lw=2)
-    frame.add_indicator(0, signal)
+    if deals:
+        signal = mplots.TradingSignalPos(price_data, deals, lw=2)
+        frame.add_indicator(0, signal)
     ## @bug indicators导致的双水平线!
     ## @todo 完mplot_demo上套。
     #frame.add_indicator(0, Volume(None, price_data.open, price_data.close, price_data.volume))

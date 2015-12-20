@@ -1,13 +1,13 @@
 # -*- coding: utf8 -*-
 import Queue
 import datetime
+import copy
 from quantdigger.engine import series
 from quantdigger.indicators.base import IndicatorBase
 from quantdigger.engine.exchange import Exchange
-from quantdigger.engine.event import SignalEvent
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.engine.blotter import SimpleBlotter
-from quantdigger.engine.event import Event, EventsPool
+from quantdigger.engine.event import Event, EventsPool, SignalEvent
 from quantdigger.util import elogger as logger
 from quantdigger.errors import TradingError
 from quantdigger.datastruct import (
@@ -15,6 +15,7 @@ from quantdigger.datastruct import (
     TradeSide,
     Direction,
     PriceType,
+    PositionKey,
     Contract,
     Bar
 )
@@ -201,82 +202,85 @@ class StrategyContext(object):
     def __init__(self, name, settings={ }):
         self.events_pool = EventsPool()
         self.blotter = SimpleBlotter(name, self.events_pool, settings)
-        self.exchange = Exchange(self.events_pool, strict=True)
+        self.exchange = Exchange(name, self.events_pool, strict=True)
         self.name = name
         self._orders = []
         self._datetime = None
 
     def update_environment(self, dt, ticks, bars):
         """ 更新模拟交易所和订单管理器的数据，时间,持仓 """ 
-        self.blotter.update_data(ticks, bars)
         self.blotter.update_datetime(dt)
-        self.blotter.update_status(dt)
+        self.exchange.update_datetime(dt)
+        self.blotter.update_data(ticks, bars)
         self._datetime = dt
         return
 
-    def process_trading_events(self):
-        # 一次策略循环可能产生多个委托单。
+    def process_trading_events(self, append):
+        """ 提交订单，撮合，更新持仓 """
         if self._orders:
             self.events_pool.put(SignalEvent(self._orders))
         self._orders = []
-        maked = False # 保证至少一次价格撮合。
+        new_signal = False # 保证至少一次价格撮合。
+        event = None
         while True:
            # 事件处理。 
             try:
                 event = self.events_pool.get()
             except Queue.Empty:
-                if maked:
-                    break
+                assert(False)
             except IndexError:
-                break
+                if new_signal:
+                    break
             else:
-                if event is not None:
-                    #if event.type == 'MARKET':
-                        #strategy.calculate_signals(event)
-                        #port.update_timeindex(event)
-                    if event.type == Event.SIGNAL:
-                        try:
-                            self.blotter.update_signal(event)
-                        except TradingError as e:
-                            logger.debug(e)
-                            return
+                #if event.type == 'MARKET':
+                    #strategy.calculate_signals(event)
+                    #port.update_timeindex(event)
+                if event.type == Event.SIGNAL:
+                    try:
+                        self.blotter.update_signal(event)
+                    except TradingError as e:
+                        logger.debug(e)
+                        return
 
-                    elif event.type == Event.ORDER:
-                        self.exchange.insert_order(event)
+                elif event.type == Event.ORDER:
+                    self.exchange.insert_order(event)
 
-                    elif event.type == Event.FILL:
-                        # 模拟交易接口收到报单成交
-                        self.blotter.api.on_transaction(event)
+                elif event.type == Event.FILL:
+                    # 模拟交易接口收到报单成交
+                    self.blotter.api.on_transaction(event)
             # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
-            self.exchange.make_market(self.blotter._bars)
-            maked = True
+            if event == None or event.type == Event.ORDER:
+                self.exchange.make_market(self.blotter._bars)
+                new_signal = True
+        self.blotter.update_status(self._datetime, append)
 
     def buy(self, direction, price, quantity, price_type, contract):
         self._orders.append(Order(
-                ## @todo 时间放到blotter中设置
-                self._datetime,
+                None,
                 contract,
-                PriceType.arg_to_type(price_type),
+                price_type,
                 TradeSide.KAI,
-                Direction.arg_to_type(direction),
+                direction,
                 float(price),
                 quantity
         ))
 
     def sell(self, direction, price, quantity, price_type, contract):
         self._orders.append(Order(
-                self._datetime,
+                None,
                 contract,
-                PriceType.arg_to_type(price_type),
+                price_type,
                 TradeSide.PING,
-                Direction.arg_to_type(direction),
+                direction,
                 float(price),
                 quantity
         ))
 
-    def position(self, contract):
+    def position(self, contract, direction):
         try:
-            return self.blotter.current_positions[contract].quantity
+            direction = Direction.arg_to_type(direction)
+            poskey = PositionKey(contract, direction) 
+            return self.blotter.positions[poskey].quantity
         except KeyError:
             return 0
 
@@ -313,18 +317,20 @@ class Context(object):
     def switch_to_contract(self, pcon):
         self._cur_data_context = self._data_contexts[pcon]
 
-    def time_aligned(self):
-        return (self._cur_data_context.datetime[0] < self.last_date or
-            self._cur_data_context.curbar == 0)
+    def time_aligned(self, cache=False):
+        if cache:
+            return self._cur_data_context.aligned 
+        self._cur_data_context.aligned =  (self._cur_data_context.datetime[0] < self.last_date or self._cur_data_context.curbar == 0)
+        return self._cur_data_context.aligned
 
     def switch_to_strategy(self, i, j):
         self._cur_data_context.i, self._cur_data_context.j  = i, j
         self._cur_strategy_context = self._strategy_contexts[i][j]
 
 
-    def process_trading_events(self):
+    def process_trading_events(self, append):
         self._cur_strategy_context.update_environment(self.last_date, self._ticks, self._bars)
-        self._cur_strategy_context.process_trading_events()
+        self._cur_strategy_context.process_trading_events(append)
 
     def rolling_foward(self):
         """
@@ -438,53 +444,88 @@ class Context(object):
         else:
             self._cur_data_context.add_item(name, value)
 
-    def buy(self, direction, price, quantity, price_type='LMT', symbol=None):
-        """ 开仓    
+    def buy(self, price, quantity, symbol=None):
+        """ 开多仓    
         
         Args:
-            direction (str/int): 下单方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
-
-            price (float): 价格。
+            price (float): 价格, 0表市价。
 
             quantity (int): 数量。
-
-            price_type (str/int): 下单价格类型。限价单 - 'lmt' / 1；市价单 - 'mkt' / 2
 
             symbol (str): 合约
         """
         ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
-        self._cur_strategy_context.buy(direction, price, quantity, price_type, contract)
+        price_type = PriceType.MKT if price == 0 else PriceType.LMT
+        self._cur_strategy_context.buy(Direction.LONG, price,
+                                        quantity, price_type,
+                                        contract)
 
-    def sell(self, direction, price, quantity, price_type='LMT', symbol=None):
-        """ 平仓。
+    def sell(self, price, quantity, symbol=None):
+        """ 平多仓。
         
         Args:
-           direction (str/int): 下单方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
-
-           price (float): 价格。
+            price (float): 价格, 0表市价。
 
            quantity (int): 数量。
-
-           price_type (str/int): 下单价格类型。限价单 - 'lmt' / 1；市价单 - 'mkt' / 2
 
            symbol (str): 合约
         """
         ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
-        self._cur_strategy_context.sell(direction, price, quantity, price_type, contract)
+        price_type = PriceType.MKT if price == 0 else PriceType.LMT
+        self._cur_strategy_context.sell(Direction.LONG, price,
+                                        quantity, price_type,
+                                        contract)
 
-    def position(self, symbol=None):
+    def short(self, price, quantity, symbol=None):
+        """ 开空仓    
+        
+        Args:
+            price (float): 价格, 0表市价。
+
+            quantity (int): 数量。
+
+            symbol (str): 合约
+        """
+        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
+        contract = Contract(symbol) if symbol else self._cur_data_context.contract 
+        price_type = PriceType.MKT if price == 0 else PriceType.LMT
+        self._cur_strategy_context.buy(Direction.SHORT, price,
+                                        quantity, price_type,
+                                        contract)
+
+    def cover(self, price, quantity, symbol=None):
+        """ 平空仓。
+        
+        Args:
+            price (float): 价格, 0表市价。
+
+           quantity (int): 数量。
+
+           symbol (str): 合约
+        """
+        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
+        contract = Contract(symbol) if symbol else copy.deepcopy(self._cur_data_context.contract)
+        price_type = PriceType.MKT if price == 0 else PriceType.LMT
+        self._cur_strategy_context.sell(Direction.SHORT, price,
+                                        quantity, price_type,
+                                        contract)
+
+    def position(self, direction=Direction.LONG, symbol=None):
         """ 当前仓位。
        
         Args:
+            direction (str/int): 持仓方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
+            , 默认为多头。
+
             symbol (str): 字符串合约，默认为None表示主合约。
         
         Returns:
             int. 该合约的持仓数目。
         """
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
-        return self._cur_strategy_context.position(contract)
+        return self._cur_strategy_context.position(contract, direction)
 
     def cash(self):
         """ 现金。 """

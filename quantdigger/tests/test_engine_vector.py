@@ -466,19 +466,6 @@ class TestDiffPeriod2(unittest.TestCase):
         logger.info('-- 跨周期多组合策略测试成功 --')
         logger.info('***** 跨周期多组合策略测试结束 *****\n')
 
-class TestSimulator(unittest.TestCase):
-    """ 多组合策略测试 """
-        
-    def test_case(self):
-        ## @todo profile
-            # all_holdings 长度一样
-            # signals 盈利
-
-        ## @todo 回测案例
-        # 隔天第一根买卖，很容易计算结果。
-
-        ## @TODO deals DemoStrategy2
-        pass
 
 if __name__ == '__main__':
     unittest.main()

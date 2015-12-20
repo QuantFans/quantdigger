@@ -45,6 +45,20 @@ class TradeSide(object):
         else:
             return arg
 
+    @classmethod
+    def type_to_str(self, type):
+        type2str = { 
+            self.BUY: '多头开仓',
+            self.SHORT: '空头开仓',
+            self.COVER: '空头平仓',
+            self.SELL: '多头平仓',
+            self.COVER_TODAY: '空头平今',
+            self.SELL_TODAY: '多头平今',
+            self.KAI: '开仓',
+            self.PING: '平仓',
+        }
+        return type2str[type]
+
 
 class Captial(object):
     """ 账号资金 
@@ -72,11 +86,11 @@ class Captial(object):
 class PriceType(object):
     """ 下单类型 
 
-    :ivar LMT: 限价单 - 0.
-    :ivar MKT: 市价单 - 1.
+    :ivar LMT: 限价单 - 1.
+    :ivar MKT: 市价单 - 0.
     """
-    LMT = 0
-    MKT = 1 
+    LMT = 1
+    MKT = 0 
 
     @classmethod
     def arg_to_type(self, arg):
@@ -90,6 +104,12 @@ class PriceType(object):
             return tdict[arg.upper()]
         else:
             return arg
+
+    @classmethod
+    def type_to_str(self, type):
+        type2str = { self.LMT: 'LMT',
+                     self.MKT: 'MKT'}
+        return type2str[type]
 
 class HedgeType(object):
     """ 下单类型 
@@ -111,6 +131,13 @@ class HedgeType(object):
             return tdict[arg.upper()]
         else:
             return arg
+
+    @classmethod
+    def type_to_str(self, type):
+        type2str = { self.SPEC: 'SPEC',
+                     self.HEDG: 'HEDG'}
+    
+        return type2str[type]
 
 class Direction(object):
     """
@@ -137,8 +164,8 @@ class Direction(object):
 
     @classmethod
     def type_to_str(self, type):
-        type2str = { self.LONG: 'LONG',
-                     self.SHORT: 'SHORT'}
+        type2str = { self.LONG: 'long',
+                     self.SHORT: 'short'}
     
         return type2str[type]
 
@@ -175,11 +202,22 @@ class Transaction(object):
         self.margin_ratio = 1
 
     def __hash__(self):
-        if hasattr(self, '_hash'):
-            return self._hash
-        else:
+        try:
+            return self._hash    
+        except AttributeError:
             self._hash =  hash(self.id)
             return self._hash
+
+    def __eq__(self, r):
+        return self._hash == r._hash
+
+    def __str__(self):
+        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n margin_ratio: %f" % \
+        (self.id, self.contract, Direction.type_to_str(self.direction),
+        self.price, self.quantity, TradeSide.type_to_str(self.side),
+        self.datetime, PriceType.type_to_str(self.price_type),
+        HedgeType.type_to_str(self.hedge_type), self.margin_ratio)
+        return rst
 
 
     
@@ -216,6 +254,9 @@ class OrderID(object):
 
     def __ge__(self, other):
         return self.id >= other.id
+
+    def __str__(self):
+        return str(self.id)
         
 
 class Order(object):
@@ -262,11 +303,22 @@ class Order(object):
         pass
 
     def __hash__(self):
-        if hasattr(self, '_hash'):
-            return self._hash
-        else:
+        try:
+            return self._hash    
+        except AttributeError:
             self._hash =  hash(self.id)
             return self._hash
+
+    def __str__(self):
+        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n margin_ratio: %f" % \
+        (self.id, self.contract, Direction.type_to_str(self.direction),
+        self.price, self.quantity, TradeSide.type_to_str(self.side),
+        self.datetime, PriceType.type_to_str(self.price_type),
+        HedgeType.type_to_str(self.hedge_type), self.margin_ratio)
+        return rst
+
+    def __eq__(self, r):
+        return self._hash == r._hash
 
     
 class Contract(object):
@@ -285,6 +337,7 @@ class Contract(object):
             assert False
         self.exch_type = exchange  # 用'stock'表示中国股市
         self.code = code
+        ## @TODO 从代码中计算
         self._is_stock = True if exchange == 'stock' else False
 
     def __str__(self):
@@ -292,11 +345,14 @@ class Contract(object):
         return "%s.%s" % (self.code, self.exch_type)
 
     def __hash__(self):
-        if hasattr(self, '_hash'):
-            return self._hash
-        else:
+        try:
+            return self._hash    
+        except AttributeError:
             self._hash =  hash(self.__str__())
             return self._hash
+
+    def __eq__(self, r):
+        return self._hash == r._hash
 
     @property
     def is_stock(self):
@@ -358,13 +414,6 @@ class Period(object):
     def __str__(self):
         return "%d.%s" % (self._length, self._type)
 
-    def __hash__(self):
-        if hasattr(self, '_hash'):
-            return self._hash
-        else:
-            self._hash =  hash(self.__str__())
-            return self._hash
-
 
 class PContract(object):
     """ 特定周期的合约。
@@ -386,11 +435,33 @@ class PContract(object):
         return PContract(Contract(t[0]), Period(t[1]))
 
     def __hash__(self):
+        try:
+            return self._hash    
+        except AttributeError:
+            self._hash =  hash(self.__str__())
+            return self._hash
+
+    def __eq__(self, r):
+        return self._hash == r._hash
+
+
+class PositionKey(object):
+    def __init__(self, contract, direction):
+        self.contract = contract
+        self.direction = direction
+
+    def __str__(self):
+        return "%s_%s" % (self.contract, str(self.direction))
+
+    def __hash__(self):
         if hasattr(self, '_hash'):
             return self._hash
         else:
-            self._hash =  hash(self.__str__())
+            self._hash =  hash((self.contract, self.direction))
             return self._hash
+
+    def __eq__(self, r):
+        return self._hash == r._hash
 
 
 class Position(object):
@@ -443,19 +514,10 @@ class Position(object):
         price = self.cost if self.contract.is_stock else new_price
         return price * self.quantity * self.margin_ratio
 
-    def __hash__(self):
-        if hasattr(self, '_hash'):
-            return self._hash
-        else:
-            self._hash =  hash(self.contract)
-            return self._hash
-
     def __str__(self):
-        rst = """
-                Position:
-                   cost - %f
-                   quantity - %d
-               """ % (self.cost, self.quantity)
+        rst = " contract: %s\n direction: %s\n cost: %f\n quantity: %d\n " % \
+                (self.contract, Direction.type_to_str(self.direction),
+                       self.cost, self.quantity)
         return rst
 
 

@@ -30,10 +30,10 @@ class DemoStrategy(Strategy):
     def on_bar(self, ctx):
         if ctx.curbar > 20:
             if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
-                ctx.buy('long', ctx.close, 1) 
+                ctx.buy(ctx.close, 1) 
             elif ctx.position() > 0 and ctx.ma10[1] > ctx.ma20[1] and \
                  ctx.ma10 < ctx.ma20:
-                ctx.sell('long', ctx.close, 1) 
+                ctx.sell(ctx.close, 1) 
 
         boll['upper'].append(ctx.boll['upper'][0])
         boll['middler'].append(ctx.boll['middler'][0])
@@ -58,10 +58,10 @@ class DemoStrategy2(Strategy):
     def on_bar(self, ctx):
         if ctx.curbar > 10:
             if ctx.ma5[1] < ctx.ma10[1] and ctx.ma5 > ctx.ma10:
-                ctx.buy('long', ctx.close, 1) 
+                ctx.buy(ctx.close, 1) 
             elif ctx.position() > 0 and ctx.ma5[1] > ctx.ma10[1] and \
                  ctx.ma5 < ctx.ma10:
-                ctx.sell('long', ctx.close, 1) 
+                ctx.sell(ctx.close, 1) 
 
     def on_final(self, ctx):
         return

@@ -79,11 +79,22 @@ class ExecuteUnit(object):
             self.context.switch_to_contract(pcon)
             self.context.rolling_foward()
         while True:
+            # 
             # 遍历数据轮的所有合约
             for pcon, data in self.all_data.iteritems():
                 self.context.switch_to_contract(pcon)
-                if self.context.time_aligned():
+                if self.context.time_aligned(False):
                     self.context.update_system_vars()
+
+            for i, combination in enumerate(self._combs):
+                for j, s in enumerate(combination):
+                    self.context.switch_to_strategy(i, j)
+                    self.context.process_trading_events(append=True)
+
+            # 遍历数据轮的所有合约
+            for pcon, data in self.all_data.iteritems():
+                self.context.switch_to_contract(pcon)
+                if self.context.time_aligned(True):
                     # 组合遍历
                     for i, combination in enumerate(self._combs):
                         # 策略遍历
@@ -91,13 +102,14 @@ class ExecuteUnit(object):
                             self.context.switch_to_strategy(i, j)
                             self.context.update_user_vars()
                             s.on_bar(self.context)
+
             # 每轮数据的最后处理
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
                     # 只有在on_final引用跨合约数据才有保证。
                     s.on_final(self.context)
-                    self.context.process_trading_events()
+                    self.context.process_trading_events(append=False)
             self.context.last_date = datetime(2100,1,1)
             # 
             toremove = []
