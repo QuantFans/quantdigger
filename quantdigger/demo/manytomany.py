@@ -23,11 +23,11 @@ class DemoStrategy(Strategy):
     def on_bar(self, ctx):
         if ctx.curbar > 20:
             if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
-                ctx.buy('long', ctx.close, 1) 
+                ctx.buy(ctx.close, 1) 
                 print('策略%s, 买入%s'%(ctx.strategy, ctx.symbol))
             elif ctx.position() > 0 and ctx.ma10[1] > ctx.ma20[1] and \
                  ctx.ma10 < ctx.ma20:
-                ctx.sell('long', ctx.close, 1) 
+                ctx.sell(ctx.close, 1) 
                 print('策略%s, 卖出%s'%(ctx.strategy, ctx.symbol))
 
     def on_final(self, ctx):
@@ -48,11 +48,11 @@ class DemoStrategy2(Strategy):
     def on_bar(self, ctx):
         if ctx.curbar > 10:
             if ctx.ma5[1] < ctx.ma10[1] and ctx.ma5 > ctx.ma10:
-                ctx.buy('long', ctx.close, 1) 
+                ctx.buy(ctx.close, 1) 
                 print('策略%s, 买入%s'%(ctx.strategy, ctx.symbol))
             elif ctx.position() > 0 and ctx.ma5[1] > ctx.ma10[1] and \
                  ctx.ma5 < ctx.ma10:
-                ctx.sell('long', ctx.close, 1) 
+                ctx.sell(ctx.close, 1) 
                 print('策略%s, 卖出%s'%(ctx.strategy, ctx.symbol))
 
     def on_final(self, ctx):

@@ -439,7 +439,6 @@ def _update_positions(current_positions, deal_positions, trans):
         last_index = 0
         p.total -= trans.quantity
         for position in reversed(p.positions):
-            print position.quantity, p.total
             if position.quantity < left_vol:
                 # 还需从之前的仓位中平。
                 left_vol -= position.quantity
