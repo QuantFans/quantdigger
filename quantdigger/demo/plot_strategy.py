@@ -27,6 +27,9 @@ class DemoStrategy(Strategy):
         ctx.boll = BOLL(ctx.close, 2)
         pass
 
+    def on_symbol(self, ctx):
+        pass
+
     def on_bar(self, ctx):
         if ctx.curbar > 20:
             if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
@@ -38,9 +41,6 @@ class DemoStrategy(Strategy):
         boll['upper'].append(ctx.boll['upper'][0])
         boll['middler'].append(ctx.boll['middler'][0])
         boll['lower'].append(ctx.boll['lower'][0])
-        pass
-
-    def on_final(self, ctx):
         return
 
     def on_exit(self, ctx):
@@ -55,6 +55,9 @@ class DemoStrategy2(Strategy):
         ctx.ma5 = MA(ctx.close, 5, 'ma5', 'y', 2) #, 'ma20', 'b', '1')
         ctx.ma10 = MA(ctx.close, 10, 'ma10', 'black', 2) #, 'ma20', 'b', '1')
 
+    def on_symbol(self, ctx):
+        pass
+
     def on_bar(self, ctx):
         if ctx.curbar > 10:
             if ctx.ma5[1] < ctx.ma10[1] and ctx.ma5 > ctx.ma10:
@@ -62,8 +65,6 @@ class DemoStrategy2(Strategy):
             elif ctx.position() > 0 and ctx.ma5[1] > ctx.ma10[1] and \
                  ctx.ma5 < ctx.ma10:
                 ctx.sell(ctx.close, 1) 
-
-    def on_final(self, ctx):
         return
 
     def on_exit(self, ctx):

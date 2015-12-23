@@ -22,12 +22,12 @@ class DemoStrategy(Strategy):
         ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2) #, 'ma20', 'b', '1')
         ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2) #, 'ma20', 'b', '1')
 
-    def on_bar(self, ctx):
+    def on_symbol(self, ctx):
         if ctx.curbar > 20:
             if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
                 self.candicates.append(ctx.symbol)
 
-    def on_final(self, ctx):
+    def on_bar(self, ctx):
         if self.candicates:
             print(ctx.curbar, self.candicates)
             # 其它操作, 如买卖相关股票

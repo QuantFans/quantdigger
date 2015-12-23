@@ -241,10 +241,8 @@ class StrategyContext(object):
                     except TradingError as e:
                         logger.debug(e)
                         return
-
                 elif event.type == Event.ORDER:
                     self.exchange.insert_order(event)
-
                 elif event.type == Event.FILL:
                     # 模拟交易接口收到报单成交
                     self.blotter.api.on_transaction(event)
@@ -278,17 +276,16 @@ class StrategyContext(object):
 
     def position(self, contract, direction):
         try:
-            direction = Direction.arg_to_type(direction)
             poskey = PositionKey(contract, direction) 
             return self.blotter.positions[poskey].quantity
         except KeyError:
             return 0
 
     def cash(self):
-        return self.blotter.current_holdings['cash']
+        return self.blotter.holding['cash']
 
     def equity(self):
-        return self.blotter.current_holdings['equity']
+        return self.blotter.holding['equity']
 
     def profit(self, contract):
         pass
@@ -317,16 +314,16 @@ class Context(object):
     def switch_to_contract(self, pcon):
         self._cur_data_context = self._data_contexts[pcon]
 
-    def time_aligned(self, cache=False):
-        if cache:
-            return self._cur_data_context.aligned 
-        self._cur_data_context.aligned =  (self._cur_data_context.datetime[0] < self.last_date or self._cur_data_context.curbar == 0)
-        return self._cur_data_context.aligned
+    def time_aligned(self):
+        return  (self._cur_data_context.datetime[0] < self.last_date or self._cur_data_context.curbar == 0)
 
-    def switch_to_strategy(self, i, j):
+    def switch_to_strategy(self, i, j, trading=False):
+        self._trading = trading
         self._cur_data_context.i, self._cur_data_context.j  = i, j
         self._cur_strategy_context = self._strategy_contexts[i][j]
 
+    def switch_to_data(self, i, j):
+        self._cur_data_context.i, self._cur_data_context.j  = i, j
 
     def process_trading_events(self, append):
         self._cur_strategy_context.update_environment(self.last_date, self._ticks, self._bars)
@@ -364,8 +361,7 @@ class Context(object):
         self._cur_data_context.update_system_vars()
         self._ticks[self._cur_data_context.contract] = self._cur_data_context.close[0]
         self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
-        oldbar = self._bars.setdefault(self._cur_data_context.contract,
-                                            self._cur_data_context.bar)
+        oldbar = self._bars.setdefault(self._cur_data_context.contract, self._cur_data_context.bar)
         if self._cur_data_context.bar.datetime > oldbar.datetime:
              # 处理不同周期时间滞后
             self._bars[self._cur_data_context.contract] = self._cur_data_context.bar
@@ -439,7 +435,7 @@ class Context(object):
 
     def __setattr__(self, name, value):
         if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
-                    '_strategy_contexts', 'last_date', '_ticks', '_bars', 'i', 'j']:
+                    '_strategy_contexts', 'last_date', '_ticks', '_bars', '_trading']:
             super(Context, self).__setattr__(name, value)
         else:
             self._cur_data_context.add_item(name, value)
@@ -454,7 +450,9 @@ class Context(object):
 
             symbol (str): 合约
         """
-        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
+        if not self._trading:
+            raise Exception('只有on_bar函数内能下单！')
+            return 
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
         self._cur_strategy_context.buy(Direction.LONG, price,
@@ -471,7 +469,9 @@ class Context(object):
 
            symbol (str): 合约
         """
-        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
+        if not self._trading:
+            raise Exception('只有on_bar函数内能下单！')
+            return 
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
         self._cur_strategy_context.sell(Direction.LONG, price,
@@ -488,7 +488,9 @@ class Context(object):
 
             symbol (str): 合约
         """
-        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
+        if not self._trading:
+            raise Exception('只有on_bar函数内能下单！')
+            return 
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
         self._cur_strategy_context.buy(Direction.SHORT, price,
@@ -505,14 +507,16 @@ class Context(object):
 
            symbol (str): 合约
         """
-        ## @todo 判断是否在on_final中运行，是的默认值为第一个合约
+        if not self._trading:
+            raise Exception('只有on_bar函数内能下单！')
+            return 
         contract = Contract(symbol) if symbol else copy.deepcopy(self._cur_data_context.contract)
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
         self._cur_strategy_context.sell(Direction.SHORT, price,
                                         quantity, price_type,
                                         contract)
 
-    def position(self, direction=Direction.LONG, symbol=None):
+    def position(self, direction='long', symbol=None):
         """ 当前仓位。
        
         Args:
@@ -524,21 +528,42 @@ class Context(object):
         Returns:
             int. 该合约的持仓数目。
         """
+        if not self._trading:
+            raise Exception('只有on_bar函数内能查询当前持仓！')
+            return 
+        direction = Direction.arg_to_type(direction)
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
+        ## @TODO assert direction
         return self._cur_strategy_context.position(contract, direction)
 
     def cash(self):
         """ 现金。 """
+        if not self._trading:
+            raise Exception('只有on_bar函数内能查询可用资金！')
         return self._cur_strategy_context.cash()
+
+    def test_cash(self):
+        """  当根bar时间终点撮合后的可用资金，用于测试。 """
+        self.process_trading_events(append=False)
+        return self.cash()
 
     def equity(self):
         """ 当前权益 """
+        if not self._trading:
+            raise Exception('只有on_bar函数内能查询当前权益！')
+            return 
         return self._cur_strategy_context.equity()
 
     def profit(self, contract=None):
         """ 当前持仓的历史盈亏 """ 
+        #if not self._trading:
+            #logger.warn('只有on_bar函数内能查询总盈亏！')
+            #return 
         pass
 
     def day_profit(self, contract=None):
         """ 当前持仓的浮动盈亏 """ 
+        #if not self._trading:
+            #logger.warn('只有on_bar函数内能查询浮动盈亏！')
+            #return 
         pass

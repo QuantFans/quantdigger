@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+##
+# @file test_engine.py
+# @brief 测试策略逐步运行中的序列变量，指标计算，跨周期时间对齐，策略和数据的组合遍历。
+# @author wondereamer
+# @version 0.3
+# @date 2015-12-22
+
 import datetime
 import unittest
 import pandas as pd
@@ -12,7 +19,7 @@ from quantdigger.engine.series import NumberSeries, DateTimeSeries
 logger = Logger('test')
 window_size = 3
 
-class TestSeries(unittest.TestCase):
+class TestSeries3(unittest.TestCase):
         
     def test_case(self):
         logger.info('***** 序列变量测试开始 *****')
@@ -39,7 +46,7 @@ class TestSeries(unittest.TestCase):
                 ctx.dlist = []
                 return
 
-            def on_bar(self, ctx):
+            def on_symbol(self, ctx):
                 ## @TODO + - * /
                 transform_test.append(ctx.open-0 == ctx.open[0])
                 transform_test.append(ctx.close-0 == ctx.close[0])
@@ -144,8 +151,8 @@ class TestSeries(unittest.TestCase):
         logger.info('-- 序列变量回溯测试成功 --')
         logger.info('***** 序列变量测试结束 *****\n')
 
-class TestIndicator(unittest.TestCase):
-        
+
+class TestIndicator3(unittest.TestCase):
     def test_case(self):
         logger.info('***** 指标测试开始 *****')
         close, open, ma2 = [], [], []
@@ -169,7 +176,7 @@ class TestIndicator(unittest.TestCase):
                 ctx.ma2 = MA(ctx.close, 2)
                 ctx.boll = BOLL(ctx.close, 2)
 
-            def on_bar(self, ctx):
+            def on_symbol(self, ctx):
                 if ctx.curbar>=2:
                     ## @todo + - * /
                     true_test.append(ctx.ma2-0 == ctx.ma2[0])
@@ -188,7 +195,7 @@ class TestIndicator(unittest.TestCase):
                 boll3['lower'].append(ctx.boll['lower'][3])
 
 
-            def on_final(self, ctx):
+            def on_bar(self, ctx):
                 return
 
             def on_exit(self, ctx):
@@ -297,8 +304,9 @@ class TestIndicator(unittest.TestCase):
         logger.info('***** 指标测试结束 *****\n')
 
 
-class TestMultipleCombination(unittest.TestCase):
-    """ 多组合策略测试 """
+class TestMultipleCombination3(unittest.TestCase):
+    """ 多组合策略, 测试数据、策略遍历
+    """
         
     def test_case(self):
         logger.info('***** 多组合策略测试开始 *****')
@@ -306,10 +314,10 @@ class TestMultipleCombination(unittest.TestCase):
                 'strategy': [],
                 }
 
-        on_final = {
+        on_bar = {
                 'strategy': [],
                 }
-        on_bar = {
+        on_symbol = {
                 'combination': set(),
                 'count': 0
                 }
@@ -320,14 +328,14 @@ class TestMultipleCombination(unittest.TestCase):
                 """初始化数据""" 
                 return
 
-            def on_bar(self, ctx):
+            def on_symbol(self, ctx):
                 #print ctx.strategy, ctx.pcontract
-                on_bar['combination'].add((str(ctx.pcontract), ctx.strategy))
-                on_bar['count'] += 1
+                on_symbol['combination'].add((str(ctx.pcontract), ctx.strategy))
+                on_symbol['count'] += 1
                 pass
 
-            def on_final(self, ctx):
-                on_final['strategy'].append(ctx.strategy)
+            def on_bar(self, ctx):
+                on_bar['strategy'].append(ctx.strategy)
 
             def on_exit(self, ctx):
                 on_exit['strategy'].append(ctx.strategy)
@@ -352,23 +360,23 @@ class TestMultipleCombination(unittest.TestCase):
                 ('AA.SHFE-1.Minute', 'B1'),
                 ('AA.SHFE-1.Minute', 'B2')
         ])
-        self.assertTrue(on_bar['combination'] == sample)
+        self.assertTrue(on_symbol['combination'] == sample)
         sample.pop()
-        self.assertFalse(on_bar['combination'] == sample)
-        self.assertTrue(on_bar['count'] == alen*4 + blen*4)
-        self.assertFalse(on_bar['count'] == alen*3 + blen*4)
-        self.assertTrue(['A1', 'A2', 'B1', 'B2']*max(blen, alen) == on_final['strategy'],
-                        'on_final测试失败！')
-        self.assertFalse(['C1', 'A2', 'B1', 'B2']*max(blen, alen) == on_final['strategy'],
-                        'on_final测试失败！')
+        self.assertFalse(on_symbol['combination'] == sample)
+        self.assertTrue(on_symbol['count'] == alen*4 + blen*4)
+        self.assertFalse(on_symbol['count'] == alen*3 + blen*4)
+        self.assertTrue(['A1', 'A2', 'B1', 'B2']*max(blen, alen) == on_bar['strategy'],
+                        'on_bar测试失败！')
+        self.assertFalse(['C1', 'A2', 'B1', 'B2']*max(blen, alen) == on_bar['strategy'],
+                        'on_bar测试失败！')
         self.assertTrue(['A1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
         self.assertFalse(['C1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
         logger.info('-- 多组合策略测试成功 --')
 
 
-class TestDiffPeriod(unittest.TestCase):
+class TestDiffPeriod3(unittest.TestCase):
     """ 跨周期多组合策略测试 
-    主要测试时间对齐
+        主要测试时间对齐和数据、策略遍历
     """
         
     def test_case(self):
@@ -377,11 +385,11 @@ class TestDiffPeriod(unittest.TestCase):
                 'strategy': [],
                 }
 
-        on_final = {
+        on_bar = {
                 'strategy': [],
                 'diffPeriod': [],
                 }
-        on_bar = {
+        on_symbol = {
                 'diffPeriod': [],
                 'count': 0
                 }
@@ -392,18 +400,18 @@ class TestDiffPeriod(unittest.TestCase):
                 """初始化数据""" 
                 return
 
-            def on_bar(self, ctx):
-                on_bar['count'] += 1
-                on_bar['diffPeriod'].append("%s %s %s %s"%(ctx.pcontract,
+            def on_symbol(self, ctx):
+                on_symbol['count'] += 1
+                on_symbol['diffPeriod'].append("%s %s %s %s"%(ctx.pcontract,
                     ctx.strategy, ctx.datetime, ctx.curbar))
                 pass
 
-            def on_final(self, ctx):
-                on_final['strategy'].append(ctx.strategy)
+            def on_bar(self, ctx):
+                on_bar['strategy'].append(ctx.strategy)
                 t = ctx['oneday.SHFE-1.Minute']
-                on_final['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
+                on_bar['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
                 t = ctx['TWODAY.SHFE-2.Second']
-                on_final['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
+                on_bar['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
 
             def on_exit(self, ctx):
                 on_exit['strategy'].append(ctx.strategy)
@@ -414,14 +422,26 @@ class TestDiffPeriod(unittest.TestCase):
         add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()
 
-        # on_bar
+        # on_symbol
         fname = os.path.join(os.getcwd(), 'data', 'oneday.SHFE-1.Minute.csv')
         blen = len(pd.read_csv(fname))
         fname = os.path.join(os.getcwd(), 'data', 'TWODAY.SHFE-2.Second.csv')
         alen = len(pd.read_csv(fname))
-        self.assertTrue(on_bar['count'] == alen*4 + blen*4)
-        self.assertFalse(on_bar['count'] == alen*3 + blen*4)
+        self.assertTrue(on_symbol['count'] == alen*4 + blen*4)
+        self.assertFalse(on_symbol['count'] == alen*3 + blen*4)
         fname = os.path.join(os.getcwd(), 'data', 'diffPeriodOnBar.txt')
+        with open(fname) as f:
+            source =  f.readlines()
+            assert(len(source)>0 and source[0] != "")
+            i = 0
+            for t in on_symbol['diffPeriod']:
+                if source[i].startswith('*'):
+                    i+=1
+                self.assertTrue(t == source[i].strip('\n'), "跨周期合约on_symbol失败")
+                i+=1
+
+        # on_bar
+        fname = os.path.join(os.getcwd(), 'data', 'diffPeriod.txt')
         with open(fname) as f:
             source =  f.readlines()
             assert(len(source)>0 and source[0] != "")
@@ -429,24 +449,12 @@ class TestDiffPeriod(unittest.TestCase):
             for t in on_bar['diffPeriod']:
                 if source[i].startswith('*'):
                     i+=1
-                self.assertTrue(t == source[i].strip('\n'), "跨周期合约on_bar失败")
-                i+=1
-
-        # on_final
-        fname = os.path.join(os.getcwd(), 'data', 'diffPeriod.txt')
-        with open(fname) as f:
-            source =  f.readlines()
-            assert(len(source)>0 and source[0] != "")
-            i = 0
-            for t in on_final['diffPeriod']:
-                if source[i].startswith('*'):
-                    i+=1
                 self.assertTrue(t == source[i].strip('\n'), "跨周期合约引用失败")
                 i+=1
-        self.assertTrue(['A1', 'A2', 'B1', 'B2'] * 6498 == on_final['strategy'],
-                        'on_final测试失败！')
-        self.assertFalse(['C1', 'A2', 'B1', 'B2'] * 6498 == on_final['strategy'],
-                        'on_final测试失败！')
+        self.assertTrue(['A1', 'A2', 'B1', 'B2'] * 6498 == on_bar['strategy'],
+                        'on_bar测试失败！')
+        self.assertFalse(['C1', 'A2', 'B1', 'B2'] * 6498 == on_bar['strategy'],
+                        'on_bar测试失败！')
 
         # on_exit
         self.assertTrue(['A1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')

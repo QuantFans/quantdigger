@@ -94,7 +94,6 @@ class Profile(object):
                 hd['equity'] += rhd['equity']
         return holdings
                 
-
     #def current_positions(self, j):
         #""" 当前持仓
         
@@ -256,6 +255,7 @@ class SimpleBlotter(Blotter):
                 'cash': self._captial,
                 'commission':  0.0,
                 'history_profit':  0.0,
+                'position_profit' : 0.0,
                 'equity': self._captial
         }
 
@@ -309,6 +309,7 @@ class SimpleBlotter(Blotter):
         dh['equity'] = self._captial + self.holding['history_profit'] + profit - \
                        self.holding['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
+        #print margin, dt
         if dh['cash'] < 0:
             if not is_stock:
                 # 如果是期货需要追加保证金
@@ -317,6 +318,7 @@ class SimpleBlotter(Blotter):
 
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
+        self.holding['position_profit'] = profit
         if append:
             self._all_holdings.append(dh)
         else:
@@ -386,6 +388,9 @@ class SimpleBlotter(Blotter):
         self._all_transactions.append(trans)
 
     def _valid_order(self, order):
+        if order.quantity<=0:
+            logger.warn("下单数量错误！")
+            return False 
         """ 判断订单是否合法。 """ 
         if order.side == TradeSide.PING:
             try:
@@ -403,6 +408,9 @@ class SimpleBlotter(Blotter):
         elif order.side == TradeSide.KAI:
             if self.holding['cash'] < order.price * order.quantity:
                 raise TradingError(err='没有足够的资金开仓') 
+            else:
+                new_price = self._ticks[order.contract]
+                self.holding['cash'] -= order.order_margin(new_price)
         return True
 
 kai = 0

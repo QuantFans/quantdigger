@@ -106,11 +106,11 @@ class Strategy(object):
         """初始化数据""" 
         return
 
-    def on_bar(self, ctx):
+    def on_symbol(self, ctx):
         """ 逐合约逐根k线运行 """
         return
 
-    def on_final(self, ctx):
+    def on_bar(self, ctx):
         """ 逐根k线运行 """
         # 停在最后一个合约处
         return

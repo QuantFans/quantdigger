@@ -30,7 +30,7 @@ class DemoStrategy(Strategy):
                 ctx.sell(ctx.close, 1) 
                 print('策略%s, 卖出%s'%(ctx.strategy, ctx.symbol))
 
-    def on_final(self, ctx):
+    def on_symbol(self, ctx):
         return
 
     def on_exit(self, ctx):
@@ -55,7 +55,7 @@ class DemoStrategy2(Strategy):
                 ctx.sell(ctx.close, 1) 
                 print('策略%s, 卖出%s'%(ctx.strategy, ctx.symbol))
 
-    def on_final(self, ctx):
+    def on_symbol(self, ctx):
         return
 
     def on_exit(self, ctx):

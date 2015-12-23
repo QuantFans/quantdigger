@@ -12,7 +12,7 @@ class ExecuteUnit(object):
 
         :ivar dt_begin: 策略执行的时间起点。
         :ivar dt_end: 策略执行的时间终点。
-        :ivar pcontracts: 策略用到的周期合约数据集合。
+        :ivar pcontracts: [str]策略用到的周期合约数据集合。
         :ivar _strategies: 策略集合。
         :ivar datasource: 数据源。
 
@@ -79,36 +79,28 @@ class ExecuteUnit(object):
             self.context.switch_to_contract(pcon)
             self.context.rolling_foward()
         while True:
-            # 
             # 遍历数据轮的所有合约
             for pcon, data in self.all_data.iteritems():
                 self.context.switch_to_contract(pcon)
-                if self.context.time_aligned(False):
+                if self.context.time_aligned():
                     self.context.update_system_vars()
-
-            for i, combination in enumerate(self._combs):
-                for j, s in enumerate(combination):
-                    self.context.switch_to_strategy(i, j)
-                    self.context.process_trading_events(append=True)
-
-            # 遍历数据轮的所有合约
-            for pcon, data in self.all_data.iteritems():
-                self.context.switch_to_contract(pcon)
-                if self.context.time_aligned(True):
                     # 组合遍历
                     for i, combination in enumerate(self._combs):
                         # 策略遍历
                         for j, s in enumerate(combination):
                             self.context.switch_to_strategy(i, j)
+                            #self.context.switch_to_data(i, j)
                             self.context.update_user_vars()
-                            s.on_bar(self.context)
-
+                            s.on_symbol(self.context)
+            ## 默认的是第一个合约
+            self.context.switch_to_contract(self.pcontracts[0])
             # 每轮数据的最后处理
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
-                    self.context.switch_to_strategy(i, j)
+                    self.context.switch_to_strategy(i, j, True)
                     # 只有在on_final引用跨合约数据才有保证。
-                    s.on_final(self.context)
+                    self.context.process_trading_events(append=True)
+                    s.on_bar(self.context)
                     self.context.process_trading_events(append=False)
             self.context.last_date = datetime(2100,1,1)
             # 
