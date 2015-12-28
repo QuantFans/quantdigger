@@ -22,6 +22,11 @@ class Exchange(object):
         """ 价格撮合""" 
         fill_orders = set()
         for order in self._open_orders:
+            if order.side == TradeSide.CANCEL:
+                transact = Transaction(order)
+                self.events.put(FillEvent(transact)) 
+                fill_orders.add(order)
+                continue
             try:
                 bar = bars[order.contract]
             except KeyError:
@@ -72,6 +77,7 @@ class Exchange(object):
         """
         模拟交易所收到订单。
         """ 
+        # 如果是撤单，会自动覆盖。
         self._open_orders.add(event.order)
 
     def cancel_order(self, order):

@@ -206,6 +206,7 @@ class StrategyContext(object):
         self.name = name
         self._orders = []
         self._datetime = None
+        self._cancel_now = False # 是当根bar还是下一根bar撤单成功。
 
     def update_environment(self, dt, ticks, bars):
         """ 更新模拟交易所和订单管理器的数据，时间,持仓 """ 
@@ -274,10 +275,38 @@ class StrategyContext(object):
                 quantity
         ))
 
+    def cancel(self, orders):
+        """ 撤单
+        
+        Args:
+            orders (list/Order): 撤单，参数为list表示撤多个单。
+        
+        """
+        orders = orders if isinstance(orders, list) else [orders]
+        if not self._cancel_now:
+            # 下一根bar处理撤单
+            for order in orders:
+                order.side = TradeSide.CANCEL
+                self._orders.append(order)
+            return
+        temp = copy.deepcopy(self._orders)
+        self._orders = []
+        for order in orders:
+            order.side = TradeSide.CANCEL
+            self._orders.append(order)
+        # 立即处理撤单
+        self.process_trading_events(False)
+        self._orders = temp
+    
+    @property
+    def open_orders(self):
+        """ 未成交的订单 """ 
+        return self.blotter.open_orders
+
     def position(self, contract, direction):
         try:
             poskey = PositionKey(contract, direction) 
-            return self.blotter.positions[poskey].quantity
+            return self.blotter.positions[poskey].closable
         except KeyError:
             return 0
 
@@ -515,6 +544,15 @@ class Context(object):
         self._cur_strategy_context.sell(Direction.SHORT, price,
                                         quantity, price_type,
                                         contract)
+
+    def cancel(self, ids):
+        """ 撤单 """
+        self._cur_strategy_context.cancel(ids)
+
+    @property
+    def open_orders(self):
+        """ 未成交的订单 """ 
+        return list(self._cur_strategy_context.open_orders)
 
     def position(self, direction='long', symbol=None):
         """ 当前仓位。

@@ -23,7 +23,7 @@ class TradeSide(object):
     SELL_TODAY = 6
     KAI = 7
     PING = 8
-
+    CANCEL = 9
 
     @classmethod
     def arg_to_type(self, arg):
@@ -38,7 +38,8 @@ class TradeSide(object):
             'COVER_TODAY': 5,
             'SELL_TODAY': 6,
             'KAI': 7,
-            'PING': 8
+            'PING': 8,
+            'CANCEL': 9
         }
         if type(arg) == str:
             return tdict[arg.upper()]
@@ -56,6 +57,7 @@ class TradeSide(object):
             self.SELL_TODAY: '多头平今',
             self.KAI: '开仓',
             self.PING: '平仓',
+            self.CANCEL: '撤单',
         }
         return type2str[type]
 
@@ -189,7 +191,6 @@ class Transaction(object):
     def __init__(self, order=None):
         if order:
             self.id = order.id
-            self.ref = order.ref
             self.contract = order.contract
             self.direction = order.direction
             self.price = order.price
@@ -198,6 +199,7 @@ class Transaction(object):
             self.datetime = order.datetime
             self.price_type = order.price_type
             self.hedge_type = order.hedge_type
+            self.order = order
         self.commission = 0
         self.margin_ratio = 1
 
@@ -228,6 +230,7 @@ class OrderID(object):
     order_id = 0
     def __init__(self, id):
         self.id = id
+        #self.ref = OrderID.next_order_id()
 
     @classmethod
     def next_order_id(cls):
@@ -257,6 +260,9 @@ class OrderID(object):
 
     def __str__(self):
         return str(self.id)
+
+    def __hash__(self):
+        return hash(self.id)
         
 
 class Order(object):
@@ -273,9 +279,8 @@ class Order(object):
         :ivar price_type: 下单类型。
         :ivar hedge_type: 交易类型。
     """
-    def __init__(self, dt, contract, type_, side, direction, price, quantity, hedge = HedgeType.SPEC):
-        self.ref = OrderID.next_order_id()
-        self.id = OrderID.next_order_id()
+    def __init__(self, dt, contract, type_, side, direction,
+                 price, quantity, hedge=HedgeType.SPEC, id=None):
         self.contract = contract
         self.direction = direction
         self.price = price
@@ -285,6 +290,7 @@ class Order(object):
         self.price_type = type_
         self.hedge_type = hedge
         self.margin_ratio = 1
+        self.id = id if id else OrderID.next_order_id()
 
     def order_margin(self, new_price):
         """ 计算这笔限价交易的保证金。
@@ -338,7 +344,7 @@ class Contract(object):
         self.exch_type = exchange  # 用'stock'表示中国股市
         self.code = code
         ## @TODO 从代码中计算
-        self._is_stock = True if exchange == 'stock' else False
+        self.is_stock = True if exchange == 'stock' else False
 
     def __str__(self):
         """""" 
@@ -353,11 +359,6 @@ class Contract(object):
 
     def __eq__(self, r):
         return self._hash == r._hash
-
-    @property
-    def is_stock(self):
-        """ 是否是股票""" 
-        return self._is_stock
 
     @classmethod
     def get_trading_interval(self, contract):
@@ -452,6 +453,10 @@ class PositionKey(object):
 
     def __str__(self):
         return "%s_%s" % (self.contract, str(self.direction))
+    
+    @property
+    def is_stock(self):
+        return self.contract.is_stock
 
     def __hash__(self):
         if hasattr(self, '_hash'):
@@ -475,8 +480,10 @@ class Position(object):
     """
     def __init__(self, trans):
         self.contract = trans.contract
-        self.quantity = 0;
-        self.cost = 0;
+        self.quantity = 0
+        self.closable = 0 # 可平数量
+        self.today = 0    # 当天数量
+        self.cost = 0
         self.direction = trans.direction
         self.margin_ratio = trans.margin_ratio
 

@@ -84,8 +84,6 @@ class Profile(object):
             return self._blts[0].all_holdings
         import copy
         holdings = copy.deepcopy(self._blts[0].all_holdings)
-        #print self._blts[0].all_holdings
-        #print self._blts[1].all_holdings
         for i, hd in enumerate(holdings):
             for blt in self._blts[1:]:
                 rhd = blt.all_holdings[i]
@@ -197,7 +195,7 @@ class SimpleBlotter(Blotter):
     """
     def __init__(self, name, events_pool, settings={ }):
         super(SimpleBlotter, self).__init__(name)
-        self._open_orders = list()
+        self.open_orders = set()
         self._all_orders = []
         self._pre_settlement = 0     # 昨日结算价
         self._datetime = None # 当前时间
@@ -274,12 +272,16 @@ class SimpleBlotter(Blotter):
             self._start_date = dt
             self._init_state()
         elif self._datetime.date() != dt.date():
-            self._open_orders = []
+            for order in self.open_orders:
+                if order.contract.is_stock and order.side == TradeSide.PING:
+                    pos = self.positions[PositionKey(order.contract, order.direction)]
+                    pos.closable += pos.today
+                    pos.today = 0
+            self.open_orders.clear()
         self._datetime = dt
 
     def update_status(self, dt, append=True):
         """ 更新历史持仓，当前权益。"""
-
         # 更新资金历史。
         dh = { }
         dh['datetime'] = dt
@@ -300,7 +302,7 @@ class SimpleBlotter(Blotter):
                 is_stock =  False   # 
 
         # 计算限价报单的保证金占用
-        for order in self._open_orders:
+        for order in self.open_orders:
             assert(order.price_type == PriceType.LMT)
             new_price = self._ticks[order.contract]
             order_margin +=  order.order_margin(new_price)
@@ -329,16 +331,20 @@ class SimpleBlotter(Blotter):
         处理策略函数产生的下单事件。
         """
         assert event.type == Event.SIGNAL
-        valid_orders = []
+        new_orders = []
         for order in event.orders:
             if self._valid_order(order):
                 order.datetime = self._datetime
                 self.api.order(order)
-                valid_orders.append(order)
+                new_orders.append(order)
             else:
                 continue
-        self._open_orders.extend(valid_orders)
-        self._all_orders.extend(valid_orders)
+        self.open_orders.update(new_orders)
+        self._all_orders.extend(new_orders)
+        for order in new_orders:
+            if order.side == TradeSide.PING:
+                pos = self.positions[PositionKey(order.contract, order.direction)]
+                pos.closable -= order.quantity
         #print "Receive %d signals!" % len(event.orders)
         #self.generate_naive_order(event.orders)
 
@@ -346,29 +352,32 @@ class SimpleBlotter(Blotter):
         """
         处理委托单成交事件。
         """
+        ## @TODO 订单编号和成交编号区分开
         assert event.type == Event.FILL
-        t_order = None
-        for i, order in enumerate(self._open_orders):
-            if order.id == event.transaction.id:
-                t_order = self._open_orders.pop(i)
-                break
-        assert(t_order)
-        self._update_holding(event.transaction)
-        self._update_positions(event.transaction)
+        trans = event.transaction
+        self.open_orders.remove(trans.order)
+        self._update_holding(trans)
+        self._update_positions(trans)
 
 
     def _update_positions(self, trans):
         """ 更新持仓 """
         poskey = PositionKey(trans.contract, trans.direction)
+        if trans.side == TradeSide.CANCEL:
+            pos = self.positions.get(poskey, None)
+            if pos:
+                pos.closable += trans.quantity
+            return
         pos = self.positions.setdefault(poskey, Position(trans))
-        #print len(self.positions)
-        #print pos.contract, pos.quantity
         if trans.side == TradeSide.KAI:
-            # 开仓
             pos.cost = (pos.cost*pos.quantity + trans.price*trans.quantity) / (pos.quantity+trans.quantity)
             pos.quantity += trans.quantity
+            if trans.contract.is_stock:
+                pos.today += trans.quantity 
+            else:
+                pos.closable += trans.quantity
+            assert(pos.quantity == pos.today + pos.closable)
         elif trans.side == TradeSide.PING:
-            # 平仓
             pos.quantity -= trans.quantity
             if pos.quantity == 0:
                 del self.positions[poskey] 
@@ -377,6 +386,8 @@ class SimpleBlotter(Blotter):
         """
         更新佣金和平仓盈亏。
         """
+        if trans.side == TradeSide.CANCEL:
+            return
         # 每笔佣金，和数目无关！
         self.holding['commission'] += trans.commission
         # 平仓，更新历史持仓盈亏。
@@ -388,10 +399,16 @@ class SimpleBlotter(Blotter):
         self._all_transactions.append(trans)
 
     def _valid_order(self, order):
+        """ 判断订单是否合法。 """ 
         if order.quantity<=0:
             logger.warn("下单数量错误！")
             return False 
-        """ 判断订单是否合法。 """ 
+        # 撤单
+        if order.side == TradeSide.CANCEL:
+            if order in self.open_orders:
+                return True  
+            else:
+                raise TradingError(err='撤销失败： 不存在该订单！') 
         if order.side == TradeSide.PING:
             try:
                 poskey = PositionKey(order.contract, order.direction)
