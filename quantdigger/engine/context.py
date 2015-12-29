@@ -3,7 +3,7 @@ import Queue
 import datetime
 import copy
 from quantdigger.engine import series
-from quantdigger.indicators.base import IndicatorBase
+from quantdigger.technicals.base import TechnicalBase
 from quantdigger.engine.exchange import Exchange
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.engine.blotter import SimpleBlotter
@@ -188,7 +188,7 @@ class DataContext(object):
         """ 
         if isinstance(value, series.SeriesBase):
             self.add_series(name, value)
-        elif isinstance(value, IndicatorBase):
+        elif isinstance(value, TechnicalBase):
             self.add_indicator(name, value)
         else:
             self.add_variable(name, value)

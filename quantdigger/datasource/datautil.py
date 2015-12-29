@@ -54,9 +54,6 @@ def tick2period(code,period,start,end):
     #assert(False)
     return  dfout
 
-
-
-
 def encode2id(period, dt):
     """ 把周期和时间编码成13位的整数id
     

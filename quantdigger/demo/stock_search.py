@@ -7,7 +7,7 @@
 # @date 2015-12-09
 
 #from quantdigger.engine.series import NumberSeries
-#from quantdigger.indicators.common import MA
+#from quantdigger.technicals.common import MA
 #from quantdigger.util import  pcontract
 from quantdigger.engine.qd import *
 

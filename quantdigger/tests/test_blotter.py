@@ -15,7 +15,7 @@ import talib
 import numpy as np
 from logbook import Logger
 from quantdigger.engine.qd import *
-from quantdigger.engine.series import NumberSeries, DateTimeSeries
+from quantdigger.datastruct import TradeSide
 
 logger = Logger('test')
 window_size = 0
@@ -27,6 +27,8 @@ buy3 = datetime.datetime.strptime("09:03:00", "%H:%M:%S").time()
 sell1 = datetime.datetime.strptime("14:57:00", "%H:%M:%S").time()
 sell2 = datetime.datetime.strptime("14:58:00", "%H:%M:%S").time()
 sell3 = datetime.datetime.strptime("15:00:00", "%H:%M:%S").time()
+fname = os.path.join(os.getcwd(), 'data', 'blotter.SHFE-1.Minute.csv')
+source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
 
 class TestOneDataOneCombination(unittest.TestCase):
@@ -41,7 +43,7 @@ class TestOneDataOneCombination(unittest.TestCase):
         cashes0, cashes1 = [], []
 
         class DemoStrategy1(Strategy):
-            """ 只买多头仓位的策略 """
+            """ 限价只买多头仓位的策略 """
             
             def on_init(self, ctx):
                 """初始化数据""" 
@@ -63,7 +65,7 @@ class TestOneDataOneCombination(unittest.TestCase):
 
 
         class DemoStrategy2(Strategy):
-            """ 买多卖空的策略 """
+            """ 限价买多卖空的策略 """
             
             def on_init(self, ctx):
                 """初始化数据""" 
@@ -89,6 +91,7 @@ class TestOneDataOneCombination(unittest.TestCase):
 
 
         class DemoStrategy3(Strategy):
+            """ 测试平仓未成交时的持仓，撤单后的持仓，撤单。 """
             def on_init(self, ctx):
                 """初始化数据""" 
                 pass
@@ -97,19 +100,28 @@ class TestOneDataOneCombination(unittest.TestCase):
                 if ctx.curbar == 1:
                     ctx.short(138, 1) 
                     ctx.short(138, 1) 
+                    ctx.buy(ctx.close, 1)
                 elif ctx.curbar == 3:
                     # 保证下一根撤单成功, 而非当前这根。
-                    assert(len(ctx.open_orders) == 2)
+                    assert(len(ctx.open_orders) == 2 and  '撤单测试失败!')
                     ctx.cancel(ctx.open_orders[0])
-                    assert(len(ctx.open_orders) == 2)
+                    assert(len(ctx.open_orders) == 2 and '撤单测试失败')
                 elif ctx.curbar == 4:
-                    assert(len(ctx.open_orders) == 1)
+                    assert(len(ctx.open_orders) == 1 and '撤单测试失败！')
+                elif ctx.curbar == 5:
+                    ctx.sell(300, 1) # 下无法成交的平仓，测试持仓。
+                    assert(ctx.position() == 1 and '持仓测试失败!')
+                elif ctx.curbar == 7:
+                    assert(ctx.position() == 0 and '持仓测试失败!')
+                    assert(len(ctx.open_orders) == 2 and '撤单测试失败！')
+                    order = filter(lambda x: x.side == TradeSide.PING, ctx.open_orders)[0]
+                    ctx.cancel(order)
+                elif ctx.curbar == 8:
+                    assert(len(ctx.open_orders) == 1 and '撤单测试失败！')
+                    assert(ctx.position() == 1 and '持仓测试失败!')
                 if ctx.curbar > 1 and ctx.datetime[0].date() != ctx.datetime[1].date():
-                    # 清空隔夜订单
-                    assert(len(ctx.open_orders) == 0)
-                assert(ctx.position() == 0)
+                    assert(len(ctx.open_orders) == 0 and '隔夜订单清空测试失败')
                 
-
 
         set_symbols(['blotter.SHFE-1.Minute'], window_size)
         profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
@@ -117,37 +129,43 @@ class TestOneDataOneCombination(unittest.TestCase):
             'ratio': [0.3, 0.3, 0.4]
             })
         run()
-        # all_holding
-        fname = os.path.join(os.getcwd(), 'data', 'blotter.SHFE-1.Minute.csv')
-        source = pd.read_csv(fname, parse_dates=True, index_col=0)
-        self.assertTrue(len(source) > 0 and 
-                        len(source) ==  len(profile.all_holdings(0)), '模拟器测试失败！')
-        self.assertTrue(len(source) > 0 and 
-                        len(source) ==  len(profile.all_holdings(1)), '模拟器测试失败！')
-        # cash()
+        # all_holdings
+        all_holdings = profile.all_holdings()
+        all_holdings0 = profile.all_holdings(0)
+        all_holdings1 = profile.all_holdings(1)
+        all_holdings2 = profile.all_holdings(2)
+        self.assertTrue(len(source) > 0 and len(source) ==  len(all_holdings), '模拟器测试失败！')
+
         target, cashes, dts = holdings_buy_maked_curbar(source, CAPTIAL*0.3)
+        self.assertTrue(len(cashes0) == len(cashes), 'cash接口测试失败！')
         for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
             self.assertTrue(np.isclose(cashes0[i],cashes[i]), 'cash接口测试失败！')
-        self.assertTrue(len(cashes0) == len(cashes), 'cash接口测试失败！')
-        self.assertTrue(len(profile.all_holdings(0)) == len(target) and
-                        len(target) > 0, 'all_holdings接口测试失败！')
-
-        for i, hd in enumerate(profile.all_holdings(0)):
+        self.assertTrue(len(all_holdings) == len(target), 'all_holdings接口测试失败！')
+        for i, hd in enumerate(all_holdings0):
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
             self.assertTrue(np.isclose(hd['equity'], target[i]), 'all_holdings接口测试失败！')
 
         target2, cashes, dts = holdings_buy_short_maked_curbar(source, CAPTIAL*0.3)
-        self.assertTrue(len(profile.all_holdings(1)) == len(target2) and 
-                        len(target2) > 0, 'all_holdings接口测试失败！')
+        self.assertTrue(len(cashes1) == len(cashes), 'cash接口测试失败！')
         for i in range(0, len(cashes1)-1): # 最后一根强平了无法比较
             self.assertTrue(np.isclose(cashes1[i],cashes[i]), 'cash接口测试失败！')
-        self.assertTrue(len(cashes1) == len(cashes), 'cash接口测试失败！')
         for i, hd in enumerate(profile.all_holdings(1)):
             self.assertTrue(np.isclose(target[i]-CAPTIAL*0.3,
                                         0-(target2[i]-CAPTIAL*0.3)), '测试代码错误！')
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
             self.assertTrue(np.isclose(hd['equity'], target2[i]), 'all_holdings接口测试失败！')
-        #
+        for i in range(0, len(profile.all_holdings())):
+            hd = all_holdings[i]
+            hd0 = all_holdings0[i]
+            hd1 = all_holdings1[i]
+            hd2 = all_holdings2[i]
+            self.assertTrue(hd['cash'] == hd0['cash']+hd1['cash']+hd2['cash'], 
+                            'all_holdings接口测试失败！')
+            self.assertTrue(hd['commission'] == hd0['commission']+
+                    hd1['commission']+hd2['commission'], 'all_holdings接口测试失败！')
+            self.assertTrue(hd['equity'] == hd0['equity']+hd1['equity']+hd2['equity'], 'all_holdings接口测试失败！')
+            
+        # holding
         hd0 = profile.holding(0) 
         hd1 = profile.holding(1) 
         hd2 = profile.holding(2) 
@@ -165,30 +183,12 @@ class TestOneDataOneCombination(unittest.TestCase):
         self.assertTrue(hd0last['commission'] == hd0['commission'], 'holdings接口测试失败！')
         self.assertTrue(len(profile.all_holdings()) == len(target) and
                         len(target) > 0, 'holdings接口测试失败！')
-        #
-        ## @TODO 
-        all_holdings = profile.all_holdings()
-        all_holdings0 = profile.all_holdings(0)
-        all_holdings1 = profile.all_holdings(1)
-        all_holdings2 = profile.all_holdings(2)
-        for i in range(0, len(profile.all_holdings())):
-            hd = all_holdings[i]
-            hd0 = all_holdings0[i]
-            hd1 = all_holdings1[i]
-            hd2 = all_holdings2[i]
-            self.assertTrue(hd['cash'] == hd0['cash']+hd1['cash']+hd2['cash'], 
-                            'all_holdings接口测试失败！')
-            self.assertTrue(hd['commission'] == hd0['commission']+
-                    hd1['commission']+hd2['commission'], 'all_holdings接口测试失败！')
-            self.assertTrue(hd['equity'] == hd0['equity']+hd1['equity']+hd2['equity'], 'all_holdings接口测试失败！')
-            
         # 绘制k线，交易信号线
         #from quantdigger.digger import finance, plotting
         #plotting.plot_strategy(profile.data(), deals=profile.deals(2))
 
 
     def test_case2(self):
-        ## @TODO 跨日订单的清空, 用cover案例,11号
         """ 测试限价的延迟成交 """
         buy_entries, sell_entries = [], []
         short_entries, cover_entries = [], []
@@ -262,9 +262,6 @@ class TestOneDataOneCombination(unittest.TestCase):
                                     'captial': CAPTIAL,
                                     'ratio': [0.25, 0.25, 0.25, 0.25]
                                   })
-
-        fname = os.path.join(os.getcwd(), 'data', 'blotter.SHFE-1.Minute.csv')
-        source = pd.read_csv(fname, parse_dates=True, index_col=0)
         buy_entries, sell_entries, short_entries, cover_entries = entries_maked_nextbar(source)
         run()
         # buy
@@ -307,6 +304,44 @@ class TestOneDataOneCombination(unittest.TestCase):
 
         ## @TODO 模拟器make_market的运行次数
         return
+
+    def test_case3(self):
+        """ 测试市价成交 """
+        cashes0 = []
+
+        class DemoStrategy(Strategy):
+            def on_init(self, ctx):
+                """初始化数据""" 
+                pass
+
+            def on_bar(self, ctx):
+                curtime = ctx.datetime[0].time()
+                if curtime in [buy1, buy2, buy3]:
+                    ctx.buy(0, 1) 
+                    ctx.short(0, 2) 
+                else:
+                    if curtime == sell1:
+                        assert(ctx.position('long') == 3 and '持仓测试失败！')
+                        ctx.sell(0, 2) 
+                        assert(ctx.position('short') == 6 and '持仓测试失败！')
+                        ctx.cover(0, 4) 
+                    elif curtime == sell2:
+                        assert(ctx.position('long') == 1 and '持仓测试失败！')
+                        ctx.sell(0, 1) 
+                        assert(ctx.position('short') == 2 and '持仓测试失败！')
+                        ctx.cover(0, 2) 
+                cashes0.append(ctx.test_cash()) 
+
+        set_symbols(['blotter.SHFE-1.Minute'], window_size)
+        profile = add_strategy([DemoStrategy('C1')],{ 'captial': CAPTIAL, 'ratio': [1] })
+        run()
+        target, cashes, dts = holdings_buy_short_maked_market(source, CAPTIAL)
+        self.assertTrue(len(cashes0) == len(cashes), 'cash接口测试失败！')
+        for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
+            self.assertTrue(np.isclose(cashes0[i],cashes[i]), 'cash接口测试失败！')
+        for i, hd in enumerate(profile.all_holdings()):
+            self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
+            self.assertTrue(np.isclose(hd['equity'], target[i]), '模拟器测试失败！')
 
 def holdings_buy_maked_curbar(data, captial):
     """ 策略: 多头限价开仓且当根bar成交
@@ -591,6 +626,64 @@ def holdings_cover_maked_nextbar(data, cover_entries, captial):
         dts.append(dt)
         prelow = low
     return equities, dts
+
+def holdings_buy_short_maked_market(data, captial):
+    """ 策略: 多空市价开仓且当根bar成交
+        买入点：[buy1, buy2, buy3]
+        当天卖出点：[sell1, sell2]
+    """ 
+    buy_prices= []
+    short_prices = []
+    close_profit = 0
+    equities = [] # 累计平仓盈亏
+    dts = []
+    cashes = []
+    for index, row in data.iterrows():
+        close = row['close']
+        dt = index
+        high, low = row['high'], row['low']
+        curtime = dt.time()
+        if curtime in [buy1, buy2, buy3]:
+            buy_prices.append(high)
+            short_prices.append(low)
+            short_prices.append(low)
+        else:
+            if curtime == sell1:
+                assert(len(buy_prices) == 3)
+                profit = (low-buy_prices[0]) + (low-buy_prices[1])
+                close_profit += profit
+                buy_prices = buy_prices[-1:]
+                assert(len(short_prices) == 6)
+                profit = (high-short_prices[0]) + (high-short_prices[1]) +  \
+                         (high-short_prices[2]) + (high-short_prices[3])
+                close_profit -= profit
+                short_prices = short_prices[-2:]
+            elif curtime == sell2:
+                assert(len(buy_prices) == 1)
+                close_profit += (low - buy_prices[0])
+                buy_prices = []
+                assert(len(short_prices) == 2)
+                close_profit -= (high - short_prices[0])
+                close_profit -= (high - short_prices[1])
+                buy_prices = []
+                short_prices = []
+        if dt == data.index[-1]:
+            # 强平现有持仓
+            for bp in buy_prices:
+                close_profit += (close - bp)
+            for bp in short_prices:
+                close_profit -= (close - bp)
+            buy_prices = []
+            short_prices = []
+        pos_profit = sum([close-pos_price for pos_price in buy_prices]) # 持仓盈亏
+        pos_profit -= sum([close-pos_price for pos_price in short_prices]) # 持仓盈亏
+        equities.append(captial+close_profit+pos_profit)
+        ## @TODO 股票测试
+        cost = close * len(buy_prices) * 1  # 保证金为比例为1的期货持仓成本。
+        cost += close * len(short_prices) * 1 
+        cashes.append(equities[-1]-cost)
+        dts.append(dt)
+    return equities, cashes, dts
 
 
 if __name__ == '__main__':

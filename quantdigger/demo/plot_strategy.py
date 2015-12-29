@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     # 绘制k线，交易信号线
     from quantdigger.digger import finance, plotting
-    plotting.plot_strategy(profile.data(0), profile.indicators(1), profile.deals(1))
+    plotting.plot_strategy(profile.data(0), profile.technicals(1), profile.deals(1))
     # 绘制策略A1, 策略A2, 组合的资金曲线
     curve0 = finance.create_equity_curve(profile.all_holdings(0))
     curve1 = finance.create_equity_curve(profile.all_holdings(1))

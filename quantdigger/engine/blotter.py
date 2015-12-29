@@ -126,7 +126,7 @@ class Profile(object):
             holdings['history_profit'] += rhd['history_profit']
         return holdings
 
-    def indicators(self, j=None, strpcon=None):
+    def technicals(self, j=None, strpcon=None):
         """ 返回第j个策略的指标, 默认返回组合的所有指标。
         
         Args:

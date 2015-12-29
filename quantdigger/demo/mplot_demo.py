@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from quantdigger.widgets.mplotwidgets import widgets, mplots
-from quantdigger.indicators.common import MA, RSI, Volume
+from quantdigger.technicals.common import MA, RSI, Volume
 from quantdigger.digger import sugar
 import pandas as pd
 

@@ -2,7 +2,7 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from quantdigger.indicators.common import MA
+from quantdigger.technicals import MA
 import pandas as pd
 
 # 创建画布
