@@ -72,7 +72,7 @@ http://www.quantfans.com/doc/quantdigger/
             ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2)
 
         def on_symbol(self, ctx):
-            """ 选股 """ 
+            """  选股 """ 
             return
 
         def on_bar(self, ctx):
