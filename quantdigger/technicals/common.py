@@ -10,28 +10,25 @@ import numpy as np
 import matplotlib.finance as finance
 from collections import OrderedDict
 from quantdigger.technicals.base import TechnicalBase, transform2ndarray, create_attributes
-from quantdigger.engine import series
+
 class MA(TechnicalBase):
     """ 移动平均线指标。 """
     @create_attributes
     def __init__(self, data, n, name='MA',
                  color='y', lw=1, style="line"):
         super(MA, self).__init__(data, n, name)
-        # 数据转化成ta-lib能处理的格式
-        # self.value为任何支持index的数据结构。
-        # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
-        # 转化为numpy.ndarray等能被指标函数处理的参数。
-        if not series.g_rolling:
-            # 向量化运行的均值函数
-            data = transform2ndarray(data)
-            self.value = talib.SMA(data, n)
         # 支持逐步运行必须函数的参数
-        self._rolling_args = (n,)
+        self._args = (n,)
+        self._init_by_subclass(data)
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。""" 
         ## @todo 用了向量化方法，速度降低
         return (talib.SMA(data, n)[i], )
+
+    def _vector_algo(self, data, n):
+        """向量化运行, 必须对self.value赋值。""" 
+        self.value = talib.SMA(data, n)
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """
@@ -39,39 +36,36 @@ class MA(TechnicalBase):
         self.plot_line(self.value, self.color, self.lw, self.style)
 
 
-
 class BOLL(TechnicalBase):
     """ 布林带指标。 """
-    ## @todo assure name is unique, it there are same names,
-    # modify the repeat name.
     @create_attributes
     def __init__(self, data, n, name='BOLL', color='y', lw=1, style="line"):
         super(BOLL, self).__init__(data, n, name)
-        # self.value为任何支持index的数据结构。
-        # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
-        # 转化为numpy.ndarray等能被指标函数处理的参数。
+        ## @NOTE 只有在逐步运算中需给self.value先赋值,
+        # 逐步运算后面可能被废除。
         self.value = OrderedDict([
                 ('upper', []),
                 ('middler', []),
                 ('lower', [])
                 ])
-        if not series.g_rolling:
-            # 向量化运行的均值函数
-            data = transform2ndarray(data)
-            u, m, l = talib.BBANDS(data, n, 2, 2)
-            self.value = {
-                    'upper': u,
-                    'middler': m,
-                    'lower': l
-                    }
-        # 支持逐步运行必须函数的参数
-        self._rolling_args = (n,)
+        self._args = (n, 2, 2)
+        self._init_by_subclass(data)
 
-    def _rolling_algo(self, data, n, i):
+    def _rolling_algo(self, data, n, a1, a2, i):
         """ 逐步运行函数。""" 
         ## @todo 用了向量化方法，速度降低
-        upper, middle, lower =  talib.BBANDS(data, n, 2, 2)
+        upper, middle, lower =  talib.BBANDS(data, n, a1, a2)
         return (upper[i], middle[i], lower[i])
+
+    def _vector_algo(self, data, n, a1, a2):
+        """向量化运行""" 
+        ## @NOTE self.value为保留字段！
+        u, m, l = talib.BBANDS(data, n, a1, a2)
+        self.value = {
+                'upper': u,
+                'middler': m,
+                'lower': l
+                }
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """

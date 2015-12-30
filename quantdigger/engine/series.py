@@ -217,6 +217,9 @@ class NumberSeries(SeriesBase):
         except SeriesIndexError:
             raise SeriesIndexError
 
+    def __call__(self, index):
+        return self[index]
+
 import datetime
 class DateTimeSeries(SeriesBase):
     """ 时间序列变量 """

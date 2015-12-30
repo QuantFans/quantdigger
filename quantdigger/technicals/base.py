@@ -49,47 +49,7 @@ def create_attributes(method):
             setattr(self, key, value)
         # 运行构造函数
         rst =  method(self, *args, **kwargs)
-        if not hasattr(self, 'value'):
-            raise Exception("每个指标都必须有value属性，代表指标值！")
-        else:
-            if isinstance(self.value, dict):
-                ## @todo 去掉多值情况
-                self.series = OrderedDict()
-                for key, value in self.value.iteritems():
-                    self.series[key] = series.NumberSeries(value, len(value),
-                                                        name, self, float('nan'))
-
-
-                for key, value in self.series.iteritems():
-                    setattr(self, key, value)
-                self.multi_value = True
-            else:
-                self.series = [series.NumberSeries(self.value, len(self.value),
-                                name, self, float('nan'))]
-                self.multi_value = False
-            # 输出
-            if series.g_rolling:
-                if self.multi_value:
-                    for key, value in self.series.iteritems():
-                        value.reset_data([], 1+series.g_window)
-                else:
-                    for s in self.series:
-                        s.reset_data([], 1+series.g_window)
-            
-            # 绘图中的y轴范围未被设置，使用默认值。
-            if not self._upper:
-                upper = lower = []
-                if isinstance(self.value, tuple):
-                    # 多值指标
-                    upper = [ max([value[i] for value in self.value ]) 
-                                 for i in xrange(0, len(self.value[0]))]
-                    lower = [ min([value[i] for value in self.value ]) 
-                                  for i in xrange(0, len(self.value[0]))]
-                else:
-                    upper = self.value
-                    lower = self.value
-                self.set_yrange(lower, upper)
-            return rst
+        return rst
     return wrapper
 
 # 带参数decorator
@@ -110,7 +70,7 @@ class TechnicalBase(PlotInterface):
     """
     指标基类。每个指标的内部数据为序列变量。所以每个指标对象都会与一个跟踪器相关联，
     负责更新其内部的序列变量。 如果是MA这样的单值指标, 重载函数可以使指标对象像序列变量一样被使用。
-    如果是多值指标，如布林带，那么会以元组的形式返回多一个序列变量。
+    如果是多值指标，如布林带，那么会以元组的形式返回多个序列变量。
 
     :ivar name: 指标对象名称
     :ivar value: 向量化运行结果, 用于处理历史数据。
@@ -123,18 +83,64 @@ class TechnicalBase(PlotInterface):
         self.name = name
         self.count = 0
         if isinstance(data, series.NumberSeries) and series.g_rolling:
-            # set input ordered
             data.set_shift()
             # 指标周期
             data.reset_data([], n+series.g_window)
             #(curbar, values)
             self._cache = [(-1, None)] * (series.g_window+1)
-        self._rolling_args = None
+        self._args = None
         self.value = []    # 输出
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。""" 
         raise NotImplementedError
+
+    def _init_by_subclass(self, data):
+        # 数据转化成ta-lib能处理的格式
+        # self.value为任何支持index的数据结构。
+        # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
+        # 转化为numpy.ndarray等能被指标函数处理的参数。
+        if not series.g_rolling:
+            # 向量化运行的均值函数
+            data = transform2ndarray(data)
+            args =  (data, ) + self._args
+            apply(self._vector_algo, args)
+        #if not hasattr(self, 'value'):
+            #raise Exception("每个指标都必须有value属性，代表指标值！")
+        #else:
+        if isinstance(self.value, dict):
+            self.series = OrderedDict()
+            for key, value in self.value.iteritems():
+                self.series[key] = series.NumberSeries(value, len(value),
+                                                    self.name, self, float('nan'))
+            for key, value in self.series.iteritems():
+                setattr(self, key, value)
+            self.multi_value = True
+        else:
+            self.series = [series.NumberSeries(self.value, len(self.value),
+                            self.name, self, float('nan'))]
+            self.multi_value = False
+        if series.g_rolling:
+            if self.multi_value:
+                for key, value in self.series.iteritems():
+                    value.reset_data([], 1+series.g_window)
+            else:
+                for s in self.series:
+                    s.reset_data([], 1+series.g_window)
+        
+        # 绘图中的y轴范围未被设置，使用默认值。
+        if not self._upper:
+            upper = lower = []
+            if isinstance(self.value, tuple):
+                # 多值指标
+                upper = [ max([value[i] for value in self.value ]) 
+                             for i in xrange(0, len(self.value[0]))]
+                lower = [ min([value[i] for value in self.value ]) 
+                              for i in xrange(0, len(self.value[0]))]
+            else:
+                upper = self.value
+                lower = self.value
+            self.set_yrange(lower, upper)
 
     def compute_element(self, cache_index, rolling_index):
         """ 计算一个回溯值, 被Series延迟调用。
@@ -152,7 +158,7 @@ class TechnicalBase(PlotInterface):
             else:
                 self._rolling_data = transform2ndarray(self.data)  # 输入
                 # 指标一次返回多个值
-                args =  (self._rolling_data, ) + self._rolling_args + (rolling_index,)
+                args =  (self._rolling_data, ) + self._args + (rolling_index,)
                 values = apply(self._rolling_algo, args)
                 self._cache[cache_index] = (self.curbar, values)
 
@@ -200,6 +206,9 @@ class TechnicalBase(PlotInterface):
     #def next(self):
         #"""docstring for next""" 
         #iter(self.series)
+
+    def __call__(self, index):
+        return self[index]
 
     def __getitem__(self, index):
         # 解析多元值, 返回series
