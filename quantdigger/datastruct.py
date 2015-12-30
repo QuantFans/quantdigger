@@ -501,7 +501,7 @@ class Position(object):
         if self.direction == Direction.LONG:
             profit += (new_price - self.cost) * self.quantity
         else:
-            profit += (self.cost - new_price) * self.quantity
+            profit -= (new_price - self.cost) * self.quantity
         return profit
 
     @property

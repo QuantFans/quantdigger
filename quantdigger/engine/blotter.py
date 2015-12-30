@@ -300,7 +300,6 @@ class SimpleBlotter(Blotter):
             margin += pos.position_margin(new_price)
             if not key.contract.is_stock:
                 is_stock =  False   # 
-
         # 计算限价报单的保证金占用
         for order in self.open_orders:
             assert(order.price_type == PriceType.LMT)
@@ -317,7 +316,6 @@ class SimpleBlotter(Blotter):
                 # 如果是期货需要追加保证金
                 ## @bug 如果同时交易期货和股票，就有问题。
                 raise Exception('需要追加保证金!')
-
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = profit

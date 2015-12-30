@@ -32,7 +32,7 @@ source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
 
 class TestOneDataOneCombination(unittest.TestCase):
-    """ 测试单数据单组合的价格撮合，持仓，可用资金等交易接口 """
+    """ 测试单数据单组合的价格撮合，持仓查询／默认持仓查询，可用资金等交易接口 """
         
     def test_case(self):
         ## @TODO 持仓过夜，不卖，累加仓位。
@@ -78,7 +78,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                     ctx.short(ctx.close, 2) 
                 else:
                     if curtime == sell1:
-                        assert(ctx.position('long') == 3 and '持仓测试失败！')
+                        assert(ctx.position() == 3 and '默认持仓查询测试失败！')
                         ctx.sell(ctx.close, 2) 
                         assert(ctx.position('short') == 6 and '持仓测试失败！')
                         ctx.cover(ctx.close, 4) 
@@ -129,7 +129,7 @@ class TestOneDataOneCombination(unittest.TestCase):
             'ratio': [0.3, 0.3, 0.4]
             })
         run()
-        # all_holdings
+        # all_holdings, cash()
         all_holdings = profile.all_holdings()
         all_holdings0 = profile.all_holdings(0)
         all_holdings1 = profile.all_holdings(1)
@@ -343,6 +343,48 @@ class TestOneDataOneCombination(unittest.TestCase):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertTrue(np.isclose(hd['equity'], target[i]), '模拟器测试失败！')
 
+    def test_case4(self):
+        """ 测试跨合约交易的持仓, 资金 """ 
+        cashes0 = []
+        class DemoStrategy(Strategy):
+            
+            def on_init(self, ctx):
+                """初始化数据""" 
+                pass
+
+            def on_bar(self, ctx):
+                curtime = ctx.datetime[0].time()
+                if curtime in [buy1, buy2, buy3]:
+                    ctx.buy(ctx.close, 1) # 默认blotter.SHFE
+                    ctx.short(ctx['blotter2.SHFE-1.Minute'].close, 2, 'blotter2.SHFE') 
+                else:
+                    if curtime == sell1:
+                        assert(ctx.position('long', 'blotter.SHFE') == 3 and '持仓测试失败！')
+                        ctx.sell(ctx.close, 2) 
+                        assert(ctx.position('short', 'blotter2.SHFE') == 6 and '持仓测试失败！')
+                        ctx.cover(ctx['blotter2.SHFE-1.Minute'].close, 4, 'blotter2.SHFE') 
+                    elif curtime == sell2:
+                        assert(ctx.position('long', 'blotter.SHFE') == 1 and '跨合约持仓测试失败！')
+                        ctx.sell(ctx.close, 1, 'blotter.SHFE') 
+                        assert(ctx.position('short', 'blotter2.SHFE') == 2 and '持仓测试失败！')
+                        ctx.cover(ctx['blotter2.SHFE-1.Minute'].close, 2, 'blotter2.SHFE') 
+                cashes0.append(ctx.test_cash()) 
+        set_symbols(['blotter.SHFE-1.Minute', 'blotter2.SHFE-1.Minute'], window_size)
+        profile = add_strategy([DemoStrategy('D1')],{ 'captial': CAPTIAL, 'ratio': [1] })
+        run()
+        fname = os.path.join(os.getcwd(), 'data', 'blotter2.SHFE-1.Minute.csv')
+        source2 = pd.read_csv(fname, parse_dates=True, index_col=0)
+        target1, cashes1, dts = holdings_buy_maked_curbar(source, CAPTIAL/2) # 确保资金够用，所以不影响
+        target2, cashes2, dts = holdings_short_maked_curbar(source2, CAPTIAL/2)
+        target = [x + y for x, y in zip(target1, target2)]
+        cashes = [x + y for x, y in zip(cashes1, cashes2)]
+        self.assertTrue(len(cashes0) == len(cashes), 'cash接口测试失败！')
+        for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
+            self.assertTrue(np.isclose(cashes0[i],cashes[i]), 'cash接口测试失败！')
+        for i, hd in enumerate(profile.all_holdings()):
+            self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
+            self.assertTrue(np.isclose(hd['equity'], target[i]), 'all_holdings接口测试失败！')
+
 def holdings_buy_maked_curbar(data, captial):
     """ 策略: 多头限价开仓且当根bar成交
         买入点: [buy1, buy2, buy3]
@@ -376,6 +418,47 @@ def holdings_buy_maked_curbar(data, captial):
         #cost = sum(buy_prices) # 股票持仓成本
         equities.append(captial+close_profit+pos_profit)
         cost = price * len(buy_prices) * 1  # 保证金为比例为1的期货持仓成本。
+        cashes.append(equities[-1]-cost)
+        dts.append(dt)
+    return equities, cashes, dts
+
+def holdings_short_maked_curbar(data, captial):
+    """ 策略: 空头限价开仓且当根bar成交
+        买入点：[buy1, buy2, buy3]
+        当天卖出点：[sell1, sell2]
+    """ 
+    short_prices = []
+    close_profit = 0
+    equities = [] # 累计平仓盈亏
+    dts = []
+    cashes = []
+    for dt, price in data.close.iteritems():
+        curtime = dt.time()
+        if curtime in [buy1, buy2, buy3]:
+            short_prices.append(price)
+            short_prices.append(price)
+        else:
+            if curtime == sell1:
+                assert(len(short_prices) == 6)
+                profit = (price-short_prices[0]) + (price-short_prices[1]) +  \
+                         (price-short_prices[2]) + (price-short_prices[3])
+                close_profit -= profit
+                short_prices = short_prices[-2:]
+            elif curtime == sell2:
+                assert(len(short_prices) == 2)
+                close_profit -= (price - short_prices[0])
+                close_profit -= (price - short_prices[1])
+                short_prices = []
+        if dt == data.index[-1]:
+            # 强平现有持仓
+            for bp in short_prices:
+                close_profit -= (price - bp)
+            short_prices = []
+        pos_profit = sum([pos_price-price for pos_price in short_prices]) # 持仓盈亏
+        equities.append(captial+close_profit+pos_profit)
+        ## @TODO 股票测试
+        #cost = price * len(buy_prices) * 1  # 保证金为比例为1的期货持仓成本。
+        cost = price * len(short_prices) * 1 
         cashes.append(equities[-1]-cost)
         dts.append(dt)
     return equities, cashes, dts
