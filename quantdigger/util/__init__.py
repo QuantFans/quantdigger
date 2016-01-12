@@ -1,6 +1,8 @@
+
 # -*- coding: utf8 -*-
 from logbook import Logger
 import time
+from progressbar import ProgressBar
 
 elogger = Logger('engine')
 dlogger = Logger('data')

@@ -14,6 +14,7 @@ class TradeSide(object):
     :ivar SELL_TODAY: 多头平今，6
     :ivar KAI: 开仓，7
     :ivar PING: 平仓，8
+    :ivar CANCEL: 撤单，9
     """
     BUY = 1
     SHORT = 2
@@ -184,8 +185,6 @@ class Transaction(object):
     :ivar side: 开平仓标志。
     :ivar datetime: 成交时间
     :ivar price_type: 下单类型。
-    :ivar commission: 佣金百分比
-    :ivar margin_ratio: 保证金比例。
     :ivar hedge_type: 交易类型。
     """
     def __init__(self, order=None):
@@ -201,7 +200,6 @@ class Transaction(object):
             self.hedge_type = order.hedge_type
             self.order = order
         self.commission = 0
-        self.margin_ratio = 1
 
     def __hash__(self):
         try:
@@ -214,11 +212,11 @@ class Transaction(object):
         return self._hash == r._hash
 
     def __str__(self):
-        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n margin_ratio: %f" % \
+        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s" % \
         (self.id, self.contract, Direction.type_to_str(self.direction),
         self.price, self.quantity, TradeSide.type_to_str(self.side),
         self.datetime, PriceType.type_to_str(self.price_type),
-        HedgeType.type_to_str(self.hedge_type), self.margin_ratio)
+        HedgeType.type_to_str(self.hedge_type))
         return rst
 
 
@@ -289,8 +287,12 @@ class Order(object):
         self.datetime = dt
         self.price_type = type_
         self.hedge_type = hedge
-        self.margin_ratio = 1
         self.id = id if id else OrderID.next_order_id()
+        if self.direction == Direction.LONG:
+            self._margin_ratio = Contract.long_margin_ratio(str(self.contract))
+        else:
+            self._margin_ratio = Contract.short_margin_ratio(str(self.contract))
+        self._volume_multiple = Contract.volume_multiple(str(self.contract))
 
     def order_margin(self, new_price):
         """ 计算这笔限价交易的保证金。
@@ -301,7 +303,8 @@ class Order(object):
         Returns:
             float. 保证金占用
         """
-        return self.price * self.quantity * self.margin_ratio
+        price = self.price if self.contract.is_stock else new_price
+        return price * self.quantity * self._margin_ratio * self._volume_multiple
 
     def print_order(self):
         #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \
@@ -316,11 +319,11 @@ class Order(object):
             return self._hash
 
     def __str__(self):
-        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n margin_ratio: %f" % \
+        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n long_margin_ratio: %f" % \
         (self.id, self.contract, Direction.type_to_str(self.direction),
         self.price, self.quantity, TradeSide.type_to_str(self.side),
         self.datetime, PriceType.type_to_str(self.price_type),
-        HedgeType.type_to_str(self.hedge_type), self.margin_ratio)
+        HedgeType.type_to_str(self.hedge_type), self.long_margin_ratio)
         return rst
 
     def __eq__(self, r):
@@ -330,25 +333,31 @@ class Order(object):
 class Contract(object):
     """ 合约。
    
-    :ivar exch_type: 市场类型。
+    :ivar exchange: 市场类型。
     :ivar code: 合约代码
+    :ivar margin_ratio: 保证金比例。
+    :ivar volume_multiple: 合约乘数。
     """
+    info = None
     def __init__(self, str_contract):
         info = str_contract.split('.')
         if len(info) == 2:
-            code = info[0]
-            exchange = info[1]
-        else:
-            ## @todo 合约到市场的映射。
-            assert False
-        self.exch_type = exchange  # 用'stock'表示中国股市
+            code = info[0].upper()
+            exchange = info[1].upper()
+        self.exchange = exchange
         self.code = code
-        ## @TODO 从代码中计算
-        self.is_stock = True if exchange == 'stock' else False
+        if self.exchange == 'SZ' or self.exchange == 'SH':
+            self.is_stock = True 
+        elif self.exchange == 'SHFE':
+            self.is_stock = False
+        elif self.exchange == 'TEST' and self.code == 'STOCK':
+            self.is_stock = True 
+        elif self.exchange == 'TEST':
+            self.is_stock = False
 
     def __str__(self):
         """""" 
-        return "%s.%s" % (self.code, self.exch_type)
+        return "%s.%s" % (self.code, self.exchange)
 
     def __hash__(self):
         try:
@@ -361,14 +370,25 @@ class Contract(object):
         return self._hash == r._hash
 
     @classmethod
-    def get_trading_interval(self, contract):
+    def trading_interval(self, contract):
         """ 获取合约的交易时段。""" 
         pass
 
     @classmethod
-    def get_margin_ratio(self, contract):
+    def long_margin_ratio(self, strcontract):
         """ 获取合约的交易时段。""" 
-        return 1
+        return Contract.info.ix[strcontract.upper(), 'long_margin_ratio']
+
+    @classmethod
+    def short_margin_ratio(self, strcontract):
+        """ 获取合约的交易时段。""" 
+        return Contract.info.ix[strcontract.upper(), 'short_margin_ratio']
+
+    @classmethod
+    def volume_multiple(self, strcontract):
+        """ 获取合约的交易时段。""" 
+        return Contract.info.ix[strcontract.upper(), 'volume_multiple']
+
 
 
 class Period(object):
@@ -382,18 +402,18 @@ class Period(object):
         #Months = "Months" 
         #Seasons = "Seasons" 
         #Years = "Years" 
-    periods = ["MilliSecond", "Second", "Minute", "Hour",
-               "Day", "Month", "Season", "Year"]    
+    periods = ["MILLISECOND", "SECOND", "MINUTE", "HOUR",
+               "DAY", "MONTH", "SEASON", "YEAR"]    
 
     def __init__(self, str_period):
         period = str_period.split('.')
         if len(period) == 2:
             unit_count = int(period[0])
-            time_unit = period[1]
+            time_unit = period[1].upper()
         else:
             raise PeriodTypeError
         if time_unit not in self.periods:
-            raise PeriodTypeError
+            raise PeriodTypeError(period=time_unit)
 
         self._type = time_unit
         self._length = unit_count
@@ -474,18 +494,23 @@ class Position(object):
 
     :ivar contract: 合约。
     :ivar quantity: 数目。
+    :ivar closable: 可平数目。
+    :ivar today: 当天开仓数目。
     :ivar cost: 成本价。
     :ivar direction: 开仓方向。
-    :ivar margin_ratio: 保证金比例。
     """
     def __init__(self, trans):
         self.contract = trans.contract
         self.quantity = 0
-        self.closable = 0 # 可平数量
-        self.today = 0    # 当天数量
+        self.closable = 0 
+        self.today = 0 
         self.cost = 0
         self.direction = trans.direction
-        self.margin_ratio = trans.margin_ratio
+        if self.direction == Direction.LONG:
+            self._margin_ratio = Contract.long_margin_ratio(str(self.contract))
+        else:
+            self._margin_ratio = Contract.short_margin_ratio(str(self.contract))
+        self._volume_multiple = Contract.volume_multiple(str(self.contract))
 
     def profit(self, new_price):
         """ 根据最新价格计算持仓盈亏。
@@ -499,9 +524,9 @@ class Position(object):
 
         profit = 0
         if self.direction == Direction.LONG:
-            profit += (new_price - self.cost) * self.quantity
+            profit += (new_price - self.cost) * self.quantity * self._volume_multiple
         else:
-            profit -= (new_price - self.cost) * self.quantity
+            profit -= (new_price - self.cost) * self.quantity * self._volume_multiple
         return profit
 
     @property
@@ -519,12 +544,12 @@ class Position(object):
             float. 保证金占用
         """
         price = self.cost if self.contract.is_stock else new_price
-        return price * self.quantity * self.margin_ratio
+        return price * self.quantity * self._margin_ratio
 
     def __str__(self):
-        rst = " contract: %s\n direction: %s\n cost: %f\n quantity: %d\n " % \
+        rst = " contract: %s\n direction: %s\n cost: %f\n quantity: %d\n closeable: %d\n" % \
                 (self.contract, Direction.type_to_str(self.direction),
-                       self.cost, self.quantity)
+                       self.cost, self.quantity, self.closable)
         return rst
 
 

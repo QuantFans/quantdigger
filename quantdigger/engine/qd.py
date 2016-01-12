@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from quantdigger.engine.execute_unit import ExecuteUnit
 import datetime
-from quantdigger.engine.series import NumberSeries, DateTimeSeries
-from quantdigger.technicals.common import *
-from quantdigger.datastruct import PContract
 
 # 系统角色
 g_simulator = None

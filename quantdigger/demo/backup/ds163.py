@@ -60,7 +60,7 @@ class Stock163Source(object):
         pass
 
     def load_data(self, pcontract, dt_start=None, dt_end=None):
-        if pcontract.contract.exch_type != 'stock':
+        if pcontract.contract.exchange != 'stock':
             # 只有股票数据
             return None
         title, rows = _query_data(pcontract.contract.code, dt_start, dt_end)

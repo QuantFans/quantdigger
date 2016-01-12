@@ -4,10 +4,11 @@ import datetime
 import os
 import pandas as pd
 import string
-import time
+import sqlite3
 from quantdigger.engine import series
 from quantdigger.errors import FileDoesNotExist, DataFieldError
 from quantdigger.datasource import datautil
+#from quantdigger.config import settings
 
 
 class SourceWrapper(object):
@@ -69,7 +70,6 @@ class CsvSourceWrapper(SourceWrapper):
         else:
             return True, self.curbar
 
-
 def convert_datetime(tf):
     return datetime.datetime.fromtimestamp(float(tf)/1000)
 
@@ -78,18 +78,17 @@ class SqlLiteSource(object):
     Sqlite数据源。
     """
     def __init__(self, fname):
-        import sqlite3
         self.db = sqlite3.connect(fname,
                     detect_types = sqlite3.PARSE_DECLTYPES)
         sqlite3.register_converter('timestamp', convert_datetime)
         ## @todo remove self.cursor
         self.cursor = self.db.cursor()
     
-    def load_bars(self, pcontract, dt_start, dt_end, window_size):
+    def get_bars(self, pcontract, dt_start, dt_end, window_size):
         cursor = self.db.cursor()
         id_start, u = datautil.encode2id(pcontract.period, dt_start)
         id_end, u = datautil.encode2id(pcontract.period, dt_end)
-        table = string.replace(str(pcontract.contract), '.', '_')
+        table = '_'.join([pcontract.contract.exchange, pcontract.contract.code])
         #sql = "SELECT COUNT(*) FROM {tb} \
                 #WHERE {start}<=id AND id<={end}".format(tb=table, start=id_start, end=id_end)
         #max_length = cursor.execute(sql).fetchone()[0]
@@ -114,25 +113,114 @@ class SqlLiteSource(object):
             data.index = []
             return SqliteSourceWrapper(pcontract, data, cursor, window_size)
 
-    def read_csv(self, path):
-        """ 导入路径path下所有csv数据文件到sqlite中，每个文件对应数据库中的一周表格。
+    def get_tables(self):
+        """ 返回数据库所有的表格""" 
+        self.cursor.execute("select name from sqlite_master where type='table'")
+        return  self.cursor.fetchall()
 
-        DateFrame(index, open, close, low, high, vol)
+    def get_table_fields(self, tb):
+        """ 返回表格的字段""" 
+        self.cursor.execute("select * from %s LIMIT 1" % tb)
+        field_names = [r[0] for r in self.cursor.description]
+        return field_names
 
-        >>> sql.read_csv(os.getcwd())
+    def get_contracts(self):
+        """ 获取所有合约的基本信息
+        
+        Returns:
+            pd.DataFrame. 
+        """
+        self.cursor.execute("select * from contract")
+        data = self.cursor.fetchall()
+        data = zip(*data)
+        df = pd.DataFrame({
+            'code': data[1], 
+            'exchange': data[2],
+            'name': data[3],
+            'spell': data[4],
+            'long_margin_ratio': data[5],
+            'short_margin_ratio': data[6],
+            'price_tick': data[7],
+            'volume_multiple': data[8]
+            }, index = data[0])
+        return df
+
+    def get_exchanges(self):
+        """ 获取所有交易所的编码""" 
+        exch = set()
+        for row in self.cursor.execute('SELECT * FROM contract'):
+            exch.add(row[2])
+        return list(exch)
+
+    def import_bars(self, tbdata, strpcon):
+        """ 导入交易数据
+        
+        Args:
+            tbdata (dict): {'datetime', 'open', 'close', 'high', 'low', 'volume'}
+
+            strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute' 
+
+            生成表格: 'SHFE_AA' 
+        """
+        data = []
+        ids, utimes = [], []
+        strdt = strpcon.split('-')[1].upper()
+        tbname = strpcon.split('-')[0].split('.')
+        tbname = "_".join([tbname[1], tbname[0]])
+        for dt in tbdata['datetime']:
+            id,  utime = datautil.encode2id(strdt, dt)
+            ids.append(id)
+            utimes.append(utime)
+        data = zip(ids, utimes, tbdata['open'], tbdata['close'], tbdata['high'],
+                   tbdata['low'], tbdata['volume'])
+        try:
+            self.cursor.execute('''CREATE TABLE {tb}
+                         (id int primary key,
+                          datetime timestamp,
+                          open real,
+                          close real,
+                          high real,
+                          low real,
+                          volume int)'''.format(tb = tbname))
+            self.db.commit()
+        except sqlite3.OperationalError:
+            pass
+        finally:
+            sql = "INSERT INTO %s VALUES (?,?,?,?,?,?,?)" % tbname
+            self.cursor.executemany(sql, data)
+            self.db.commit()
+
+    def import_contracts(self, data):
+        """ 导入合约的基本信息。
+        
+        Args:
+            data (dict): {key, code, exchange, name, spell, 
+            long_margin_ratio, short_margin_ratio, price_tick, volume_multiple}
+        
         """
 
-        for path, dirs, files in os.walk(path):
-            for file in files:
-                filepath = path + os.sep + file
-                if filepath.endswith(".CSV"):
-                    fname =  file.split('-')[0]
-                    print("import: ", fname)
-                    df = pd.read_csv(filepath, parse_dates={'datetime': ['date', 'time']},
-                                     index_col='datetime')
-                    self._df2sqlite(df, fname)
+        tbname = 'contract'
+        data['key'] = map(lambda x: x.upper(), data['key'])
+        data = zip(data['key'], data['code'], data['exchange'], data['name'], 
+                   data['spell'], data['long_margin_ratio'], data['short_margin_ratio'],
+                   data['price_tick'], data['volume_multiple'])
+        sql = '''CREATE TABLE {tb}
+                     (key text primary key,
+                      code text not null,
+                      exchange text not null,
+                      name text not null,
+                      spell text not null,
+                      long_margin_ratio real not null,
+                      short_margin_ratio real not null,
+                      price_tick real not null,
+                      volume_multiple real not null
+                      )'''.format(tb=tbname)
+        self.cursor.execute(sql)
+        sql = "INSERT INTO %s VALUES (?,?,?,?,?,?,?,?,?)" % (tbname)
+        self.cursor.executemany(sql, data)
+        self.db.commit()
 
-    def to_csv(self, index=True, index_label='index'):
+    def export_bars(self, index=True, index_label='index'):
         """
             导出sqlite中的所有表格数据。
         """
@@ -145,33 +233,12 @@ class SqlLiteSource(object):
             table.to_csv(table_name + '.csv', index=index, index_label=index_label,
                          columns = ['datetime', 'open', 'close', 'high', 'low', 'volume'])
 
-    def get_tables(self):
-        """ 返回数据库所有的表格""" 
-        self.cursor.execute("select name from sqlite_master where type='table'")
-        return  self.cursor.fetchall()
 
-    def get_table_fields(self, tb):
-        """ 返回表格的字段""" 
-        self.cursor.execute("select * from %s LIMIT 1" % tb)
-        field_names = [r[0] for r in self.cursor.description]
-        return field_names
+    def clear_db(self):
+        """ 清空数据库""" 
+        ## @TODO 
+        pass
 
-    def _df2sqlite(self, df, tbname):
-        self.cursor.execute('''CREATE TABLE {tb}
-                     (id int primary key,
-                      datetime timestamp,
-                      open real,
-                      close real,
-                      high real,
-                      low real,
-                      volume int)'''.format(tb = tbname))
-        data = []
-        for index, row in df.iterrows():
-            id, datetime = datautil.encode2id('1.Minute', index)
-            data.append((id, datetime, row['open'], row['close'], row['high'], row['low'], row['vol']))
-        sql = "INSERT INTO %s VALUES (?,?,?,?,?,?,?)" % tbname
-        self.cursor.executemany(sql, data)
-        self.db.commit()
 
 
 class CsvSource(object):
@@ -182,7 +249,7 @@ class CsvSource(object):
     def __init__(self, root):
         self._root = root
     
-    def load_bars(self, pcontract, dt_start, dt_end, window_size):
+    def get_bars(self, pcontract, dt_start, dt_end, window_size):
         fname = os.path.join(self._root, str(pcontract) + ".csv")
         if not series.g_rolling:
             try:
@@ -211,3 +278,61 @@ class CsvSource(object):
             if header[0:6] != fmt:
                 raise DataFieldError(error_fields=header, right_fields=fmt)
             return CsvSourceWrapper(pcontract, data, cursor, window_size)
+
+    def import_contracts(self, data):
+        """ 导入合约的基本信息。
+        
+        Args:
+            data (dict): {key, code, exchange, name, spell, 
+            long_margin_ratio, short_margin_ratio, price_tick, volume_multiple}
+        
+        """
+        fname = os.path.join(self._root, "contracts.csv")
+        df = pd.DataFrame(data)
+        df.to_csv(fname, columns = ['code', 'exchange', 'name', 'spell',
+                  'long_margin_ratio', 'short_margin_ratio', 'price_tick',
+                  'volume_multiple'], index=False)
+
+    #def get_exchanges(self):
+        #""" 获取所有交易所的编码""" 
+        #df = self.get_contracts()
+        #exch = set()
+        #for row in df['exchange']
+            ##exch.add(row[2])
+        ##return list(exch)
+        #pass
+
+    def import_bars(self, tbdata, strpcon):
+        """ 导入交易数据
+        
+        Args:
+            tbdata (dict): {'datetime', 'open', 'close', 'high', 'low', 'volume'}
+
+            strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute' 
+        """
+        fname = os.path.join(self._root, strpcon+'.csv')
+        df = pd.DataFrame(tbdata)
+        df.to_csv(fname, columns = ['datetime', 'open', 'close', 'high', 'low',
+            'volume'], index=False)
+
+    def get_contracts(self):
+        """ 获取所有合约的基本信息
+        
+        Returns:
+            pd.DataFrame
+        """
+        fname = os.path.join(self._root, "contracts.csv")
+        df = pd.read_csv(fname)
+        df.index = df['code'] + '.' + df['exchange']
+        df.index = map(lambda x: x.upper(), df.index)
+        return df
+
+    def export_bars(self, index=True, index_label='index'):
+        """
+            导出csv中的所有表格数据。
+        """
+        pass
+
+    def get_tables(self):
+        """ 返回数据库所有的表格""" 
+        pass

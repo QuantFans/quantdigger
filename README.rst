@@ -61,7 +61,7 @@ http://www.quantfans.com/doc/quantdigger/
     #from quantdigger.engine.series import NumberSeries
     #from quantdigger.indicators.common import MA
     #from quantdigger.util import  pcontract
-    from quantdigger.engine.qd import *
+    from quantdigger import *
 
     class DemoStrategy(Strategy):
         """ 策略A1 """
@@ -77,11 +77,11 @@ http://www.quantfans.com/doc/quantdigger/
 
         def on_bar(self, ctx):
             if ctx.curbar > 20:
-                if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
+                if ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
                     ctx.buy(ctx.close, 1) 
-                elif ctx.position() > 0 and ctx.ma10[1] > ctx.ma20[1] and \
-                     ctx.ma10 < ctx.ma20:
-                    ctx.sell(ctx.close, 1) 
+                elif ctx.position() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
+                     ctx.ma10[1] < ctx.ma20[1]:
+                    ctx.sell(ctx.close, ctx.position()) 
 
         def on_exit(self, ctx):
             return
@@ -100,11 +100,11 @@ http://www.quantfans.com/doc/quantdigger/
 
         def on_bar(self, ctx):
             if ctx.curbar > 10:
-                if ctx.ma5[1] < ctx.ma10[1] and ctx.ma5 > ctx.ma10:
+                if ctx.ma5[2] < ctx.ma10[2] and ctx.ma5[1] > ctx.ma10[1]:
                     ctx.buy(ctx.close, 1) 
-                elif ctx.position() > 0 and ctx.ma5[1] > ctx.ma10[1] and \
-                     ctx.ma5 < ctx.ma10:
-                    ctx.sell(ctx.close, 1) 
+                elif ctx.position() > 0 and ctx.ma5[2] > ctx.ma10[2] and \
+                     ctx.ma5[1] < ctx.ma10[1]:
+                    ctx.sell(ctx.close, ctx.position()) 
 
         def on_exit(self, ctx):
             return

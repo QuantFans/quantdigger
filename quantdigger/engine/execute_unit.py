@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 from datetime import datetime
 from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
@@ -21,8 +22,9 @@ class ExecuteUnit(object):
             dt_end=datetime(2100,1,1), spec_date = { }): # 'symbol':[,]
         series.g_rolling = False if window_size == 0 else True
         series.g_window = window_size
-        self.all_data = { }     # str(PContract): DataWrapper
+        self.all_data = OrderedDict()     # str(PContract): DataWrapper
         self.finished_data = []
+        pcontracts = map(lambda x: x.upper(), pcontracts)
         self.pcontracts = pcontracts
         self._combs = []
         self._window_size = window_size + 1
@@ -120,6 +122,7 @@ class ExecuteUnit(object):
                             self.context.switch_to_strategy(i, j)
                             s.on_exit(self.context)
                     return
+            #print "*********" 
                  
                     
     def load_data(self, strpcon, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
@@ -135,10 +138,11 @@ class ExecuteUnit(object):
         Returns:
             pd.DataFrame. k线数据
         """
+        strpcon = strpcon.upper()
         try:
             return self.all_data[strpcon]
         except KeyError:
-            wrapper = self._data_manager.load_bars(strpcon, dt_start, dt_end, self._window_size)
+            wrapper = self._data_manager.get_bars(strpcon, dt_start, dt_end, self._window_size)
             window_size = len(wrapper.data) if not series.g_rolling else self._window_size
             self.all_data[strpcon] = DataContext(wrapper, window_size)
             return wrapper

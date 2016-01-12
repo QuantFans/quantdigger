@@ -240,7 +240,8 @@ class StrategyContext(object):
                     try:
                         self.blotter.update_signal(event)
                     except TradingError as e:
-                        logger.debug(e)
+                        new_signal = True
+                        logger.warn(e)
                         return
                 elif event.type == Event.ORDER:
                     self.exchange.insert_order(event)
@@ -286,9 +287,11 @@ class StrategyContext(object):
         if not self._cancel_now:
             # 下一根bar处理撤单
             for order in orders:
-                order.side = TradeSide.CANCEL
-                self._orders.append(order)
+                norder = copy.deepcopy(order)
+                norder.side = TradeSide.CANCEL
+                self._orders.append(norder)
             return
+        assert(False)
         temp = copy.deepcopy(self._orders)
         self._orders = []
         for order in orders:
@@ -344,7 +347,12 @@ class Context(object):
         self._cur_data_context = self._data_contexts[pcon]
 
     def time_aligned(self):
-        return  (self._cur_data_context.datetime[0] < self.last_date or self._cur_data_context.curbar == 0)
+        return  (self._cur_data_context.datetime[0] <= self.last_date and
+                self._cur_data_context.last_date <= self.last_date)
+        ## 第一根是必须运行
+        #return  (self._cur_data_context.datetime[0] <= self.last_date and
+                #self._cur_data_context.last_date <= self.last_date) or \
+                #self._cur_data_context.curbar == 0 
 
     def switch_to_strategy(self, i, j, trading=False):
         self._trading = trading
@@ -453,6 +461,7 @@ class Context(object):
         #self._cur_data_context = self._data_contexts[pcon]
 
         ## @TODO 字典，str做key
+        strpcon = strpcon.upper()
         return self._data_contexts[strpcon]
         #tt = PContract.from_string(strpcon)
         #for key, value in self._data_contexts.iteritems():

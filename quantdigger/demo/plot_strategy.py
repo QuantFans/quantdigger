@@ -9,7 +9,7 @@
 #from quantdigger.engine.series import NumberSeries
 #from quantdigger.indicators.common import MA
 #from quantdigger.util import  pcontract
-from quantdigger.engine.qd import *
+from quantdigger import *
 
 boll = {
         'upper': [],
@@ -32,11 +32,11 @@ class DemoStrategy(Strategy):
 
     def on_bar(self, ctx):
         if ctx.curbar > 20:
-            if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
+            if ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.position() > 0 and ctx.ma10[1] > ctx.ma20[1] and \
-                 ctx.ma10 < ctx.ma20:
-                ctx.sell(ctx.close, 1) 
+            elif ctx.position() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
+                 ctx.ma10[1] < ctx.ma20[1]:
+                ctx.sell(ctx.close, ctx.position()) 
 
         boll['upper'].append(ctx.boll['upper'][0])
         boll['middler'].append(ctx.boll['middler'][0])
@@ -60,19 +60,20 @@ class DemoStrategy2(Strategy):
 
     def on_bar(self, ctx):
         if ctx.curbar > 10:
-            if ctx.ma5[1] < ctx.ma10[1] and ctx.ma5 > ctx.ma10:
+            if ctx.ma5[2] < ctx.ma10[2] and ctx.ma5[1] > ctx.ma10[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.position() > 0 and ctx.ma5[1] > ctx.ma10[1] and \
-                 ctx.ma5 < ctx.ma10:
-                ctx.sell(ctx.close, 1) 
+            elif ctx.position() > 0 and ctx.ma5[2] > ctx.ma10[2] and \
+                 ctx.ma5[1] < ctx.ma10[1]:
+                ctx.sell(ctx.close, ctx.position()) 
         return
 
     def on_exit(self, ctx):
         return
 
 if __name__ == '__main__':
+    #set_config({ 'source': 'csv' })
     set_symbols(['BB.SHFE-1.Minute'], 0)
-    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')], { 'captial': 50000,
+    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')], { 'captial': 5000000,
                               'ratio': [0.2, 0.8] })
     run()
 

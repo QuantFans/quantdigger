@@ -158,7 +158,7 @@ class LocalFsCache(object):
         self.meta[key] = new_start, new_end
 
     def __to_key(self, pcontract):
-        return pcontract.contract.exch_type + pcontract.contract.code
+        return pcontract.contract.exchange + pcontract.contract.code
 
     def __key_to_path(self, key):
         path = os.path.join(self.base_path, key + '.csv')

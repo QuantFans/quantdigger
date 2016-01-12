@@ -127,20 +127,8 @@ class TechnicalBase(PlotInterface):
             else:
                 for s in self.series:
                     s.reset_data([], 1+series.g_window)
+        self._init_bound()
         
-        # 绘图中的y轴范围未被设置，使用默认值。
-        if not self._upper:
-            upper = lower = []
-            if isinstance(self.value, tuple):
-                # 多值指标
-                upper = [ max([value[i] for value in self.value ]) 
-                             for i in xrange(0, len(self.value[0]))]
-                lower = [ min([value[i] for value in self.value ]) 
-                              for i in xrange(0, len(self.value[0]))]
-            else:
-                upper = self.value
-                lower = self.value
-            self.set_yrange(lower, upper)
 
     def compute_element(self, cache_index, rolling_index):
         """ 计算一个回溯值, 被Series延迟调用。

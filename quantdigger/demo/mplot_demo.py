@@ -14,8 +14,8 @@ import pandas as pd
 def get_stock_signal_data():
     from matplotlib.colors import colorConverter
 
-    signal_data = pd.read_csv('./data/signal_IF000.csv', index_col=0, parse_dates=True)
-    price_data = pd.read_csv('./data/IF000.csv' , index_col=0, parse_dates=True)
+    signal_data = pd.read_csv('./work/signal_IF000.csv', index_col=0, parse_dates=True)
+    price_data = pd.read_csv('./work/IF000.csv' , index_col=0, parse_dates=True)
     info = sugar.process_signal(signal_data, price_data)
     entry_x = []
     entry_y = info['entry_price'].tolist()
@@ -39,7 +39,7 @@ def get_stock_signal_data():
 #price_data, entry_x, entry_y, exit_x, exit_y, colors = get_stock_signal_data()
 
 
-price_data = pd.read_csv('./data/IF000.csv', index_col=0, parse_dates=True)
+price_data = pd.read_csv('./work/IF000.csv', index_col=0, parse_dates=True)
 #import matplotlib.font_manager as font_manager
 print len(price_data)
 fig = plt.figure()

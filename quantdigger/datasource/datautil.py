@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+import datetime
+import os
 import time
 import pandas as pd
 from quantdigger.errors import ArgumentError
@@ -66,23 +67,24 @@ def encode2id(period, dt):
         int. id
     """
     db_period = {
-            '1.Minute': '101',
-            '3.Minute': '102',
-            '5.Minute': '103',
-            '10.Minute': '104',
-            '15.Minute': '105',
-            '30.Minute': '106',
-            '1.Hour': '107',
-            '1.Day': '108',
-            '1.Week': '109',
-            '1.Month': '110',
-            '1.Season': '111',
-            '1.Year': '112'
+            '5.SECOND': '155',
+            '1.MINUTE': '101',
+            '3.MINUTE': '102',
+            '5.MINUTE': '103',
+            '10.MINUTE': '104',
+            '15.MINUTE': '105',
+            '30.MINUTE': '106',
+            '1.HOUR': '107',
+            '1.DAY': '108',
+            '1.WEEK': '109',
+            '1.MONTH': '110',
+            '1.SEASON': '111',
+            '1.YEAR': '112'
             }
     # 确保13位
     strperiod = str(period)
     if strperiod not in db_period:
-        raise "错误类型"
+        raise Exception("错误类型")
     utime = int(time.mktime(dt.timetuple())*1000)
     id = str(utime)
     count = 13 - len(id)
@@ -92,3 +94,97 @@ def encode2id(period, dt):
         return int(db_period[strperiod] + id), utime
     except KeyError:
         raise ArgumentError()
+
+def import_tdx_stock(path, ld):
+    """ 导入通达信的股票数据
+    
+    Args:
+        path (str): 数据文件夹
+
+        ld (LocalData): 本地数据库对象
+    
+    """
+    from datetime import datetime, timedelta
+    from quantdigger.util import ProgressBar
+    for path, dirs, files in os.walk(path):
+        progressbar = ProgressBar(total = len(files))
+        for file in files:
+            filepath = path + os.sep + file
+            if filepath.endswith(".txt"):
+                with open(filepath) as f:
+                    lines = f.readlines()
+                    data = {'datetime': [],
+                            'open': [],
+                            'high': [],
+                            'low': [],
+                            'close': [],
+                            'volume': [],
+                            'turnover': []
+                    }
+
+                    for ln in lines[2:-1]:
+                        ln = ln.rstrip('\r\n').split('\t')
+                        ln[0] = datetime.strptime(ln[0], "%Y/%m/%d") + timedelta(hours=15)
+                        for i in range(1, len(ln)):
+                            ln[i]=float(ln[i])
+                        data['datetime'].append(ln[0])
+                        data['open'].append(ln[1])
+                        data['high'].append(ln[2])
+                        data['low'].append(ln[3])
+                        data['close'].append(ln[4])
+                        data['volume'].append(ln[5])
+                        data['turnover'].append(ln[6])
+                    t = file.split('#')
+                    exch = t[0]
+                    code = t[1].split('.')[0]
+                    tbname = '%s_%s'%(exch, code)
+                    ld.import_bars(data, tbname, '1.Day')
+            progressbar.move()
+            progressbar.log('')
+    return
+
+def import_from_csv(self, paths):
+    'sqlite' 
+    ## @TODO 移动到周围代码
+    """ 批量导入特定路径下规定格式的csv文件到系统。
+    """
+    for path in paths:
+        if not path.endswith(".csv") and not path.endswith(".CSV"):
+            ## @TODO 
+            print(path)
+            raise Exception("错误的文件格式")
+        print("import: ", path)
+        df = pd.read_csv(path, parse_dates='datetime')
+        try:
+            df['datetime'] = map(lambda x: datetime.datetime.strptime(x,
+                                "%Y-%m-%d %H:%M:%S"), df['datetime'])
+        except ValueError:
+            df['datetime'] = map(lambda x: datetime.datetime.strptime(x,
+                                    "%Y-%m-%d"), df['datetime'])
+        fname = path.split(os.path.sep)[-1]
+
+        tbname = fname.split('-')[0].split('.')
+        strdt = fname.split('-')[1].rstrip('.csv').rstrip('.CSV')
+        tbname = "_".join([tbname[1], tbname[0]])
+        self.import_bars(df, tbname, strdt)
+
+def import_data(fpaths, ld):
+    """ 批量导入特定路径下规定格式的csv文件到系统。
+    """
+    for path in fpaths:
+        if not path.endswith(".csv") and not path.endswith(".CSV"):
+            ## @TODO 
+            print(path)
+            raise Exception("错误的文件格式")
+        print("import data: ", path)
+        df = pd.read_csv(path, parse_dates='datetime')
+        try:
+            df['datetime'] = map(lambda x: datetime.datetime.strptime(x,
+                                "%Y-%m-%d %H:%M:%S"), df['datetime'])
+        except ValueError:
+            df['datetime'] = map(lambda x: datetime.datetime.strptime(x,
+                                    "%Y-%m-%d"), df['datetime'])
+        strpcon = path.split(os.path.sep)[-1].rstrip('.csv')
+        ld.import_bars(df, strpcon)
+
+__all__ = ['csv2frame', 'encode2id', 'tick2period', 'import_data', 'import_tdx_stock']

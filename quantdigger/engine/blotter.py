@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+import copy
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
 from quantdigger.engine import series
 from quantdigger.util import elogger as logger
 from quantdigger.errors import TradingError
@@ -225,7 +225,7 @@ class SimpleBlotter(Blotter):
 
 
     def _force_close(self):
-        """ 在回测的最后一根k线以close价格强平持仓位。""" 
+        """ 在回测的最后一根k线以close价格强平持仓位。 """ 
         force_trans = []
         price_type = self._all_transactions[-1].price_type if self._all_transactions else PriceType.LMT 
         for pos in self.positions.values():
@@ -273,11 +273,13 @@ class SimpleBlotter(Blotter):
             self._init_state()
         elif self._datetime.date() != dt.date():
             for order in self.open_orders:
-                if order.contract.is_stock and order.side == TradeSide.PING:
+                if order.side == TradeSide.PING:
                     pos = self.positions[PositionKey(order.contract, order.direction)]
-                    pos.closable += pos.today
-                    pos.today = 0
+                    pos.closable += order.quantity
             self.open_orders.clear()
+            for key, pos in self.positions.iteritems():
+                pos.closable += pos.today
+                pos.today = 0
         self._datetime = dt
 
     def update_status(self, dt, append=True):
@@ -289,17 +291,13 @@ class SimpleBlotter(Blotter):
         profit = 0
         margin = 0
         order_margin = 0;
-
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
-        is_stock = True  # 默认是股票回测
         for key, pos in self.positions.iteritems():
             new_price = self._ticks[key.contract]
             profit += pos.profit(new_price)
             ## @TODO 用昨日结算价计算保证金
             margin += pos.position_margin(new_price)
-            if not key.contract.is_stock:
-                is_stock =  False   # 
         # 计算限价报单的保证金占用
         for order in self.open_orders:
             assert(order.price_type == PriceType.LMT)
@@ -310,12 +308,11 @@ class SimpleBlotter(Blotter):
         dh['equity'] = self._captial + self.holding['history_profit'] + profit - \
                        self.holding['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
-        #print margin, dt
         if dh['cash'] < 0:
-            if not is_stock:
-                # 如果是期货需要追加保证金
-                ## @bug 如果同时交易期货和股票，就有问题。
-                raise Exception('需要追加保证金!')
+            for key in self.positions.iterkeys():
+                if not key.contract.is_stock:
+                    ## @NOTE  只要有一个是期货，在资金不足的时候就得追加保证金
+                    raise Exception('需要追加保证金!')
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = profit
@@ -333,11 +330,11 @@ class SimpleBlotter(Blotter):
         for order in event.orders:
             if self._valid_order(order):
                 order.datetime = self._datetime
-                self.api.order(order)
+                self.api.order(copy.deepcopy(order))
                 new_orders.append(order)
             else:
                 continue
-        self.open_orders.update(new_orders)
+        self.open_orders.update(new_orders) # 改变对象的值，不改变对象地址。
         self._all_orders.extend(new_orders)
         for order in new_orders:
             if order.side == TradeSide.PING:
@@ -353,7 +350,13 @@ class SimpleBlotter(Blotter):
         ## @TODO 订单编号和成交编号区分开
         assert event.type == Event.FILL
         trans = event.transaction
-        self.open_orders.remove(trans.order)
+        try:
+            self.open_orders.remove(trans.order)
+        except KeyError:
+            if trans.order.side == TradeSide.CANCEL:
+                raise TradingError(err='重复撤单') 
+            else:
+                assert(False and '重复成交')
         self._update_holding(trans)
         self._update_positions(trans)
 
@@ -393,43 +396,40 @@ class SimpleBlotter(Blotter):
             poskey = PositionKey(trans.contract, trans.direction)
             multi = 1 if trans.direction == Direction.LONG else -1
             profit = (trans.price-self.positions[poskey].cost) * trans.quantity * multi
+            #if self.name == 'A1': # 平仓调试
+                #print "***********" 
+                #print self._datetime, profit 
             self.holding['history_profit'] += profit
         self._all_transactions.append(trans)
 
     def _valid_order(self, order):
         """ 判断订单是否合法。 """ 
         if order.quantity<=0:
-            logger.warn("下单数量错误！")
-            return False 
+            raise TradingError(err="交易数量不能小于0")
         # 撤单
         if order.side == TradeSide.CANCEL:
-            if order in self.open_orders:
-                return True  
-            else:
+            if order not in self.open_orders:
                 raise TradingError(err='撤销失败： 不存在该订单！') 
         if order.side == TradeSide.PING:
             try:
                 poskey = PositionKey(order.contract, order.direction)
                 pos = self.positions[poskey]
-                if pos.quantity >= order.quantity:
-                    return True 
+                if pos.closable < order.quantity:
+                    raise TradingError(err='可平仓位不足')
             except KeyError:
                 # 没有持有该合约
-                logger.warn("不存在合约[%s]" % order.contract)
-                #assert False
-                return False
-            logger.warn("下单仓位问题")
-            return False
+                #logger.warn("不存在合约[%s]" % order.contract)
+                raise TradingError(err="不存在合约[%s]" % order.contract)
         elif order.side == TradeSide.KAI:
-            if self.holding['cash'] < order.price * order.quantity:
+            new_price = self._ticks[order.contract]
+            if self.holding['cash'] < order.order_margin(new_price):
                 raise TradingError(err='没有足够的资金开仓') 
             else:
-                new_price = self._ticks[order.contract]
                 self.holding['cash'] -= order.order_margin(new_price)
         return True
 
-kai = 0
-ping = 0
+#kai = 0
+#ping = 0
 def _update_positions(current_positions, deal_positions, trans):
     """ 更新持仓 
         current_positions: 当前持仓
@@ -460,32 +460,38 @@ def _update_positions(current_positions, deal_positions, trans):
         assert(len(p.positions)>0 and '所平合约没有持仓')
         left_vol = trans.quantity
         last_index = 0
+        search_index = 0
         p.total -= trans.quantity
-        for position in reversed(p.positions):
+        if trans.contract.is_stock:
+            for position in reversed(p.positions):
+                # 开仓日期小于平仓时间
+                if position.datetime.date() < trans.datetime.date():
+                    break
+                search_index -= 1
+        if search_index != 0:
+            positions = p.positions[:search_index]
+            left_positions = p.positions[search_index:]
+        else:
+            positions = p.positions
+        for position in reversed(positions):
             if position.quantity < left_vol:
                 # 还需从之前的仓位中平。
                 left_vol -= position.quantity
                 last_index -= 1
                 deal_positions.append(OneDeal(position, trans, position.quantity))
-
             elif position.quantity == left_vol:
                 left_vol -= position.quantity
                 last_index -= 1
                 deal_positions.append(OneDeal(position, trans, position.quantity))
                 break 
-
             else:
                 position.quantity -= left_vol
                 left_vol = 0
                 deal_positions.append(OneDeal(position, trans, left_vol))
                 break
-        if last_index != 0:
-            p.positions = p.positions[0 : last_index]
-        assert(left_vol == 0) # 会被catch捕获 AssertError
-        #if mark:
-            #print '------------' 
-            #print len(p.positions)
-            #assert False
-
-
-
+        if last_index != 0 and search_index != 0:
+            p.positions = positions[0 : last_index] + left_positions
+        elif last_index != 0:
+            p.positions = positions[0 : last_index]
+        # last_index == 0, 表示没找到可平的的开仓对，最后一根强平
+        assert(left_vol == 0 or last_index == 0) # 可以被catch捕获 AssertError

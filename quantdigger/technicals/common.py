@@ -158,6 +158,7 @@ class Volume(PlotInterface):
     def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(name, None)
         self.value = transform2ndarray(volume)
+        self._init_bound()
 
     def plot(self, widget):
         finance.volume_overlay(widget, self.open, self.close, self.volume,

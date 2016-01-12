@@ -8,7 +8,7 @@ import pandas as pd
 # 创建画布
 fig, ax = plt.subplots()
 # 加载数据
-price_data = pd.read_csv("./data/IF000.SHFE-10.Minute.csv", 
+price_data = pd.read_csv("./work/IF000.SHFE-10.Minute.csv", 
                         index_col=0, parse_dates=True)
 # 创建平均线
 ma10 = MA(price_data.close, 10, 'MA10', 'y', 2)

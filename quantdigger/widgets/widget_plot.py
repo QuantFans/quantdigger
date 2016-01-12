@@ -92,5 +92,20 @@ class PlotInterface(object):
         ymax = np.max(self._upper[w_left: w_right])
         ymin = np.min(self._lower[w_left: w_right])
         return ymax, ymin
+
+    def _init_bound(self):
+        # 绘图中的y轴范围未被设置，使用默认值。
+        if not self._upper:
+            upper = lower = []
+            if isinstance(self.value, tuple):
+                # 多值指标
+                upper = [ max([value[i] for value in self.value ]) 
+                             for i in xrange(0, len(self.value[0]))]
+                lower = [ min([value[i] for value in self.value ]) 
+                              for i in xrange(0, len(self.value[0]))]
+            else:
+                upper = self.value
+                lower = self.value
+            self.set_yrange(lower, upper)
     
 

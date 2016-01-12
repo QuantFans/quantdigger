@@ -10,7 +10,7 @@
 #from quantdigger.engine.series import NumberSeries
 #from quantdigger.indicators.common import MA
 #from quantdigger.util import  pcontract
-from quantdigger.engine.qd import *
+from quantdigger import *
 
 class DemoStrategy(Strategy):
     """ 策略A1 """
@@ -66,9 +66,9 @@ if __name__ == '__main__':
 
     set_symbols(['BB.SHFE-1.Minute'], 0)
     comb1 = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
-                            { 'captial': 10000, 'ratio': [0.5, 0.5] })
+                            { 'captial': 10000000, 'ratio': [0.5, 0.5] })
     comb2 = add_strategy([DemoStrategy('B1'), DemoStrategy2('B2')],
-                            { 'captial': 20000, 'ratio': [0.4, 0.6] })
+                            { 'captial': 20000000, 'ratio': [0.4, 0.6] })
     run()
     # 打印组合1的统计信息
     curve1 = finance.create_equity_curve(comb1.all_holdings())

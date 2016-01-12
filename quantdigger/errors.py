@@ -40,7 +40,7 @@ class FileDoesNotExist(QError):
 
 
 class PeriodTypeError(QError):
-    msg = "不存在该周期！" 
+    msg = "不存在该周期！ -- {period}" 
 
 
 class DataAlignError(QError):

@@ -9,7 +9,7 @@
 #from quantdigger.engine.series import NumberSeries
 #from quantdigger.technicals.common import MA
 #from quantdigger.util import  pcontract
-from quantdigger.engine.qd import *
+from quantdigger import *
 
 class DemoStrategy(Strategy):
     """ 策略A1 """

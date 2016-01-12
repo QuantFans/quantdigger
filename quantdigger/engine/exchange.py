@@ -20,6 +20,8 @@ class Exchange(object):
 
     def make_market(self, bars):
         """ 价格撮合""" 
+            #for order in self._open_orders:
+                #print order.id
         fill_orders = set()
         for order in self._open_orders:
             if order.side == TradeSide.CANCEL:
@@ -72,13 +74,31 @@ class Exchange(object):
         if fill_orders:
             self._open_orders -= fill_orders
 
+        #if self.name == 'A3':
+            #print "aaaaaaaa" 
+            #for order in self._open_orders:
+                #print order.id
+
 
     def insert_order(self, event):
         """
         模拟交易所收到订单。
         """ 
         # 如果是撤单，会自动覆盖。
+        #if self.name == 'A3':
+            #for order in self._open_orders:
+                #print order
+            #print event.order.id, event.order.side, "##" 
+            #print "-----------------" 
+        ## @TODO 
+        if event.order in self._open_orders:
+            self._open_orders.remove(event.order) 
         self._open_orders.add(event.order)
+
+        #if self.name == 'A3':
+            #for order in self._open_orders:
+                #print order
+
 
     def cancel_order(self, order):
         ## @TODO 撤单
@@ -87,9 +107,5 @@ class Exchange(object):
     def update_datetime(self, dt):
         if self._datetime:
             if self._datetime.date() != dt.date():
-                #if self.name == 'A2':
-                    #print "%s**"%self.name, self._datetime.date(), dt.date(), len(self._open_orders)
-                #if self._open_orders:
-                    #assert False
                 self._open_orders.clear()
         self._datetime = dt
