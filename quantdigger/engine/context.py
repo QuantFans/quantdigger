@@ -128,11 +128,11 @@ class DataContext(object):
                     for s in indic.series:
                         s.update_curbar(self._curbar)
 
-    def add_series(self, key, s):
+    def add_series(self, attr, s):
         """ 添加on_init中初始化的序列变量    
         
         Args:
-            key (str): 属性名
+            attr (str): 属性名
 
             s (Series): 序列变量 
 
@@ -140,30 +140,30 @@ class DataContext(object):
         s.reset_data([], self.window_size + 1)
         if self.i < len(self.series):
             if self.j < len(self.series[self.i]):
-                self.series[self.i][self.j][key] = s
+                self.series[self.i][self.j][attr] = s
             else:
-                self.series[self.i].append({ key: s })
+                self.series[self.i].append({ attr: s })
         else:
-            self.series.append([{ key:s }])
+            self.series.append([{ attr:s }])
         return
 
-    def add_indicator(self, key, indic):
+    def add_indicator(self, attr, indic):
         if self.i < len(self.indicators):
             if self.j < len(self.indicators[self.i]):
-                self.indicators[self.i][self.j][key] = indic
+                self.indicators[self.i][self.j][attr] = indic
             else:
-                self.indicators[self.i].append({ key: indic })
+                self.indicators[self.i].append({ attr: indic })
         else:
-            self.indicators.append([{ key: indic }])
+            self.indicators.append([{ attr: indic }])
 
-    def add_variable(self, key, var):
+    def add_variable(self, attr, var):
         if self.i < len(self.variables):
             if self.j < len(self.variables[self.i]):
-                self.variables[self.i][self.j][key] = var
+                self.variables[self.i][self.j][attr] = var
             else:
-                self.variables[self.i].append({ key: var })
+                self.variables[self.i].append({ attr: var })
         else:
-            self.variables.append([{ key: var }])
+            self.variables.append([{ attr: var }])
 
     def __len__(self):
         return len(self.wrapper)

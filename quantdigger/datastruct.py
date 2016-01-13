@@ -292,7 +292,7 @@ class Order(object):
             self._margin_ratio = Contract.long_margin_ratio(str(self.contract))
         else:
             self._margin_ratio = Contract.short_margin_ratio(str(self.contract))
-        self._volume_multiple = Contract.volume_multiple(str(self.contract))
+        self.volume_multiple = Contract.volume_multiple(str(self.contract))
 
     def order_margin(self, new_price):
         """ 计算这笔限价交易的保证金。
@@ -304,7 +304,7 @@ class Order(object):
             float. 保证金占用
         """
         price = self.price if self.contract.is_stock else new_price
-        return price * self.quantity * self._margin_ratio * self._volume_multiple
+        return price * self.quantity * self._margin_ratio * self.volume_multiple
 
     def print_order(self):
         #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \
@@ -591,9 +591,9 @@ class OneDeal(object):
         """ 盈亏额  """
         direction = self.open.direction
         if direction == Direction.LONG:
-            return (self.close.price - self.open.price) * self.open.quantity
+            return (self.close.price - self.open.price) * self.open.quantity * self.open.order.volume_multiple
         else:
-            return (self.open.price - self.close.price) * self.open.quantity
+            return (self.open.price - self.close.price) * self.open.quantity * self.open.order.volume_multiple
 
     @property
     def quantity(self):

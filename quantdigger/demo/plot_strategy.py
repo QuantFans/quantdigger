@@ -22,20 +22,20 @@ class DemoStrategy(Strategy):
     
     def on_init(self, ctx):
         """初始化数据""" 
-        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2) #, 'ma20', 'b', '1')
-        ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2) #, 'ma20', 'b', '1')
-        ctx.boll = BOLL(ctx.close, 2)
+        ctx.ma100 = MA(ctx.close, 100, 'ma100', 'y', 2) #, 'ma200', 'b', '1')
+        ctx.ma200 = MA(ctx.close, 200, 'ma200', 'b', 2) #, 'ma200', 'b', '1')
+        ctx.boll = BOLL(ctx.close, 20)
         pass
 
     def on_symbol(self, ctx):
         pass
 
     def on_bar(self, ctx):
-        if ctx.curbar > 20:
-            if ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
+        if ctx.curbar > 200:
+            if ctx.position() == 0 and ctx.ma100[2] < ctx.ma200[2] and ctx.ma100[1] > ctx.ma200[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.position() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
-                 ctx.ma10[1] < ctx.ma20[1]:
+            elif ctx.position() > 0 and ctx.ma100[2] > ctx.ma200[2] and \
+                 ctx.ma100[1] < ctx.ma200[1]:
                 ctx.sell(ctx.close, ctx.position()) 
 
         boll['upper'].append(ctx.boll['upper'][0])
@@ -52,18 +52,18 @@ class DemoStrategy2(Strategy):
     
     def on_init(self, ctx):
         """初始化数据""" 
-        ctx.ma5 = MA(ctx.close, 5, 'ma5', 'y', 2) #, 'ma20', 'b', '1')
-        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'black', 2) #, 'ma20', 'b', '1')
+        ctx.ma50 = MA(ctx.close, 50, 'ma50', 'y', 2) #, 'ma200', 'b', '1')
+        ctx.ma100 = MA(ctx.close, 100, 'ma100', 'black', 2) #, 'ma200', 'b', '1')
 
     def on_symbol(self, ctx):
         pass
 
     def on_bar(self, ctx):
-        if ctx.curbar > 10:
-            if ctx.ma5[2] < ctx.ma10[2] and ctx.ma5[1] > ctx.ma10[1]:
+        if ctx.curbar > 100:
+            if ctx.position() == 0 and ctx.ma50[2] < ctx.ma100[2] and ctx.ma50[1] > ctx.ma100[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.position() > 0 and ctx.ma5[2] > ctx.ma10[2] and \
-                 ctx.ma5[1] < ctx.ma10[1]:
+            elif ctx.position() > 0 and ctx.ma50[2] > ctx.ma100[2] and \
+                 ctx.ma50[1] < ctx.ma100[1]:
                 ctx.sell(ctx.close, ctx.position()) 
         return
 
@@ -73,17 +73,18 @@ class DemoStrategy2(Strategy):
 if __name__ == '__main__':
     #set_config({ 'source': 'csv' })
     set_symbols(['BB.SHFE-1.Minute'], 0)
-    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')], { 'captial': 5000000,
-                              'ratio': [0.2, 0.8] })
+    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
+                            { 'captial': 50000.0, 'ratio': [0.5, 0.5] })
     run()
-
     # 绘制k线，交易信号线
     from quantdigger.digger import finance, plotting
-    plotting.plot_strategy(profile.data(0), profile.technicals(1), profile.deals(1))
+    s = 0
     # 绘制策略A1, 策略A2, 组合的资金曲线
     curve0 = finance.create_equity_curve(profile.all_holdings(0))
     curve1 = finance.create_equity_curve(profile.all_holdings(1))
     curve = finance.create_equity_curve(profile.all_holdings())
+    plotting.plot_strategy(profile.data(0), profile.technicals(0),
+                            profile.deals(0), curve.equity)
     plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
                         colors=['r', 'g', 'b'],
                         names=[profile.name(0), profile.name(1), 'A0'])

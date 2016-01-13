@@ -4,6 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 from quantdigger.widgets.mplotwidgets import widgets, mplots
+from quantdigger.technicals import EquityCurve
 
 def xticks_to_display(data_length):
     #print(r.index[0].weekday())
@@ -16,7 +17,7 @@ def xticks_to_display(data_length):
     return xticks
 
 
-def plot_strategy(price_data, indicators={ }, deals=[]):
+def plot_strategy(price_data, indicators={ }, deals=[], curve=[]):
     """ 
         显示回测结果。
     """
@@ -34,6 +35,9 @@ def plot_strategy(price_data, indicators={ }, deals=[]):
     if deals:
         signal = mplots.TradingSignalPos(price_data, deals, lw=2)
         frame.add_indicator(0, signal)
+    if len(curve) > 0:
+        curve = EquityCurve(curve)
+        frame.add_indicator(0, curve, True)
     ## @bug indicators导致的双水平线!
     ## @todo 完mplot_demo上套。
     #frame.add_indicator(0, Volume(None, price_data.open, price_data.close, price_data.volume))

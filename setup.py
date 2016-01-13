@@ -16,7 +16,7 @@ def read(fname):
 
 standard_exclude = ["*.py", "*.pyc", "*$py.class", "*~", "*.bak"]
 standard_exclude_directories = [
-     "_darcs", "./build", "./dist", "EGG-INFO", "*.egg-info", "*.bak"
+     "_darcs", "./build", "./dist", "EGG-INFO", "*.egg-info", "*.bak", "./quantdigger/tests/work" 
 ]
 
 def find_package_data(

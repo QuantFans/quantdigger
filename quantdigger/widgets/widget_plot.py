@@ -97,15 +97,14 @@ class PlotInterface(object):
         # 绘图中的y轴范围未被设置，使用默认值。
         if not self._upper:
             upper = lower = []
-            if isinstance(self.value, tuple):
+            if isinstance(self.values, dict):
                 # 多值指标
-                upper = [ max([value[i] for value in self.value ]) 
-                             for i in xrange(0, len(self.value[0]))]
-                lower = [ min([value[i] for value in self.value ]) 
-                              for i in xrange(0, len(self.value[0]))]
+                ## @TODO self.values可能是个字典 tuple
+                if self.name == 'BOLL':
+                    values = zip(*self.values.itervalues())
+                    upper = [ max(value) for value in values ]
+                    lower = [ min(value) for value in values ]
             else:
-                upper = self.value
-                lower = self.value
+                upper = self.values
+                lower = self.values
             self.set_yrange(lower, upper)
-    
-

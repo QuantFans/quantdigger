@@ -365,7 +365,6 @@ class MultiWidgets(object):
             *args (tuple): 窗口布局。
         
         """
-
         self.name = "MultiWidgets" 
         self._fig = fig
         self._subwidget2plots = { } # 窗口坐标到指标的映射。
@@ -442,16 +441,22 @@ class MultiWidgets(object):
 
     def _add_plot(self, ith_axes, plot, twinx=False):
         try:
-            plot.plot(self.axes[ith_axes])
-            return self.register_plot(ith_axes,plot)
+            if twinx:
+                twaxes = self.axes[ith_axes].twinx()
+                self.axes.append(twaxes)
+                plot.plot(twaxes)
+            else:
+                plot.plot(self.axes[ith_axes])
+            return self.register_plot(ith_axes,plot, twinx)
         except Exception as e:
             raise e
 
-    def register_plot(self, ith_axes, plot):
+    def register_plot(self, ith_axes, plot, twinx=False):
         """ 注册指标。
             axes到指标的映射。
         """ 
         try:
+            plot.twinx = twinx
             ax_plots = self._subwidget2plots.get(ith_axes, [])
             if ax_plots:
                 ax_plots.append(plot) 
@@ -685,14 +690,6 @@ class MultiWidgets(object):
 
     def _set_cur_ylim(self, w_left, w_right):
         """ 设置当前显示窗口的y轴范围。
-        
-        Args:
-
-            name (str): description
-        
-        Returns:
-
-            int. The result
         """
         self.voffset = 0
         for i in range(0, len(self.axes)):
@@ -704,6 +701,8 @@ class MultiWidgets(object):
                 pass
             else:
                 for plot in plots:
+                    if plot.twinx:
+                        continue 
                     ymax, ymin = plot.y_interval(w_left, w_right)
                     ## @todo move ymax, ymin 计算到plot中去。
                     all_ymax.append(ymax)

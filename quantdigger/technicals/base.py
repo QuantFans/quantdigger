@@ -41,14 +41,13 @@ def create_attributes(method):
         method_args.update(kwargs)
         # 
         default.update(method_args)
-        name = ''
         # 属性创建
         for key, value in default.iteritems():
-            if key == 'name':
-                name = value
             setattr(self, key, value)
         # 运行构造函数
         rst =  method(self, *args, **kwargs)
+        if hasattr(self, 'compute'):
+            self.compute()
         return rst
     return wrapper
 
@@ -66,7 +65,6 @@ def create_attributes(method):
 
 
 class TechnicalBase(PlotInterface):
-    ## @todo 把绘图函数分类到父类中。
     """
     指标基类。每个指标的内部数据为序列变量。所以每个指标对象都会与一个跟踪器相关联，
     负责更新其内部的序列变量。 如果是MA这样的单值指标, 重载函数可以使指标对象像序列变量一样被使用。
@@ -89,35 +87,37 @@ class TechnicalBase(PlotInterface):
             #(curbar, values)
             self._cache = [(-1, None)] * (series.g_window+1)
         self._args = None
-        self.value = []    # 输出
+        ## @TODO 去掉逐步运算后删除
+        # 只在逐步运算中必须初始化
+        self.values = []    
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。""" 
         raise NotImplementedError
 
-    def _init_by_subclass(self, data):
-        # 数据转化成ta-lib能处理的格式
-        # self.value为任何支持index的数据结构。
-        # 在策略中，price变量可能为NumberSeries，需要用NUMBER_SERIES_SUPPORT处理，
-        # 转化为numpy.ndarray等能被指标函数处理的参数。
+    def compute(self):
+        """ 
+         构建时间序列变量，执行指标的向量算法。
+        """
+        if not hasattr(self, '_args'):
+            raise Exception("每个指标都必须有_args属性，代表指标计算的参数！")
+        self.data = self._args[0]
         if not series.g_rolling:
-            # 向量化运行的均值函数
-            data = transform2ndarray(data)
-            args =  (data, ) + self._args
-            apply(self._vector_algo, args)
-        #if not hasattr(self, 'value'):
-            #raise Exception("每个指标都必须有value属性，代表指标值！")
-        #else:
-        if isinstance(self.value, dict):
+            # 数据转化成ta-lib能处理的格式
+            self._args[0] = transform2ndarray(self._args[0])
+            apply(self._vector_algo, tuple(self._args))
+        if not hasattr(self, 'values'):
+            raise Exception("每个指标都必须有value属性，代表指标计算结果！")
+        if isinstance(self.values, dict):
             self.series = OrderedDict()
-            for key, value in self.value.iteritems():
+            for key, value in self.values.iteritems():
                 self.series[key] = series.NumberSeries(value, len(value),
                                                     self.name, self, float('nan'))
             for key, value in self.series.iteritems():
                 setattr(self, key, value)
             self.multi_value = True
         else:
-            self.series = [series.NumberSeries(self.value, len(self.value),
+            self.series = [series.NumberSeries(self.values, len(self.values),
                             self.name, self, float('nan'))]
             self.multi_value = False
         if series.g_rolling:
