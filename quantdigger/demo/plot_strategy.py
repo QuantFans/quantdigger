@@ -25,12 +25,14 @@ class DemoStrategy(Strategy):
         ctx.ma100 = MA(ctx.close, 100, 'ma100', 'y', 2) #, 'ma200', 'b', '1')
         ctx.ma200 = MA(ctx.close, 200, 'ma200', 'b', 2) #, 'ma200', 'b', '1')
         ctx.boll = BOLL(ctx.close, 20)
-        pass
+        ctx.ma2 = NumberSeries()
 
-    def on_symbol(self, ctx):
-        pass
+    #def on_symbol(self, ctx):
+        #pass
 
     def on_bar(self, ctx):
+        if ctx.curbar > 1:
+            ctx.ma2.update((ctx.close + ctx.close[1])/2)
         if ctx.curbar > 200:
             if ctx.position() == 0 and ctx.ma100[2] < ctx.ma200[2] and ctx.ma100[1] > ctx.ma200[1]:
                 ctx.buy(ctx.close, 1) 

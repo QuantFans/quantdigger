@@ -309,6 +309,13 @@ class StrategyContext(object):
     def position(self, contract, direction):
         try:
             poskey = PositionKey(contract, direction) 
+            return self.blotter.positions[poskey]
+        except KeyError:
+            return 0
+
+    def pos(self, contract, direction):
+        try:
+            poskey = PositionKey(contract, direction) 
             return self.blotter.positions[poskey].closable
         except KeyError:
             return 0
@@ -453,6 +460,11 @@ class Context(object):
         """ k线时间序列 """
         return self._cur_data_context.datetime
 
+    @property
+    def open_orders(self):
+        """ 未成交的订单 """ 
+        return list(self._cur_strategy_context.open_orders)
+
     def __getitem__(self, strpcon):
         """ 获取跨品种合约 """
         ## @TODO 
@@ -554,17 +566,28 @@ class Context(object):
                                         quantity, price_type,
                                         contract)
 
-    def cancel(self, ids):
-        """ 撤单 """
-        self._cur_strategy_context.cancel(ids)
-
-    @property
-    def open_orders(self):
-        """ 未成交的订单 """ 
-        return list(self._cur_strategy_context.open_orders)
-
     def position(self, direction='long', symbol=None):
         """ 当前仓位。
+       
+        Args:
+            direction (str/int): 持仓方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
+            , 默认为多头。
+
+            symbol (str): 字符串合约，默认为None表示主合约。
+        
+        Returns:
+            Position. 该合约的持仓
+        """
+        if not self._trading:
+            raise Exception('只有on_bar函数内能查询当前持仓！')
+            return 
+        direction = Direction.arg_to_type(direction)
+        contract = Contract(symbol) if symbol else self._cur_data_context.contract 
+        ## @TODO assert direction
+        return self._cur_strategy_context.position(contract, direction)
+
+    def pos(self, direction='long', symbol=None):
+        """  合约的当前可平仓位。
        
         Args:
             direction (str/int): 持仓方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
@@ -581,18 +604,17 @@ class Context(object):
         direction = Direction.arg_to_type(direction)
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         ## @TODO assert direction
-        return self._cur_strategy_context.position(contract, direction)
+        return self._cur_strategy_context.pos(contract, direction)
+
+    def cancel(self, orders):
+        """ 撤单 """
+        self._cur_strategy_context.cancel(orders)
 
     def cash(self):
         """ 现金。 """
         if not self._trading:
             raise Exception('只有on_bar函数内能查询可用资金！')
         return self._cur_strategy_context.cash()
-
-    def test_cash(self):
-        """  当根bar时间终点撮合后的可用资金，用于测试。 """
-        self.process_trading_events(append=False)
-        return self.cash()
 
     def equity(self):
         """ 当前权益 """
@@ -614,3 +636,9 @@ class Context(object):
             #logger.warn('只有on_bar函数内能查询浮动盈亏！')
             #return 
         pass
+
+    def test_cash(self):
+        """  当根bar时间终点撮合后的可用资金，用于测试。 """
+        self.process_trading_events(append=False)
+        return self.cash()
+

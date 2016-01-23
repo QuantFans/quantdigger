@@ -55,14 +55,14 @@ class ExecuteUnit(object):
         self._combs.append(comb)
         if settings:
             num_strategy = len(comb) 
-            assert (settings['captial'] > 0)
+            assert (settings['capital'] > 0)
             assert len(settings['ratio']) == num_strategy
             assert(sum(settings['ratio']) == 1)
         ctxs = []
         for i, s in enumerate(comb):
             iset = { }
             if settings:
-                iset = { 'captial': settings['captial'] * settings['ratio'][i] }
+                iset = { 'capital': settings['capital'] * settings['ratio'][i] }
                 logger.debug(iset)
             ctxs.append(StrategyContext(s.name, iset))
         self.context.add_strategy_context(ctxs)

@@ -60,7 +60,7 @@ class Trader(object):
         """ tick数据回调  """ 
         pass
 
-    def on_captial(self, tick):
+    def on_capital(self, tick):
         """ 资金查询回调  """ 
         pass
 
@@ -110,7 +110,7 @@ class CtpTraderAPI(object):
         """ tick数据回调  """ 
         pass
 
-    def on_captial(self, tick):
+    def on_capital(self, tick):
         """ 资金查询回调  """ 
         pass
 
@@ -161,7 +161,7 @@ class SimulateTraderAPI(Trader):
         """ tick数据回调  """ 
         pass
 
-    def on_captial(self, tick):
+    def on_capital(self, tick):
         """ 资金查询回调  """ 
         pass
 

@@ -18,7 +18,7 @@ from quantdigger import *
 from logbook import Logger
 logger = Logger('test')
 window_size = 0
-CAPTIAL = 200000
+capital = 200000
 OFFSET = 0.6
 buy1 = datetime.datetime.strptime("09:01:00", "%H:%M:%S").time()
 buy2 = datetime.datetime.strptime("09:02:00", "%H:%M:%S").time()
@@ -48,9 +48,9 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                 if curtime in [buy1, buy2, buy3]:
                     ctx.buy(ctx.close, 1) 
                 else:
-                    if ctx.position() >= 2 and curtime == sell1:
+                    if ctx.pos() >= 2 and curtime == sell1:
                         ctx.sell(ctx.close, 2) 
-                    elif ctx.position() >= 1 and curtime == sell2:
+                    elif ctx.pos() >= 1 and curtime == sell2:
                         ctx.sell(ctx.close, 1) 
                 ## 前一根的交易信号在当前价格撮合后的可用资金
                 t_cashes0.append(ctx.test_cash()) 
@@ -70,17 +70,17 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                     ctx.short(ctx.close, 2) 
                 else:
                     if curtime == sell1:
-                        if ctx.position() >= 3:
+                        if ctx.pos() >= 3:
                             # quantity == 6, closable == 3
-                            assert(ctx.position() == 3 and '默认持仓查询测试失败！')
+                            assert(ctx.pos() == 3 and '默认持仓查询测试失败！')
                             ctx.sell(ctx.close, 2) 
-                        if ctx.position('short') >= 6:
-                            assert(ctx.position('short') == 6 and '默认持仓查询测试失败！')
+                        if ctx.pos('short') >= 6:
+                            assert(ctx.pos('short') == 6 and '默认持仓查询测试失败！')
                             ctx.cover(ctx.close, 4) 
                     elif curtime == sell2:
-                        if ctx.position() >= 1:
+                        if ctx.pos() >= 1:
                             ctx.sell(ctx.close, 1) 
-                        if ctx.position('short') >= 2:
+                        if ctx.pos('short') >= 2:
                             ctx.cover(ctx.close, 2) 
                 t_cashes1.append(ctx.test_cash()) 
 
@@ -96,7 +96,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                 
         set_symbols(['stock.TEST-1.Minute'], window_size)
         profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
-            'captial': CAPTIAL,
+            'capital': capital,
             'ratio': [0.3, 0.3, 0.4]
             })
         run()
@@ -109,7 +109,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         lmg = Contract.long_margin_ratio('stock.TEST')
         multi = Contract.volume_multiple('stock.TEST')
         smg = Contract.short_margin_ratio('stock.TEST')
-        s_equity0, s_cashes0, dts = holdings_buy_maked_curbar(source, CAPTIAL*0.3, lmg, multi)
+        s_equity0, s_cashes0, dts = holdings_buy_maked_curbar(source, capital*0.3, lmg, multi)
         self.assertTrue(len(t_cashes0) == len(s_cashes0), 'cash接口测试失败！')
         for i in range(0, len(t_cashes0)-1): # 最后一根强平了无法比较
             self.assertTrue(np.isclose(t_cashes0[i],s_cashes0[i]), 'cash接口测试失败！')
@@ -119,16 +119,16 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
             self.assertTrue(np.isclose(hd['equity'], s_equity0[i]), 'all_holdings接口测试失败！')
 
         #  确保资金够用，所以不影响
-        e0, c0, dts = holdings_buy_maked_curbar(source, CAPTIAL*0.3/2, lmg, multi)
-        e1, c1, dts = holdings_short_maked_curbar(source, CAPTIAL*0.3/2, smg, multi)
+        e0, c0, dts = holdings_buy_maked_curbar(source, capital*0.3/2, lmg, multi)
+        e1, c1, dts = holdings_short_maked_curbar(source, capital*0.3/2, smg, multi)
         s_equity1 = [x + y for x, y in zip(e0, e1)]
         s_cashes1 = [x + y for x, y in zip(c0, c1)]
         self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
         for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
             self.assertTrue(np.isclose(t_cashes1[i],s_cashes1[i]), 'cash接口测试失败！')
         for i, hd in enumerate(profile.all_holdings(1)):
-            self.assertTrue(np.isclose(s_equity0[i]-CAPTIAL*0.3,
-                                        0-(s_equity1[i]-CAPTIAL*0.3)), '测试代码错误！')
+            self.assertTrue(np.isclose(s_equity0[i]-capital*0.3,
+                                        0-(s_equity1[i]-capital*0.3)), '测试代码错误！')
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
             self.assertTrue(np.isclose(hd['equity'], s_equity1[i]), 'all_holdings接口测试失败！')
         for i in range(0, len(profile.all_holdings())):
@@ -147,7 +147,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         #plotting.plot_strategy(profile.data(), deals=profile.deals(0))
 
 
-def holdings_buy_maked_curbar(data, captial, long_margin, volume_multiple):
+def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     """ 策略: 多头限价开仓且当根bar成交
         买入点: [buy1, buy2, buy3]
         当天卖出点: [sell1, sell2]
@@ -193,13 +193,13 @@ def holdings_buy_maked_curbar(data, captial, long_margin, volume_multiple):
 
         quantity = sum(buy_quantity.values())
         pos_profit += (curprice - poscost) * quantity * volume_multiple
-        equities.append(captial+close_profit+pos_profit)
+        equities.append(capital+close_profit+pos_profit)
         cost = poscost * quantity * volume_multiple * long_margin
         cashes.append(equities[-1]-cost)
         dts.append(curdt)
     return equities, cashes, dts
 
-def holdings_short_maked_curbar(data, captial, short_margin, volume_multiple):
+def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     """ 策略: 多头限价开仓且当根bar成交
         买入点: [buy1, buy2, buy3]
         当天卖出点: [sell1, sell2]
@@ -245,7 +245,7 @@ def holdings_short_maked_curbar(data, captial, short_margin, volume_multiple):
 
         quantity = sum(short_quantity.values())
         pos_profit -= (curprice - poscost) * quantity * volume_multiple
-        equities.append(captial+close_profit+pos_profit)
+        equities.append(capital+close_profit+pos_profit)
         cost = poscost * quantity * volume_multiple * short_margin
         cashes.append(equities[-1]-cost)
         dts.append(curdt)

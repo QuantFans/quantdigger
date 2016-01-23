@@ -4,7 +4,7 @@ import datetime
 
 # 系统角色
 g_simulator = None
-def set_symbols(pcons, window_size,
+def set_symbols(pcons, window_size=0,
                     dt_start=datetime.datetime(1980,1,1),
                     dt_end=datetime.datetime(2100,1,1)):
     """ 添加数据

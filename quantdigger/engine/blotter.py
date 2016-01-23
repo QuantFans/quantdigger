@@ -206,9 +206,9 @@ class SimpleBlotter(Blotter):
         self._all_transactions = []
         self.api = SimulateTraderAPI(self, events_pool) # 模拟交易接口
         if settings:
-            self._captial =  settings['captial'] # 初始权益
+            self._capital =  settings['capital'] # 初始权益
         else:
-            self._captial = 5000.0
+            self._capital = 5000.0
 
     @property
     def all_holdings(self):
@@ -251,11 +251,11 @@ class SimpleBlotter(Blotter):
 
     def _init_state(self):
         self.holding = {
-                'cash': self._captial,
+                'cash': self._capital,
                 'commission':  0.0,
                 'history_profit':  0.0,
                 'position_profit' : 0.0,
-                'equity': self._captial
+                'equity': self._capital
         }
 
     def update_data(self, ticks, bars):
@@ -306,7 +306,7 @@ class SimpleBlotter(Blotter):
             order_margin +=  order.order_margin(new_price)
 
         # 当前权益 = 初始资金 + 累积平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
-        dh['equity'] = self._captial + self.holding['history_profit'] + profit - \
+        dh['equity'] = self._capital + self.holding['history_profit'] + profit - \
                        self.holding['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
