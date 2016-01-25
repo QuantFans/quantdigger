@@ -79,7 +79,7 @@ class ExecuteUnit(object):
         # 遍历每个数据轮, 次数为数据的最大长度
         for pcon, data in self.all_data.iteritems():
             self.context.switch_to_contract(pcon)
-            self.context.rolling_foward()
+            self.context.rolling_forward()
         while True:
             # 遍历数据轮的所有合约
             for pcon, data in self.all_data.iteritems():
@@ -104,12 +104,12 @@ class ExecuteUnit(object):
                     self.context.process_trading_events(append=True)
                     s.on_bar(self.context)
                     self.context.process_trading_events(append=False)
-            self.context.last_date = datetime(2100,1,1)
+            self.context.ctx_datetime = datetime(2100,1,1)
             # 
             toremove = []
             for pcon, data in self.all_data.iteritems():
                 self.context.switch_to_contract(pcon)
-                has_next = self.context.rolling_foward()
+                has_next = self.context.rolling_forward()
                 if not has_next:
                     toremove.append(pcon)
             if toremove:

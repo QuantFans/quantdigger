@@ -187,7 +187,7 @@ class TestIndicator(unittest.TestCase):
                 #print ctx.ma2[0], a
                 close.append(ctx.close[0])
                 open.append(ctx.open[0])
-                boll['upper'].append(ctx.boll['upper'][0])
+                boll['upper'].append(float(ctx.boll['upper']))
                 boll['middler'].append(ctx.boll['middler'][0])
                 boll['lower'].append(ctx.boll['lower'][0])
                 boll3['upper'].append(ctx.boll['upper'][3])

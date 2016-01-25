@@ -26,7 +26,7 @@ class SourceWrapper(object):
     def __len__(self):
         return self._max_length
 
-    def  rolling_foward(self):
+    def  rolling_forward(self):
         """ 读取下一个数据""" 
         raise NotImplementedError
 
@@ -36,7 +36,7 @@ class SqliteSourceWrapper(SourceWrapper):
     def __init__(self, pcontract, data, cursor, max_length=0):
         super(SqliteSourceWrapper, self).__init__(pcontract, data, cursor, max_length)
 
-    def rolling_foward(self):
+    def rolling_forward(self):
         self.curbar += 1
         # self.cursor为None说明是向量运算
         if self.cursor:
@@ -53,7 +53,7 @@ class CsvSourceWrapper(SourceWrapper):
     def __init__(self, pcontract, data, cursor, max_length=0):
         super(CsvSourceWrapper, self).__init__(pcontract, data, cursor, max_length)
 
-    def rolling_foward(self):
+    def rolling_forward(self):
         self.curbar += 1
         # self.cursor为None说明是向量运算
         if self.cursor:

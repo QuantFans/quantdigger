@@ -34,11 +34,11 @@ class DemoStrategy(Strategy):
         if ctx.curbar > 1:
             ctx.ma2.update((ctx.close + ctx.close[1])/2)
         if ctx.curbar > 200:
-            if ctx.position() == 0 and ctx.ma100[2] < ctx.ma200[2] and ctx.ma100[1] > ctx.ma200[1]:
+            if ctx.pos() == 0 and ctx.ma100[2] < ctx.ma200[2] and ctx.ma100[1] > ctx.ma200[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.position() > 0 and ctx.ma100[2] > ctx.ma200[2] and \
+            elif ctx.pos() > 0 and ctx.ma100[2] > ctx.ma200[2] and \
                  ctx.ma100[1] < ctx.ma200[1]:
-                ctx.sell(ctx.close, ctx.position()) 
+                ctx.sell(ctx.close, ctx.pos()) 
 
         boll['upper'].append(ctx.boll['upper'][0])
         boll['middler'].append(ctx.boll['middler'][0])
@@ -62,11 +62,11 @@ class DemoStrategy2(Strategy):
 
     def on_bar(self, ctx):
         if ctx.curbar > 100:
-            if ctx.position() == 0 and ctx.ma50[2] < ctx.ma100[2] and ctx.ma50[1] > ctx.ma100[1]:
+            if ctx.pos() == 0 and ctx.ma50[2] < ctx.ma100[2] and ctx.ma50[1] > ctx.ma100[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.position() > 0 and ctx.ma50[2] > ctx.ma100[2] and \
+            elif ctx.pos() > 0 and ctx.ma50[2] > ctx.ma100[2] and \
                  ctx.ma50[1] < ctx.ma100[1]:
-                ctx.sell(ctx.close, ctx.position()) 
+                ctx.sell(ctx.close, ctx.pos()) 
         return
 
     def on_exit(self, ctx):
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     #set_config({ 'source': 'csv' })
     set_symbols(['BB.SHFE-1.Minute'], 0)
     profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
-                            { 'captial': 50000.0, 'ratio': [0.5, 0.5] })
+                            { 'capital': 50000.0, 'ratio': [0.5, 0.5] })
     run()
     # 绘制k线，交易信号线
     from quantdigger.digger import finance, plotting
@@ -87,10 +87,10 @@ if __name__ == '__main__':
     curve = finance.create_equity_curve(profile.all_holdings())
     plotting.plot_strategy(profile.data(0), profile.technicals(0),
                             profile.deals(0), curve.equity)
-    plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
-                        colors=['r', 'g', 'b'],
-                        names=[profile.name(0), profile.name(1), 'A0'])
-    # 绘制净值曲线
-    plotting.plot_curves([curve.networth])
-    # 打印统计信息
-    print finance.summary_stats(curve, 252*4*60)
+    #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
+                        #colors=['r', 'g', 'b'],
+                        #names=[profile.name(0), profile.name(1), 'A0'])
+    ## 绘制净值曲线
+    #plotting.plot_curves([curve.networth])
+    ## 打印统计信息
+    #print finance.summary_stats(curve, 252*4*60)

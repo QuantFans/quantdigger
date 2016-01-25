@@ -344,6 +344,9 @@ class Contract(object):
         if len(info) == 2:
             code = info[0].upper()
             exchange = info[1].upper()
+        else:
+            ## @TODO throw 'wrong format error' 
+            assert(False)
         self.exchange = exchange
         self.code = code
         if self.exchange == 'SZ' or self.exchange == 'SH':

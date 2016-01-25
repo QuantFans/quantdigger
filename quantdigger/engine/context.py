@@ -85,12 +85,12 @@ class DataContext(object):
         self.last_row = []
         return
 
-    def rolling_foward(self):
+    def rolling_forward(self):
         ## @todo next
         """ 
         滚动读取下一步的数据。
         """
-        new_row, self.last_curbar = self.wrapper.rolling_foward()
+        new_row, self.last_curbar = self.wrapper.rolling_forward()
         if not new_row:
             self.last_curbar -= 1
             return False, None
@@ -343,7 +343,7 @@ class Context(object):
         self._cur_data_context = None
         self._strategy_contexts = []
         self._cur_strategy_context = None
-        self.last_date = datetime.datetime(2100,1,1)
+        self.ctx_datetime = datetime.datetime(2100,1,1) # context datetime
         self._ticks = { } # Contract: float
         self._bars = { }  # Contract: Bar
 
@@ -354,11 +354,11 @@ class Context(object):
         self._cur_data_context = self._data_contexts[pcon]
 
     def time_aligned(self):
-        return  (self._cur_data_context.datetime[0] <= self.last_date and
-                self._cur_data_context.last_date <= self.last_date)
+        return  (self._cur_data_context.datetime[0] <= self.ctx_datetime and
+                self._cur_data_context.last_date <= self.ctx_datetime)
         ## 第一根是必须运行
-        #return  (self._cur_data_context.datetime[0] <= self.last_date and
-                #self._cur_data_context.last_date <= self.last_date) or \
+        #return  (self._cur_data_context.datetime[0] <= self.ctx_datetime and
+                #self._cur_data_context.ctx_datetime <= self.ctx_datetime) or \
                 #self._cur_data_context.curbar == 0 
 
     def switch_to_strategy(self, i, j, trading=False):
@@ -370,10 +370,10 @@ class Context(object):
         self._cur_data_context.i, self._cur_data_context.j  = i, j
 
     def process_trading_events(self, append):
-        self._cur_strategy_context.update_environment(self.last_date, self._ticks, self._bars)
+        self._cur_strategy_context.update_environment(self.ctx_datetime, self._ticks, self._bars)
         self._cur_strategy_context.process_trading_events(append)
 
-    def rolling_foward(self):
+    def rolling_forward(self):
         """
         更新最新tick价格，最新bar价格, 环境时间。
         """
@@ -381,16 +381,16 @@ class Context(object):
         #self.data = np.append(data, tracker.container_day)
         if self._cur_data_context.last_row:
             # 回测系统时间
-            self.last_date = min(self._cur_data_context.last_date, self.last_date)
+            self.ctx_datetime = min(self._cur_data_context.last_date, self.ctx_datetime)
             return True
-        hasnext, data = self._cur_data_context.rolling_foward()
+        hasnext, data = self._cur_data_context.rolling_forward()
         if not hasnext:
             return False 
-        self.last_date = min(self._cur_data_context.last_date, self.last_date) # 回测系统时间
+        self.ctx_datetime = min(self._cur_data_context.last_date, self.ctx_datetime) # 回测系统时间
         return True
 
     def reset(self):
-            self.last_date = datetime.datetime(2100,1,1)
+            self.ctx_datetime = datetime.datetime(2100,1,1)
 
     def update_user_vars(self):
         """
@@ -485,7 +485,7 @@ class Context(object):
 
     def __setattr__(self, name, value):
         if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
-                    '_strategy_contexts', 'last_date', '_ticks', '_bars', '_trading']:
+                    '_strategy_contexts', 'ctx_datetime', '_ticks', '_bars', '_trading']:
             super(Context, self).__setattr__(name, value)
         else:
             self._cur_data_context.add_item(name, value)

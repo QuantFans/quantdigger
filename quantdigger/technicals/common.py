@@ -7,15 +7,15 @@
 # @date 2015-12-23
 import talib
 import matplotlib.finance as finance
-from collections import OrderedDict
-from quantdigger.technicals.base import TechnicalBase, transform2ndarray, create_attributes
+from quantdigger.technicals.base import TechnicalBase, transform2ndarray, tech_init, plot_init
 
 class MA(TechnicalBase):
     """ 移动平均线指标。 """
-    @create_attributes
+    @tech_init
     def __init__(self, data, n, name='MA',
                  color='y', lw=1, style="line"):
-        super(MA, self).__init__(data, n, name)
+        """ data (NumberSeries/np.ndarray/list) """
+        super(MA, self).__init__(name)
         # 必须的函数参数
         self._args = [data, n]
 
@@ -25,7 +25,12 @@ class MA(TechnicalBase):
         return (talib.SMA(data, n)[i], )
 
     def _vector_algo(self, data, n):
-        """向量化运行, 必须对self.values赋值。""" 
+        """向量化运行, 结果必须赋值给self.values。
+        
+        Args:
+            data (np.ndarray): 数据
+            n (int): 时间窗口大小
+        """
         self.values = talib.SMA(data, n)
 
     def plot(self, widget):
@@ -36,16 +41,16 @@ class MA(TechnicalBase):
 
 class BOLL(TechnicalBase):
     """ 布林带指标。 """
-    @create_attributes
+    @tech_init
     def __init__(self, data, n, name='BOLL', colors=('y', 'b', 'g'), lw=1, style="line"):
-        super(BOLL, self).__init__(data, n, name)
-        ## @TODO 只有在逐步运算中需给self.values先赋值,
-        # 去掉逐步运算后删除
-        self.values = OrderedDict([
-                ('upper', []),
-                ('middler', []),
-                ('lower', [])
-                ])
+        super(BOLL, self).__init__(name)
+        ### @TODO 只有在逐步运算中需给self.values先赋值,
+        ## 去掉逐步运算后删除
+        #self.values = OrderedDict([
+                #('upper', []),
+                #('middler', []),
+                #('lower', [])
+                #])
         self._args = [data, n, 2, 2]
 
     def _rolling_algo(self, data, n, a1, a2, i):
@@ -152,23 +157,22 @@ class BOLL(TechnicalBase):
 from quantdigger.widgets.widget_plot import PlotInterface
 class Volume(PlotInterface):
     """ 柱状图。 """
-    @create_attributes
+    @plot_init
     def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(name, None)
         self.values = transform2ndarray(volume)
-        self._init_bound()
 
     def plot(self, widget):
+        self.widget = widget
         finance.volume_overlay(widget, self.open, self.close, self.volume,
                                self.colorup, self.colordown, self.width)
 
 class EquityCurve(PlotInterface):
     """ 资金曲线 """
-    @create_attributes
+    @plot_init
     def __init__(self, data, name='EquityCurve', color='black', lw=1, style='line'):
         super(EquityCurve, self).__init__(name, None)
         self.values = data
-        self._init_bound()
 
     def plot(self, widget):
         self.widget = widget

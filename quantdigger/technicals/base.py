@@ -23,12 +23,14 @@ def transform2ndarray(data):
     elif isinstance(data, pandas.Series):
         # 处理pandas.Series
         data = np.asarray(data)
-    if type(data) != np.ndarray:
+    if not isinstance(data, np.ndarray):
         raise  DataFormatError(type=type(data))
     return data
 
-def create_attributes(method):
-    """ 根据被修饰函数的参数构造属性。"""
+def tech_init(method):
+    """ 根据被修饰函数的参数构造属性。  
+        并且触发向量计算。
+    """
     def wrapper(self, *args, **kwargs):
         magic = inspect.getargspec(method)
         arg_names = magic.args[1:]
@@ -46,8 +48,32 @@ def create_attributes(method):
             setattr(self, key, value)
         # 运行构造函数
         rst =  method(self, *args, **kwargs)
-        if hasattr(self, 'compute'):
-            self.compute()
+        self.compute()
+        return rst
+    return wrapper
+
+def plot_init(method):
+    """ 根据被修饰函数的参数构造属性。  
+        并且触发绘图范围计算。
+    """
+    def wrapper(self, *args, **kwargs):
+        magic = inspect.getargspec(method)
+        arg_names = magic.args[1:]
+        # 默认参数
+        default =  dict((x, y) for x, y in zip(magic.args[-len(magic.defaults):], magic.defaults))
+        # 调用参数
+        method_args = { }
+        for i, arg in enumerate(args):
+            method_args[arg_names[i]] = arg
+        method_args.update(kwargs)
+        # 
+        default.update(method_args)
+        # 属性创建
+        for key, value in default.iteritems():
+            setattr(self, key, value)
+        # 运行构造函数
+        rst =  method(self, *args, **kwargs)
+        self._init_bound()
         return rst
     return wrapper
 
@@ -66,26 +92,24 @@ def create_attributes(method):
 
 class TechnicalBase(PlotInterface):
     """
-    指标基类。每个指标的内部数据为序列变量。所以每个指标对象都会与一个跟踪器相关联，
-    负责更新其内部的序列变量。 如果是MA这样的单值指标, 重载函数可以使指标对象像序列变量一样被使用。
-    如果是多值指标，如布林带，那么会以元组的形式返回多个序列变量。
+    指标基类。
 
     :ivar name: 指标对象名称
-    :ivar value: 向量化运行结果, 用于处理历史数据。
+    :ivar values: 向量化运行结果, 用于处理历史数据。
     :ivar series: 单值指标的序列变量或多值指标的序列变量数组。
     :ivar _algo: 逐步指标函数。
     :ivar _args: 逐步指标函数的参数。
     """
-    def __init__(self, data, n, name='',  widget=None):
+    def __init__(self, name='',  widget=None):
         super(TechnicalBase, self).__init__(name, widget)
         self.name = name
         self.count = 0
-        if isinstance(data, series.NumberSeries) and series.g_rolling:
-            data.set_shift()
-            # 指标周期
-            data.reset_data([], n+series.g_window)
-            #(curbar, values)
-            self._cache = [(-1, None)] * (series.g_window+1)
+        #if isinstance(data, series.NumberSeries) and series.g_rolling:
+            #data.set_shift()
+            ## 指标周期
+            #data.reset_data([], n+series.g_window)
+            ##(curbar, values)
+            #self._cache = [(-1, None)] * (series.g_window+1)
         self._args = None
         ## @TODO 去掉逐步运算后删除
         # 只在逐步运算中必须初始化
@@ -93,6 +117,15 @@ class TechnicalBase(PlotInterface):
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。""" 
+        raise NotImplementedError
+
+    def _vector_algo(self, data, n):
+        """向量化运行, 结果必须赋值给self.values。
+        
+        Args:
+            data (np.ndarray): 数据
+            n (int): 时间窗口大小
+        """
         raise NotImplementedError
 
     def compute(self):
