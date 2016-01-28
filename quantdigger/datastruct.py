@@ -200,6 +200,7 @@ class Transaction(object):
             self.hedge_type = order.hedge_type
             self.order = order
         self.commission = 0
+        self.volume_multiple = order.volume_multiple
 
     def __hash__(self):
         try:

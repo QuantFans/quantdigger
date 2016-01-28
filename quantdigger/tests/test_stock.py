@@ -112,11 +112,11 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         s_equity0, s_cashes0, dts = holdings_buy_maked_curbar(source, capital*0.3, lmg, multi)
         self.assertTrue(len(t_cashes0) == len(s_cashes0), 'cash接口测试失败！')
         for i in range(0, len(t_cashes0)-1): # 最后一根强平了无法比较
-            self.assertTrue(np.isclose(t_cashes0[i],s_cashes0[i]), 'cash接口测试失败！')
+            self.assertAlmostEqual(t_cashes0[i],s_cashes0[i])
         self.assertTrue(len(all_holdings) == len(s_equity0), 'all_holdings接口测试失败！')
         for i, hd in enumerate(all_holdings0):
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
-            self.assertTrue(np.isclose(hd['equity'], s_equity0[i]), 'all_holdings接口测试失败！')
+            self.assertAlmostEqual(hd['equity'], s_equity0[i])
 
         #  确保资金够用，所以不影响
         e0, c0, dts = holdings_buy_maked_curbar(source, capital*0.3/2, lmg, multi)
@@ -125,12 +125,12 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         s_cashes1 = [x + y for x, y in zip(c0, c1)]
         self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
         for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
-            self.assertTrue(np.isclose(t_cashes1[i],s_cashes1[i]), 'cash接口测试失败！')
+            self.assertAlmostEqual(t_cashes1[i],s_cashes1[i])
         for i, hd in enumerate(profile.all_holdings(1)):
-            self.assertTrue(np.isclose(s_equity0[i]-capital*0.3,
-                                        0-(s_equity1[i]-capital*0.3)), '测试代码错误！')
+            self.assertAlmostEqual(s_equity0[i]-capital*0.3, -(s_equity1[i]-capital*0.3))
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
-            self.assertTrue(np.isclose(hd['equity'], s_equity1[i]), 'all_holdings接口测试失败！')
+            self.assertAlmostEqual(hd['equity'], s_equity1[i])
+
         for i in range(0, len(profile.all_holdings())):
             hd = all_holdings[i]
             hd0 = all_holdings0[i]

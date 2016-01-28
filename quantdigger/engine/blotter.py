@@ -395,8 +395,8 @@ class SimpleBlotter(Blotter):
         # 平仓，更新历史持仓盈亏。
         if trans.side == TradeSide.PING:
             poskey = PositionKey(trans.contract, trans.direction)
-            multi = 1 if trans.direction == Direction.LONG else -1
-            profit = (trans.price-self.positions[poskey].cost) * trans.quantity * multi
+            flag = 1 if trans.direction == Direction.LONG else -1
+            profit = (trans.price-self.positions[poskey].cost) * trans.quantity * flag * trans.volume_multiple
             #if self.name == 'A1': # 平仓调试
                 #print "***********" 
                 #print self._datetime, profit 
