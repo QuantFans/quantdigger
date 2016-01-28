@@ -68,6 +68,7 @@ def encode2id(period, dt):
     """
     db_period = {
             '5.SECOND': '155',
+            '3.SECOND': '153',
             '1.MINUTE': '101',
             '3.MINUTE': '102',
             '5.MINUTE': '103',

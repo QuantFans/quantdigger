@@ -156,6 +156,7 @@ class BOLL(TechnicalBase):
 
 from quantdigger.widgets.widget_plot import PlotInterface
 class Volume(PlotInterface):
+    ## @TODO 改成技术指标
     """ 柱状图。 """
     @plot_init
     def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):

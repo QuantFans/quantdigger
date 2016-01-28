@@ -547,7 +547,7 @@ class Position(object):
             float. 保证金占用
         """
         price = self.cost if self.contract.is_stock else new_price
-        return price * self.quantity * self._margin_ratio
+        return price * self.quantity * self._margin_ratio * self._volume_multiple
 
     def __str__(self):
         rst = " contract: %s\n direction: %s\n cost: %f\n quantity: %d\n closeable: %d\n" % \
