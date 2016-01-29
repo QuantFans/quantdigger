@@ -19,7 +19,7 @@ from quantdigger import *
 
 logger = Logger('test')
 window_size = 0
-capital = 20000000000
+capital = 20000000
 OFFSET = 0.6
 buy1 = datetime.datetime.strptime("09:01:00", "%H:%M:%S").time()
 buy2 = datetime.datetime.strptime("09:02:00", "%H:%M:%S").time()
@@ -74,17 +74,17 @@ class TestOneDataOneCombination(unittest.TestCase):
             def on_bar(self, ctx):
                 curtime = ctx.datetime[0].time()
                 if curtime in [buy1, buy2, buy3]:
-                    #ctx.buy(ctx.close, 1) 
+                    ctx.buy(ctx.close, 1) 
                     ctx.short(ctx.close, 2) 
                 else:
                     if curtime == sell1:
-                        #assert(ctx.pos() == 3 and '默认持仓查询测试失败！')
-                        #ctx.sell(ctx.close, 2) 
+                        assert(ctx.pos() == 3 and '默认持仓查询测试失败！')
+                        ctx.sell(ctx.close, 2) 
                         assert(ctx.pos('short') == 6 and '持仓测试失败！')
                         ctx.cover(ctx.close, 4) 
                     elif curtime == sell2:
-                        #assert(ctx.pos('long') == 1 and '持仓测试失败！')
-                        #ctx.sell(ctx.close, 1) 
+                        assert(ctx.pos('long') == 1 and '持仓测试失败！')
+                        ctx.sell(ctx.close, 1) 
                         assert(ctx.pos('short') == 2 and '持仓测试失败！')
                         ctx.cover(ctx.close, 2) 
                 t_cashes1.append(ctx.test_cash()) 
@@ -153,19 +153,13 @@ class TestOneDataOneCombination(unittest.TestCase):
         e1, c1, dts = holdings_short_maked_curbar(source, capital*0.3/2, smg, multi)
         s_equity1 = [x + y for x, y in zip(e0, e1)]
         s_cashes1 = [x + y for x, y in zip(c0, c1)]
-        #s_equity1= e1
-        #s_cashes1 = c1
         self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
-        #for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
-            #print "****************" 
-            #print dts[i]
-            #print "****************" 
-            #self.assertAlmostEqual(t_cashes1[i], s_cashes1[i])
-        #for i, hd in enumerate(profile.all_holdings(1)):
-            ##self.assertTrue(np.isclose(s_equity0[i]-capital*0.3,
-                                        ##0-(s_equity1[i]-capital*0.3)), '测试代码错误！')
-            #self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
-            #self.assertAlmostEqual(hd['equity'], s_equity1[i])
+        for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
+            self.assertAlmostEqual(t_cashes1[i], s_cashes1[i])
+        for i, hd in enumerate(profile.all_holdings(1)):
+            self.assertAlmostEqual(s_equity0[i]-capital*0.3, -(s_equity1[i]-capital*0.3))
+            self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
+            self.assertAlmostEqual(hd['equity'], s_equity1[i])
         for i in range(0, len(profile.all_holdings())):
             hd = all_holdings[i]
             hd0 = all_holdings0[i]
@@ -286,36 +280,34 @@ class TestOneDataOneCombination(unittest.TestCase):
                         len(target) > 0, '模拟器测试失败！')
         for i, hd in enumerate(profile.all_holdings(0)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
-            #self.assertAlmostEqual(hd['equity'], target[i])
+            self.assertAlmostEqual(hd['equity'], target[i])
         # cash() 终点
         for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
-            #self.assertAlmostEqual(cashes0[i],cashes[i])
-            pass
+            self.assertAlmostEqual(cashes0[i],cashes[i])
         # short
         target, cashes, dts = holdings_short_maked_nextbar(source, short_entries, capital/4, smg, multi)
         self.assertTrue(len(profile.all_holdings(2)) == len(target) and
                         len(target) > 0, '模拟器测试失败！')
         for i, hd in enumerate(profile.all_holdings(2)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
-            #self.assertAlmostEqual(hd['equity'], target[i])
+            self.assertAlmostEqual(hd['equity'], target[i])
         for i in range(0, len(cashes1)-1):
-            #self.assertAlmostEqual(cashes1[i],cashes[i])
-            pass
+            self.assertAlmostEqual(cashes1[i],cashes[i])
         # sell
         target, dts = holdings_sell_maked_nextbar(source, sell_entries, capital/4, lmg, multi)
         self.assertTrue(len(profile.all_holdings(1)) == len(target) and
                         len(target) > 0, '模拟器测试失败！')
         for i, hd in enumerate(profile.all_holdings(1)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
-            self.assertTrue(np.isclose(hd['equity'], target[i]), '模拟器测试失败！')
+            self.assertAlmostEqual(hd['equity'], target[i])
 
         # cover
-        target, dts = holdings_cover_maked_nextbar(source, cover_entries, capital/4)
+        target, dts = holdings_cover_maked_nextbar(source, cover_entries, capital/4, smg, multi)
         self.assertTrue(len(profile.all_holdings(3)) == len(target) and
                         len(target) > 0, '模拟器测试失败！')
         for i, hd in enumerate(profile.all_holdings(3)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
-            self.assertTrue(np.isclose(hd['equity'], target[i]), '模拟器测试失败！')
+            self.assertAlmostEqual(hd['equity'], target[i])
 
         #from quantdigger.digger import plotting
         #plotting.plot_strategy(profile.data(), deals=profile.deals(0))
@@ -410,11 +402,10 @@ class TestOneDataOneCombination(unittest.TestCase):
         cashes = [x + y for x, y in zip(cashes1, cashes2)]
         self.assertTrue(len(cashes0) == len(cashes), 'cash接口测试失败！')
         for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
-            #self.assertAlmostEqual(cashes0[i],cashes[i])
-            pass
+            self.assertAlmostEqual(cashes0[i],cashes[i])
         for i, hd in enumerate(profile.all_holdings()):
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
-            #self.assertAlmostEqual(hd['equity'], target[i])
+            self.assertAlmostEqual(hd['equity'], target[i])
 
 def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     """ 策略: 多头限价开仓且当根bar成交
@@ -645,7 +636,7 @@ def holdings_sell_maked_nextbar(data, sell_entries, capital, long_magin, volume_
         prehigh = high
     return equities, dts
 
-def holdings_cover_maked_nextbar(data, cover_entries, capital):
+def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, volume_multiple):
     """ 策略: 空头限价平仓且下一根bar成交
         买入点：[相关bar的最低点减去OFFSET]
         当天卖出点：sell1
@@ -664,22 +655,22 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital):
         if dt.time() == buy1:
             bprice = close
         elif bprice and dt in trans_entries:
-            close_profit -= (prelow-OFFSET-bprice)
+            close_profit -= (prelow-OFFSET-bprice) * volume_multiple
             bprice = None
         elif dt == data.index[-1]:
             # 最后一根, 强平现有持仓
             if bprice:
-                close_profit -= (close - bprice)
+                close_profit -= (close - bprice) * volume_multiple
             bprice = None
         elif dt.time () == sell3:
             # 不隔日
             if bprice:
-                close_profit -= (close - bprice)
+                close_profit -= (close - bprice) * volume_multiple
             bprice = None
         pos_profit = 0 # 持仓盈亏
         if bprice:
-            pos_profit -= (close - bprice)
-        equities.append(close_profit+pos_profit+capital)
+            pos_profit -= (close - bprice) * volume_multiple
+        equities.append(close_profit+pos_profit+capital) 
         dts.append(dt)
         prelow = low
     return equities, dts
