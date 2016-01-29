@@ -27,7 +27,7 @@ class TradeSide(object):
     CANCEL = 9
 
     @classmethod
-    def arg_to_type(self, arg):
+    def arg_to_type(cls, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
@@ -48,17 +48,17 @@ class TradeSide(object):
             return arg
 
     @classmethod
-    def type_to_str(self, type):
+    def type_to_str(cls, type):
         type2str = { 
-            self.BUY: '多头开仓',
-            self.SHORT: '空头开仓',
-            self.COVER: '空头平仓',
-            self.SELL: '多头平仓',
-            self.COVER_TODAY: '空头平今',
-            self.SELL_TODAY: '多头平今',
-            self.KAI: '开仓',
-            self.PING: '平仓',
-            self.CANCEL: '撤单',
+            cls.BUY: '多头开仓',
+            cls.SHORT: '空头开仓',
+            cls.COVER: '空头平仓',
+            cls.SELL: '多头平仓',
+            cls.COVER_TODAY: '空头平今',
+            cls.SELL_TODAY: '多头平今',
+            cls.KAI: '开仓',
+            cls.PING: '平仓',
+            cls.CANCEL: '撤单',
         }
         return type2str[type]
 
@@ -96,12 +96,12 @@ class PriceType(object):
     MKT = 0 
 
     @classmethod
-    def arg_to_type(self, arg):
+    def arg_to_type(cls, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
-        tdict = {'LMT': self.LMT,
-                 'MKT': self.MKT
+        tdict = {'LMT': cls.LMT,
+                 'MKT': cls.MKT
         }
         if type(arg) == str:
             return tdict[arg.upper()]
@@ -109,9 +109,9 @@ class PriceType(object):
             return arg
 
     @classmethod
-    def type_to_str(self, type):
-        type2str = { self.LMT: 'LMT',
-                     self.MKT: 'MKT'}
+    def type_to_str(cls, type):
+        type2str = { cls.LMT: 'LMT',
+                      cls.MKT: 'MKT'}
         return type2str[type]
 
 class HedgeType(object):
@@ -124,21 +124,21 @@ class HedgeType(object):
     HEDG = 1
 
     @classmethod
-    def arg_to_type(self, arg):
+    def arg_to_type(cls, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
-        tdict = {'SPEC': self.SPEC,
-                 'HEDG': self.HEDG }
+        tdict = {'SPEC': cls.SPEC,
+                 'HEDG': cls.HEDG }
         if type(arg) == str:
             return tdict[arg.upper()]
         else:
             return arg
 
     @classmethod
-    def type_to_str(self, type):
-        type2str = { self.SPEC: 'SPEC',
-                     self.HEDG: 'HEDG'}
+    def type_to_str(cls, type):
+        type2str = {cls.SPEC: 'SPEC',
+                     cls.HEDG: 'HEDG'}
     
         return type2str[type]
 
@@ -153,12 +153,12 @@ class Direction(object):
     SHORT = 2
 
     @classmethod
-    def arg_to_type(self, arg):
+    def arg_to_type(cls, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
-        arg2type = {'LONG': self.LONG,
-                 'SHORT': self.SHORT 
+        arg2type = {'LONG': cls.LONG,
+                 'SHORT': cls.SHORT 
         }
         if type(arg) == str:
             return arg2type[arg.upper()]
@@ -166,9 +166,9 @@ class Direction(object):
             return arg
 
     @classmethod
-    def type_to_str(self, type):
-        type2str = { self.LONG: 'long',
-                     self.SHORT: 'short'}
+    def type_to_str(cls, type):
+        type2str = { cls.LONG: 'long',
+                     cls.SHORT: 'short'}
     
         return type2str[type]
 
@@ -374,24 +374,21 @@ class Contract(object):
         return self._hash == r._hash
 
     @classmethod
-    def trading_interval(self, contract):
+    def trading_interval(cls, contract):
         """ 获取合约的交易时段。""" 
         pass
 
     @classmethod
-    def long_margin_ratio(self, strcontract):
-        """ 获取合约的交易时段。""" 
-        return Contract.info.ix[strcontract.upper(), 'long_margin_ratio']
+    def long_margin_ratio(cls, strcontract):
+        return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
 
     @classmethod
-    def short_margin_ratio(self, strcontract):
-        """ 获取合约的交易时段。""" 
-        return Contract.info.ix[strcontract.upper(), 'short_margin_ratio']
+    def short_margin_ratio(cls, strcontract):
+        return cls.info.ix[strcontract.upper(), 'short_margin_ratio']
 
     @classmethod
-    def volume_multiple(self, strcontract):
-        """ 获取合约的交易时段。""" 
-        return Contract.info.ix[strcontract.upper(), 'volume_multiple']
+    def volume_multiple(cls, strcontract):
+        return cls.info.ix[strcontract.upper(), 'volume_multiple']
 
 
 
@@ -454,8 +451,8 @@ class PContract(object):
         """ return string like 'IF000.SHEF-10.Minutes'  """
         return "%s-%s" % (self.contract, self.period)
 
-    @classmethod
-    def from_string(self, strpcon):
+    @staticmethod
+    def from_string(strpcon):
         t = strpcon.split('-')
         return PContract(Contract(t[0]), Period(t[1]))
 
