@@ -123,7 +123,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                     assert(len(ctx.open_orders) == 0 and '隔夜订单清空测试失败')
                 
 
-        set_symbols(['future.TEST-1.Minute'], window_size)
+        set_symbols(['future.TEST-1.Minute'])
         profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
             'capital': capital,
             'ratio': [0.3, 0.3, 0.4]
@@ -263,7 +263,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                 elif ctx.pos('short') > 0 and ctx.datetime[0].time() == sell3:
                     ctx.cover(ctx.close, ctx.pos('short')) 
 
-        set_symbols(['future.TEST-1.Minute'], window_size)
+        set_symbols(['future.TEST-1.Minute'])
         profile = add_strategy([DemoStrategyBuy('B1'), DemoStrategySell('B2'),
                                 DemoStrategyShort('B3'), DemoStrategyCover('B4')],{
                                     'capital': capital,
@@ -342,8 +342,8 @@ class TestOneDataOneCombination(unittest.TestCase):
                         ctx.cover(0, 2) 
                 cashes0.append(ctx.test_cash()) 
 
-        set_symbols(['future.TEST-1.Minute'], window_size)
-        profile = add_strategy([DemoStrategy('C1')],{ 'capital': capital, 'ratio': [1] })
+        set_symbols(['future.TEST-1.Minute'])
+        profile = add_strategy([DemoStrategy('C1')],{ 'capital': capital})
         run()
         lmg = Contract.long_margin_ratio('future.TEST')
         multi = Contract.volume_multiple('future.TEST')
@@ -384,8 +384,8 @@ class TestOneDataOneCombination(unittest.TestCase):
                         ctx.cover(ctx['future2.TEST-1.Minute'].close, 2, 'future2.TEST') 
                 cashes0.append(ctx.test_cash()) 
 
-        set_symbols(['future.TEST-1.Minute', 'future2.TEST-1.Minute'], window_size)
-        profile = add_strategy([DemoStrategy('D1')],{ 'capital': capital, 'ratio': [1] })
+        set_symbols(['future.TEST-1.Minute', 'future2.TEST-1.Minute'])
+        profile = add_strategy([DemoStrategy('D1')],{ 'capital': capital })
         run()
         fname = os.path.join(os.getcwd(), 'data', 'future2.TEST-1.Minute.csv')
         source2 = pd.read_csv(fname, parse_dates=True, index_col=0)

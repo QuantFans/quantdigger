@@ -42,13 +42,13 @@ class TradeSide(object):
             'PING': 8,
             'CANCEL': 9
         }
-        if type(arg) == str:
+        if isinstance(arg, str):
             return tdict[arg.upper()]
         else:
             return arg
 
     @classmethod
-    def type_to_str(cls, type):
+    def type_to_str(cls, type_):
         type2str = { 
             cls.BUY: '多头开仓',
             cls.SHORT: '空头开仓',
@@ -60,7 +60,7 @@ class TradeSide(object):
             cls.PING: '平仓',
             cls.CANCEL: '撤单',
         }
-        return type2str[type]
+        return type2str[type_]
 
 
 class Captial(object):
@@ -89,39 +89,42 @@ class Captial(object):
 class PriceType(object):
     """ 下单类型 
 
-    :ivar LMT: 限价单 - 1.
-    :ivar MKT: 市价单 - 0.
+    :ivar MKT: 市价单 - 1.
+    :ivar LMT: 限价单 - 2.
     """
-    LMT = 1
-    MKT = 0 
+    MKT = 1 
+    LMT = 2
 
     @classmethod
     def arg_to_type(cls, arg):
         """
         把用户输入参数转化为系统类型。
         """ 
-        tdict = {'LMT': cls.LMT,
-                 'MKT': cls.MKT
+        tdict = {
+            'LMT': cls.LMT,
+            'MKT': cls.MKT
         }
-        if type(arg) == str:
+        if isinstance(arg, str):
             return tdict[arg.upper()]
         else:
             return arg
 
     @classmethod
     def type_to_str(cls, type):
-        type2str = { cls.LMT: 'LMT',
-                      cls.MKT: 'MKT'}
+        type2str = { 
+            cls.LMT: 'LMT',
+            cls.MKT: 'MKT'
+        }
         return type2str[type]
 
 class HedgeType(object):
     """ 下单类型 
 
-    :ivar SPEC: 投机 - 0.
-    :ivar HEDG: 套保 - 1.
+    :ivar SPEC: 投机 - 1.
+    :ivar HEDG: 套保 - 2.
     """
-    SPEC = 0
-    HEDG = 1
+    SPEC = 1
+    HEDG = 2
 
     @classmethod
     def arg_to_type(cls, arg):
@@ -130,7 +133,7 @@ class HedgeType(object):
         """ 
         tdict = {'SPEC': cls.SPEC,
                  'HEDG': cls.HEDG }
-        if type(arg) == str:
+        if isinstance(arg, str):
             return tdict[arg.upper()]
         else:
             return arg
@@ -157,26 +160,27 @@ class Direction(object):
         """
         把用户输入参数转化为系统类型。
         """ 
-        arg2type = {'LONG': cls.LONG,
-                 'SHORT': cls.SHORT 
+        arg2type = {
+            'LONG': cls.LONG,
+            'SHORT': cls.SHORT 
         }
-        if type(arg) == str:
+        if isinstance(arg, str):
             return arg2type[arg.upper()]
         else:
             return arg
 
     @classmethod
-    def type_to_str(cls, type):
-        type2str = { cls.LONG: 'long',
-                     cls.SHORT: 'short'}
-    
+    def type_to_str(cls, type_):
+        type2str = { 
+            cls.LONG: 'long',
+            cls.SHORT: 'short'
+        }
         return type2str[type]
 
         
 class Transaction(object):
     """ 成交记录。
 
-    :ivar ref: 本地编号
     :ivar id: 成交编号
     :ivar contract: 合约。
     :ivar direction: 多空方向。
@@ -220,12 +224,9 @@ class Transaction(object):
         HedgeType.type_to_str(self.hedge_type))
         return rst
 
-
     
 class OrderID(object):
-    """
-    委托ID， 用来唯一的标识一个委托订单。
-    """
+    """ 委托ID， 用来唯一的标识一个委托订单。 """
     order_id = 0
     def __init__(self, id):
         self.id = id
@@ -233,9 +234,7 @@ class OrderID(object):
 
     @classmethod
     def next_order_id(cls):
-        """
-        下个有效的委托ID编号。
-        """ 
+        """ 下个有效的委托ID编号。 """ 
         cls.order_id += 1
         return OrderID(cls.order_id)
 
@@ -267,7 +266,6 @@ class OrderID(object):
 class Order(object):
     """ 订单 
 
-        :ivar ref: 本地编号
         :ivar id: 报单编号
         :ivar contract: 合约。
         :ivar direction: 多空方向。
@@ -280,6 +278,7 @@ class Order(object):
     """
     def __init__(self, dt, contract, type_, side, direction,
                  price, quantity, hedge=HedgeType.SPEC, id=None):
+        self.id = id if id else OrderID.next_order_id()
         self.contract = contract
         self.direction = direction
         self.price = price
@@ -288,7 +287,6 @@ class Order(object):
         self.datetime = dt
         self.price_type = type_
         self.hedge_type = hedge
-        self.id = id if id else OrderID.next_order_id()
         if self.direction == Direction.LONG:
             self._margin_ratio = Contract.long_margin_ratio(str(self.contract))
         else:
@@ -336,6 +334,7 @@ class Contract(object):
    
     :ivar exchange: 市场类型。
     :ivar code: 合约代码
+    :ivar is_stock: 是否是股票
     :ivar margin_ratio: 保证金比例。
     :ivar volume_multiple: 合约乘数。
     """
@@ -391,9 +390,12 @@ class Contract(object):
         return cls.info.ix[strcontract.upper(), 'volume_multiple']
 
 
-
 class Period(object):
-    """ 周期 """
+    """ 周期
+
+    :ivar unit: 时间单位
+    :ivar count: 数值
+    """
     #class Type(Enum):
         #MilliSeconds = "MilliSeconds" 
         #Seconds = "Seconds" 
@@ -406,8 +408,8 @@ class Period(object):
     periods = ["MILLISECOND", "SECOND", "MINUTE", "HOUR",
                "DAY", "MONTH", "SEASON", "YEAR"]    
 
-    def __init__(self, str_period):
-        period = str_period.split('.')
+    def __init__(self, strperiod):
+        period = strperiod.split('.')
         if len(period) == 2:
             unit_count = int(period[0])
             time_unit = period[1].upper()
@@ -415,26 +417,11 @@ class Period(object):
             raise PeriodTypeError
         if time_unit not in self.periods:
             raise PeriodTypeError(period=time_unit)
-
-        self._type = time_unit
-        self._length = unit_count
-
-    @property
-    def type(self):
-        """
-        时间单位。
-        """
-        return self._type
-
-    @property
-    def length(self):
-        """
-        时间长度。
-        """
-        return self._length
+        self.unit = time_unit
+        self.count = unit_count
 
     def __str__(self):
-        return "%d.%s" % (self._length, self._type)
+        return "%d.%s" % (self.count, self.unit)
 
 
 class PContract(object):
@@ -451,10 +438,10 @@ class PContract(object):
         """ return string like 'IF000.SHEF-10.Minutes'  """
         return "%s-%s" % (self.contract, self.period)
 
-    @staticmethod
-    def from_string(strpcon):
+    @classmethod
+    def from_string(cls, strpcon):
         t = strpcon.split('-')
-        return PContract(Contract(t[0]), Period(t[1]))
+        return cls(Contract(t[0]), Period(t[1]))
 
     def __hash__(self):
         try:
@@ -507,11 +494,12 @@ class Position(object):
         self.today = 0 
         self.cost = 0
         self.direction = trans.direction
+        strcon = str(self.contract)
         if self.direction == Direction.LONG:
-            self._margin_ratio = Contract.long_margin_ratio(str(self.contract))
+            self._margin_ratio = Contract.long_margin_ratio(strcon)
         else:
-            self._margin_ratio = Contract.short_margin_ratio(str(self.contract))
-        self._volume_multiple = Contract.volume_multiple(str(self.contract))
+            self._margin_ratio = Contract.short_margin_ratio(strcon)
+        self._volume_multiple = Contract.volume_multiple(strcon)
 
     def profit(self, new_price):
         """ 根据最新价格计算持仓盈亏。
@@ -522,7 +510,6 @@ class Position(object):
         Returns:
             float. 盈亏数额
         """
-
         profit = 0
         if self.direction == Direction.LONG:
             profit += (new_price - self.cost) * self.quantity * self._volume_multiple
@@ -557,12 +544,12 @@ class Position(object):
 class Bar(object):
     """Bar数据。
 
+    :ivar datetime: 开盘时间。
     :ivar open: 开盘价。
     :ivar close: 收盘价。
     :ivar high: 最高价。
     :ivar low: 最低价。
-    :ivar datetime: 开盘时间。
-    :ivar vol: 成交量。
+    :ivar volume: 成交量。
     """
     def __init__(self, dt, open, close, high, low, vol):
         self.datetime = dt
@@ -576,53 +563,44 @@ class Bar(object):
 class OneDeal(object):
     """ 每笔交易（一开，一平)
         
-        :ivar open: 开仓价
-        :vartype open: float
-        :ivar close: 平仓价
-        :vartype close: float
+    :ivar open_datetime: 开仓时间
+    :ivar close_datetime: 平仓时间
+    :ivar open_price: 开仓价格
+    :ivar close_price: 平仓价格
+    :ivar direction: 开仓方向
     """
-
-
     def __init__(self, buy_trans, sell_trans, quantity):
         self.open = buy_trans
         self.close = sell_trans
-        self._quantity = quantity;
+        self.quantity = quantity;
 
     def profit(self):
         """ 盈亏额  """
         direction = self.open.direction
         if direction == Direction.LONG:
-            return (self.close.price - self.open.price) * self.open.quantity * self.open.order.volume_multiple
+            return (self.close.price - self.open.price) * self.open.quantity *\
+                    self.open.order.volume_multiple
         else:
-            return (self.open.price - self.close.price) * self.open.quantity * self.open.order.volume_multiple
-
-    @property
-    def quantity(self):
-        """ 成交量 """
-        return self._quantity
+            return (self.open.price - self.close.price) * self.open.quantity *\
+                    self.open.order.volume_multiple
 
     @property
     def open_datetime(self):
-        """ 开仓时间 """
         return self.open.datetime
 
     @property
     def open_price(self):
-        """ 开仓价格 """
         return self.open.price
 
     @property
     def close_datetime(self):
-        """ 平仓时间 """
         return self.close.datetime
 
     @property
     def close_price(self):
-        """ 平仓价格 """
         return self.close.price
 
     @property
     def direction(self):
-        """ 空头还是多头 """
         return self.open.direction
 

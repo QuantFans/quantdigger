@@ -11,7 +11,7 @@ def set_config(cfg):
         cfg['source'] = cfg['source'].lower()
         assert(cfg['source'] in ['sqlite', 'csv']) 
     settings.update(cfg)
-    locd.reset_source(settings)
+    locd.set_source(settings)
 
 # 默认设置
 #from quantdigger.errors import FileDoesNotExist

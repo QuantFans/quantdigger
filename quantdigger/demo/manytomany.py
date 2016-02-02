@@ -64,7 +64,7 @@ class DemoStrategy2(Strategy):
 if __name__ == '__main__':
     from quantdigger.digger import finance
 
-    set_symbols(['BB.SHFE-1.Minute'], 0)
+    set_symbols(['BB.SHFE-1.Minute'])
     comb1 = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
                             { 'capital': 10000000, 'ratio': [0.5, 0.5] })
     comb2 = add_strategy([DemoStrategy('B1'), DemoStrategy2('B2')],

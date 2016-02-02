@@ -6,10 +6,9 @@
 # @version 0.2
 # @date 2015-12-09
 
-
+from datetime import datetime
 import os
 import pandas as pd
-from datetime import datetime, timedelta
 from quantdigger.errors import FileDoesNotExist
 from quantdigger.datasource.source import CsvSource, SqlLiteSource
 from quantdigger.datasource.datautil import tick2period
@@ -21,8 +20,9 @@ class QuoteCache(object):
 
 class LocalData(object):
     """ 
-    本地数据代理根据配置决定数据源的类型,
-        比如sqlite, csv, pytable
+    本地数据代理根据配置决定数据源的类型, 比如sqlite, csv, pytable
+
+    :ivar source: 数据源名称
     """
     def __init__(self):
         """
@@ -30,8 +30,7 @@ class LocalData(object):
         self._src = None
         self.source = ''
 
-    def reset_source(self, settings):
-        """ 重新设置数据源 """ 
+    def set_source(self, settings):
         if settings['source'] == 'sqlite' :
             try:
                 import sqlite3
@@ -48,18 +47,14 @@ class LocalData(object):
             pass
         self.source = settings['source']
 
-    def get_bars(self, strpcon, dt_start, dt_end, window_size):
+    def get_bars(self, strpcon, dt_start, dt_end):
         """ 获取本地历史数据    
         
         Args:
             strpcon (str): 周期合约
-
             dt_start (datetime): 数据的开始时间
-
             dt_end (datetime): 数据的结束时间
 
-            window_size (int): 窗口大小，0表示大小为数据长度。
-        
         Returns:
             SourceWrapper. 数据
         """
@@ -67,19 +62,24 @@ class LocalData(object):
         if pcontract.contract.exchange == 'stock':
             return []
         else:
-            return self._src.get_bars(pcontract, dt_start, dt_end, window_size);
+            return self._src.get_bars(pcontract, dt_start, dt_end)
 
-    def get_data(self, pcontract, dt_start=datetime(1980,1,1),
-                  dt_end=datetime(2100,1,1), window_size=0):
-        """ 返回DataFrame数据 """
-        return self.get_bars(pcontract, dt_start, dt_end, window_size).data
+    def get_data(self, pcontract, dt_start="1980-1-1", dt_end="2100-1-1"):
+        """ 获取本地历史数据    
+        
+        Args:
+            strpcon (str): 周期合约
+            dt_start (datetime): 数据的开始时间
+            dt_end (datetime): 数据的结束时间
 
-    def getTickData(self):
-        raise NotImplementedError
-
-    def getContractsInfo(self):
-        """ 合约信息 """
-        raise NotImplementedError
+        Returns:
+            DataFrame. 
+        """
+        if isinstance(dt_start, str):
+            dt_start = datetime.strptime(dt_start, "%Y-%m-%d")
+        if isinstance(dt_end, str):
+            dt_end = datetime.strptime(dt_end, "%Y-%m-%d")
+        return self.get_bars(pcontract, dt_start, dt_end).data
 
     def get_contracts(self):
         """ 获取所有合约的基本信息""" 
@@ -99,7 +99,6 @@ class LocalData(object):
         Args:
             data_iter (iteratorable object): 数据['datetime', 'open', 'close',
             'high', 'low', 'volume']
-
             strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute' 
 
         """
@@ -173,8 +172,6 @@ class ServerData(object):
             data.index = pd.to_datetime(data.index)
             return data
     
-locd = LocalData()
-#locd.get_contracts
 class DataManager(object):
     """
     数据代理
@@ -183,29 +180,27 @@ class DataManager(object):
         self._loc_data = locd
         self._srv_data = ServerData()
 
-    def get_bars(self, strpcon , dt_start=datetime(1980,1,1),
-                  dt_end=datetime(2100,1,1), window_size=0):
+    def get_bars(self, strpcon , dt_start="1980-1-1", dt_end="2100-1-1"):
         """  加载时间范围[dt_start, dt_end]的k线数据。
         
         Args:
             strpcon (str): 周期合约
-
-            dt_start(datetime): 开始时间
-
-            dt_end(datetime): 结束时间
+            dt_start(datetime/str): 开始时间
+            dt_end(datetime/str): 结束时间
         
         Returns:
             SourceWrapper.
         """
-        if type(dt_start) == str:
+        if isinstance(dt_start, str):
             dt_start = datetime.strptime(dt_start, "%Y-%m-%d")
-        if type(dt_end) == str:
+        if isinstance(dt_end, str):
             dt_end = datetime.strptime(dt_end, "%Y-%m-%d")
-        dt_end += timedelta(days=1)
-        data = self._loc_data.get_bars(strpcon, dt_start, dt_end, window_size)
+        #dt_end += timedelta(days=1) # dt_end]
+        data = self._loc_data.get_bars(strpcon, dt_start, dt_end)
         if len(data) == 0:
             return self._srv_data.get_bars(strpcon, dt_start, dt_end) 
         else:
             return data
 
+locd = LocalData()
 __all__ = ['DataManager', 'locd']

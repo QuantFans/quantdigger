@@ -94,7 +94,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
             def on_bar(self, ctx):
                 return
                 
-        set_symbols(['stock.TEST-1.Minute'], window_size)
+        set_symbols(['stock.TEST-1.Minute'])
         profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
             'capital': capital,
             'ratio': [0.3, 0.3, 0.4]

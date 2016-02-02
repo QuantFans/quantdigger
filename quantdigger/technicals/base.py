@@ -5,23 +5,19 @@
 # @version 0.1
 # @date 2015-12-23
 
+from collections import OrderedDict
 import inspect
 import numpy as np
 import pandas
-from collections import OrderedDict
 from quantdigger.engine import series
 from quantdigger.widgets.widget_plot import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
 def transform2ndarray(data):
-    """ 如果是序列变量，返回ndarray
-        ,浅拷贝
-    """
+    """ 如果是序列变量，返回ndarray浅拷贝 """
     if isinstance(data, series.NumberSeries):
         data = data.data
-        #data = data.data[:len(data)]
     elif isinstance(data, pandas.Series):
-        # 处理pandas.Series
         data = np.asarray(data)
     if not isinstance(data, np.ndarray):
         raise  DataFormatError(type=type(data))
@@ -95,25 +91,14 @@ class TechnicalBase(PlotInterface):
     指标基类。
 
     :ivar name: 指标对象名称
-    :ivar values: 向量化运行结果, 用于处理历史数据。
-    :ivar series: 单值指标的序列变量或多值指标的序列变量数组。
-    :ivar _algo: 逐步指标函数。
-    :ivar _args: 逐步指标函数的参数。
+    :ivar series: 单值指标的序列变量或多值指标字典
+    :ivar is_multiple: 是否是多值指标
     """
     def __init__(self, name='',  widget=None):
         super(TechnicalBase, self).__init__(name, widget)
         self.name = name
-        self.count = 0
-        #if isinstance(data, series.NumberSeries) and series.g_rolling:
-            #data.set_shift()
-            ## 指标周期
-            #data.reset_data([], n+series.g_window)
-            ##(curbar, values)
-            #self._cache = [(-1, None)] * (series.g_window+1)
+        self.series = None
         self._args = None
-        ## @TODO 去掉逐步运算后删除
-        # 只在逐步运算中必须初始化
-        self.values = []    
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。""" 
@@ -124,6 +109,7 @@ class TechnicalBase(PlotInterface):
         
         Args:
             data (np.ndarray): 数据
+
             n (int): 时间窗口大小
         """
         raise NotImplementedError
@@ -135,33 +121,22 @@ class TechnicalBase(PlotInterface):
         if not hasattr(self, '_args'):
             raise Exception("每个指标都必须有_args属性，代表指标计算的参数！")
         self.data = self._args[0]
-        if not series.g_rolling:
-            # 数据转化成ta-lib能处理的格式
-            self._args[0] = transform2ndarray(self._args[0])
-            apply(self._vector_algo, tuple(self._args))
+        # 数据转化成ta-lib能处理的格式
+        self._args[0] = transform2ndarray(self._args[0])
+        apply(self._vector_algo, tuple(self._args))
         if not hasattr(self, 'values'):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
         if isinstance(self.values, dict):
             self.series = OrderedDict()
             for key, value in self.values.iteritems():
-                self.series[key] = series.NumberSeries(value, len(value),
-                                                    self.name, self, float('nan'))
+                self.series[key] = series.NumberSeries(value, self.name, self, float('nan'))
             for key, value in self.series.iteritems():
                 setattr(self, key, value)
-            self.multi_value = True
+            self.is_multiple = True
         else:
-            self.series = [series.NumberSeries(self.values, len(self.values),
-                            self.name, self, float('nan'))]
-            self.multi_value = False
-        if series.g_rolling:
-            if self.multi_value:
-                for key, value in self.series.iteritems():
-                    value.reset_data([], 1+series.g_window)
-            else:
-                for s in self.series:
-                    s.reset_data([], 1+series.g_window)
+            self.series = [series.NumberSeries(self.values, self.name, self, float('nan'))]
+            self.is_multiple = False
         self._init_bound()
-        
 
     def compute_element(self, cache_index, rolling_index):
         """ 计算一个回溯值, 被Series延迟调用。
@@ -171,36 +146,33 @@ class TechnicalBase(PlotInterface):
 
             rolling_index (int): 回溯索引
         """
-        if series.g_rolling:
-            rolling_index = min(len(self.data)-1, self.curbar)
-            values = None
-            if self._cache[cache_index][0] == self.curbar:
-                values = self._cache[cache_index][1] # 缓存命中
-            else:
-                self._rolling_data = transform2ndarray(self.data)  # 输入
-                # 指标一次返回多个值
-                args =  (self._rolling_data, ) + self._args + (rolling_index,)
-                values = apply(self._rolling_algo, args)
-                self._cache[cache_index] = (self.curbar, values)
+        #rolling_index = min(len(self.data)-1, self.curbar)
+        #values = None
+        #if self._cache[cache_index][0] == self.curbar:
+            #values = self._cache[cache_index][1] # 缓存命中
+        #else:
+            #self._rolling_data = transform2ndarray(self.data)  # 输入
+            ## 指标一次返回多个值
+            #args =  (self._rolling_data, ) + self._args + (rolling_index,)
+            #values = apply(self._rolling_algo, args)
+            #self._cache[cache_index] = (self.curbar, values)
 
-            for i, v in enumerate(values):
-                if self.multi_value:
-                    self.series.values()[i].update(v) 
-                else:
-                    self.series[i].update(v)
-        else:
-            ## @todo 如果是实时数据，还是要计算
-            return
+        #for i, v in enumerate(values):
+            #if self.is_multiple:
+                #self.series.values()[i].update(v) 
+            #else:
+                #self.series[i].update(v)
+        pass
 
     @property
     def curbar(self):
-        if self.multi_value:
+        if self.is_multiple:
             return self.series.itervalues().next().curbar
         return self.series[0].curbar
 
     def __size__(self):
         """""" 
-        if self.multi_value:
+        if self.is_multiple:
             return len(self.series.itervalues().next())
         return len(self.series[0])
     
@@ -236,7 +208,7 @@ class TechnicalBase(PlotInterface):
         # python 3.x 有这种机制？
         #print self.name, index
         #print self.series[0].data
-        if self.multi_value:
+        if self.is_multiple:
             return self.series[index]
         # 返回单变量的值。
         if index >= 0:
@@ -327,3 +299,5 @@ class TechnicalBase(PlotInterface):
     #def __ifloordiv__(self, r):
         #self._data[self._curbar] %= r
         #return self
+
+__all__ = ['TechnicalBase', 'transform2ndarray']

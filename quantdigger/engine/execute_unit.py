@@ -3,42 +3,32 @@ from collections import OrderedDict
 from datetime import datetime
 from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
-from quantdigger.engine import series, blotter
+from quantdigger.engine import blotter
 from quantdigger.util import elogger as logger
 
 class ExecuteUnit(object):
-    """ 策略执行的物理单元，支持多个策略同时运行。
-        每个执行单元都可能跟踪多个数据(策略用到的周期合约数据集合)。
-        其中第一个合约为"主合约" 。 每个执行器可加载多个策略,只要数据需求不超过pcontracts。
-
-        :ivar dt_begin: 策略执行的时间起点。
-        :ivar dt_end: 策略执行的时间终点。
-        :ivar pcontracts: [str]策略用到的周期合约数据集合。
-        :ivar _strategies: 策略集合。
-        :ivar datasource: 数据源。
-
+    """ 策略执行的物理单元，支持多个组合同时运行。
     """
-    def __init__(self, pcontracts, window_size=0, dt_start=datetime(1980,1,1),
-            dt_end=datetime(2100,1,1), spec_date = { }): # 'symbol':[,]
-        series.g_rolling = False if window_size == 0 else True
-        series.g_window = window_size
-        self.all_data = OrderedDict()     # str(PContract): DataWrapper
+    def __init__(self, pcontracts,
+                       dt_start="1980-1-1",
+                       dt_end="2100-1-1",
+                       spec_date = { }): # 'symbol':[,]
+        """ 
+        Args:
+            pcontracts (list): list of pcontracts(string)
+            dt_start (datetime/str): start time of all pcontracts
+            dt_end (datetime/str): end time of all pcontracts
+            spec_date (dict): time range for specific pcontracts
+        """
         self.finished_data = []
         pcontracts = map(lambda x: x.upper(), pcontracts)
         self.pcontracts = pcontracts
         self._combs = []
-        self._window_size = window_size + 1
-        self._data_manager = DataManager()
-        for pcon in pcontracts:
-            if pcon in spec_date:
-                dt_start = spec_date[pcon][0]
-                dt_end = spec_date[pcon][1]
-            assert(dt_start < dt_end)
-            self.load_data(pcon, dt_start, dt_end)
-        self.context = Context(self.all_data)
+        self._all_data = self._load_data(self.pcontracts, dt_start, dt_end, spec_date)
+        self.context = Context(self._all_data)
 
     def _init_strategies(self):
-        for pcon, dcontext in self.all_data.iteritems():
+        for pcon, dcontext in self._all_data.iteritems():
             # switch context
             self.context.switch_to_contract(pcon)
             for i, combination in enumerate(self._combs):
@@ -46,28 +36,35 @@ class ExecuteUnit(object):
                     self.context.switch_to_strategy(i, j)
                     s.on_init(self.context)
 
-    def add_comb(self, comb, settings = { }):
+    def add_comb(self, comb, settings):
         """ 添加策略组合组合
         
         Args:
             comb (list): 一个策略组合
         """
         self._combs.append(comb)
-        if settings:
-            num_strategy = len(comb) 
-            assert (settings['capital'] > 0)
-            assert len(settings['ratio']) == num_strategy
-            assert(sum(settings['ratio']) == 1)
+        num_strategy = len(comb) 
+        if 'capital' not in settings:
+            settings['capital'] = 1000000.0 # 默认资金
+        assert (settings['capital'] > 0)
+        if num_strategy == 1:
+            settings['ratio'] = [1]
+        elif num_strategy > 1 and 'ratio' not in settings:
+            settings['ratio'] = [1.0/num_strategy] * num_strategy
+        assert('ratio' in settings) 
+        assert(len(settings['ratio']) == num_strategy)
+        assert(sum(settings['ratio']) == 1)
+        assert(num_strategy>=1)
         ctxs = []
         for i, s in enumerate(comb):
             iset = { }
             if settings:
                 iset = { 'capital': settings['capital'] * settings['ratio'][i] }
-                logger.debug(iset)
+                #logger.debug(iset)
             ctxs.append(StrategyContext(s.name, iset))
         self.context.add_strategy_context(ctxs)
         blotters = [ ctx.blotter for ctx in  ctxs]
-        return blotter.Profile(blotters, self.all_data, self.pcontracts[0], len(self._combs)-1)
+        return blotter.Profile(blotters, self._all_data, self.pcontracts[0], len(self._combs)-1)
 
     def run(self):
         # 初始化策略自定义时间序列变量
@@ -77,12 +74,12 @@ class ExecuteUnit(object):
         # todo 对单策略优化
         has_next = True
         # 遍历每个数据轮, 次数为数据的最大长度
-        for pcon, data in self.all_data.iteritems():
+        for pcon, data in self._all_data.iteritems():
             self.context.switch_to_contract(pcon)
             self.context.rolling_forward()
         while True:
             # 遍历数据轮的所有合约
-            for pcon, data in self.all_data.iteritems():
+            for pcon, data in self._all_data.iteritems():
                 self.context.switch_to_contract(pcon)
                 if self.context.time_aligned():
                     self.context.update_system_vars()
@@ -91,7 +88,6 @@ class ExecuteUnit(object):
                         # 策略遍历
                         for j, s in enumerate(combination):
                             self.context.switch_to_strategy(i, j)
-                            #self.context.switch_to_data(i, j)
                             self.context.update_user_vars()
                             s.on_symbol(self.context)
             ## 默认的是第一个合约
@@ -107,15 +103,15 @@ class ExecuteUnit(object):
             self.context.ctx_datetime = datetime(2100,1,1)
             # 
             toremove = []
-            for pcon, data in self.all_data.iteritems():
+            for pcon, data in self._all_data.iteritems():
                 self.context.switch_to_contract(pcon)
                 has_next = self.context.rolling_forward()
                 if not has_next:
                     toremove.append(pcon)
             if toremove:
                 for key in toremove:
-                    del self.all_data[key]
-                if len(self.all_data) == 0:
+                    del self._all_data[key]
+                if len(self._all_data) == 0:
                     # 策略退出后的处理
                     for i, combination in enumerate(self._combs):
                         for j, s in enumerate(combination):
@@ -123,27 +119,15 @@ class ExecuteUnit(object):
                             s.on_exit(self.context)
                     return
             #print "*********" 
-                 
-                    
-    def load_data(self, strpcon, dt_start=datetime(1980,1,1), dt_end=datetime(2100,1,1)):
-        """ 加载周期合约数据
-        
-        Args:
-            strpcon (str): 周期合约
 
-            dt_start(datetime): 开始时间
-
-            dt_end(datetime): 结束时间
-
-        Returns:
-            pd.DataFrame. k线数据
-        """
-        strpcon = strpcon.upper()
-        try:
-            return self.all_data[strpcon]
-        except KeyError:
-            wrapper = self._data_manager.get_bars(strpcon, dt_start, dt_end, self._window_size)
-            window_size = len(wrapper.data) if not series.g_rolling else self._window_size
-            self.all_data[strpcon] = DataContext(wrapper, window_size)
-            return wrapper
-
+    def _load_data(self, pcontracts, dt_start, dt_end, spec_date):
+        all_data = OrderedDict()     # str(PContract): DataWrapper
+        self._data_manager = DataManager()
+        for pcon in pcontracts:
+            if pcon in spec_date:
+                dt_start = spec_date[pcon][0]
+                dt_end = spec_date[pcon][1]
+            assert(dt_start < dt_end)
+            wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
+            all_data[pcon] = DataContext(wrapper)
+        return all_data

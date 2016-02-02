@@ -17,7 +17,6 @@ from logbook import Logger
 from quantdigger import *
 
 logger = Logger('test')
-window_size = 0
 
 class TestSeries(unittest.TestCase):
         
@@ -76,7 +75,7 @@ class TestSeries(unittest.TestCase):
                 uvars['dtseries'].append(ctx.dtseries[0])
                 uvars['dlist'] = ctx.dlist
 
-        set_symbols(['BB.TEST-1.Minute'], window_size)
+        set_symbols(['BB.TEST-1.Minute'])
         add_strategy([DemoStrategy('A1')])
         run()
 
@@ -201,7 +200,7 @@ class TestIndicator(unittest.TestCase):
             def on_exit(self, ctx):
                 return
 
-        set_symbols(['BB.TEST-1.Minute'], window_size)
+        set_symbols(['BB.TEST-1.Minute'])
         add_strategy([DemoStrategy('A1')])
         run()
         self.assertTrue(all(true_test), "指标转化错误!")
@@ -340,7 +339,7 @@ class TestMultipleCombination(unittest.TestCase):
                 on_exit['strategy'].append(ctx.strategy)
                 return
 
-        set_symbols(['BB.TEST-1.Minute', 'AA.TEST-1.Minute'], window_size)
+        set_symbols(['BB.TEST-1.Minute', 'AA.TEST-1.Minute'])
         add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
         add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()
@@ -419,7 +418,7 @@ class TestDiffPeriod(unittest.TestCase):
                 on_exit['strategy'].append(ctx.strategy)
                 return
 
-        set_symbols(['TWODAY.TEST-5.Second', 'oneday.TEST-1.Minute'], window_size)
+        set_symbols(['TWODAY.TEST-5.Second', 'oneday.TEST-1.Minute'])
         add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
         add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()

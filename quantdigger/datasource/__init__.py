@@ -1,2 +1,2 @@
 from datautil import *
-from data import *
+from data import locd

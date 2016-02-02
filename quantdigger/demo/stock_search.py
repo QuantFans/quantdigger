@@ -42,7 +42,7 @@ class DemoStrategy(Strategy):
 
 if __name__ == '__main__':
     # 
-    set_symbols(['BB.SHFE-1.Minute', 'AA.SHFE-1.Minute'], 0)
+    set_symbols(['BB.SHFE-1.Minute', 'AA.SHFE-1.Minute'])
     algo = DemoStrategy('A1')
     profile = add_strategy([algo])
     run()

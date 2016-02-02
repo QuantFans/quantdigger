@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 from quantdigger.engine.execute_unit import ExecuteUnit
-import datetime
 
 # 系统角色
-g_simulator = None
-def set_symbols(pcons, window_size=0,
-                    dt_start=datetime.datetime(1980,1,1),
-                    dt_end=datetime.datetime(2100,1,1)):
-    """ 添加数据
-
+_simulator = None
+def set_symbols(pcontracts, dt_start="1980-1-1",
+                       dt_end="2100-1-1",
+                       spec_date = { }): # 'symbol':[,]
+    """ 
     Args:
-        pcons ([str,]): 周期合约数组
-
-        dt_start (str): 开始时间
-
-        dt_end (str): 结束
-
-        window_size (int): 序列数据的窗口大小
-    
+        pcontracts (list): list of pcontracts(string)
+        dt_start (datetime/str): start time of all pcontracts
+        dt_end (datetime/str): end time of all pcontracts
+        spec_date (dict): time range for specific pcontracts
     """
-    global g_simulator
-    ## @TODO pcon格式验证
-    g_simulator = ExecuteUnit(pcons, window_size, dt_start, dt_end)
-    return g_simulator
+    global _simulator
+    _simulator = ExecuteUnit(pcontracts, dt_start, dt_end, spec_date)
+    return _simulator
 
 def add_strategy(algos, settings = { }):
     """ 一个组合中的策略
@@ -33,66 +26,13 @@ def add_strategy(algos, settings = { }):
     Returns:
         Profile. 组合结果
     """
-    return g_simulator.add_comb(algos, settings)
+    rst = _simulator.add_comb(algos, settings)
+    ## @TODO 为什么去掉测试test_engine_vector.py无法通过 
+    settings.clear()
+    return rst
 
 def run():
-    g_simulator.run()
-
-def buy(direction, price, quantity, price_type='LMT', contract=None):
-    """ 开仓    
-    
-    Args:
-        direction (str/int): 下单方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
-
-        price (float): 价格。
-
-        quantity (int): 数量。
-
-        price_type (str/int): 下单价格类型。限价单 - 'lmt' / 1；市价单 - 'mkt' / 2
-    """
-    g_simulator.context.buy(direction, price, quantity, price_type, contract)
-    #print g_simulator._context.trading_context.name
-
-def sell(direction, price, quantity, price_type='MKT', contract=None):
-    """ 平仓。
-    
-    Args:
-       direction (str/int): 下单方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
-
-       price (float): 价格。
-
-       quantity (int): 数量。
-
-       price_type (str/int): 下单价格类型。限价单 - 'lmt' / 1；市价单 - 'mkt' / 2
-    """
-    g_simulator.context.sell(direction, price, quantity, price_type, contract)
-
-def position(contract=None):
-    """ 当前仓位。
-   
-    Args:
-        contract (str): 字符串合约，默认为None表示主合约。
-    
-    Returns:
-        int. 该合约的持仓数目。
-    """
-    pass
-
-def cash():
-    """ 现金。 """
-    pass
-
-def equity():
-    """ 当前权益 """
-    pass
-
-def profit(contract=None):
-    """ 当前持仓的历史盈亏 """ 
-    pass
-
-def day_profit(contract=None):
-    """ 当前持仓的浮动盈亏 """ 
-    pass
+    _simulator.run()
 
 class Strategy(object):
     """ 策略基类"""
@@ -117,5 +57,4 @@ class Strategy(object):
         # 停在最后一根bar
         return
 
-#__all__ = ['set_symbols', 'add_strategy', 'run', 'buy', 'sell',
-        #'position', 'cash', 'equity', 'profit', 'day_profit', 'Strategy']
+__all__ = ['set_symbols', 'add_strategy', 'run', 'Strategy']

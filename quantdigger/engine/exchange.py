@@ -5,29 +5,26 @@ from quantdigger.util import elogger as logger
 class Exchange(object):
     """ 模拟交易所。
   
-        :ivar _slippage: 滑点模型。
-        :ivar _open_orders: 未成交订单。
         :ivar events: 事件池。
+        :ivar name: 策略名，用于代码跟踪。
     """
     def __init__(self, name, events_pool, slippage = None, strict=True):
+        self.events = events_pool
+        self.name = name
         self._slippage = slippage
         self._open_orders = set()
-        self.events = events_pool
         # strict 为False表示只关注信号源的可视化，而非实际成交情况。
         self._strict = strict
         self._datetime = None
-        self.name = name
 
     def make_market(self, bars):
         """ 价格撮合""" 
-            #for order in self._open_orders:
-                #print order.id
         fill_orders = set()
         for order in self._open_orders:
             if order.side == TradeSide.CANCEL:
+                fill_orders.add(order)
                 transact = Transaction(order)
                 self.events.put(FillEvent(transact)) 
-                fill_orders.add(order)
                 continue
             try:
                 bar = bars[order.contract]
@@ -74,35 +71,15 @@ class Exchange(object):
         if fill_orders:
             self._open_orders -= fill_orders
 
-        #if self.name == 'A3':
-            #print "aaaaaaaa" 
-            #for order in self._open_orders:
-                #print order.id
-
-
     def insert_order(self, event):
         """
         模拟交易所收到订单。
         """ 
-        # 如果是撤单，会自动覆盖。
-        #if self.name == 'A3':
-            #for order in self._open_orders:
-                #print order
-            #print event.order.id, event.order.side, "##" 
-            #print "-----------------" 
         ## @TODO 
         if event.order in self._open_orders:
+            # 撤单处理, set不会自动覆盖。
             self._open_orders.remove(event.order) 
         self._open_orders.add(event.order)
-
-        #if self.name == 'A3':
-            #for order in self._open_orders:
-                #print order
-
-
-    def cancel_order(self, order):
-        ## @TODO 撤单
-        pass
 
     def update_datetime(self, dt):
         if self._datetime:

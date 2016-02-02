@@ -60,7 +60,6 @@ def encode2id(period, dt):
     
     Args:
         period (Period): 周期
-
         dt (datetime): 时间戳 
     
     Returns:
@@ -101,9 +100,7 @@ def import_tdx_stock(path, ld):
     
     Args:
         path (str): 数据文件夹
-
         ld (LocalData): 本地数据库对象
-    
     """
     from datetime import datetime, timedelta
     from quantdigger.util import ProgressBar
@@ -145,10 +142,7 @@ def import_tdx_stock(path, ld):
     return
 
 def import_from_csv(self, paths):
-    'sqlite' 
-    ## @TODO 移动到周围代码
-    """ 批量导入特定路径下规定格式的csv文件到系统。
-    """
+    """ 批量导入特定路径下规定格式的csv文件到系统。 """
     for path in paths:
         if not path.endswith(".csv") and not path.endswith(".CSV"):
             ## @TODO 

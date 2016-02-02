@@ -74,7 +74,7 @@ class DemoStrategy2(Strategy):
 
 if __name__ == '__main__':
     #set_config({ 'source': 'csv' })
-    set_symbols(['BB.SHFE-1.Minute'], 0)
+    set_symbols(['BB.SHFE-1.Minute'])
     profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
                             { 'capital': 50000.0, 'ratio': [0.5, 0.5] })
     run()
@@ -87,10 +87,10 @@ if __name__ == '__main__':
     curve = finance.create_equity_curve(profile.all_holdings())
     plotting.plot_strategy(profile.data(0), profile.technicals(0),
                             profile.deals(0), curve.equity)
-    #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
-                        #colors=['r', 'g', 'b'],
-                        #names=[profile.name(0), profile.name(1), 'A0'])
-    ## 绘制净值曲线
-    #plotting.plot_curves([curve.networth])
-    ## 打印统计信息
-    #print finance.summary_stats(curve, 252*4*60)
+    plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
+                        colors=['r', 'g', 'b'],
+                        names=[profile.name(0), profile.name(1), 'A0'])
+    # 绘制净值曲线
+    plotting.plot_curves([curve.networth])
+    # 打印统计信息
+    print finance.summary_stats(curve, 252*4*60)
