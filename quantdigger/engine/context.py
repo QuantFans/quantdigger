@@ -321,8 +321,9 @@ class StrategyContext(object):
 
 class Context(object):
     """ 上下文"""
-    def __init__(self, data):
+    def __init__(self, data, max_window):
         self.ctx_datetime = datetime.datetime(2100,1,1) # universal time
+        self.on_bar = False
         self._data_contexts = { }       # str(PContract): DataContext
         for key, value in data.iteritems():
             self._data_contexts[key] = value
@@ -437,7 +438,10 @@ class Context(object):
     @property
     def datetime(self):
         """ k线时间序列 """
-        return self._cur_data_context.datetime
+        if self.on_bar:
+            return self._cur_data_context.datetime
+        else:
+            return self._cur_data_context.datetime
 
     @property
     def open_orders(self):
@@ -455,7 +459,8 @@ class Context(object):
 
     def __setattr__(self, name, value):
         if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
-                    '_strategy_contexts', 'ctx_datetime', '_ticks', '_bars', '_trading']:
+                    '_strategy_contexts', 'ctx_datetime', '_ticks', '_bars',
+                    '_trading', 'on_bar']:
             super(Context, self).__setattr__(name, value)
         else:
             self._cur_data_context.add_item(name, value)

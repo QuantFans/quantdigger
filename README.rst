@@ -21,15 +21,7 @@ http://www.quantfans.com/doc/quantdigger/
 安装
 ----
     
-你可以选择pip安装
-   
-  ::
-       
-      python install_pip.py  (如果已经安装了pip,略过这一步。)
-      pip install QuantDigger
-      python install_dependency.py
-
-或者克隆github代码后本地安装(推荐)
+或者克隆github代码后本地安装
    
   ::
        

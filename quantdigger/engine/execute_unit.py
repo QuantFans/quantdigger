@@ -25,8 +25,9 @@ class ExecuteUnit(object):
         pcontracts = map(lambda x: x.upper(), pcontracts)
         self.pcontracts = pcontracts
         self._combs = []
-        self._all_data = self._load_data(self.pcontracts, dt_start, dt_end, spec_date)
-        self.context = Context(self._all_data)
+        # str(PContract): DataWrapper
+        self._all_data, self._max_window = self._load_data(self.pcontracts, dt_start, dt_end, spec_date)
+        self.context = Context(self._all_data, self._max_window)
 
     def _init_strategies(self):
         for pcon, dcontext in self._all_data.iteritems():
@@ -68,6 +69,7 @@ class ExecuteUnit(object):
         return blotter.Profile(blotters, self._all_data, self.pcontracts[0], len(self._combs)-1)
 
     def run(self):
+        ## @TODO max_window 可用来显示回测进度
         # 初始化策略自定义时间序列变量
         print 'runing strategies..' 
         self._init_strategies()
@@ -80,6 +82,7 @@ class ExecuteUnit(object):
             self.context.switch_to_contract(pcon)
             self.context.rolling_forward()
         while True:
+            self.context.on_bar = False
             # 遍历数据轮的所有合约
             for pcon, data in self._all_data.iteritems():
                 self.context.switch_to_contract(pcon)
@@ -94,6 +97,7 @@ class ExecuteUnit(object):
                             s.on_symbol(self.context)
             ## 默认的是第一个合约
             self.context.switch_to_contract(self.pcontracts[0])
+            self.context.on_bar = True
             # 每轮数据的最后处理
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
@@ -124,8 +128,9 @@ class ExecuteUnit(object):
             #print "*********" 
 
     def _load_data(self, pcontracts, dt_start, dt_end, spec_date):
-        all_data = OrderedDict()     # str(PContract): DataWrapper
+        all_data = OrderedDict()     
         self._data_manager = DataManager()
+        max_window = -1
         for pcon in pcontracts:
             if pcon in spec_date:
                 dt_start = spec_date[pcon][0]
@@ -133,4 +138,5 @@ class ExecuteUnit(object):
             assert(dt_start < dt_end)
             wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
             all_data[pcon] = DataContext(wrapper)
-        return all_data
+            max_window = max(max_window, len(wrapper))
+        return all_data, max_window

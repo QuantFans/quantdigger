@@ -211,7 +211,7 @@ class TestIndicator(unittest.TestCase):
         true_test, false_test = [], []
         for i in xrange(0, len(close)):
             if i >=  1:
-                true_test.append(np.isclose(ma2[i], source_ma2[i]))
+                true_test.append(ma2[i] == source_ma2[i])
             else:
                 false_test.append(ma2[i] == ma2[i])
 
@@ -221,7 +221,7 @@ class TestIndicator(unittest.TestCase):
         true_test, false_test = [], []
         for i in xrange(0, len(open)):
             if i >=  1:
-                true_test.append(np.isclose(ma2[i], source_ma2[i]))
+                true_test.append(ma2[i] == source_ma2[i])
             else:
                 false_test.append(ma2[i] == ma2[i])
         self.assertFalse(any(false_test), "单值指标反例测试失败!")
@@ -232,7 +232,7 @@ class TestIndicator(unittest.TestCase):
         source_ma2 = talib.SMA(np.asarray(close), 2)
         for i in xrange(0, len(close)):
             if i >= 4:
-                true_test.append(np.isclose(pre_ma2[i], source_ma2[i-3]))
+                true_test.append(pre_ma2[i] == source_ma2[i-3])
             else:
                 # 指标序列变量的默认值为nan
                 false_test.append(pre_ma2[i] == pre_ma2[i])
@@ -255,9 +255,9 @@ class TestIndicator(unittest.TestCase):
         true_test, false_test = [], []
         for i in xrange(0, len(close)):
             if i >=  1:
-                true_test.append(np.isclose(boll['upper'][i], u[i]))
-                true_test.append(np.isclose(boll['middler'][i], m[i]))
-                true_test.append(np.isclose(boll['lower'][i], l[i]))
+                true_test.append(boll['upper'][i] == u[i])
+                true_test.append(boll['middler'][i] == m[i])
+                true_test.append(boll['lower'][i] == l[i])
             else:
                 false_test.append(boll['upper'][i] == boll['upper'][i])
                 false_test.append(boll['middler'][i] == boll['middler'][i])
@@ -268,9 +268,9 @@ class TestIndicator(unittest.TestCase):
         true_test, false_test = [], []
         for i in xrange(0, len(close)):
             if i >=  1:
-                true_test.append(np.isclose(boll['upper'][i], u[i]))
-                true_test.append(np.isclose(boll['middler'][i], m[i]))
-                true_test.append(np.isclose(boll['lower'][i], l[i]))
+                true_test.append(boll['upper'][i] == u[i])
+                true_test.append(boll['middler'][i] == m[i])
+                true_test.append(boll['lower'][i] == l[i])
             else:
                 false_test.append(boll['upper'][i] == boll['upper'][i])
                 false_test.append(boll['middler'][i] == boll['middler'][i])
@@ -284,7 +284,7 @@ class TestIndicator(unittest.TestCase):
         u, m, l = talib.BBANDS(np.asarray(close), 2, 2, 2)
         for i in xrange(0, len(close)):
             if i >= 4:
-                true_test.append(np.isclose(boll3['upper'][i], u[i-3]))
+                true_test.append(boll3['upper'][i] ==  u[i-3])
             else:
                 false_test.append(boll3['upper'][i] ==  boll3['upper'][i])
         self.assertTrue(all(true_test), "多值指标回溯正例测试失败")
