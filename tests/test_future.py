@@ -6,13 +6,10 @@
 # @version 0.3
 # @date 2015-12-22
 
-## @TODO TestCase2, TestCase3, TestCase4 重构
 import datetime
 import unittest
 import pandas as pd
 import os
-import talib
-import numpy as np
 from logbook import Logger
 from quantdigger.datastruct import TradeSide, Contract
 from quantdigger import *
@@ -141,25 +138,26 @@ class TestOneDataOneCombination(unittest.TestCase):
         smg = Contract.short_margin_ratio('future.TEST')
         s_equity0, s_cashes0, dts = holdings_buy_maked_curbar(source, capital*0.3, lmg, multi)
         self.assertTrue(len(t_cashes0) == len(s_cashes0), 'cash接口测试失败！')
-        for i in range(0, len(t_cashes0)-1): # 最后一根强平了无法比较
-            self.assertAlmostEqual(t_cashes0[i], s_cashes0[i])
         self.assertTrue(len(all_holdings) == len(s_equity0), 'all_holdings接口测试失败！')
-
         for i, hd in enumerate(all_holdings0):
             self.assertAlmostEqual(hd['equity'], s_equity0[i])
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
+         # 最后一根强平了无法比较, 可以通过Profile的all_holding去比较
+        for i in range(0, len(t_cashes0)-1):
+            self.assertAlmostEqual(t_cashes0[i], s_cashes0[i])
+
         #  确保资金够用，所以不影响
         e0, c0, dts = holdings_buy_maked_curbar(source, capital*0.3/2, lmg, multi)
         e1, c1, dts = holdings_short_maked_curbar(source, capital*0.3/2, smg, multi)
         s_equity1 = [x + y for x, y in zip(e0, e1)]
         s_cashes1 = [x + y for x, y in zip(c0, c1)]
         self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
-        for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
-            self.assertAlmostEqual(t_cashes1[i], s_cashes1[i])
         for i, hd in enumerate(profile.all_holdings(1)):
-            self.assertAlmostEqual(s_equity0[i]-capital*0.3, -(s_equity1[i]-capital*0.3))
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
             self.assertAlmostEqual(hd['equity'], s_equity1[i])
+         # 最后一根强平了无法比较, 可以通过Profile的all_holding去比较
+        for i in range(0, len(t_cashes1)-1):
+            self.assertAlmostEqual(t_cashes1[i], s_cashes1[i])
         for i in range(0, len(profile.all_holdings())):
             hd = all_holdings[i]
             hd0 = all_holdings0[i]
@@ -189,17 +187,18 @@ class TestOneDataOneCombination(unittest.TestCase):
         self.assertTrue(hd0last['commission'] == hd0['commission'], 'holdings接口测试失败！')
         self.assertTrue(len(profile.all_holdings()) == len(s_equity0) and
                         len(s_equity0) > 0, 'holdings接口测试失败！')
-        # 绘制k线，交易信号线
-        #from quantdigger.digger import finance, plotting
-        #plotting.plot_strategy(profile.data(), deals=profile.deals(0))
+        ## 绘制k线，交易信号线
+        ##from quantdigger.digger import finance, plotting
+        ##plotting.plot_strategy(profile.data(), deals=profile.deals(0))
 
 
     def test_case2(self):
         """ 测试限价的延迟成交, 与是否是期货还是股票无关。
+            测试延迟成交的资金占用
         """
         buy_entries, sell_entries = [], []
         short_entries, cover_entries = [], []
-        cashes0, cashes1 = [], []
+        cashes0, cashes1, cashes2 = [], [], []
 
         class DemoStrategyBuy(Strategy):
             """ 只开多头仓位的策略 """
@@ -214,9 +213,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                 # 默认多头
                 elif ctx.pos() > 0 and ctx.datetime[0].time() == sell1:
                     ctx.sell(ctx.close, ctx.pos()) 
-                    cashes0.append(ctx.test_cash())
-                    return
-                cashes0.append(ctx.cash())
+                cashes0.append(ctx.test_cash())
 
         class DemoStrategyShort(Strategy):
             """ 只开空头仓位的策略 """
@@ -230,9 +227,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                     ctx.short(ctx.high+OFFSET, 1) 
                 elif ctx.pos('short') > 0 and ctx.datetime[0].time() == sell1:
                     ctx.cover(ctx.close, ctx.pos('short')) 
-                    cashes1.append(ctx.test_cash())
-                    return
-                cashes1.append(ctx.cash())
+                cashes1.append(ctx.test_cash())
 
         class DemoStrategySell(Strategy):
             """ 只开多头仓位的策略 """
@@ -244,10 +239,15 @@ class TestOneDataOneCombination(unittest.TestCase):
             def on_bar(self, ctx):
                 if ctx.datetime[0].time() == buy1:
                     ctx.buy(ctx.close, 1) 
+                    cashes2.append(ctx.test_cash())
+                    return
                 elif ctx.pos('long') > 0 and ctx.datetime[0] in sell_entries:
                     ctx.sell(ctx.high+OFFSET, ctx.pos()) 
                 elif ctx.pos('long') > 0 and ctx.datetime[0].time() == sell3:
                     ctx.sell(ctx.close, ctx.pos()) 
+                    cashes2.append(ctx.test_cash())
+                    return
+                cashes2.append(ctx.cash())
 
         class DemoStrategyCover(Strategy):
             
@@ -281,7 +281,6 @@ class TestOneDataOneCombination(unittest.TestCase):
         for i, hd in enumerate(profile.all_holdings(0)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertAlmostEqual(hd['equity'], target[i])
-        # cash() 终点
         for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
             self.assertAlmostEqual(cashes0[i],cashes[i])
         # short
@@ -293,13 +292,15 @@ class TestOneDataOneCombination(unittest.TestCase):
             self.assertAlmostEqual(hd['equity'], target[i])
         for i in range(0, len(cashes1)-1):
             self.assertAlmostEqual(cashes1[i],cashes[i])
-        # sell
-        target, dts = holdings_sell_maked_nextbar(source, sell_entries, capital/4, lmg, multi)
+        ## sell
+        target, cashes, dts = holdings_sell_maked_nextbar(source, sell_entries, capital/4, lmg, multi)
         self.assertTrue(len(profile.all_holdings(1)) == len(target) and
                         len(target) > 0, '模拟器测试失败！')
         for i, hd in enumerate(profile.all_holdings(1)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertAlmostEqual(hd['equity'], target[i])
+        for i in range(0, len(cashes2)-1):
+            self.assertAlmostEqual(cashes2[i],cashes[i])
 
         # cover
         target, dts = holdings_cover_maked_nextbar(source, cover_entries, capital/4, smg, multi)
@@ -315,7 +316,8 @@ class TestOneDataOneCombination(unittest.TestCase):
         ## @TODO 模拟器make_market的运行次数
         return
 
-    def test_case3(self):
+
+    def test_case4(self):
         """ 测试市价成交 """
         cashes0 = []
 
@@ -351,13 +353,13 @@ class TestOneDataOneCombination(unittest.TestCase):
         target, cashes, dts = holdings_buy_short_maked_market(source, capital,
                                                                 lmg, smg, multi)
         self.assertTrue(len(cashes0) == len(cashes), 'cash接口测试失败！')
-        for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
-            self.assertAlmostEqual(cashes0[i],cashes[i])
         for i, hd in enumerate(profile.all_holdings()):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertAlmostEqual(hd['equity'], target[i])
+        for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
+            self.assertAlmostEqual(cashes0[i],cashes[i])
 
-    def test_case4(self):
+    def test_case5(self):
         """ 测试跨合约交易的持仓, 资金 """ 
         cashes0 = []
         class DemoStrategy(Strategy):
@@ -422,25 +424,28 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     for dt, price in data.close.iteritems():
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
-            poscost = (poscost * quantity + price*UNIT) / (quantity+UNIT)
+            poscost = (poscost*quantity + price*(1+settings['future_commission'])*UNIT)/ (quantity+UNIT)
             quantity += UNIT
         else:
             if curtime == sell1:
                 assert(quantity == UNIT*3)
-                close_profit += (price-poscost) * 2*UNIT * volume_multiple
+                close_profit += (price*(1-settings['future_commission']) - poscost) *\
+                                2*UNIT * volume_multiple
                 quantity -= 2 * UNIT
             elif curtime == sell2:
                 assert(quantity == UNIT*1)
-                close_profit += (price - poscost) * UNIT * volume_multiple
+                close_profit += (price*(1-settings['future_commission']) - poscost) *\
+                                UNIT * volume_multiple
                 quantity = 0
         if dt == data.index[-1]:
             # 强平现有持仓
-            close_profit += (price - poscost) * quantity * volume_multiple
+            close_profit += (price*(1-settings['future_commission']) - poscost) *\
+                            quantity* volume_multiple
             quantity = 0
         pos_profit = (price-poscost)*volume_multiple * quantity # 持仓盈亏
         equities.append(capital+close_profit+pos_profit)
-        cost = price * quantity * volume_multiple * long_margin
-        cashes.append(equities[-1]-cost)
+        posmargin = price * quantity * volume_multiple * long_margin
+        cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         #if close_profit != 0 or pos_profit != 0:
             #print close_profit, pos_profit, equities[-1]
@@ -462,26 +467,29 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     for dt, price in data.close.iteritems():
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
-            poscost = (poscost * quantity + price*UNIT) / (quantity+UNIT)
+            poscost = (poscost*quantity + price*(1-settings['future_commission'])*UNIT)/ (quantity+UNIT)
             quantity += UNIT
         else:
             if curtime == sell1:
                 assert(quantity == UNIT*3)
-                close_profit -= (price-poscost)*UNIT*2 * volume_multiple
+                close_profit -= (price*(1+settings['future_commission']) - poscost) *\
+                                2*UNIT * volume_multiple
                 quantity -= UNIT * 2
             elif curtime == sell2:
                 assert(quantity == UNIT)
-                close_profit -= (price - poscost) * UNIT * volume_multiple
+                close_profit -= (price*(1+settings['future_commission']) - poscost) *\
+                                UNIT * volume_multiple
                 quantity = 0
         if dt == data.index[-1]:
             # 强平现有持仓
-            close_profit -= (price - poscost) * quantity * volume_multiple
+            close_profit -= (price*(1+settings['future_commission']) - poscost) *\
+                            quantity * volume_multiple
             quantity = 0
          # 持仓盈亏
         pos_profit = (poscost-price)*volume_multiple * quantity # 持仓盈亏
         equities.append(capital+close_profit+pos_profit)
-        cost = price * quantity * volume_multiple * short_margin
-        cashes.append(equities[-1]-cost)
+        posmargin = price * quantity * volume_multiple * short_margin
+        cashes.append(equities[-1]-posmargin)
         dts.append(dt)
     return equities, cashes, dts
 
@@ -529,35 +537,36 @@ def holdings_buy_maked_nextbar(data, buy_entries, capital, long_margin, volume_m
         买入点：[相关bar的最低点减去OFFSET]
         当天卖出点：sell1
     """ 
-    buy_prices= []
     close_profit = 0    # 累计平仓盈亏
     equities = [] 
     dts = []
     cashes = []
     prelow = data.low[0]
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), buy_entries)
+    quantity = 0
+    poscost = 0
+    preclose = 0
+    UNIT = 1
     for dt, low in data.low.iteritems():
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
-            buy_prices.append(prelow-OFFSET)
-        elif curtime == sell1:
-            for bprice in buy_prices:
-                close_profit += (close-bprice) * volume_multiple
-            buy_prices = []
-        elif dt == data.index[-1]:
-            # 最后一根，强平现有持仓
-            for bp in buy_prices:
-                close_profit += (close - bp) * volume_multiple
-            buy_prices = []
-        pos_profit = 0 # 持仓盈亏
-        for pos_price in buy_prices:
-            pos_profit += (close - pos_price) * volume_multiple
+            poscost = (poscost*quantity + (prelow-OFFSET)*(1+settings['future_commission'])*UNIT)/ (quantity+UNIT)
+            quantity += UNIT
+        elif curtime == sell1 or dt == data.index[-1]:
+            close_profit += (close*(1-settings['future_commission']) - poscost) *\
+                            quantity * volume_multiple
+            quantity = 0
+        pos_profit = (close-poscost)*volume_multiple * quantity # 持仓盈亏
         equities.append(close_profit+pos_profit+capital)
-        cost = close * len(buy_prices) * long_margin * volume_multiple
-        cashes.append(equities[-1]-cost)
+        posmargin =  close* quantity * volume_multiple * long_margin
+        cashes.append(equities[-1]-posmargin)
+        if dt in trans_entries:
+            # 算上未成交单的资金占用, 修改成交点的上一个cash
+            cashes[-2] -= preclose * volume_multiple * long_margin
         dts.append(dt)
         prelow = low
+        preclose = close
     return equities, cashes, dts
 
 def holdings_short_maked_nextbar(data, buy_entries, capital, short_margin, volume_multiple):
@@ -565,76 +574,74 @@ def holdings_short_maked_nextbar(data, buy_entries, capital, short_margin, volum
         买入点：[相关bar的最高点加上OFFSET]
         当天卖出点：sell1
     """ 
-    buy_prices= []
-    close_profit = 0    # 累计平仓盈亏
     equities = [] 
     dts = []
     cashes = []
     prehigh = data.high[0]
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), buy_entries)
+    poscost = 0
+    quantity = 0
+    preclose = 0
+    close_profit = 0    # 累计平仓盈亏
+    UNIT = 1
     for dt, high in data.high.iteritems():
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
-            buy_prices.append(prehigh+OFFSET)
-        elif curtime == sell1:
-            for bprice in buy_prices:
-                close_profit -= (close-bprice) * volume_multiple
-            buy_prices = []
-        elif dt == data.index[-1]:
-            # 最后一根，强平现有持仓
-            for bp in buy_prices:
-                close_profit -= (close - bp) * volume_multiple
-            buy_prices = []
-        pos_profit = 0 # 持仓盈亏
-        for pos_price in buy_prices:
-            pos_profit -= (close - pos_price) * volume_multiple
-        #print dt, pos_profit, close
-        #print buy_prices
+            poscost = (poscost*quantity + (prehigh+OFFSET)*(1-settings['future_commission'])*UNIT)/ (quantity+UNIT)
+            quantity += UNIT
+        elif curtime == sell1 or dt == data.index[-1]:
+            close_profit -= (close*(1+settings['future_commission']) - poscost) *\
+                            quantity * volume_multiple
+            quantity = 0
+        pos_profit = -(close-poscost)*volume_multiple * quantity # 持仓盈亏
         equities.append(close_profit+pos_profit+capital)
-        cost = close * len(buy_prices) * short_margin * volume_multiple
-        cashes.append(equities[-1]-cost)
+        posmargin = close * quantity * volume_multiple * short_margin
+        cashes.append(equities[-1]-posmargin)
+        if dt in trans_entries:
+            # 算上未成交单的资金占用, 修改成交点的上一个cash
+            cashes[-2] -= preclose * volume_multiple * short_margin
         dts.append(dt)
         prehigh = high
+        preclose = close
     return equities, cashes, dts
 
-## @TODO 修改以下两个测试案例
-def holdings_sell_maked_nextbar(data, sell_entries, capital, long_magin, volume_multiple):
+def holdings_sell_maked_nextbar(data, sell_entries, capital, long_margin, volume_multiple):
     """ 策略: 多头限价平仓且下一根bar成交
         买入点：[相关bar的最高点加上OFFSET]
         当天卖出点：sell1
     """ 
-    buy_prices = []
     close_profit = 0    # 累计平仓盈亏
     equities = [] 
+    cashes = []
     dts = []
+    # 从平仓点计算平仓成交点
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), sell_entries)
     bprice = None
     prehigh = data.high[0]
     for dt, high in data.high.iteritems():
         close = data.close[dt]
         if dt.time() == buy1:
-            bprice = close
+            bprice = close * (1+settings['future_commission'])
         elif bprice and dt in trans_entries:
-            close_profit += (prehigh+OFFSET-bprice) * volume_multiple
+            close_profit += ((prehigh+OFFSET)*(1-settings['future_commission'])-bprice) * volume_multiple
             bprice = None
-        elif dt == data.index[-1]:
+        elif dt == data.index[-1] or dt.time() == sell3:
             # 最后一根, 强平现有持仓
-            if bprice:
-                close_profit += (close - bprice) * volume_multiple
-            bprice = None
-        elif dt.time () == sell3:
             # 不隔日
             if bprice:
-                close_profit += (close - bprice) * volume_multiple
+                close_profit += (close*(1-settings['future_commission']) - bprice) * volume_multiple
             bprice = None
         pos_profit = 0 # 持仓盈亏
+        posmargin = 0
         if bprice:
             pos_profit += (close - bprice) * volume_multiple
+            posmargin = close * volume_multiple * long_margin # quantity == 1
         equities.append(close_profit+pos_profit+capital)
+        cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         prehigh = high
-    return equities, dts
+    return equities, cashes, dts
 
 def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, volume_multiple):
     """ 策略: 空头限价平仓且下一根bar成交
@@ -643,9 +650,9 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     """ 
     ## @TODO 11号无法成交，可用来测试“去隔夜单”
     ## @TODO c测试股票的可平数量
-    buy_prices = []
     close_profit = 0    # 累计平仓盈亏
     equities = [] 
+    cashes = []
     dts = []
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), cover_entries)
     bprice = None
@@ -653,27 +660,27 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     for dt, low in data.low.iteritems():
         close = data.close[dt]
         if dt.time() == buy1:
-            bprice = close
+            bprice = close * (1-settings['future_commission'])
         elif bprice and dt in trans_entries:
-            close_profit -= (prelow-OFFSET-bprice) * volume_multiple
+            close_profit -= ((prelow-OFFSET)*(1+settings['future_commission'])-bprice) * volume_multiple
             bprice = None
-        elif dt == data.index[-1]:
+        elif dt == data.index[-1] or dt.time() == sell3:
             # 最后一根, 强平现有持仓
-            if bprice:
-                close_profit -= (close - bprice) * volume_multiple
-            bprice = None
-        elif dt.time () == sell3:
             # 不隔日
             if bprice:
-                close_profit -= (close - bprice) * volume_multiple
+                close_profit -= (close*(1+settings['future_commission']) - bprice) * volume_multiple
             bprice = None
         pos_profit = 0 # 持仓盈亏
+        posmargin = 0
         if bprice:
             pos_profit -= (close - bprice) * volume_multiple
-        equities.append(close_profit+pos_profit+capital) 
+            posmargin = close * volume_multiple * short_margin # quantity == 1
+        equities.append(close_profit+pos_profit+capital)
+        cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         prelow = low
     return equities, dts
+
 
 def holdings_buy_short_maked_market(data, capital, long_margin, short_margin, 
                                     volume_multiple):
@@ -681,57 +688,52 @@ def holdings_buy_short_maked_market(data, capital, long_margin, short_margin,
         买入点：[buy1, buy2, buy3]
         当天卖出点：[sell1, sell2]
     """ 
-    buy_prices= []
-    short_prices = []
     close_profit = 0
     equities = [] # 累计平仓盈亏
     dts = []
     cashes = []
+    lquantity = 0
+    squantity = 0
+    lposcost = 0
+    sposcost = 0
     for index, row in data.iterrows():
         close = row['close']
         dt = index
         high, low = row['high'], row['low']
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
-            buy_prices.append(high)
-            short_prices.append(low)
-            short_prices.append(low)
+            lposcost = (lposcost*lquantity + high*(1+settings['future_commission'])) / (lquantity+1)
+            sposcost = (sposcost*squantity + low*(1-settings['future_commission'])*2) / (squantity+2)
+            lquantity += 1
+            squantity += 2
         else:
             if curtime == sell1:
-                assert(len(buy_prices) == 3)
-                cost = sum(buy_prices)/3
-                profit = (low-cost)*2
-                close_profit += profit * volume_multiple
-                buy_prices = [cost]
-                assert(len(short_prices) == 6)
-                cost = sum(short_prices)/6
-                profit = (high-cost) * 4
-                close_profit -= profit * volume_multiple
-                short_prices = [cost, cost]
+                assert(lquantity == 3)
+                close_profit += (low*(1-settings['future_commission'])-lposcost) * 2  * volume_multiple
+                lquantity = 1
+                assert(squantity == 6)
+                close_profit -= (high*(1+settings['future_commission'])-sposcost) * 4 * volume_multiple
+                squantity = 2
             elif curtime == sell2:
-                assert(len(buy_prices) == 1)
-                close_profit += (low - buy_prices[0]) * volume_multiple
-                buy_prices = []
-                assert(len(short_prices) == 2)
-                close_profit -= (high - short_prices[0]) * volume_multiple
-                close_profit -= (high - short_prices[1]) * volume_multiple
-                buy_prices = []
-                short_prices = []
+                assert(lquantity == 1)
+                close_profit += (low*(1-settings['future_commission'])-lposcost) * volume_multiple
+                lquantity = 0
+                #assert(squantity == 2)
+                close_profit -= (high*(1+settings['future_commission'])-sposcost) * 2 * volume_multiple
+                squantity = 0
+
         if dt == data.index[-1]:
             # 强平现有持仓
-            for bp in buy_prices:
-                close_profit += (close - bp) * volume_multiple
-            for bp in short_prices:
-                close_profit -= (close - bp) * volume_multiple
-            buy_prices = []
-            short_prices = []
-        pos_profit = sum([close-pos_price for pos_price in buy_prices]) * volume_multiple # 持仓盈亏
-        pos_profit -= sum([close-pos_price for pos_price in short_prices]) * volume_multiple
+            close_profit += (close*(1-settings['future_commission'])-sposcost)*lquantity*volume_multiple
+            close_profit -= (close*(1+settings['future_commission'])-sposcost)*squantity*volume_multiple
+            lquantity = 0
+            squantity = 0
+        pos_profit = (close-lposcost) * lquantity * volume_multiple
+        pos_profit -= (close-sposcost) * squantity * volume_multiple
         equities.append(capital+close_profit+pos_profit)
-        ## @TODO 股票测试
-        cost = close * len(buy_prices) * long_margin * volume_multiple
-        cost += close * len(short_prices) * long_margin * volume_multiple
-        cashes.append(equities[-1]-cost)
+        posmargin = close * lquantity * long_margin * volume_multiple
+        posmargin += close * squantity * short_margin * volume_multiple
+        cashes.append(equities[-1]-posmargin)
         dts.append(dt)
     return equities, cashes, dts
 

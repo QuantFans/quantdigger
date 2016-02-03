@@ -4,8 +4,7 @@ from test_data import *
 from test_engine_vector import *
 from test_future import *
 from test_stock import *
-from quantdigger.config import set_config
-from quantdigger import locd
+from quantdigger import locd, set_config
 
 if __name__ == '__main__':
     set_config({ 'source': 'sqlite' })

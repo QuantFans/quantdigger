@@ -17,8 +17,7 @@ from quantdigger.datastruct import TradeSide, Contract
 from quantdigger import *
 from logbook import Logger
 logger = Logger('test')
-window_size = 0
-capital = 200000
+capital = 2000000
 OFFSET = 0.6
 buy1 = datetime.datetime.strptime("09:01:00", "%H:%M:%S").time()
 buy2 = datetime.datetime.strptime("09:02:00", "%H:%M:%S").time()
@@ -127,7 +126,6 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
             self.assertAlmostEqual(t_cashes1[i],s_cashes1[i])
         for i, hd in enumerate(profile.all_holdings(1)):
-            self.assertAlmostEqual(s_equity0[i]-capital*0.3, -(s_equity1[i]-capital*0.3))
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
             self.assertAlmostEqual(hd['equity'], s_equity1[i])
 
@@ -156,6 +154,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     UNIT = 1
     buy_quantity= { }
     poscost = 0
+    poscost2 = 0
     close_profit = 0
     equities = [] # 累计平仓盈亏
     dts = []
@@ -167,20 +166,23 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
         if curtime in [buy1, buy2, buy3]:
             buy_quantity.setdefault(curdate, 0)
             quantity = sum(buy_quantity.values())
-            poscost = (poscost * quantity + curprice*UNIT) / (quantity+UNIT)
+            poscost = (poscost * quantity + curprice*(1+settings['stock_commission'])*UNIT) / (quantity+UNIT)
+            poscost2 = (poscost2*quantity + curprice*UNIT) / (quantity+UNIT)
             buy_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
                 for posdate, quantity in buy_quantity.iteritems():
                     if posdate < curdate and quantity > 0:
-                        close_profit += (curprice-poscost) * 2*UNIT * volume_multiple
+                        close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
+                                        2*UNIT * volume_multiple
                         buy_quantity[posdate] -= 2*UNIT
                     elif posdate > curdate:
                         assert(False)
             elif curtime == sell2:
                 for posdate, quantity in buy_quantity.iteritems():
                     if posdate < curdate and quantity > 0:
-                        close_profit += (curprice-poscost) * volume_multiple
+                        close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
+                                        UNIT * volume_multiple
                         buy_quantity[posdate] -= UNIT
                         assert(buy_quantity[posdate] == 0)
                     elif posdate > curdate:
@@ -188,14 +190,15 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
         if curdt == data.index[-1]:
             # 强平现有持仓
             quantity = sum(buy_quantity.values())
-            close_profit += (curprice - poscost) * quantity * volume_multiple
+            close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
+                            quantity * volume_multiple
             buy_quantity.clear()
 
         quantity = sum(buy_quantity.values())
         pos_profit += (curprice - poscost) * quantity * volume_multiple
         equities.append(capital+close_profit+pos_profit)
-        cost = poscost * quantity * volume_multiple * long_margin
-        cashes.append(equities[-1]-cost)
+        posmargin = poscost2 * quantity * volume_multiple * long_margin
+        cashes.append(equities[-1]-posmargin)
         dts.append(curdt)
     return equities, cashes, dts
 
@@ -208,6 +211,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     UNIT = 2
     short_quantity= { }
     poscost = 0
+    poscost2 = 0
     close_profit = 0
     equities = [] # 累计平仓盈亏
     dts = []
@@ -219,20 +223,23 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
         if curtime in [buy1, buy2, buy3]:
             short_quantity.setdefault(curdate, 0)
             quantity = sum(short_quantity.values())
-            poscost = (poscost * quantity + curprice*UNIT) / (quantity+UNIT)
+            poscost = (poscost * quantity + curprice*(1-settings['stock_commission'])*UNIT) / (quantity+UNIT)
+            poscost2 = (poscost2 * quantity + curprice*UNIT) / (quantity+UNIT)
             short_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
                 for posdate, quantity in short_quantity.iteritems():
                     if posdate < curdate and quantity > 0:
-                        close_profit -= (curprice-poscost) * 2*UNIT * volume_multiple
+                        close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
+                                        2*UNIT * volume_multiple
                         short_quantity[posdate] -= 2*UNIT
                     elif posdate > curdate:
                         assert(False)
             elif curtime == sell2:
                 for posdate, quantity in short_quantity.iteritems():
                     if posdate < curdate and quantity > 0:
-                        close_profit -= (curprice-poscost) * volume_multiple * UNIT
+                        close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
+                                        UNIT * volume_multiple
                         short_quantity[posdate] -= UNIT
                         assert(short_quantity[posdate] == 0)
                     elif posdate > curdate:
@@ -240,14 +247,15 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
         if curdt == data.index[-1]:
             # 强平现有持仓
             quantity = sum(short_quantity.values())
-            close_profit -= (curprice - poscost) * quantity * volume_multiple
+            close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
+                            quantity * volume_multiple
             short_quantity.clear()
 
         quantity = sum(short_quantity.values())
         pos_profit -= (curprice - poscost) * quantity * volume_multiple
         equities.append(capital+close_profit+pos_profit)
-        cost = poscost * quantity * volume_multiple * short_margin
-        cashes.append(equities[-1]-cost)
+        posmargin= poscost2 * quantity * volume_multiple * short_margin
+        cashes.append(equities[-1]-posmargin)
         dts.append(curdt)
     return equities, cashes, dts
 

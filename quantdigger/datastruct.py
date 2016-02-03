@@ -2,6 +2,7 @@
 
 #from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
+from quantdigger.config import settings
 
 class TradeSide(object):
     """ 开平仓标志 
@@ -203,8 +204,17 @@ class Transaction(object):
             self.price_type = order.price_type
             self.hedge_type = order.hedge_type
             self.order = order
-        self.commission = 0
         self.volume_multiple = order.volume_multiple
+        self.compute_commission()
+        #print "********************" 
+        #print self.datetime, self.price, self.quantity, self.volume_multiple, ratio
+        #print "********************" 
+        #assert False
+
+    def compute_commission(self):
+        ratio = settings['stock_commission'] if self.contract.is_stock else\
+                     settings['future_commission']
+        self.commission = self.price * self.quantity * self.volume_multiple * ratio
 
     def __hash__(self):
         try:

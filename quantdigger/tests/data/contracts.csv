@@ -1,9 +1,0 @@
-code,exchange,name,spell,long_margin_ratio,short_margin_ratio,price_tick,volume_multiple
-stock,TEST,stock,stock,1.0,1.0,0.0,1
-future,TEST,future,future,0.4,0.4,0.2,3
-future2,TEST,future2,future,0.4,0.4,0.2,3
-AA,TEST,AA,AA,1.0,1.0,0.0,1
-BB,TEST,BB,BB,1.0,1.0,0.0,1
-CC,TEST,CC,CC,1.0,1.0,0.0,1
-oneday,TEST,oneday,oneday,1.0,1.0,0.0,1
-TWODAY,TEST,TWODAY,TWODAY,1.0,1.0,0.0,1

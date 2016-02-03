@@ -5,6 +5,7 @@ from quantdigger.util import elogger as logger
 from quantdigger.errors import TradingError
 from quantdigger.engine.api import SimulateTraderAPI
 from quantdigger.engine.event import Event
+from quantdigger.config import settings
 from quantdigger.datastruct import (
     Direction, 
     OneDeal,
@@ -307,23 +308,24 @@ class SimpleBlotter(Blotter):
         dh = { }
         dh['datetime'] = dt
         dh['commission'] = self.holding['commission']
-        profit = 0
+        pos_profit = 0
         margin = 0
         order_margin = 0;
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
         for key, pos in self.positions.iteritems():
             new_price = self._ticks[key.contract]
-            profit += pos.profit(new_price)
+            pos_profit += pos.profit(new_price)
             ## @TODO 用昨日结算价计算保证金
             margin += pos.position_margin(new_price)
-        # 计算限价报单的保证金占用
+        # 计算未成交开仓报单的保证金占用
         for order in self.open_orders:
             assert(order.price_type == PriceType.LMT)
             new_price = self._ticks[order.contract]
-            order_margin +=  order.order_margin(new_price)
+            if order.side == TradeSide.KAI:
+                order_margin += order.order_margin(new_price)
         # 当前权益 = 初始资金 + 累积平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
-        dh['equity'] = self._capital + self.holding['history_profit'] + profit - \
+        dh['equity'] = self._capital + self.holding['history_profit'] + pos_profit - \
                        self.holding['commission'] 
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
@@ -333,7 +335,7 @@ class SimpleBlotter(Blotter):
                     raise Exception('需要追加保证金!')
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
-        self.holding['position_profit'] = profit
+        self.holding['position_profit'] = pos_profit
         if append:
             self._all_holdings.append(dh)
         else:
@@ -401,7 +403,6 @@ class SimpleBlotter(Blotter):
         """ 更新佣金和平仓盈亏。 """
         if trans.side == TradeSide.CANCEL:
             return
-        # 每笔佣金，和数目无关！
         self.holding['commission'] += trans.commission
         # 平仓，更新历史持仓盈亏。
         if trans.side == TradeSide.PING:

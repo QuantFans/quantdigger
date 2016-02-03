@@ -58,8 +58,9 @@ class Exchange(object):
                             transact.price = bar.low
                         else:
                             transact.price = bar.high
-
                     transact.datetime = bar.datetime
+                    # recompute commission when price changed
+                    transact.compute_commission()
                     fill_orders.add(order)
                     self.events.put(FillEvent(transact)) 
             else:

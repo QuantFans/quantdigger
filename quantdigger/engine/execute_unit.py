@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 from datetime import datetime
+from quantdigger.config import settings
 from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import blotter
@@ -73,6 +74,7 @@ class ExecuteUnit(object):
         print 'on_bars..' 
         # todo 对单策略优化
         has_next = True
+        tick_test = settings['tick_test']
         # 遍历每个数据轮, 次数为数据的最大长度
         for pcon, data in self._all_data.iteritems():
             self.context.switch_to_contract(pcon)
@@ -96,10 +98,11 @@ class ExecuteUnit(object):
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j, True)
-                    # 只有在on_final引用跨合约数据才有保证。
                     self.context.process_trading_events(append=True)
                     s.on_bar(self.context)
-                    self.context.process_trading_events(append=False)
+                    if not tick_test:
+                        # 保证有可能在当根Bar成交
+                        self.context.process_trading_events(append=False)
             self.context.ctx_datetime = datetime(2100,1,1)
             # 
             toremove = []
