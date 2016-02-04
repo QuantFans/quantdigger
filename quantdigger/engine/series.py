@@ -7,7 +7,7 @@ class SeriesBase(object):
         """ 序列变量的基类。 
         name用来跟踪
         """
-        self._curbar = 0
+        self.curbar = 0
         self._window_size = len(data)
         self._indic = indic
         self._default = default
@@ -17,11 +17,6 @@ class SeriesBase(object):
             self.data = np.array([self._default] * self._window_size)
         else:
             self.data = data
-
-    @property
-    def curbar(self):
-        """ 当前Bar索引。 """
-        return self._curbar
 
     def reset_data(self, data, wsize):
         """ 初始化值和窗口大小
@@ -41,7 +36,7 @@ class SeriesBase(object):
         #temp = self.data[self._index]
         #max_index = self.window_size-1
         #for i in range(0, max_index):
-            #ordered_index = (self._curbar - (max_index-self._index)) % self._window_size
+            #ordered_index = (self.curbar - (max_index-self._index)) % self._window_size
             #self.data[self._index] = self.data[ordered_index]
             #self._index = ordered_index
         #self.data[max_index] = temp
@@ -50,11 +45,11 @@ class SeriesBase(object):
 
     def update_curbar(self, curbar):
         """ 更新当前Bar索引 """
-        self._curbar = curbar
+        self.curbar = curbar
 
     def update(self, v):
         """ 更新最后一个值 """
-        self.data[self._curbar] = v
+        self.data[self.curbar] = v
 
     def __len__(self):
         return len(self.data)
@@ -64,11 +59,11 @@ class SeriesBase(object):
            非指标序列变量才会运行 
         """
         try:
-           pre_elem = self.data[(self._curbar-1) % self._window_size] 
+           pre_elem = self.data[(self.curbar-1) % self._window_size] 
         except KeyError:
             return
         else:
-            self.data[self._curbar] = pre_elem
+            self.data[self.curbar] = pre_elem
 
     def __str__(self):
         return str(self[0])
@@ -81,7 +76,7 @@ class SeriesBase(object):
         #if length  == 0:
             #return float(self) 
         #elif length == 1:
-            #return self.data[self._curbar - args[0]]
+            #return self.data[self.curbar - args[0]]
     
     
 class NumberSeries(SeriesBase):
@@ -181,14 +176,14 @@ class NumberSeries(SeriesBase):
                     ## 输入
                     #return self.data[self._index-index]
                 ## 输出
-                #i = self._curbar - index
+                #i = self.curbar - index
                 #if self._indic:
                     ## 延迟计算
                     #self._indic.compute_element(i%self._window_size, index) 
                 #return self.data[i%self._window_size]
                 assert(False)
             else:
-                i = self._curbar - index
+                i = self.curbar - index
                 if i < 0 or index<0:
                     return self._default
                 else:
@@ -210,7 +205,7 @@ class DateTimeSeries(SeriesBase):
 
     def __getitem__(self, index):
         try:
-            i = self._curbar - index
+            i = self.curbar - index
             if i < 0 or index < 0:
                 return self._default
             #return datetime.fromtimestamp(self.data[i%self._window_size]/1000)
@@ -219,7 +214,7 @@ class DateTimeSeries(SeriesBase):
             raise SeriesIndexError
 
     def __str__(self):
-        return str(self.data[self._curbar])
+        return str(self.data[self.curbar])
 
     def __eq__(self, r):
         if isinstance(r, DateTimeSeries):

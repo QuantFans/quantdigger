@@ -322,8 +322,11 @@ class StrategyContext(object):
 class Context(object):
     """ 上下文"""
     def __init__(self, data, max_window):
-        self.ctx_datetime = datetime.datetime(2100,1,1) # universal time
+        self.ctx_dt_series = DateTimeSeries([datetime.datetime(2100,1,1)]*max_window,
+                            'universal_time')
+        self.ctx_datetime = datetime.datetime(2100,1,1)
         self.on_bar = False
+        self.step = 0
         self._data_contexts = { }       # str(PContract): DataContext
         for key, value in data.iteritems():
             self._data_contexts[key] = value
@@ -340,11 +343,11 @@ class Context(object):
         self._cur_data_context = self._data_contexts[pcon]
 
     def time_aligned(self):
-        return  (self._cur_data_context.datetime[0] <= self.ctx_datetime and
+        return  (self._cur_data_context.datetime[0] <= self.ctx_datetime  and
                 self._cur_data_context.last_date <= self.ctx_datetime)
         ## 第一根是必须运行
-        #return  (self._cur_data_context.datetime[0] <= self.ctx_datetime and
-                #self._cur_data_context.ctx_datetime <= self.ctx_datetime) or \
+        #return  (self._cur_data_context.datetime[0] <= self.ctx_dt_series and
+                #self._cur_data_context.ctx_dt_series <= self.ctx_dt_series) or \
                 #self._cur_data_context.curbar == 0 
 
     def switch_to_strategy(self, i, j, trading=False):
@@ -360,21 +363,29 @@ class Context(object):
         self._cur_strategy_context.process_trading_events(append)
 
     def rolling_forward(self):
-        """
-        更新最新tick价格，最新bar价格, 环境时间。
-        """
+        """ 更新最新tick价格，最新bar价格, 环境时间。 """
         if self._cur_data_context.last_row:
-            # 回测系统时间
+            self.ctx_dt_series.curbar = self.step
+            self.ctx_dt_series.data[self.step]=(min(self._cur_data_context.last_date,
+                                    self.ctx_datetime))
             self.ctx_datetime = min(self._cur_data_context.last_date, self.ctx_datetime)
+            try:
+                self.ctx_dt_series.data[self.step]=min(self._cur_data_context.last_date,
+                                                        self.ctx_datetime)
+            except IndexError:
+                self.ctx_dt_series.data.append(min(self._cur_data_context.last_date,
+                                                self.ctx_datetime))
             return True
         hasnext, data = self._cur_data_context.rolling_forward()
         if not hasnext:
             return False 
-        self.ctx_datetime = min(self._cur_data_context.last_date, self.ctx_datetime) # 回测系统时间
+        self.ctx_dt_series.curbar = self.step
+        try:
+            self.ctx_dt_series.data[self.step]=min(self._cur_data_context.last_date, self.ctx_datetime)
+        except IndexError:
+            self.ctx_dt_series.data.append(min(self._cur_data_context.last_date, self.ctx_datetime))
+        self.ctx_datetime = min(self._cur_data_context.last_date, self.ctx_datetime)
         return True
-
-    def reset(self):
-            self.ctx_datetime = datetime.datetime(2100,1,1)
 
     def update_user_vars(self):
         """ 更新用户在策略中定义的变量, 如指标等。 """
@@ -439,7 +450,8 @@ class Context(object):
     def datetime(self):
         """ k线时间序列 """
         if self.on_bar:
-            return self._cur_data_context.datetime
+            return self.ctx_dt_series
+            #return self._cur_data_context.datetime
         else:
             return self._cur_data_context.datetime
 
@@ -459,8 +471,8 @@ class Context(object):
 
     def __setattr__(self, name, value):
         if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
-                    '_strategy_contexts', 'ctx_datetime', '_ticks', '_bars',
-                    '_trading', 'on_bar']:
+                    '_strategy_contexts', 'ctx_dt_series', '_ticks', '_bars',
+                    '_trading', 'on_bar', 'step', 'ctx_datetime']:
             super(Context, self).__setattr__(name, value)
         else:
             self._cur_data_context.add_item(name, value)

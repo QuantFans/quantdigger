@@ -95,10 +95,10 @@ class ExecuteUnit(object):
                             self.context.switch_to_strategy(i, j)
                             self.context.update_user_vars()
                             s.on_symbol(self.context)
-            ## 默认的是第一个合约
+            ## 确保单合约回测的默认值
             self.context.switch_to_contract(self.pcontracts[0])
             self.context.on_bar = True
-            # 每轮数据的最后处理
+            # 遍历组合策略每轮数据的最后处理
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j, True)
@@ -107,7 +107,9 @@ class ExecuteUnit(object):
                     if not tick_test:
                         # 保证有可能在当根Bar成交
                         self.context.process_trading_events(append=False)
+            #print self.context.ctx_datetime
             self.context.ctx_datetime = datetime(2100,1,1)
+            self.context.step += 1
             # 
             toremove = []
             for pcon, data in self._all_data.iteritems():
