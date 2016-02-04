@@ -203,7 +203,7 @@ class StrategyContext(object):
         self._datetime = dt
         return
 
-    def process_trading_events(self, append):
+    def process_trading_events(self, at_baropen):
         """ 提交订单，撮合，更新持仓 """
         if self._orders:
             self.events_pool.put(SignalEvent(self._orders))
@@ -237,9 +237,9 @@ class StrategyContext(object):
                     self.blotter.api.on_transaction(event)
             # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
             if event == None or event.type == Event.ORDER:
-                self.exchange.make_market(self.blotter._bars)
+                self.exchange.make_market(self.blotter._bars, at_baropen)
                 new_signal = True
-        self.blotter.update_status(self._datetime, append)
+        self.blotter.update_status(self._datetime, at_baropen)
 
     def buy(self, direction, price, quantity, price_type, contract):
         self._orders.append(Order(
@@ -358,9 +358,9 @@ class Context(object):
     def switch_to_data(self, i, j):
         self._cur_data_context.i, self._cur_data_context.j  = i, j
 
-    def process_trading_events(self, append):
+    def process_trading_events(self, at_baropen):
         self._cur_strategy_context.update_environment(self.ctx_datetime, self._ticks, self._bars)
-        self._cur_strategy_context.process_trading_events(append)
+        self._cur_strategy_context.process_trading_events(at_baropen)
 
     def rolling_forward(self):
         """ 更新最新tick价格，最新bar价格, 环境时间。 """
@@ -611,6 +611,6 @@ class Context(object):
 
     def test_cash(self):
         """  当根bar时间终点撮合后的可用资金，用于测试。 """
-        self.process_trading_events(append=False)
+        self.process_trading_events(at_baropen=False)
         return self.cash()
 

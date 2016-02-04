@@ -282,7 +282,7 @@ class SimpleBlotter(Blotter):
 
     def update_data(self, ticks, bars):
         """ 当前价格数据更新。 """ 
-        self._ticks = ticks
+        #self._ticks = ticks
         self._bars = bars
 
     def update_datetime(self, dt):
@@ -302,7 +302,7 @@ class SimpleBlotter(Blotter):
                 pos.today = 0
         self._datetime = dt
 
-    def update_status(self, dt, append=True):
+    def update_status(self, dt, at_baropen=True):
         """ 更新历史持仓，当前权益。"""
         # 更新资金历史。
         dh = { }
@@ -314,14 +314,16 @@ class SimpleBlotter(Blotter):
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
         for key, pos in self.positions.iteritems():
-            new_price = self._ticks[key.contract]
+            bar = self._bars[key.contract]
+            new_price = bar.open if at_baropen else bar.close
             pos_profit += pos.profit(new_price)
             ## @TODO 用昨日结算价计算保证金
             margin += pos.position_margin(new_price)
         # 计算未成交开仓报单的保证金占用
         for order in self.open_orders:
             assert(order.price_type == PriceType.LMT)
-            new_price = self._ticks[order.contract]
+            bar = self._bars[order.contract]
+            new_price = bar.open if at_baropen else bar.close
             if order.side == TradeSide.KAI:
                 order_margin += order.order_margin(new_price)
         # 当前权益 = 初始资金 + 累积平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
@@ -336,7 +338,7 @@ class SimpleBlotter(Blotter):
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = pos_profit
-        if append:
+        if at_baropen:
             self._all_holdings.append(dh)
         else:
             self._all_holdings[-1] = dh
@@ -435,7 +437,7 @@ class SimpleBlotter(Blotter):
                 #logger.warn("不存在合约[%s]" % order.contract)
                 raise TradingError(err="不存在合约[%s]" % order.contract)
         elif order.side == TradeSide.KAI:
-            new_price = self._ticks[order.contract]
+            new_price = self._bars[order.contract].close
             if self.holding['cash'] < order.order_margin(new_price):
                 raise TradingError(err='没有足够的资金开仓') 
             else:
@@ -453,7 +455,7 @@ class SimpleBlotter(Blotter):
                 price_type,
                 TradeSide.PING,
                 pos.direction,
-                self._ticks[pos.contract],
+                self._bars[pos.contract].close,
                 pos.quantity
             )
             force_trans.append(Transaction(order))

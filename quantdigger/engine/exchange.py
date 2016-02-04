@@ -17,7 +17,7 @@ class Exchange(object):
         self._strict = strict
         self._datetime = None
 
-    def make_market(self, bars):
+    def make_market(self, bars, at_baropen):
         """ 价格撮合""" 
         fill_orders = set()
         for order in self._open_orders:
@@ -33,36 +33,57 @@ class Exchange(object):
                 continue
             transact = Transaction(order)
             if self._strict:
-                if order.price_type == PriceType.LMT:
-                    # 限价单以最高和最低价格为成交的判断条件．
-                    if (order.side == TradeSide.KAI and \
-                             (order.direction == Direction.LONG and order.price >= bar.low or \
-                             order.direction == Direction.SHORT and order.price <= bar.high)) or \
-                       (order.side == TradeSide.PING and \
-                             (order.direction == Direction.LONG and order.price <= bar.high or \
-                             order.direction == Direction.SHORT and order.price >= bar.low)):
-                            transact.price = order.price
-                            # Bar的结束时间做为交易成交时间.
-                            transact.datetime = bar.datetime
-                            fill_orders.add(order)
-                            self.events.put(FillEvent(transact)) 
-                elif order.price_type == PriceType.MKT:
-                    # 市价单以最高或最低价格为成交价格．
-                    if order.side == TradeSide.KAI:
-                        if order.direction == Direction.LONG:
-                            transact.price = bar.high
-                        else:
-                            transact.price = bar.low
-                    elif order.side == TradeSide.PING:
-                        if order.direction == Direction.LONG:
-                            transact.price = bar.low
-                        else:
-                            transact.price = bar.high
-                    transact.datetime = bar.datetime
-                    # recompute commission when price changed
-                    transact.compute_commission()
-                    fill_orders.add(order)
-                    self.events.put(FillEvent(transact)) 
+                if at_baropen:
+                    if order.price_type == PriceType.LMT:
+                        price = bar.open
+                        if (order.side == TradeSide.KAI and \
+                                 (order.direction == Direction.LONG and order.price >= price or \
+                                 order.direction == Direction.SHORT and order.price <= price)) or \
+                           (order.side == TradeSide.PING and \
+                                 (order.direction == Direction.LONG and order.price <= price or \
+                                 order.direction == Direction.SHORT and order.price >= price)):
+                                transact.price = order.price
+                                transact.datetime = bar.datetime
+                                fill_orders.add(order)
+                                self.events.put(FillEvent(transact)) 
+                    elif order.price_type == PriceType.MKT:
+                        transact.price = bar.open
+                        transact.datetime = bar.datetime
+                        # recompute commission when price changed
+                        transact.compute_commission()
+                        fill_orders.add(order)
+                        self.events.put(FillEvent(transact)) 
+                else:
+                    if order.price_type == PriceType.LMT:
+                        # 限价单以最高和最低价格为成交的判断条件．
+                        if (order.side == TradeSide.KAI and \
+                                 (order.direction == Direction.LONG and order.price >= bar.low or \
+                                 order.direction == Direction.SHORT and order.price <= bar.high)) or \
+                           (order.side == TradeSide.PING and \
+                                 (order.direction == Direction.LONG and order.price <= bar.high or \
+                                 order.direction == Direction.SHORT and order.price >= bar.low)):
+                                transact.price = order.price
+                                # Bar的结束时间做为交易成交时间.
+                                transact.datetime = bar.datetime
+                                fill_orders.add(order)
+                                self.events.put(FillEvent(transact)) 
+                    elif order.price_type == PriceType.MKT:
+                        # 市价单以最高或最低价格为成交价格．
+                        if order.side == TradeSide.KAI:
+                            if order.direction == Direction.LONG:
+                                transact.price = bar.high
+                            else:
+                                transact.price = bar.low
+                        elif order.side == TradeSide.PING:
+                            if order.direction == Direction.LONG:
+                                transact.price = bar.low
+                            else:
+                                transact.price = bar.high
+                        transact.datetime = bar.datetime
+                        # recompute commission when price changed
+                        transact.compute_commission()
+                        fill_orders.add(order)
+                        self.events.put(FillEvent(transact)) 
             else:
                 transact.datetime = bar.datetime
                 fill_orders.add(order)

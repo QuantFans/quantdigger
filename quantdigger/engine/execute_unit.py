@@ -102,11 +102,11 @@ class ExecuteUnit(object):
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j, True)
-                    self.context.process_trading_events(append=True)
+                    self.context.process_trading_events(at_baropen=True)
                     s.on_bar(self.context)
                     if not tick_test:
                         # 保证有可能在当根Bar成交
-                        self.context.process_trading_events(append=False)
+                        self.context.process_trading_events(at_baropen=False)
             #print self.context.ctx_datetime
             self.context.ctx_datetime = datetime(2100,1,1)
             self.context.step += 1

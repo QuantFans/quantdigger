@@ -239,15 +239,11 @@ class TestOneDataOneCombination(unittest.TestCase):
             def on_bar(self, ctx):
                 if ctx.datetime[0].time() == buy1:
                     ctx.buy(ctx.close, 1) 
-                    cashes2.append(ctx.test_cash())
-                    return
                 elif ctx.pos('long') > 0 and ctx.datetime[0] in sell_entries:
                     ctx.sell(ctx.high+OFFSET, ctx.pos()) 
                 elif ctx.pos('long') > 0 and ctx.datetime[0].time() == sell3:
                     ctx.sell(ctx.close, ctx.pos()) 
-                    cashes2.append(ctx.test_cash())
-                    return
-                cashes2.append(ctx.cash())
+                cashes2.append(ctx.test_cash())
 
         class DemoStrategyCover(Strategy):
             
@@ -299,16 +295,17 @@ class TestOneDataOneCombination(unittest.TestCase):
         for i, hd in enumerate(profile.all_holdings(1)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertAlmostEqual(hd['equity'], target[i])
+            self.assertAlmostEqual(hd['cash'], cashes[i])
         for i in range(0, len(cashes2)-1):
             self.assertAlmostEqual(cashes2[i],cashes[i])
-
         # cover
-        target, dts = holdings_cover_maked_nextbar(source, cover_entries, capital/4, smg, multi)
+        target, cashes, dts = holdings_cover_maked_nextbar(source, cover_entries, capital/4, smg, multi)
         self.assertTrue(len(profile.all_holdings(3)) == len(target) and
                         len(target) > 0, '模拟器测试失败！')
         for i, hd in enumerate(profile.all_holdings(3)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertAlmostEqual(hd['equity'], target[i])
+            self.assertAlmostEqual(hd['cash'], cashes[i])
 
         #from quantdigger.digger import plotting
         #plotting.plot_strategy(profile.data(), deals=profile.deals(0))
@@ -679,7 +676,7 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
         cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         prelow = low
-    return equities, dts
+    return equities, cashes, dts
 
 
 def holdings_buy_short_maked_market(data, capital, long_margin, short_margin, 
