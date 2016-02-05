@@ -271,7 +271,7 @@ class StrategyContext(object):
         """
         orders = orders if isinstance(orders, list) else [orders]
         if not self._cancel_now:
-            # 下一根bar处理撤单
+            # bar close点处理撤单
             for order in orders:
                 norder = copy.deepcopy(order)
                 norder.side = TradeSide.CANCEL

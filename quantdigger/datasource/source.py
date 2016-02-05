@@ -202,7 +202,12 @@ class CsvSource(object):
         self._root = root
     
     def get_bars(self, pcontract, dt_start, dt_end):
-        fname = os.path.join(self._root, str(pcontract) + ".csv")
+        ## @TODO pcontract -> strpcon, for consistency
+        strpcon = str(pcontract).upper()
+        contract, period = tuple(strpcon.split('-'))
+        code, exch = tuple(contract.split('.'))
+        period = period.replace('.', '')
+        fname = os.path.join(self._root, period, exch, code + ".csv")
         try:
             data = pd.read_csv(fname, index_col=0, parse_dates=True)
         except IOError:
@@ -224,7 +229,7 @@ class CsvSource(object):
             long_margin_ratio, short_margin_ratio, price_tick, volume_multiple}
         
         """
-        fname = os.path.join(self._root, "contracts.csv")
+        fname = os.path.join(self._root, "CONTRACTS.csv")
         df = pd.DataFrame(data)
         df.to_csv(fname, columns = ['code', 'exchange', 'name', 'spell',
                   'long_margin_ratio', 'short_margin_ratio', 'price_tick',
@@ -246,7 +251,15 @@ class CsvSource(object):
             tbdata (dict): {'datetime', 'open', 'close', 'high', 'low', 'volume'}
             strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute' 
         """
-        fname = os.path.join(self._root, strpcon+'.csv')
+        strpcon = strpcon.upper()
+        contract, period = tuple(strpcon.split('-'))
+        code, exch = tuple(contract.split('.'))
+        period = period.replace('.', '')
+        try:
+            os.makedirs(os.path.join(self._root, period, exch))
+        except OSError:
+            pass
+        fname = os.path.join(self._root, period, exch, code+'.csv')
         df = pd.DataFrame(tbdata)
         df.to_csv(fname, columns = ['datetime', 'open', 'close', 'high', 'low',
             'volume'], index=False)
@@ -257,7 +270,7 @@ class CsvSource(object):
         Returns:
             pd.DataFrame
         """
-        fname = os.path.join(self._root, "contracts.csv")
+        fname = os.path.join(self._root, "CONTRACTS.csv")
         df = pd.read_csv(fname)
         df.index = df['code'] + '.' + df['exchange']
         df.index = map(lambda x: x.upper(), df.index)

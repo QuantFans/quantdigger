@@ -98,12 +98,12 @@ class TestSeries(unittest.TestCase):
             })
         target = target.ix[:, ['open', 'close', 'high', 'low', 'volume']]
         target.index = dt
-        fname = os.path.join(os.getcwd(), 'data', 'BB.TEST-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'BB.csv')
         source = pd.read_csv(fname, parse_dates=True, index_col=0)
         #print 'target', target['open'][0:10]
         #print 'source', source['open'][0:10]
         self.assertTrue(source.equals(target), "系统时间序列变量正测试出错")
-        fname = os.path.join(os.getcwd(), 'data', 'CC.TEST-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'CC.csv')
         source = pd.read_csv(fname, parse_dates=True, index_col=0)
         self.assertFalse(source.equals(target), "系统时间序列变量反测试出错")
         logger.info('-- 系统序列变量值的正确性测试成功 --')
@@ -344,9 +344,9 @@ class TestMultipleCombination(unittest.TestCase):
         add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()
 
-        fname = os.path.join(os.getcwd(), 'data', 'BB.TEST-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'BB.csv')
         blen = len(pd.read_csv(fname))
-        fname = os.path.join(os.getcwd(), 'data', 'AA.TEST-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'AA.csv')
         alen = len(pd.read_csv(fname))
         sample = set([
                 ('BB.TEST-1.MINUTE', 'A1'),
@@ -424,9 +424,9 @@ class TestDiffPeriod(unittest.TestCase):
         run()
 
         # on_symbol
-        fname = os.path.join(os.getcwd(), 'data', 'oneday.TEST-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'ONEDAY.csv')
         blen = len(pd.read_csv(fname))
-        fname = os.path.join(os.getcwd(), 'data', 'TWODAY.TEST-5.Second.csv')
+        fname = os.path.join(os.getcwd(), 'data', '5SECOND', 'TEST', 'TWODAY.csv')
         alen = len(pd.read_csv(fname))
         self.assertTrue(on_symbol['count'] == alen*4 + blen*4)
         self.assertFalse(on_symbol['count'] == alen*3 + blen*4)

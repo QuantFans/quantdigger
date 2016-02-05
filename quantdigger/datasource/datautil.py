@@ -106,8 +106,8 @@ def import_tdx_stock(path, ld):
     from quantdigger.util import ProgressBar
     for path, dirs, files in os.walk(path):
         progressbar = ProgressBar(total = len(files))
-        for file in files:
-            filepath = path + os.sep + file
+        for file_ in files:
+            filepath = path + os.sep + file_
             if filepath.endswith(".txt"):
                 with open(filepath) as f:
                     lines = f.readlines()
@@ -132,11 +132,11 @@ def import_tdx_stock(path, ld):
                         data['close'].append(ln[4])
                         data['volume'].append(ln[5])
                         data['turnover'].append(ln[6])
-                    t = file.split('#')
+                    t = file_.split('#')
                     exch = t[0]
                     code = t[1].split('.')[0]
-                    tbname = '%s_%s'%(exch, code)
-                    ld.import_bars(data, tbname, '1.Day')
+                    strpcon = "".join([code, '.', exch, '-', '1.Day'])
+                    ld.import_bars(data, strpcon)
             progressbar.move()
             progressbar.log('')
     return

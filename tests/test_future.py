@@ -24,7 +24,7 @@ buy3 = datetime.datetime.strptime("09:03:00", "%H:%M:%S").time()
 sell1 = datetime.datetime.strptime("14:57:00", "%H:%M:%S").time()
 sell2 = datetime.datetime.strptime("14:58:00", "%H:%M:%S").time()
 sell3 = datetime.datetime.strptime("15:00:00", "%H:%M:%S").time()
-fname = os.path.join(os.getcwd(), 'data', 'future.TEST-1.Minute.csv')
+fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'FUTURE.csv')
 source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
 
@@ -386,7 +386,7 @@ class TestOneDataOneCombination(unittest.TestCase):
         set_symbols(['future.TEST-1.Minute', 'future2.TEST-1.Minute'])
         profile = add_strategy([DemoStrategy('D1')],{ 'capital': capital })
         run()
-        fname = os.path.join(os.getcwd(), 'data', 'future2.TEST-1.Minute.csv')
+        fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'FUTURE2.csv')
         source2 = pd.read_csv(fname, parse_dates=True, index_col=0)
 
         lmg = Contract.long_margin_ratio('future.TEST')

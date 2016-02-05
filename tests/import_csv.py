@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import os
-from quantdigger import locd
+from quantdigger import locd, set_config
 from quantdigger.datasource import import_data
-from quantdigger.config import set_config
 
 
 

@@ -25,7 +25,7 @@ buy3 = datetime.datetime.strptime("09:03:00", "%H:%M:%S").time()
 sell1 = datetime.datetime.strptime("14:57:00", "%H:%M:%S").time()
 sell2 = datetime.datetime.strptime("14:58:00", "%H:%M:%S").time()
 sell3 = datetime.datetime.strptime("15:00:00", "%H:%M:%S").time()
-fname = os.path.join(os.getcwd(), 'data', 'stock.TEST-1.Minute.csv')
+fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'STOCK.csv')
 source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
 
