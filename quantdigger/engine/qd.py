@@ -5,16 +5,18 @@ from quantdigger.engine.execute_unit import ExecuteUnit
 _simulator = None
 def set_symbols(pcontracts, dt_start="1980-1-1",
                        dt_end="2100-1-1",
+                       n=None,
                        spec_date = { }): # 'symbol':[,]
     """ 
     Args:
         pcontracts (list): list of pcontracts(string)
         dt_start (datetime/str): start time of all pcontracts
         dt_end (datetime/str): end time of all pcontracts
+        n (int): last n bars
         spec_date (dict): time range for specific pcontracts
     """
     global _simulator
-    _simulator = ExecuteUnit(pcontracts, dt_start, dt_end, spec_date)
+    _simulator = ExecuteUnit(pcontracts, dt_start, dt_end, n, spec_date)
     return _simulator
 
 def add_strategy(algos, settings = { }):

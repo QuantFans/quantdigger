@@ -47,6 +47,7 @@ class DataContext(object):
         self._wrapper = wrapper
         self._series = [[{ }]]
         self._variables = [[{ }]]
+        self._all_variables = { }
         self._size = len(data.close)
 
     @property
@@ -117,6 +118,23 @@ class DataContext(object):
                     for s in indic.series:
                         s.update_curbar(self._curbar)
 
+    def __len__(self):
+        return len(self._wrapper)
+
+    def get_item(self, name):
+        """ 获取用户在策略on_init函数中初始化的变量 """
+        return self._all_variables[name]
+    
+    def add_item(self, name, value):
+        """ 添加用户初始化的变量。 """ 
+        self._all_variables[name] = value
+        if isinstance(value, SeriesBase):
+            self.add_series(name, value)
+        elif isinstance(value, TechnicalBase):
+            self.add_indicator(name, value)
+        else:
+            self.add_variable(name, value)
+
     def add_series(self, attr, s):
         """ 添加on_init中初始化的序列变量    
         
@@ -151,31 +169,6 @@ class DataContext(object):
                 self._variables[self.i].append({ attr: var })
         else:
             self._variables.append([{ attr: var }])
-
-    def __len__(self):
-        return len(self._wrapper)
-
-    def get_item(self, name):
-        """ 获取用户在策略on_init函数中初始化的变量 """
-        try:
-            return self.indicators[self.i][self.j][name]
-        except KeyError:
-            try:
-                return self._series[self.i][self.j][name]
-            except KeyError:
-                return self._variables[self.i][self.j][name]
-    
-    def add_item(self, name, value):
-        """ 添加用户初始化的变量。 """ 
-        if isinstance(value, SeriesBase):
-            self.add_series(name, value)
-        elif isinstance(value, TechnicalBase):
-            self.add_indicator(name, value)
-        else:
-            self.add_variable(name, value)
-
-    def __getattr__(self, name):
-        return self.get_item(name)
 
 
 class StrategyContext(object):
@@ -366,8 +359,6 @@ class Context(object):
         """ 更新最新tick价格，最新bar价格, 环境时间。 """
         if self._cur_data_context.last_row:
             self.ctx_dt_series.curbar = self.step
-            self.ctx_dt_series.data[self.step]=(min(self._cur_data_context.last_date,
-                                    self.ctx_datetime))
             self.ctx_datetime = min(self._cur_data_context.last_date, self.ctx_datetime)
             try:
                 self.ctx_dt_series.data[self.step]=min(self._cur_data_context.last_date,

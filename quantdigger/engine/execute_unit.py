@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 from datetime import datetime
+from progressbar import ProgressBar
 from quantdigger.config import settings
 from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
@@ -13,20 +14,28 @@ class ExecuteUnit(object):
     def __init__(self, pcontracts,
                        dt_start="1980-1-1",
                        dt_end="2100-1-1",
+                       n = None,
                        spec_date = { }): # 'symbol':[,]
         """ 
         Args:
             pcontracts (list): list of pcontracts(string)
             dt_start (datetime/str): start time of all pcontracts
             dt_end (datetime/str): end time of all pcontracts
+            n (int): last n bars
             spec_date (dict): time range for specific pcontracts
         """
         self.finished_data = []
         pcontracts = map(lambda x: x.upper(), pcontracts)
         self.pcontracts = pcontracts
         self._combs = []
+        self._data_manager = DataManager()
         # str(PContract): DataWrapper
-        self._all_data, self._max_window = self._load_data(self.pcontracts, dt_start, dt_end, spec_date)
+        self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        self._all_data, self._max_window = self._load_data(self.pcontracts,
+                                                            dt_start,
+                                                            dt_end,
+                                                            n,
+                                                            spec_date)
         self.context = Context(self._all_data, self._max_window)
 
     def _init_strategies(self):
@@ -37,6 +46,49 @@ class ExecuteUnit(object):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
                     s.on_init(self.context)
+
+    def _parse_pcontracts(self, pcontracts):
+        ## @TODO test
+        code2strpcon, exch_period2strpcon = self._data_manager.get_code2strpcon()
+        rst = []
+        for strpcon in pcontracts:
+            strpcon = strpcon.upper()
+            code = strpcon.split('.')[0]
+            if code == "*" :
+                if strpcon == "*" : # '*' 
+                    for key, value in exch_period2strpcon.iteritems():
+                        rst += value
+                else:
+                    # "*.xxx" 
+                    # "*.xxx_period" 
+                    k = strpcon.split('.')[1]
+                    for key, value in exch_period2strpcon.iteritems():
+                        if '-' in k:
+                            if k == key:
+                                rst += value 
+                        elif k == key.split('-')[0]:
+                                rst += value 
+            else:
+                try:
+                    pcons = code2strpcon[code]
+                except IndexError:
+                    raise IndexError # 本地不含该文件
+                else:
+                    for pcon in pcons:
+                        if '-' in strpcon:
+                            # "xxx.xxx_xxx.xxx" 
+                            if strpcon == pcon:
+                                rst.append(pcon) 
+                        elif '.' in strpcon:
+                            # "xxx.xxx" 
+                            if strpcon == pcon.split('-')[0]:
+                                rst.append(pcon) 
+                        elif strpcon == pcon.split('.')[0]:
+                            # "xxx" 
+                            rst.append(pcon) 
+                        #if strpcon in pcon:
+                            #rst.append(strpcon)
+        return rst
 
     def add_comb(self, comb, settings):
         """ 添加策略组合组合
@@ -71,9 +123,9 @@ class ExecuteUnit(object):
     def run(self):
         ## @TODO max_window 可用来显示回测进度
         # 初始化策略自定义时间序列变量
-        print 'runing strategies..' 
+        logger.info("runing strategies...")
         self._init_strategies()
-        print 'on_bars..' 
+        pbar = ProgressBar().start()
         # todo 对单策略优化
         has_next = True
         tick_test = settings['tick_test']
@@ -110,6 +162,8 @@ class ExecuteUnit(object):
             #print self.context.ctx_datetime
             self.context.ctx_datetime = datetime(2100,1,1)
             self.context.step += 1
+            if self.context.step <= self._max_window:
+                pbar.update(self.context.step*100.0/self._max_window)
             # 
             toremove = []
             for pcon, data in self._all_data.iteritems():
@@ -128,17 +182,28 @@ class ExecuteUnit(object):
                             s.on_exit(self.context)
                     return
             #print "*********" 
+        pbar.finish()
 
-    def _load_data(self, pcontracts, dt_start, dt_end, spec_date):
+    def _load_data(self, strpcons, dt_start, dt_end, n, spec_date):
         all_data = OrderedDict()     
-        self._data_manager = DataManager()
         max_window = -1
-        for pcon in pcontracts:
+        logger.info("loading data...")
+        pbar = ProgressBar().start()
+        for i, pcon  in enumerate(strpcons):
+            #print "load data: %s" % pcon
             if pcon in spec_date:
                 dt_start = spec_date[pcon][0]
                 dt_end = spec_date[pcon][1]
             assert(dt_start < dt_end)
-            wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
+            if n:
+                wrapper = self._data_manager.get_last_bars(pcon, n)
+            else:
+                wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
             all_data[pcon] = DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
+            pbar.update(i*100.0/len(strpcons))
+            #progressbar.log('')
+        if n:
+            assert(max_window <= n) 
+        pbar.finish()
         return all_data, max_window

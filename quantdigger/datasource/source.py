@@ -56,6 +56,9 @@ class SqlLiteSource(object):
         self.db = sqlite3.connect(fname, detect_types = sqlite3.PARSE_DECLTYPES)
         sqlite3.register_converter('timestamp', int2time)
         self.cursor = self.db.cursor()
+
+    def get_code2strpcon(self):
+        raise NotImplementedError
     
     def get_bars(self, pcontract, dt_start, dt_end):
         id_start, u = datautil.encode2id(pcontract.period, dt_start)
@@ -69,6 +72,9 @@ class SqlLiteSource(object):
                 WHERE {start}<=id AND id<={end}".format(tb=table, start=id_start, end=id_end)
         data = pd.read_sql_query(sql, self.db, index_col='datetime')
         return SqliteSourceWrapper(pcontract, data, len(data))
+
+    def get_last_bars(self, pcontract, n):
+        raise NotImplementedError
 
     def get_tables(self):
         """ 返回数据库所有的表格""" 
@@ -109,13 +115,14 @@ class SqlLiteSource(object):
             exch.add(row[2])
         return list(exch)
 
-    def import_bars(self, tbdata, strpcon):
+    def import_bars(self, tbdata, pcontract):
         """ 导入交易数据
         
         Args:
             tbdata (dict): {'datetime', 'open', 'close', 'high', 'low', 'volume'}
-            strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute'生成表格: 'SHFE_AA' 
+            pcontract (PContract): 周期合约
         """
+        strpcon = str(pcontract).upper()
         data = []
         ids, utimes = [], []
         strdt = strpcon.split('-')[1].upper()
@@ -200,9 +207,47 @@ class CsvSource(object):
     """
     def __init__(self, root):
         self._root = root
+
+    def get_code2strpcon(self):
+        symbols = { } # code -> string pcontracts
+        period_exchange2strpcon = { }     # exchange.period -> string pcontracts
+        for parent, dirs, files  in os.walk(self._root):
+            if dirs == []:
+                t = parent.split(os.sep)
+                period, exch = t[-2], t[-1]
+                for i, a in enumerate(period):
+                    if not a.isdigit():
+                        sepi = i 
+                        break
+                count = period[0:sepi]
+                unit = period[sepi:]
+                period = '.'.join([count, unit])
+                strpcons = period_exchange2strpcon.setdefault(''.join([exch, '-', period]), [])
+                for file_ in files:
+                    if file_.endswith('csv'):
+                        code = file_.split('.')[0]
+                        t = symbols.setdefault(code, [])
+                        rst = ''.join([code, '.', exch, '-', period])
+                        t.append(rst)
+                        strpcons.append(rst)
+        return symbols, period_exchange2strpcon
     
     def get_bars(self, pcontract, dt_start, dt_end):
-        ## @TODO pcontract -> strpcon, for consistency
+        ## @TODO test dt_start, dt_end works
+        data = self._load_bars(pcontract)
+        dt_start = pd.to_datetime(dt_start)
+        dt_end = pd.to_datetime(dt_end)
+        data = data[(dt_start <= data.index) & (data.index <= dt_end)]
+        assert data.index.is_unique
+        return CsvSourceWrapper(pcontract, data, len(data))
+
+    def get_last_bars(self, pcontract, n):
+        data = self._load_bars(pcontract)
+        data = data[-n:]
+        assert data.index.is_unique
+        return CsvSourceWrapper(pcontract, data, len(data))
+
+    def _load_bars(self, pcontract):
         strpcon = str(pcontract).upper()
         contract, period = tuple(strpcon.split('-'))
         code, exch = tuple(contract.split('.'))
@@ -213,13 +258,7 @@ class CsvSource(object):
         except IOError:
             raise FileDoesNotExist(file=fname)
         else:
-            ## @TODO format checking
-            #fmt = ['datetime', 'open', 'close', 'high', 'low', 'volume']
-            dt_start = pd.to_datetime(dt_start)
-            dt_end = pd.to_datetime(dt_end)
-            data = data[(dt_start <= data.index) & (data.index <= dt_end)]
-            assert data.index.is_unique
-            return CsvSourceWrapper(pcontract, data, len(data))
+            return data
 
     def import_contracts(self, data):
         """ 导入合约的基本信息。
@@ -244,14 +283,14 @@ class CsvSource(object):
         ##return list(exch)
         #pass
 
-    def import_bars(self, tbdata, strpcon):
+    def import_bars(self, tbdata, pcontract):
         """ 导入交易数据
         
         Args:
             tbdata (dict): {'datetime', 'open', 'close', 'high', 'low', 'volume'}
-            strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute' 
+            pcontract (PContract): 周期合约
         """
-        strpcon = strpcon.upper()
+        strpcon = str(pcontract).upper()
         contract, period = tuple(strpcon.split('-'))
         code, exch = tuple(contract.split('.'))
         period = period.replace('.', '')

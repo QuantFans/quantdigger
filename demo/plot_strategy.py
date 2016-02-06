@@ -73,11 +73,18 @@ class DemoStrategy2(Strategy):
         return
 
 if __name__ == '__main__':
-    #set_config({ 'source': 'csv' })
-    set_symbols(['BB.SHFE-1.Minute'])
+    import timeit
+    start = timeit.default_timer()
+    #set_symbols(['BB.SHFE-1.Minute']) 
+    #set_symbols(['BB.SHFE']) 
+    set_symbols(['BB'])
     profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
                             { 'capital': 50000.0, 'ratio': [0.5, 0.5] })
+
     run()
+    stop = timeit.default_timer()
+    print "运行耗时: %d秒" % ((stop - start ))
+
     # 绘制k线，交易信号线
     from quantdigger.digger import finance, plotting
     s = 0

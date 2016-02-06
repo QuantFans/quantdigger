@@ -30,6 +30,9 @@ class LocalData(object):
         self._src = None
         self.source = ''
 
+    def get_code2strpcon(self):
+        return self._src.get_code2strpcon()
+
     def set_source(self, settings):
         if settings['source'] == 'sqlite' :
             try:
@@ -59,10 +62,11 @@ class LocalData(object):
             SourceWrapper. 数据
         """
         pcontract = PContract.from_string(strpcon)
-        if pcontract.contract.exchange == 'stock':
-            return []
-        else:
-            return self._src.get_bars(pcontract, dt_start, dt_end)
+        return self._src.get_bars(pcontract, dt_start, dt_end)
+
+    def get_last_bars(self, strpcon, n):
+        pcontract = PContract.from_string(strpcon)
+        return self._src.get_last_bars(pcontract, n)
 
     def get_data(self, pcontract, dt_start="1980-1-1", dt_end="2100-1-1"):
         """ 获取本地历史数据    
@@ -102,7 +106,8 @@ class LocalData(object):
             strpcon (str): 周期合约字符串如, 'AA.SHFE-1.Minute' 
 
         """
-        self._src.import_bars(data_iter, strpcon)
+        pcontract = PContract.from_string(strpcon)
+        self._src.import_bars(data_iter, pcontract)
 
     def import_contracts(self, data):
         """ 导入合约的基本信息。
@@ -201,6 +206,16 @@ class DataManager(object):
             return self._srv_data.get_bars(strpcon, dt_start, dt_end) 
         else:
             return data
+
+    def get_last_bars(self, strpcon, n):
+        data = self._loc_data.get_last_bars(strpcon, n)
+        if len(data) == 0:
+            return self._srv_data.get_last_bars(strpcon, n)
+        else:
+            return data
+
+    def get_code2strpcon(self):
+        return self._loc_data.get_code2strpcon()
 
 locd = LocalData()
 __all__ = ['DataManager', 'locd']
