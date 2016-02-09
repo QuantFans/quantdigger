@@ -31,15 +31,16 @@ http://www.quantfans.com/doc/quantdigger/
 
 依赖库
 ------
-* Python (2.x, **暂不支持3.x**)
-* pandas 
-* python-dateutil 
 * matplotlib 
 * numpy
-* TA-Lib
 * logbook
+* pandas 
+* progressbar
+* python-dateutil 
 * pyqt (可选)
+* Python (2.x, **暂不支持3.x**)
 * tushare_ (可选, 一个非常强大的股票信息抓取工具)
+* TA-Lib
 
 
 策略组合DEMO

@@ -1,5 +1,7 @@
 code,exchange,name,spell,long_margin_ratio,short_margin_ratio,price_tick,volume_multiple
 stock,TEST,stock,stock,1.0,1.0,0.0,1
+600521,SH,600521,stock,1.0,1.0,0.0,1
+600522,SH,600522,stock,1.0,1.0,0.0,1
 future,TEST,future,future,0.4,0.4,0.2,3
 future2,TEST,future2,future,0.4,0.4,0.2,3
 AA,TEST,AA,AA,1.0,1.0,0.0,1

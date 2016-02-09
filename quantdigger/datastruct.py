@@ -389,15 +389,30 @@ class Contract(object):
 
     @classmethod
     def long_margin_ratio(cls, strcontract):
-        return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
+        try:
+            return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
+        except KeyError:
+            print "Can't not find contract: %s" % strcontract 
+            return 1
+            #assert(False)
 
     @classmethod
     def short_margin_ratio(cls, strcontract):
-        return cls.info.ix[strcontract.upper(), 'short_margin_ratio']
+        try:
+            return cls.info.ix[strcontract.upper(), 'short_margin_ratio']
+        except KeyError:
+            print "Can't not find contract: %s" % strcontract 
+            return 1
+            #assert(False)
 
     @classmethod
     def volume_multiple(cls, strcontract):
-        return cls.info.ix[strcontract.upper(), 'volume_multiple']
+        try:
+            return cls.info.ix[strcontract.upper(), 'volume_multiple']
+        except KeyError:
+            print "Can't not find contract: %s" % strcontract 
+            return 1
+            #assert(False)
 
 
 class Period(object):
@@ -510,6 +525,7 @@ class Position(object):
         else:
             self._margin_ratio = Contract.short_margin_ratio(strcon)
         self._volume_multiple = Contract.volume_multiple(strcon)
+        self.symbol = str(trans.contract)
 
     def profit(self, new_price):
         """ 根据最新价格计算持仓盈亏。
@@ -539,10 +555,9 @@ class Position(object):
             new_price (float): 最新价格。
         
         Returns:
-            float. 保证金占用
+            float. 证金占用/市值
         """
-        price = self.cost if self.contract.is_stock else new_price
-        return price * self.quantity * self._margin_ratio * self._volume_multiple
+        return new_price * self.quantity * self._margin_ratio * self._volume_multiple
 
     def __str__(self):
         rst = " contract: %s\n direction: %s\n cost: %f\n quantity: %d\n closeable: %d\n" % \

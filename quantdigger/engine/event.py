@@ -32,6 +32,7 @@ class Event(object):
     SIGNAL = 2
     ORDER = 3
     FILL = 4
+    ONCE = 5
 
 
 class MarketEvent(object):
@@ -59,8 +60,10 @@ class OrderEvent(object):
         self.type = Event.ORDER
         self.order = order
 
+class OnceEvent(object):
 
-
+    def __init__(self):
+        self.type = Event.ONCE
 
 class FillEvent(object):
     """ 委托成交事件。 """

@@ -28,8 +28,10 @@ class Profile(object):
         for key, value in dcontexts.iteritems():
             self._dcontexts[key] = value
 
-    def name(self, j):
-        return self._blts[j].name
+    def name(self, j=None):
+        if j != None:
+            return self._blts[j].name
+        return self._blts[0].name
 
     def transactions(self, j=None):
         """ 第j个策略的所有成交明细, 默认返回组合的成交明细。
@@ -147,6 +149,7 @@ class Profile(object):
         return rst
             
     def data(self, strpcon=None):
+        ## @TODO execute_unit._parse_pcontracts()
         """ 周期合约数据, 只有向量运行才有意义。
         
         Args:
@@ -155,10 +158,10 @@ class Profile(object):
         Returns:
             pd.DataFrame. 数据
         """
-        pcon = self._main_pcontract
-        if strpcon:
-            pcon = PContract.from_string(strpcon) 
-        return self._dcontexts[pcon].raw_data
+        if not strpcon:
+            strpcon = self._main_pcontract
+        strpcon = strpcon.upper()
+        return self._dcontexts[strpcon].raw_data
 
     def _update_positions(self, current_positions, deal_positions, trans):
         """ 根据交易明细计算开平仓对。 """
@@ -270,6 +273,7 @@ class SimpleBlotter(Blotter):
     def all_holdings(self):
         """ 账号历史情况，最后一根k线处平所有仓位。""" 
         if self.positions:
+            #assert False
             self._force_close() 
         return self._all_holdings
 
@@ -302,8 +306,9 @@ class SimpleBlotter(Blotter):
                 pos.today = 0
         self._datetime = dt
 
-    def update_status(self, dt, at_baropen=True):
+    def update_status(self, dt, at_baropen, append):
         """ 更新历史持仓，当前权益。"""
+        ## @TODO open_orders 和 postion_margin分开，valid_order调用前再统计？
         # 更新资金历史。
         dh = { }
         dh['datetime'] = dt
@@ -329,6 +334,11 @@ class SimpleBlotter(Blotter):
         # 当前权益 = 初始资金 + 累积平仓盈亏 + 当前持仓盈亏 - 历史佣金总额 
         dh['equity'] = self._capital + self.holding['history_profit'] + pos_profit - \
                        self.holding['commission'] 
+        ## @TODO
+        # 对于股票，Bar的开盘和收盘点资金验证是一致的。
+        # 如果期货不一致，成交撮合时候也无法确定确切的时间点，
+        # ，就无法确定精确的可用资金，可能因此导致cash<0, 就得加
+        # 强平功能，使交易继续下去。
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
             for key in self.positions.iterkeys():
@@ -338,24 +348,33 @@ class SimpleBlotter(Blotter):
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = pos_profit
-        if at_baropen:
+        if append:
             self._all_holdings.append(dh)
         else:
             self._all_holdings[-1] = dh
 
     def update_signal(self, event):
-        """ 处理策略函数产生的下单事件。 """
+        """ 处理策略函数产生的下单事件。 
+        
+        可能产生一系列order事件，在bar的开盘时间交易。
+        """
         assert event.type == Event.SIGNAL
         new_orders = []
         for order in event.orders:
-            if self._valid_order(order):
+            errmsg = self._valid_order(order)
+            if errmsg == '':
                 order.datetime = self._datetime
-                self.api.order(copy.deepcopy(order))
                 new_orders.append(order)
+                if order.side == TradeSide.KAI:
+                    self.holding['cash'] -= order.order_margin(self._bars[order.contract].open)
             else:
+                logger.warn(errmsg)
+                #print len(event.orders), len(new_orders)
                 continue
         self.open_orders.update(new_orders) # 改变对象的值，不改变对象地址。
         self._all_orders.extend(new_orders)
+        for order in new_orders:
+            self.api.order(copy.deepcopy(order))
         for order in new_orders:
             if order.side == TradeSide.PING:
                 pos = self.positions[PositionKey(order.contract, order.direction)]
@@ -412,6 +431,7 @@ class SimpleBlotter(Blotter):
             flag = 1 if trans.direction == Direction.LONG else -1
             profit = (trans.price-self.positions[poskey].cost) * trans.quantity *\
                      flag * trans.volume_multiple
+            #print profit, trans.price, trans.quantity
             #if self.name == 'A1': # 平仓调试
                 #print "***********" 
                 #print self._datetime, profit 
@@ -421,28 +441,27 @@ class SimpleBlotter(Blotter):
     def _valid_order(self, order):
         """ 判断订单是否合法。 """ 
         if order.quantity<=0:
-            raise TradingError(err="交易数量不能小于0")
+            return "交易数量要大于0"
         # 撤单
         if order.side == TradeSide.CANCEL:
             if order not in self.open_orders:
-                raise TradingError(err='撤销失败： 不存在该订单！') 
+                return '撤销失败： 不存在该订单！'
         if order.side == TradeSide.PING:
             try:
                 poskey = PositionKey(order.contract, order.direction)
                 pos = self.positions[poskey]
                 if pos.closable < order.quantity:
-                    raise TradingError(err='可平仓位不足')
+                    return '可平仓位不足'
             except KeyError:
                 # 没有持有该合约
                 #logger.warn("不存在合约[%s]" % order.contract)
-                raise TradingError(err="不存在合约[%s]" % order.contract)
+                return "不存在合约[%s]" % order.contract
         elif order.side == TradeSide.KAI:
-            new_price = self._bars[order.contract].close
+            new_price = self._bars[order.contract].open
             if self.holding['cash'] < order.order_margin(new_price):
-                raise TradingError(err='没有足够的资金开仓') 
-            else:
-                self.holding['cash'] -= order.order_margin(new_price)
-        return True
+                #print self.holding['cash'], new_price * order.quantity
+                return '没有足够的资金开仓'
+        return ''
 
     def _force_close(self):
         """ 在回测的最后一根k线以close价格强平持仓位。 """ 
@@ -463,7 +482,7 @@ class SimpleBlotter(Blotter):
             self._update_holding(trans)
             self._update_positions(trans)
         if force_trans:
-            self.update_status(trans.datetime, False)
+            self.update_status(trans.datetime, False, False)
         self.positions = { }
         return
 

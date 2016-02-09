@@ -100,6 +100,8 @@ class ExecuteUnit(object):
         num_strategy = len(comb) 
         if 'capital' not in settings:
             settings['capital'] = 1000000.0 # 默认资金
+            logger.info('BackTesting with default capital 1000000.0.' )
+
         assert (settings['capital'] > 0)
         if num_strategy == 1:
             settings['ratio'] = [1]
@@ -107,7 +109,7 @@ class ExecuteUnit(object):
             settings['ratio'] = [1.0/num_strategy] * num_strategy
         assert('ratio' in settings) 
         assert(len(settings['ratio']) == num_strategy)
-        assert(sum(settings['ratio']) == 1)
+        assert(sum(settings['ratio']) - 1.0 < 0.000001)
         assert(num_strategy>=1)
         ctxs = []
         for i, s in enumerate(comb):
@@ -152,6 +154,7 @@ class ExecuteUnit(object):
             self.context.on_bar = True
             # 遍历组合策略每轮数据的最后处理
             for i, combination in enumerate(self._combs):
+                #print self.context.ctx_datetime, "--" 
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j, True)
                     self.context.process_trading_events(at_baropen=True)
@@ -181,7 +184,6 @@ class ExecuteUnit(object):
                             self.context.switch_to_strategy(i, j)
                             s.on_exit(self.context)
                     return
-            #print "*********" 
         pbar.finish()
 
     def _load_data(self, strpcons, dt_start, dt_end, n, spec_date):
@@ -199,6 +201,8 @@ class ExecuteUnit(object):
                 wrapper = self._data_manager.get_last_bars(pcon, n)
             else:
                 wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
+            if len(wrapper) == 0:
+                continue 
             all_data[pcon] = DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
             pbar.update(i*100.0/len(strpcons))
@@ -206,4 +210,7 @@ class ExecuteUnit(object):
         if n:
             assert(max_window <= n) 
         pbar.finish()
+        if len(all_data) == 0:
+            assert(False)
+            ## @TODO raise
         return all_data, max_window

@@ -187,7 +187,7 @@ class NumberSeries(SeriesBase):
                 if i < 0 or index<0:
                     return self._default
                 else:
-                    return self.data[i]
+                    return float(self.data[i])
         except SeriesIndexError:
             raise SeriesIndexError
 
@@ -209,7 +209,7 @@ class DateTimeSeries(SeriesBase):
             if i < 0 or index < 0:
                 return self._default
             #return datetime.fromtimestamp(self.data[i%self._window_size]/1000)
-            return self.data[i%self._window_size]
+            return self.data[i]
         except SeriesIndexError:
             raise SeriesIndexError
 

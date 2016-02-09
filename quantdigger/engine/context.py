@@ -12,7 +12,7 @@ import Queue
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.exchange import Exchange
 from quantdigger.engine.series import SeriesBase, NumberSeries, DateTimeSeries
-from quantdigger.engine.event import Event, EventsPool, SignalEvent
+from quantdigger.engine.event import Event, EventsPool, SignalEvent, OnceEvent
 from quantdigger.errors import TradingError
 from quantdigger.technicals.base import TechnicalBase
 from quantdigger.util import elogger as logger
@@ -47,7 +47,7 @@ class DataContext(object):
         self._wrapper = wrapper
         self._series = [[{ }]]
         self._variables = [[{ }]]
-        self._all_variables = { }
+        self._all_variables = [[{ }]]
         self._size = len(data.close)
 
     @property
@@ -65,6 +65,9 @@ class DataContext(object):
     @property
     def contract(self):
         return self._wrapper.pcontract.contract
+
+    def __getattr__(self, name):
+        return self.get_item(name)
 
     def update_system_vars(self):
         #self.data = np.append(data, tracker.container_day)
@@ -123,11 +126,18 @@ class DataContext(object):
 
     def get_item(self, name):
         """ 获取用户在策略on_init函数中初始化的变量 """
-        return self._all_variables[name]
-    
+        return self._all_variables[self.i][self.j][name]
+
     def add_item(self, name, value):
         """ 添加用户初始化的变量。 """ 
-        self._all_variables[name] = value
+        ## @TODO ...
+        if self.i < len(self._all_variables):
+            if self.j < len(self._all_variables[self.i]):
+                self._all_variables[self.i][self.j][name] = value
+            else:
+                self._all_variables[self.i].append({ name:  value})
+        else:
+            self._all_variables.append([{ name:  value}])
         if isinstance(value, SeriesBase):
             self.add_series(name, value)
         elif isinstance(value, TechnicalBase):
@@ -170,6 +180,22 @@ class DataContext(object):
         else:
             self._variables.append([{ attr: var }])
 
+class DataContextWrapper(object):
+    """"""
+    def __init__(self):
+        self.data = None
+
+    def __setattr__(self, name, value):
+        if name != 'data':
+            data = self.data 
+            if name in data._all_variables[data.i][data.j]:
+                data.add_item(name, value)
+                return
+        super(DataContextWrapper, self).__setattr__(name, value)
+
+    def __getattr__(self, name):
+        return getattr(self.data, name)
+    
 
 class StrategyContext(object):
     """ 策略组合
@@ -184,7 +210,8 @@ class StrategyContext(object):
         self.blotter = SimpleBlotter(name, self.events_pool, settings)
         self.exchange = Exchange(name, self.events_pool, strict=True)
         self.name = name
-        self._orders = []
+        self._entry_orders = []
+        self._exit_orders = []
         self._datetime = None
         self._cancel_now = False # 是当根bar还是下一根bar撤单成功。
 
@@ -198,60 +225,96 @@ class StrategyContext(object):
 
     def process_trading_events(self, at_baropen):
         """ 提交订单，撮合，更新持仓 """
-        if self._orders:
-            self.events_pool.put(SignalEvent(self._orders))
-        self._orders = []
-        new_signal = False 
-        event = None
+        append = at_baropen
+        entry_flag = True
+        exit_flag = True
+        if self._exit_orders:
+            self.events_pool.put(SignalEvent(self._exit_orders))
+            self._process_trading_events(at_baropen, at_baropen)
+            self._exit_orders = []
+            exit_flag = False
+            append = False
+        if self._entry_orders:
+            self.events_pool.put(SignalEvent(self._entry_orders))
+            self._process_trading_events(at_baropen, append)
+            self._entry_orders = []
+            entry_flag = False
+            append = False
+        # 没有交易信号，确保至少运行一次
+        if exit_flag and entry_flag:
+            self.events_pool.put(OnceEvent())
+            self._process_trading_events(at_baropen, append)
+
+    def _process_trading_events(self, at_baropen, append):
+        """""" 
         while True:
-           # 事件处理。 
+            # 事件处理。 
             try:
                 event = self.events_pool.get()
             except Queue.Empty:
                 assert(False)
             except IndexError:
-                if new_signal:
-                    break
+                break
             else:
                 #if event.type == 'MARKET':
-                    #strategy.calculate_signals(event)
+                    ##strategy.calculate_signals(event)
                     #port.update_timeindex(event)
                 if event.type == Event.SIGNAL:
-                    try:
-                        self.blotter.update_signal(event)
-                    except TradingError as e:
-                        new_signal = True
-                        logger.warn(e)
-                        return
+                    assert(not at_baropen)
+                    self.blotter.update_signal(event)
                 elif event.type == Event.ORDER:
+                    assert(not at_baropen)
                     self.exchange.insert_order(event)
                 elif event.type == Event.FILL:
                     # 模拟交易接口收到报单成交
                     self.blotter.api.on_transaction(event)
             # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
-            if event == None or event.type == Event.ORDER:
+            ## @TODO tick 回测不一样
+            if event.type == Event.ONCE or event.type == Event.ORDER:
                 self.exchange.make_market(self.blotter._bars, at_baropen)
-                new_signal = True
-        self.blotter.update_status(self._datetime, at_baropen)
+        self.blotter.update_status(self._datetime, at_baropen, append)
+        return
 
-    def buy(self, direction, price, quantity, price_type, contract):
-        self._orders.append(Order(
+    def buy(self, price, quantity, price_type, contract):
+        self._entry_orders.append(Order(
             None,
             contract,
             price_type,
             TradeSide.KAI,
-            direction,
+            Direction.LONG,
             float(price),
             quantity
         ))
 
-    def sell(self, direction, price, quantity, price_type, contract):
-        self._orders.append(Order(
+    def sell(self, price, quantity, price_type, contract):
+        self._exit_orders.append(Order(
             None,
             contract,
             price_type,
             TradeSide.PING,
-            direction,
+            Direction.LONG,
+            float(price),
+            quantity
+        ))
+
+    def short(self, price, quantity, price_type, contract):
+        self._entry_orders.append(Order(
+            None,
+            contract,
+            price_type,
+            TradeSide.KAI,
+            Direction.SHORT,
+            float(price),
+            quantity
+        ))
+
+    def cover(self, price, quantity, price_type, contract):
+        self._exit_orders.append(Order(
+            None,
+            contract,
+            price_type,
+            TradeSide.PING,
+            Direction.SHORT,
             float(price),
             quantity
         ))
@@ -268,7 +331,9 @@ class StrategyContext(object):
             for order in orders:
                 norder = copy.deepcopy(order)
                 norder.side = TradeSide.CANCEL
-                self._orders.append(norder)
+                ## @TODO or self._exit_orders ?
+                # 结合实盘考虑, 实盘可能自动撤单。
+                self._entry_orders.append(norder)
             return
         ## 立即处理撤单
         #temp = copy.deepcopy(self._orders)
@@ -283,6 +348,9 @@ class StrategyContext(object):
     def open_orders(self):
         """ 未成交的订单 """ 
         return self.blotter.open_orders
+
+    def all_positions(self):
+        return self.blotter.positions.values()
 
     def position(self, contract, direction):
         try:
@@ -321,13 +389,18 @@ class Context(object):
         self.on_bar = False
         self.step = 0
         self._data_contexts = { }       # str(PContract): DataContext
+        self._contract2contexts = { }       # str(Contract): DataContext
+        self._code2contexts = { }       # code: DataContext
         for key, value in data.iteritems():
             self._data_contexts[key] = value
+            self._contract2contexts[key.split('-')[0]] = value
+            self._code2contexts[key.split('.')[0]] = value
         self._cur_data_context = None
         self._strategy_contexts = []
         self._cur_strategy_context = None
         self._ticks = { } # Contract: float
         self._bars = { }  # Contract: Bar
+        self._data_context_wrapper = DataContextWrapper()
 
     def add_strategy_context(self, ctxs):
         self._strategy_contexts.append(ctxs)
@@ -345,10 +418,15 @@ class Context(object):
 
     def switch_to_strategy(self, i, j, trading=False):
         self._trading = trading
-        self._cur_data_context.i, self._cur_data_context.j  = i, j
         self._cur_strategy_context = self._strategy_contexts[i][j]
+        if self._trading:
+            for data_context in self._data_contexts.values():
+                data_context.i, data_context.j = i, j
+        else:
+            self._cur_data_context.i, self._cur_data_context.j  = i, j
 
     def switch_to_data(self, i, j):
+        assert(False)
         self._cur_data_context.i, self._cur_data_context.j  = i, j
 
     def process_trading_events(self, at_baropen):
@@ -410,12 +488,16 @@ class Context(object):
     @property
     def curbar(self):
         """ 当前是第几根k线, 从0开始 """
-        return self._cur_data_context.curbar
+        if self.on_bar:
+            return self.step + 1
+        else:
+            return self._cur_data_context.curbar
 
     @property
     def open(self):
         """ k线开盘价序列 """
         return self._cur_data_context.open
+
 
     @property
     def close(self):
@@ -453,9 +535,20 @@ class Context(object):
 
     def __getitem__(self, strpcon):
         """ 获取跨品种合约 """
-        ## @TODO 字典，数字做key表序号
+        ## @TODO 字典，数字做key表序号, 合并key
+        ## @TODO 根据exception自动判断优先级
         strpcon = strpcon.upper()
-        return self._data_contexts[strpcon]
+        try:
+            # xxxxx.xx
+            self._data_context_wrapper.data = self._contract2contexts[strpcon]
+        except KeyError:
+            try:
+                # xxxxx
+                self._data_context_wrapper.data = self._code2contexts[strpcon]
+            except KeyError:
+                # xxxxx.xx-xx.xx
+                self._data_context_wrapper.data = self._data_contexts[strpcon]
+        return self._data_context_wrapper
 
     def __getattr__(self, name):
         return self._cur_data_context.get_item(name)
@@ -463,7 +556,8 @@ class Context(object):
     def __setattr__(self, name, value):
         if name in ['_data_contexts', '_cur_data_context', '_cur_strategy_context',
                     '_strategy_contexts', 'ctx_dt_series', '_ticks', '_bars',
-                    '_trading', 'on_bar', 'step', 'ctx_datetime']:
+                    '_trading', 'on_bar', 'step', 'ctx_datetime',
+                    '_contract2contexts', '_code2contexts', '_data_context_wrapper']:
             super(Context, self).__setattr__(name, value)
         else:
             self._cur_data_context.add_item(name, value)
@@ -478,9 +572,12 @@ class Context(object):
         """
         if not self._trading:
             raise Exception('只有on_bar函数内能下单！')
-        contract = Contract(symbol) if symbol else self._cur_data_context.contract 
+        if symbol:
+            contract = Contract(symbol) if isinstance(symbol, str) else symbol
+        else:
+            contract = self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
-        self._cur_strategy_context.buy(Direction.LONG, price,
+        self._cur_strategy_context.buy(price,
                                         quantity, price_type,
                                         contract)
 
@@ -494,9 +591,12 @@ class Context(object):
         """
         if not self._trading:
             raise Exception('只有on_bar函数内能下单！')
-        contract = Contract(symbol) if symbol else self._cur_data_context.contract 
+        if symbol:
+            contract = Contract(symbol) if isinstance(symbol, str) else symbol
+        else:
+            contract = self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
-        self._cur_strategy_context.sell(Direction.LONG, price,
+        self._cur_strategy_context.sell(price,
                                         quantity, price_type,
                                         contract)
 
@@ -510,9 +610,12 @@ class Context(object):
         """
         if not self._trading:
             raise Exception('只有on_bar函数内能下单！')
-        contract = Contract(symbol) if symbol else self._cur_data_context.contract 
+        if symbol:
+            contract = Contract(symbol) if isinstance(symbol, str) else symbol
+        else:
+            contract = self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
-        self._cur_strategy_context.buy(Direction.SHORT, price,
+        self._cur_strategy_context.short(price,
                                         quantity, price_type,
                                         contract)
 
@@ -526,9 +629,12 @@ class Context(object):
         """
         if not self._trading:
             raise Exception('只有on_bar函数内能下单！')
-        contract = Contract(symbol) if symbol else copy.deepcopy(self._cur_data_context.contract)
+        if symbol:
+            contract = Contract(symbol) if isinstance(symbol, str) else symbol
+        else:
+            contract = self._cur_data_context.contract 
         price_type = PriceType.MKT if price == 0 else PriceType.LMT
-        self._cur_strategy_context.sell(Direction.SHORT, price,
+        self._cur_strategy_context.cover(price,
                                         quantity, price_type,
                                         contract)
 
@@ -551,6 +657,9 @@ class Context(object):
         ## @TODO assert direction
         return self._cur_strategy_context.position(contract, direction)
 
+    def all_positions(self):
+        return self._cur_strategy_context.all_positions()
+
     def pos(self, direction='long', symbol=None):
         """  合约的当前可平仓位。
        
@@ -566,6 +675,7 @@ class Context(object):
         if not self._trading:
             raise Exception('只有on_bar函数内能查询当前持仓！')
         direction = Direction.arg_to_type(direction)
+        ## @TODO symbol xxxxx
         contract = Contract(symbol) if symbol else self._cur_data_context.contract 
         ## @TODO assert direction
         return self._cur_strategy_context.pos(contract, direction)
@@ -604,4 +714,9 @@ class Context(object):
         """  当根bar时间终点撮合后的可用资金，用于测试。 """
         self.process_trading_events(at_baropen=False)
         return self.cash()
+
+    def test_equity(self):
+        """  当根bar时间终点撮合后的权益，用于测试。 """
+        self.process_trading_events(at_baropen=False)
+        return self.equity()
 

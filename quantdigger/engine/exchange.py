@@ -19,6 +19,8 @@ class Exchange(object):
 
     def make_market(self, bars, at_baropen):
         """ 价格撮合""" 
+        if len(self._open_orders) == 0:
+            return 
         fill_orders = set()
         for order in self._open_orders:
             if order.side == TradeSide.CANCEL:

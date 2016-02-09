@@ -196,6 +196,7 @@ class DataManager(object):
         Returns:
             SourceWrapper.
         """
+        ## @TODO 不存在数据时可能返回一个空的list, 虽然不影响程序执行。
         if isinstance(dt_start, str):
             dt_start = datetime.strptime(dt_start, "%Y-%m-%d")
         if isinstance(dt_end, str):

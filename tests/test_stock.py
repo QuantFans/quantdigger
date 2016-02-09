@@ -122,12 +122,12 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         e1, c1, dts = holdings_short_maked_curbar(source, capital*0.3/2, smg, multi)
         s_equity1 = [x + y for x, y in zip(e0, e1)]
         s_cashes1 = [x + y for x, y in zip(c0, c1)]
-        self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
-        for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
-            self.assertAlmostEqual(t_cashes1[i],s_cashes1[i])
         for i, hd in enumerate(profile.all_holdings(1)):
             self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
             self.assertAlmostEqual(hd['equity'], s_equity1[i])
+        self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
+        for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
+            self.assertAlmostEqual(t_cashes1[i],s_cashes1[i])
 
         for i in range(0, len(profile.all_holdings())):
             hd = all_holdings[i]
@@ -154,7 +154,6 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     UNIT = 1
     buy_quantity= { }
     poscost = 0
-    poscost2 = 0
     close_profit = 0
     equities = [] # 累计平仓盈亏
     dts = []
@@ -167,7 +166,6 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
             buy_quantity.setdefault(curdate, 0)
             quantity = sum(buy_quantity.values())
             poscost = (poscost * quantity + curprice*(1+settings['stock_commission'])*UNIT) / (quantity+UNIT)
-            poscost2 = (poscost2*quantity + curprice*UNIT) / (quantity+UNIT)
             buy_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
@@ -197,7 +195,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
         quantity = sum(buy_quantity.values())
         pos_profit += (curprice - poscost) * quantity * volume_multiple
         equities.append(capital+close_profit+pos_profit)
-        posmargin = poscost2 * quantity * volume_multiple * long_margin
+        posmargin = curprice * quantity * volume_multiple * long_margin
         cashes.append(equities[-1]-posmargin)
         dts.append(curdt)
     return equities, cashes, dts
@@ -211,7 +209,6 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     UNIT = 2
     short_quantity= { }
     poscost = 0
-    poscost2 = 0
     close_profit = 0
     equities = [] # 累计平仓盈亏
     dts = []
@@ -224,7 +221,6 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
             short_quantity.setdefault(curdate, 0)
             quantity = sum(short_quantity.values())
             poscost = (poscost * quantity + curprice*(1-settings['stock_commission'])*UNIT) / (quantity+UNIT)
-            poscost2 = (poscost2 * quantity + curprice*UNIT) / (quantity+UNIT)
             short_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
@@ -254,10 +250,174 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
         quantity = sum(short_quantity.values())
         pos_profit -= (curprice - poscost) * quantity * volume_multiple
         equities.append(capital+close_profit+pos_profit)
-        posmargin= poscost2 * quantity * volume_multiple * short_margin
+        posmargin= curprice * quantity * volume_multiple * short_margin
         cashes.append(equities[-1]-posmargin)
         dts.append(curdt)
     return equities, cashes, dts
+
+class TestMultiDataOneCombinationStock(unittest.TestCase):
+    """ 测试日线交易接口 """
+        
+    def test_case(self):
+        t_cashes0, t_equity0 = {}, { }
+        t_cashes1, t_equity1 = {}, { }
+
+        class DemoStrategy1(Strategy):
+            """ 限价只买多头仓位的策略 """
+            
+            def on_init(self, ctx):
+                """初始化数据""" 
+                ctx.tobuy = False
+                ctx.tosell = False
+
+            def on_symbol(self, ctx):
+                """""" 
+                weekday = ctx.datetime[0].weekday()
+                if weekday == 0:
+                    ctx.tobuy = True
+                elif weekday == 4:
+                    ctx.tosell = True
+                
+            def on_bar(self, ctx):
+                #weekday = ctx.datetime[0].weekday()
+                #print weekday
+                if ctx['600521'].tobuy:
+                    ctx.buy(ctx['600521'].close, 1) 
+                if ctx['600521'].tosell and ctx.pos(symbol='600521.SH')>0:
+                    ctx.sell(ctx['600521'].close, ctx.pos(symbol='600521.SH')) 
+                ctx['600521'].tobuy = False
+                ctx['600521'].tosell = False
+                t_cashes0[ctx.datetime[0]] = ctx.test_cash()
+                t_equity0[ctx.datetime[0]] = ctx.test_equity()
+
+
+        class DemoStrategy2(Strategy):
+            """ 限价买多卖空的策略 """
+            def __init__(self, name):
+                super(DemoStrategy2, self).__init__(name)
+                self.tobuys = []
+                self.tosells = []
+
+            def on_symbol(self, ctx):
+                """""" 
+                weekday = ctx.datetime[0].weekday()
+                if weekday == 0:
+                    self.tobuys.append(ctx.symbol)
+                elif weekday == 4:
+                    self.tosells.append(ctx.symbol)
+            
+            def on_bar(self, ctx):
+                """初始化数据""" 
+                ## @TODO all_positions
+                for symbol in self.tobuys:
+                    ctx.buy(ctx[symbol].close, 1)
+                for symbol in self.tosells:
+                    if ctx.pos(symbol=symbol)>0:
+                        ctx.sell(ctx[symbol].close, ctx.pos(symbol=symbol))
+
+                t_cashes1[ctx.datetime[0]] = ctx.test_cash()
+                t_equity1[ctx.datetime[0]] = ctx.test_equity()
+                self.tobuys = []
+                self.tosells = []
+
+
+        class DemoStrategy3(Strategy):
+            """ 测试平仓未成交时的持仓，撤单后的持仓，撤单。 """
+            def on_init(self, ctx):
+                """初始化数据""" 
+                pass
+
+            def on_bar(self, ctx):
+                return
+                
+        set_symbols(['600521', '600522'])
+        profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
+            'capital': capital,
+            'ratio': [0.3, 0.3, 0.4]
+            })
+        run()
+        # all_holdings, cash()
+        all_holdings = profile.all_holdings()
+        all_holdings0 = profile.all_holdings(0)
+        all_holdings1 = profile.all_holdings(1)
+        all_holdings2 = profile.all_holdings(2)
+        #self.assertTrue(len(source) > 0 and len(source) ==  len(all_holdings), '模拟器测试失败！')
+        lmg = Contract.long_margin_ratio('600521.SH')
+        multi = Contract.volume_multiple('600521.SH')
+        fname = os.path.join(os.getcwd(), 'data', '1DAY', 'SH', '600521.csv')
+        source = pd.read_csv(fname, parse_dates=True, index_col=0)
+        s_equity0, s_cashes0, dts = buy_monday_sell_friday(source, capital*0.3, lmg, multi)
+        count = 0
+        for i, hd in enumerate(all_holdings0):
+            # 刚好最后一根没持仓，无需考虑强平, 见weekday输出
+            dt = hd['datetime']
+            if dt in s_cashes0:
+                self.assertAlmostEqual(hd['cash'], s_cashes0[dt])
+                self.assertAlmostEqual(t_cashes0[dt], s_cashes0[dt])
+                self.assertAlmostEqual(hd['equity'], s_equity0[dt])
+                self.assertAlmostEqual(t_equity0[dt], s_equity0[dt])
+                count += 1
+            else:
+                self.assertAlmostEqual(all_holdings0[i-1]['cash'], hd['cash'])
+                self.assertAlmostEqual(all_holdings0[i-1]['equity'], hd['equity'])
+        self.assertTrue(count == len(dts))
+
+        ##  确保资金够用，所以不影响
+        #e0, c0, dts = holdings_buy_maked_curbar(source, capital*0.3/2, lmg, multi)
+        #e1, c1, dts = holdings_short_maked_curbar(source, capital*0.3/2, smg, multi)
+        #s_equity1 = [x + y for x, y in zip(e0, e1)]
+        #s_cashes1 = [x + y for x, y in zip(c0, c1)]
+        #for i, hd in enumerate(profile.all_holdings(1)):
+            #self.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
+            #self.assertAlmostEqual(hd['equity'], s_equity1[i])
+        #self.assertTrue(len(t_cashes1) == len(s_cashes1), 'cash接口测试失败！')
+        #for i in range(0, len(t_cashes1)-1): # 最后一根强平了无法比较
+            #self.assertAlmostEqual(t_cashes1[i],s_cashes1[i])
+
+        #for i in range(0, len(profile.all_holdings())):
+            #hd = all_holdings[i]
+            #hd0 = all_holdings0[i]
+            #hd1 = all_holdings1[i]
+            #hd2 = all_holdings2[i]
+            #self.assertTrue(hd['cash'] == hd0['cash']+hd1['cash']+hd2['cash'], 
+                            #'all_holdings接口测试失败！')
+            #self.assertTrue(hd['commission'] == hd0['commission']+
+                    #hd1['commission']+hd2['commission'], 'all_holdings接口测试失败！')
+            #self.assertTrue(hd['equity'] == hd0['equity']+hd1['equity']+hd2['equity'],
+                            #'all_holdings接口测试失败！')
+
+def buy_monday_sell_friday(data, capital, long_margin, volume_multiple):
+    """ 策略: 多头限价开仓且当根bar成交
+        买入点: [buy1, buy2, buy3]
+        当天卖出点: [sell1, sell2]
+    """ 
+    assert(volume_multiple == 1 and long_margin == 1)
+    UNIT = 1
+    poscost = 0
+    quantity = 0
+    close_profit = 0
+    equities = {} # 累计平仓盈亏
+    dts = []
+    cashes = { }
+    for curdt, curprice in data.close.iteritems():
+        pos_profit = 0
+        weekday = curdt.weekday()
+        if weekday == 0:
+            poscost = (poscost * quantity + curprice*(1+settings['stock_commission'])*UNIT) / (quantity+UNIT)
+            quantity += UNIT
+        else:
+            if weekday == 4 and quantity>0:
+                close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
+                                quantity * volume_multiple
+                quantity = 0
+        pos_profit += (curprice - poscost) * quantity * volume_multiple
+        equities[curdt] = capital+close_profit+pos_profit
+        #print curdt, equities[curdt], capital, close_profit, pos_profit, quantity
+        posmargin = curprice * quantity * volume_multiple * long_margin
+        cashes[curdt] = capital+close_profit+pos_profit -posmargin
+        dts.append(curdt)
+    return equities, cashes, dts
+
 
 
 if __name__ == '__main__':
