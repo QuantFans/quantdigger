@@ -14,12 +14,12 @@ QuantDigger目前是一个基于python的量化回测框架。作者最初是因
 
 
 文档
-----
+---
 http://www.quantfans.com/doc/quantdigger/
 
 
 安装
-----
+---
     
 或者克隆github代码后本地安装
    
@@ -30,7 +30,7 @@ http://www.quantfans.com/doc/quantdigger/
 
 
 依赖库
-------
+-----
 * matplotlib 
 * numpy
 * logbook
@@ -44,10 +44,10 @@ http://www.quantfans.com/doc/quantdigger/
 
 
 策略组合DEMO
-------------
+-----------
 
 源码
-~~~~
+~~~
 .. code:: py
 
 
@@ -127,7 +127,7 @@ http://www.quantfans.com/doc/quantdigger/
 
 
 策略结果
-~~~~~~~~
+~~~~~~~
 
 * k线和信号线
 
@@ -151,12 +151,12 @@ http://www.quantfans.com/doc/quantdigger/
     >>> [('Total Return', '-0.99%'), ('Sharpe Ratio', '-5.10'), ('Max Drawdown', '1.72%'), ('Drawdown Duration', '3568')]
 
 界面控制
-~~~~~~~~
+~~~~~~~
 k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块控制显示区域，可以通过鼠标拖拽改变显示区域。
 `上下方向键` 来进行缩放。 
 
 其它
-~~~~~~~~
+~~~
 **mplot_demo.py  matplotlib画k线，指标线的demo。**
   .. image:: images/plot.png
      :width: 500px
@@ -178,7 +178,7 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 
 
 版本
-~~~~
+~~~
 
 **TODO**
 

@@ -1,0 +1,12 @@
+logbook
+numpy>=1.10.0
+pandas>=1.7.0
+matplotlib
+python-dateutil>=2.4.2
+TA-Lib >= 0.4.8
+
+tushare
+progressbar
+
+
+
