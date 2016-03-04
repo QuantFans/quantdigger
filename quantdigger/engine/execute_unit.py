@@ -15,7 +15,7 @@ class ExecuteUnit(object):
                        dt_start="1980-1-1",
                        dt_end="2100-1-1",
                        n = None,
-                       spec_date = { }): # 'symbol':[,]
+                       spec_date = {}): # 'symbol':[,]
         """ 
         Args:
             pcontracts (list): list of pcontracts(string)

@@ -7,7 +7,6 @@ with open("README.rst", "r", "utf-8") as f:
     readme = f.read()
 
 setup(
-
     name="QuantDigger",
     version="0.4.0",
     description="量化交易PYTHON回测系统",
@@ -19,12 +18,17 @@ setup(
     packages=find_packages(exclude=['tests', 'demo', "requirements", "images"]),
     include_package_data=True,
     install_requires=[
-        "numpy>=1.10.4",
-        "pandas>=1.17.0",
+        "tushare>=0.4.7",
         "logbook>=0.12.5",
+        "ta-lib>=0.4.8",
+        "progressbar2>=3.6.2",
         "matplotlib>=1.5.1",
+        "pandas>=0.17.1",
         "python-dateutil>=2.4.2",
-        "ta-lib>=0.4.8"
+        "numpy==1.10.4",
+        "lxml>=3.5.0",
+        "cython",
+
     ],
     classifiers=[
         'Environment :: Finance',

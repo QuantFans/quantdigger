@@ -38,9 +38,16 @@ http://www.quantfans.com/doc/quantdigger/
 * progressbar
 * python-dateutil 
 * pyqt (可选)
-* Python (2.x, **暂不支持3.x**)
+* Python (2.7.8+, **暂不支持3.x**)
 * tushare_ (可选, 一个非常强大的股票信息抓取工具)
 * TA-Lib
+
+* 如果要安装tushare必须先安装`lxml`库, `pip install lxml --upgrade`.
+
+如果出现pypi源超时情况,可以通过命令方式进行安装依赖库:
+
+     pip2 -r requirements/requirements.txt --upgrade -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+
 
 
 策略组合DEMO
