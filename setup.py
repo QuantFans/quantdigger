@@ -9,7 +9,7 @@ with open("README.rst", "r", "utf-8") as f:
 setup(
     name="QuantDigger",
     version="0.4.0",
-    description="量化交易PYTHON回测系统",
+    description="量化交易Python回测系统",
     long_description=readme,
     author="QuantFans",
     author_email="dingjie.wang@foxmail.com",
@@ -27,8 +27,7 @@ setup(
         "python-dateutil>=2.4.2",
         "numpy==1.10.4",
         "lxml>=3.5.0",
-        "cython",
-
+        "cython>=0.23.4",
     ],
     classifiers=[
         'Environment :: Finance',
