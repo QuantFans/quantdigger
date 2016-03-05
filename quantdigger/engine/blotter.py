@@ -348,6 +348,9 @@ class SimpleBlotter(Blotter):
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = pos_profit
+        #if self.name == 'A2' and append == False:
+            #print dh['equity'], "**" , self._datetime
+            
         if append:
             self._all_holdings.append(dh)
         else:
