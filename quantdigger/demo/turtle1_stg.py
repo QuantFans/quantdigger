@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from quantdigger.kernel.indicators.common import MA, BOLL
-from quantdigger.kernel.engine.strategy import TradingStrategy
-from quantdigger.kernel.engine.series import NumberSeries
+from quantdigger.indicators.common import MA, BOLL
+from quantdigger.engine.strategy import TradingStrategy
+from quantdigger.engine.series import NumberSeries
 import numpy as np
 import fw
 
@@ -121,7 +121,7 @@ class TurtleStrategy(TradingStrategy):
     def __get_position_size(self, price):
         P = 10  # 最少交易股数，这里假设是10
         atr = self.pre_atr
-        if atr == 0: return 0
+        if atr == 0 or np.isnan(atr): return 0
         q = 0.01 * self.cash() / atr
         quantity = int(q / P) * P
         max_quantity = int(self.cash() / price / P) * P
@@ -145,6 +145,7 @@ class TurtleStrategy(TradingStrategy):
         signal = self.donchian.signal
         if isinstance(signal, EntrySignal):
             quantity = self.__get_position_size(signal.price)
+            print '## buy signal', signal.price, quantity
             if quantity > 0:
                 self.buy('long', signal.price, quantity)
                 self.last_buy_price = signal.price
