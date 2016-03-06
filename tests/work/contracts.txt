@@ -1,0 +1,11 @@
+name,code,exchange,spell,long_margin_ratio,short_margin_ratio,price_tick,volume_multiple
+stock,stock,TEST,stock,1,1,0,1
+600521,600521,SH,stock,1,1,0,1
+600522,600522,SH,stock,1,1,0,1
+future,future,TEST,future,0.4,0.4,0.2,3
+future2,future2,TEST,future,0.4,0.4,0.2,3
+AA,AA,TEST,AA,1,1,0,1
+BB,BB,TEST,BB,1,1,0,1
+CC,CC,TEST,CC,1,1,0,1
+oneday,oneday,TEST,oneday,1,1,0,1
+TWODAY,TWODAY,TEST,TWODAY,1,1,0,1

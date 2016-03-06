@@ -1,5 +1,5 @@
-QuantDigger
-============
+QuantDigger 0.4.0
+==================
 
 QuantDigger目前是一个基于python的量化回测框架。作者最初是因为对数据处理和机器学习感兴趣而选择了这个行业，
 接触了一些主流的期货交易软件，比如TB, 金字塔。他们的特点是语法比较简单，缺点是编程语言太封闭，有很多表达限制。
@@ -14,121 +14,170 @@ QuantDigger目前是一个基于python的量化回测框架。作者最初是因
 
 
 文档
-----
+---
 http://www.quantfans.com/doc/quantdigger/
 
 
 安装
-----
-    
-你可以选择pip安装 (推荐)
+---
+
+pip安装
    
   ::
        
-      python install_pip.py  (如果已经安装了pip,略过这一步。)
-      pip install QuantDigger
-      python install_dependency.py
+      按照指示安装ta-lib动态库: https://github.com/mrjbq7/ta-lib
+      pip install quantdigger
 
 或者克隆github代码后本地安装
    
   ::
        
       git clone https://github.com/QuantFans/quantdigger.git
-      python install.py  (会根据情况安装pip, 及依赖包)
+      python setupscripts\install.py  (会根据情况安装pip, 及依赖包)
 
 
 依赖库
-------
-* Python 
-* pandas 
-* python-dateutil 
+-----
 * matplotlib 
 * numpy
-* TA-Lib
 * logbook
+* pandas 
+* progressbar
+* python-dateutil 
 * pyqt (可选)
+* Python (2.7.8+, **暂不支持3.x**)
 * tushare_ (可选, 一个非常强大的股票信息抓取工具)
+* TA-Lib
 
-策略DEMO
---------
+* 如果要安装tushare必须先安装`lxml`库, `pip install lxml --upgrade`.
+
+如果出现pypi源超时情况,可以通过命令方式进行安装依赖库:
+
+     pip2 -r requirements/requirements.txt --upgrade -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+
+
+
+策略组合DEMO
+-----------
+
 源码
 ~~~~
+
 .. code:: py
 
-    from quantdigger.kernel.engine.execute_unit import ExecuteUnit
-    from quantdigger.kernel.indicators.common import MA, BOLL
-    from quantdigger.kernel.engine.strategy import TradingStrategy
-    from quantdigger.util import  pcontract
-    import plotting
 
-    class DemoStrategy(TradingStrategy):
-        """ 策略实例 """
-        def __init__(self, exe):
-            super(DemoStrategy, self).__init__(exe)
-            # 创建平均线指标和布林带指标。其中MA和BOLL表示指标函数类。
-            # 它们返回序列变量。
-            # 'ma20'：指标名. 'b'画线颜色. ‘1‘: 线宽。如果无需
-            # 绘图，则这些参数不需要给出。
-            self.ma20 = MA(self, self.close, 20,'ma20', 'b', '1')
-            self.ma10 = MA(self, self.close, 10,'ma10', 'y', '1')
-            self.b_upper, self.b_middler, self.b_lower = BOLL(self, self.close, 10,'boll10', 'y', '1')
+    #from quantdigger.engine.series import NumberSeries
+    #from quantdigger.indicators.common import MA
+    #from quantdigger.util import  pcontract
+    from quantdigger import *
 
-        def on_bar(self):
-            """ 策略函数，对每根Bar运行一次。""" 
-            if self.ma10[1] < self.ma20[1] and self.ma10 > self.ma20:
-                self.buy('long', self.open, 1, contract = 'IF000.SHFE') 
-            elif self.position() > 0 and self.ma10[1] > self.ma20[1] and self.ma10 < self.ma20:
-                self.sell('long', self.open, 1) 
+    class DemoStrategy(Strategy):
+        """ 策略A1 """
+    
+        def on_init(self, ctx):
+            """初始化数据""" 
+            ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2)
+            ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2)
 
-            # 输出pcon1的当前K线开盘价格。
-            print(self.open)
+        def on_symbol(self, ctx):
+            """  选股 """ 
+            return
 
-            # 夸品种数据引用
-            # pcon2的前一根K线开盘价格。
-            print(self.open_(1)[1])
+        def on_bar(self, ctx):
+            if ctx.curbar > 20:
+                if ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
+                    ctx.buy(ctx.close, 1) 
+                elif ctx.position() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
+                     ctx.ma10[1] < ctx.ma20[1]:
+                    ctx.sell(ctx.close, ctx.position()) 
+
+        def on_exit(self, ctx):
+            return
+
+    class DemoStrategy2(Strategy):
+        """ 策略A2 """
+    
+        def on_init(self, ctx):
+            """初始化数据""" 
+            ctx.ma5 = MA(ctx.close, 5, 'ma5', 'y', 2) 
+            ctx.ma10 = MA(ctx.close, 10, 'ma10', 'black', 2)
+
+        def on_symbol(self, ctx):
+            """  选股 """ 
+            return
+
+        def on_bar(self, ctx):
+            if ctx.curbar > 10:
+                if ctx.ma5[2] < ctx.ma10[2] and ctx.ma5[1] > ctx.ma10[1]:
+                    ctx.buy(ctx.close, 1) 
+                elif ctx.position() > 0 and ctx.ma5[2] > ctx.ma10[2] and \
+                     ctx.ma5[1] < ctx.ma10[1]:
+                    ctx.sell(ctx.close, ctx.position()) 
+
+        def on_exit(self, ctx):
+            return
 
     if __name__ == '__main__':
-        try:
-            # 策略的运行对象周期合约
-            pcon1 = pcontract('IF000.SHFE', '10.Minute')
-            pcon2 = pcontract('IF000.SHFE', '10.Minute')
-            # 创建模拟器，这里假设策略要用到两个不同的数据，比如套利。
-            simulator = ExecuteUnit([pcon1, pcon2]);
-            # 创建策略。
-            algo = DemoStrategy(simulator)
-            # 运行模拟器，这里会开始事件循环。
-            simulator.run()
+        set_symbols(['BB.SHFE-1.Minute'], 0)
+        # 创建组合策略
+        # 初始资金5000， 两个策略的资金配比为0.2:0.8
+        profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')], { 'captial': 5000,
+                                  'ratio': [0.2, 0.8] })
+        run()
 
-            # 显示回测结果
-            plotting.plot_result(simulator.data[pcon], algo._indicators,
-                                algo.blotter.deal_positions, algo.blotter)
-    
-        except Exception, e:
-            print(e)
+        # 绘制k线，交易信号线
+        from quantdigger.digger import finance, plotting
+        plotting.plot_strategy(profile.data(0), profile.indicators(1), profile.deals(1))
+        # 绘制策略A1, 策略A2, 组合的资金曲线
+        curve0 = finance.create_equity_curve(profile.all_holdings(0))
+        curve1 = finance.create_equity_curve(profile.all_holdings(1))
+        curve = finance.create_equity_curve(profile.all_holdings())
+        plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
+                            colors=['r', 'g', 'b'],
+                            names=[profile.name(0), profile.name(1), 'A0'])
+        # 绘制净值曲线
+        plotting.plot_curves([curve.networth])
+        # 打印统计信息
+        print finance.summary_stats(curve, 252*4*60)
 
 
 策略结果
-~~~~~~~~
-**main.py**
+~~~~~~~
 
 * k线和信号线
 
-  .. image:: figure_signal.png
+  .. image:: images/figure_signal.png
      :width: 500px
 
-* 资金曲线。
+* 2个策略和组合的资金曲线。
   
-  .. image:: figure_money.png
+  .. image:: images/figure_money.png
      :width: 500px
+
+* 组合的历史净值
+  
+  .. image:: images/figure_networth.png
+     :width: 500px
+
+* 统计结果
+
+::
+       
+    >>> [('Total Return', '-0.99%'), ('Sharpe Ratio', '-5.10'), ('Max Drawdown', '1.72%'), ('Drawdown Duration', '3568')]
+
+界面控制
+~~~~~~~
+k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块控制显示区域，可以通过鼠标拖拽改变显示区域。
+`上下方向键` 来进行缩放。 
 
 其它
-~~~~~~~~
+~~~
 **mplot_demo.py  matplotlib画k线，指标线的demo。**
-  .. image:: plot.png
+  .. image:: images/plot.png
      :width: 500px
 
 **pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。**
-  .. image:: pyquant.png
+  .. image:: images/pyquant.png
      :width: 500px
 
 .. _TeaEra: https://github.com/TeaEra
@@ -144,13 +193,17 @@ http://www.quantfans.com/doc/quantdigger/
 
 
 版本
-~~~~
+~~~
 
 **TODO**
 
 * 清理旧代码和数据文件
-* 重新设计数据模块
 * 改善UI, 补充UI文档
+
+**0.3.0 版本 2015-12-09**
+
+* 重新设计回测引擎, 支持组合回测，选股
+* 重构数据模块
 
 **0.2.0 版本 2015-08-18**
 
