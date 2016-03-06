@@ -1,5 +1,5 @@
-QuantDigger 0.3
-===============
+QuantDigger 0.4.0
+==================
 
 QuantDigger目前是一个基于python的量化回测框架。作者最初是因为对数据处理和机器学习感兴趣而选择了这个行业，
 接触了一些主流的期货交易软件，比如TB, 金字塔。他们的特点是语法比较简单，缺点是编程语言太封闭，有很多表达限制。
@@ -15,18 +15,25 @@ QuantDigger目前是一个基于python的量化回测框架。作者最初是因
 
 文档
 ---
-http://www.quantfans.com/doc/quantdigger/
+http://www.quantfans.org
 
 
 安装
 ---
-    
+
+pip安装
+   
+  ::
+       
+      按照指示安装ta-lib动态库: https://github.com/mrjbq7/ta-lib
+      pip install quantdigger
+
 或者克隆github代码后本地安装
    
   ::
        
       git clone https://github.com/QuantFans/quantdigger.git
-      python install.py  (会根据情况安装pip, 及依赖包)
+      python setupscripts\install.py  (会根据情况安装pip, 及依赖包)
 
 
 依赖库

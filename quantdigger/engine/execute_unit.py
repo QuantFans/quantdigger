@@ -136,6 +136,7 @@ class ExecuteUnit(object):
             self.context.switch_to_contract(pcon)
             self.context.rolling_forward()
         while True:
+            print "abcd..." 
             self.context.on_bar = False
             # 遍历数据轮的所有合约
             for pcon, data in self._all_data.iteritems():

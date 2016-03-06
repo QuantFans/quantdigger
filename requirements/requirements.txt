@@ -1,13 +1,7 @@
-lxml>=3.5.0
 logbook
 numpy>=1.10.0
 pandas>=1.7.1
 matplotlib
 python-dateutil>=2.4.2
 TA-Lib>= 0.4.8
-tushare>=0.4.7
 progressbar2>=3.6.2
-cython
-
-
-
