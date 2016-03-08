@@ -15,7 +15,7 @@ QuantDigger目前是一个基于python的量化回测框架。作者最初是因
 
 文档
 ---
-http://www.quantfans.com/doc/quantdigger/
+http://www.quantfans.org
 
 
 安装
