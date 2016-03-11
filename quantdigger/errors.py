@@ -1,4 +1,5 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
+
 
 class QError(Exception):
     msg = None
@@ -7,7 +8,6 @@ class QError(Exception):
         self.args = args
         self.kwargs = kwargs
         self.message = str(self)
-        
 
     def __str__(self):
         msg = self.msg.format(**self.kwargs)
@@ -20,41 +20,46 @@ class QError(Exception):
 class TradingError(QError):
     """
     """
-    msg = "交易警告：{err}" 
+    msg = "交易警告：{err}"
+
 
 class DataFormatError(QError):
     """
     """
-    msg = "{type}--错误的数据格式！" 
+    msg = "{type}--错误的数据格式！"
+
 
 class DataFieldError(QError):
     """
     """
-    msg = "错误的数据字段: {error_fields}\n正确的字段为: {right_fields} " 
+    msg = "错误的数据字段: {error_fields}\n正确的字段为: {right_fields} "
+
 
 class FileDoesNotExist(QError):
     """
     当本地文件不存在的时候触发。
     """
-    msg = "不存在文件:{file}" 
+    msg = "不存在文件:{file}"
 
 
 class PeriodTypeError(QError):
-    msg = "不存在该周期！ -- {period}" 
+    msg = "不存在该周期！ -- {period}"
 
 
 class DataAlignError(QError):
-    msg = "数据没有对齐！" 
+    msg = "数据没有对齐！"
+
 
 class SeriesIndexError(QError):
-    msg = "序列变量索引越界！" 
+    msg = "序列变量索引越界！"
+
 
 class BreakConstError(QError):
-    msg = "不能对常量赋值！" 
+    msg = "不能对常量赋值！"
+
 
 class ArgumentError(QError):
-    msg = "参数错误！" 
-    
+    msg = "参数错误！"
 
 
 class WrongDataForTransform(QError):

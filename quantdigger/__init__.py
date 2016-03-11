@@ -9,12 +9,13 @@ from quantdigger.datasource import locd
 
 __version__ = '0.4.0'
 
+
 def set_config(cfg):
-    """""" 
+    """"""
     from quantdigger.datasource.data import locd
     if 'source' in cfg:
         cfg['source'] = cfg['source'].lower()
-        assert(cfg['source'] in ['sqlite', 'csv']) 
+        assert(cfg['source'] in ['sqlite', 'csv'])
     settings.update(cfg)
     locd.set_source(settings)
 

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from quantdigger.errors import SeriesIndexError
+import datetime
+
 
 class SeriesBase(object):
     def __init__(self, data=[], name='series', indic=None, default=None):
-        """ 序列变量的基类。 
+        """ 序列变量的基类。
         name用来跟踪
         """
         self.curbar = 0
@@ -20,7 +22,7 @@ class SeriesBase(object):
 
     def reset_data(self, data, wsize):
         """ 初始化值和窗口大小
-        
+
         Args:
             data (list|ndarray|pd.Series): 数据，类型为支持索引的数据结构
             wwsize (int): 窗口大小
@@ -55,11 +57,11 @@ class SeriesBase(object):
         return len(self.data)
 
     def duplicate_last_element(self):
-        """ 
-           非指标序列变量才会运行 
+        """
+           非指标序列变量才会运行
         """
         try:
-           pre_elem = self.data[(self.curbar-1) % self._window_size] 
+            pre_elem = self.data[(self.curbar-1) % self._window_size]
         except KeyError:
             return
         else:
@@ -74,21 +76,23 @@ class SeriesBase(object):
     #def __call__(self, *args):
         #length = len(args)
         #if length  == 0:
-            #return float(self) 
+            #return float(self)
         #elif length == 1:
             #return self.data[self.curbar - args[0]]
-    
-    
+
+
 class NumberSeries(SeriesBase):
     """ 数字序列变量"""
     DEFAULT_VALUE = 0.0
     value_type = float
+
     def __init__(self, data=[], name='NumberSeries', indic=None, default=0.0):
         super(NumberSeries, self).__init__(data, name, indic, default)
-        return 
+        return
 
     def __float__(self):
         return self[0]
+
     #
     def __eq__(self, r):
         return self[0] == float(r)
@@ -179,12 +183,12 @@ class NumberSeries(SeriesBase):
                 #i = self.curbar - index
                 #if self._indic:
                     ## 延迟计算
-                    #self._indic.compute_element(i%self._window_size, index) 
+                    #self._indic.compute_element(i%self._window_size, index)
                 #return self.data[i%self._window_size]
                 assert(False)
             else:
                 i = self.curbar - index
-                if i < 0 or index<0:
+                if i < 0 or index < 0:
                     return self._default
                 else:
                     return float(self.data[i])
@@ -194,13 +198,14 @@ class NumberSeries(SeriesBase):
     def __call__(self, index):
         return self[index]
 
-import datetime
+
 class DateTimeSeries(SeriesBase):
     """ 时间序列变量 """
-    DEFAULT_VALUE = datetime.datetime(1980,1,1)
+    DEFAULT_VALUE = datetime.datetime(1980, 1, 1)
+
     def __init__(self, data=[], name='DateTimeSeries'):
         super(DateTimeSeries, self).__init__(data, name,
-                                default=self.DEFAULT_VALUE)
+                                             default=self.DEFAULT_VALUE)
         return
 
     def __getitem__(self, index):

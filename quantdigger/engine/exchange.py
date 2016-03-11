@@ -1,14 +1,16 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 from quantdigger.datastruct import Transaction, PriceType, TradeSide, Direction
 from quantdigger.engine.event import FillEvent
 from quantdigger.util import elogger as logger
+
+
 class Exchange(object):
     """ 模拟交易所。
-  
+
         :ivar events: 事件池。
         :ivar name: 策略名，用于代码跟踪。
     """
-    def __init__(self, name, events_pool, slippage = None, strict=True):
+    def __init__(self, name, events_pool, slippage=None, strict=True):
         self.events = events_pool
         self.name = name
         self._slippage = slippage
@@ -18,15 +20,15 @@ class Exchange(object):
         self._datetime = None
 
     def make_market(self, bars, at_baropen):
-        """ 价格撮合""" 
+        """ 价格撮合"""
         if len(self._open_orders) == 0:
-            return 
+            return
         fill_orders = set()
         for order in self._open_orders:
             if order.side == TradeSide.CANCEL:
                 fill_orders.add(order)
                 transact = Transaction(order)
-                self.events.put(FillEvent(transact)) 
+                self.events.put(FillEvent(transact))
                 continue
             try:
                 bar = bars[order.contract]
@@ -47,14 +49,14 @@ class Exchange(object):
                                 transact.price = order.price
                                 transact.datetime = bar.datetime
                                 fill_orders.add(order)
-                                self.events.put(FillEvent(transact)) 
+                                self.events.put(FillEvent(transact))
                     elif order.price_type == PriceType.MKT:
                         transact.price = bar.open
                         transact.datetime = bar.datetime
                         # recompute commission when price changed
                         transact.compute_commission()
                         fill_orders.add(order)
-                        self.events.put(FillEvent(transact)) 
+                        self.events.put(FillEvent(transact))
                 else:
                     if order.price_type == PriceType.LMT:
                         # 限价单以最高和最低价格为成交的判断条件．
@@ -68,7 +70,7 @@ class Exchange(object):
                                 # Bar的结束时间做为交易成交时间.
                                 transact.datetime = bar.datetime
                                 fill_orders.add(order)
-                                self.events.put(FillEvent(transact)) 
+                                self.events.put(FillEvent(transact))
                     elif order.price_type == PriceType.MKT:
                         # 市价单以最高或最低价格为成交价格．
                         if order.side == TradeSide.KAI:
@@ -85,24 +87,24 @@ class Exchange(object):
                         # recompute commission when price changed
                         transact.compute_commission()
                         fill_orders.add(order)
-                        self.events.put(FillEvent(transact)) 
+                        self.events.put(FillEvent(transact))
             else:
                 transact.datetime = bar.datetime
                 fill_orders.add(order)
                 #
-                self.events.put(FillEvent(transact)) 
-            # end of for 
+                self.events.put(FillEvent(transact))
+            # end of for
         if fill_orders:
             self._open_orders -= fill_orders
 
     def insert_order(self, event):
         """
         模拟交易所收到订单。
-        """ 
-        ## @TODO 
+        """
+        ## @TODO
         if event.order in self._open_orders:
             # 撤单处理, set不会自动覆盖。
-            self._open_orders.remove(event.order) 
+            self._open_orders.remove(event.order)
         self._open_orders.add(event.order)
 
     def update_datetime(self, dt):
