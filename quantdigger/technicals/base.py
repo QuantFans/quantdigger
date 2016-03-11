@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 # @file base.py
 # @brief 指标基类
 # @author wondereamer
@@ -13,6 +13,7 @@ from quantdigger.engine import series
 from quantdigger.widgets.widget_plot import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
+
 def transform2ndarray(data):
     """ 如果是序列变量，返回ndarray浅拷贝 """
     if isinstance(data, series.NumberSeries):
@@ -20,55 +21,61 @@ def transform2ndarray(data):
     elif isinstance(data, pandas.Series):
         data = np.asarray(data)
     if not isinstance(data, np.ndarray):
-        raise  DataFormatError(type=type(data))
+        raise DataFormatError(type=type(data))
     return data
 
+
 def tech_init(method):
-    """ 根据被修饰函数的参数构造属性。  
+    """ 根据被修饰函数的参数构造属性。
         并且触发向量计算。
     """
     def wrapper(self, *args, **kwargs):
         magic = inspect.getargspec(method)
         arg_names = magic.args[1:]
         # 默认参数
-        default =  dict((x, y) for x, y in zip(magic.args[-len(magic.defaults):], magic.defaults))
+        default = dict(
+            (x, y) for x, y in zip(magic.args[-len(magic.defaults):],
+                                   magic.defaults))
         # 调用参数
-        method_args = { }
+        method_args = {}
         for i, arg in enumerate(args):
             method_args[arg_names[i]] = arg
         method_args.update(kwargs)
-        # 
+        #
         default.update(method_args)
         # 属性创建
         for key, value in default.iteritems():
             setattr(self, key, value)
         # 运行构造函数
-        rst =  method(self, *args, **kwargs)
+        rst = method(self, *args, **kwargs)
         self.compute()
         return rst
     return wrapper
 
+
 def plot_init(method):
-    """ 根据被修饰函数的参数构造属性。  
+    """ 根据被修饰函数的参数构造属性。
         并且触发绘图范围计算。
     """
     def wrapper(self, *args, **kwargs):
         magic = inspect.getargspec(method)
         arg_names = magic.args[1:]
         # 默认参数
-        default =  dict((x, y) for x, y in zip(magic.args[-len(magic.defaults):], magic.defaults))
+        default = dict(
+            (x, y) for x, y in zip(magic.args[-len(magic.defaults):],
+                                   magic.defaults))
         # 调用参数
-        method_args = { }
+        method_args = {}
         for i, arg in enumerate(args):
             method_args[arg_names[i]] = arg
         method_args.update(kwargs)
-        # 
+        #
         default.update(method_args)
         # 属性创建
         for key, value in default.iteritems():
             setattr(self, key, value)
         # 运行构造函数
-        rst =  method(self, *args, **kwargs)
+        rst = method(self, *args, **kwargs)
         self._init_bound()
         return rst
     return wrapper
@@ -101,12 +108,12 @@ class TechnicalBase(PlotInterface):
         self._args = None
 
     def _rolling_algo(self, data, n, i):
-        """ 逐步运行函数。""" 
+        """ 逐步运行函数。"""
         raise NotImplementedError
 
     def _vector_algo(self, data, n):
         """向量化运行, 结果必须赋值给self.values。
-        
+
         Args:
             data (np.ndarray): 数据
 
@@ -115,7 +122,7 @@ class TechnicalBase(PlotInterface):
         raise NotImplementedError
 
     def compute(self):
-        """ 
+        """
          构建时间序列变量，执行指标的向量算法。
         """
         if not hasattr(self, '_args'):
@@ -129,18 +136,20 @@ class TechnicalBase(PlotInterface):
         if isinstance(self.values, dict):
             self.series = OrderedDict()
             for key, value in self.values.iteritems():
-                self.series[key] = series.NumberSeries(value, self.name, self, float('nan'))
+                self.series[key] = series.NumberSeries(
+                    value, self.name, self, float('nan'))
             for key, value in self.series.iteritems():
                 setattr(self, key, value)
             self.is_multiple = True
         else:
-            self.series = [series.NumberSeries(self.values, self.name, self, float('nan'))]
+            self.series = [series.NumberSeries(
+                self.values, self.name, self, float('nan'))]
             self.is_multiple = False
         self._init_bound()
 
     def compute_element(self, cache_index, rolling_index):
         """ 计算一个回溯值, 被Series延迟调用。
-        
+
         Args:
             cache_index (int): 缓存索引
 
@@ -171,13 +180,13 @@ class TechnicalBase(PlotInterface):
         return self.series[0].curbar
 
     def __size__(self):
-        """""" 
+        """"""
         if self.is_multiple:
             return len(self.series.itervalues().next())
         return len(self.series[0])
-    
+
     #def debug_data(self):
-        #""" 主要用于调试""" 
+        #""" 主要用于调试"""
         #return [s.data for s in self.series]
 
     def _added_to_tracker(self, tracker):
@@ -197,7 +206,7 @@ class TechnicalBase(PlotInterface):
         #return self
 
     #def next(self):
-        #"""docstring for next""" 
+        #"""docstring for next"""
         #iter(self.series)
 
     def __call__(self, index):
@@ -206,8 +215,8 @@ class TechnicalBase(PlotInterface):
     def __getitem__(self, index):
         # 解析多元值, 返回series
         # python 3.x 有这种机制？
-        #print self.name, index
-        #print self.series[0].data
+        # print self.name, index
+        # print self.series[0].data
         if self.is_multiple:
             return self.series[index]
         # 返回单变量的值。

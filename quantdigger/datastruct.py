@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 #from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
@@ -142,9 +142,10 @@ class HedgeType(object):
     @classmethod
     def type_to_str(cls, type):
         type2str = {cls.SPEC: 'SPEC',
-                     cls.HEDG: 'HEDG'}
-    
+                    cls.HEDG: 'HEDG'}
+
         return type2str[type]
+
 
 class Direction(object):
     """
