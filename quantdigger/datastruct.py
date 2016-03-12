@@ -1,8 +1,9 @@
 # -*- coding: utf8 -*-
 
-#from flufl.enum import Enum
+# from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
+
 
 class TradeSide(object):
     """ 开平仓标志 
@@ -133,7 +134,7 @@ class HedgeType(object):
         把用户输入参数转化为系统类型。
         """ 
         tdict = {'SPEC': cls.SPEC,
-                 'HEDG': cls.HEDG }
+                 'HEDG': cls.HEDG}
         if isinstance(arg, str):
             return tdict[arg.upper()]
         else:
