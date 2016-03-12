@@ -17,17 +17,20 @@ class MaStrategy(TradingStrategy):
         self.num_cont = 0
         self.num_win = 0
 
-    def __get_position_size(self):
+    def __get_position_size(self, price):
         P = 10  # 最少交易股数，这里假设是10
-        quantity = int(self.cash() / self.open / P) * P
+        quantity = int(self.cash() / price / P) * P
         return quantity
 
     def on_bar(self):
         """ 策略函数，对每根Bar运行一次。"""
         if self.volume == 0: return # 这天没有成交量，跳过
         price = self.close[0]
-        if self.position() == 0 and self.mashort[1] <= self.malong[1] and self.mashort > self.malong:
-            quantity = self.__get_position_size()
+        if self.position() == 0 and self.mashort > self.malong:# and self.mashort[1] <= self.malong[1]:
+            if self.high <= self.close:
+                print 'fail to buy!'
+                return
+            quantity = self.__get_position_size(price)
             if quantity > 0:
                 self.buy('long', price, quantity, contract = code)
                 self.buy_price = price
