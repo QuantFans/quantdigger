@@ -35,7 +35,10 @@ class StockTsSource(object):
         dt_end = _process_dt(dt_end)
         data = ts.get_h_data(pcontract.contract.code,
                              start=dt_start, end=dt_end)
-        return _process_tushare_data(data.iloc[::-1])
+        if data is None:
+            return None
+        else:
+            return _process_tushare_data(data.iloc[::-1])
 
 
 class CachedStockTsSource(cc.CachedDatasource):

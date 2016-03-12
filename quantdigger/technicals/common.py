@@ -1,13 +1,16 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 ##
 # @file common.py
-# @brief 
+# @brief
 # @author wondereamer
 # @version 0.1
 # @date 2015-12-23
 import talib
 import matplotlib.finance as finance
-from quantdigger.technicals.base import TechnicalBase, transform2ndarray, tech_init, plot_init
+from quantdigger.technicals.base import \
+    TechnicalBase, transform2ndarray, tech_init, plot_init
+from quantdigger.widgets.widget_plot import PlotInterface
+
 
 class MA(TechnicalBase):
     """ 移动平均线指标。 """
@@ -20,13 +23,13 @@ class MA(TechnicalBase):
         self._args = [data, n]
 
     def _rolling_algo(self, data, n, i):
-        """ 逐步运行函数。""" 
+        """ 逐步运行函数。"""
         ## @todo 因为用了向量化方法，速度降低
         return (talib.SMA(data, n)[i], )
 
     def _vector_algo(self, data, n):
         """向量化运行, 结果必须赋值给self.values。
-        
+
         Args:
             data (np.ndarray): 数据
             n (int): 时间窗口大小
@@ -42,7 +45,8 @@ class MA(TechnicalBase):
 class BOLL(TechnicalBase):
     """ 布林带指标。 """
     @tech_init
-    def __init__(self, data, n, name='BOLL', colors=('y', 'b', 'g'), lw=1, style="line"):
+    def __init__(self, data, n, name='BOLL',
+                 colors=('y', 'b', 'g'), lw=1, style="line"):
         super(BOLL, self).__init__(name)
         ### @TODO 只有在逐步运算中需给self.values先赋值,
         ## 去掉逐步运算后删除
@@ -54,12 +58,12 @@ class BOLL(TechnicalBase):
         self._args = [data, n, 2, 2]
 
     def _rolling_algo(self, data, n, a1, a2, i):
-        """ 逐步运行函数。""" 
-        upper, middle, lower =  talib.BBANDS(data, n, a1, a2)
+        """ 逐步运行函数。"""
+        upper, middle, lower = talib.BBANDS(data, n, a1, a2)
         return (upper[i], middle[i], lower[i])
 
     def _vector_algo(self, data, n, a1, a2):
-        """向量化运行""" 
+        """向量化运行"""
         ## @NOTE self.values为保留字段！
         u, m, l = talib.BBANDS(data, n, a1, a2)
         self.values = {
@@ -71,9 +75,12 @@ class BOLL(TechnicalBase):
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """
         self.widget = widget
-        self.plot_line(self.values['upper'], self.colors[0], self.lw, self.style)
-        self.plot_line(self.values['middler'], self.colors[1], self.lw, self.style)
-        self.plot_line(self.values['lower'], self.colors[2], self.lw, self.style)
+        self.plot_line(self.values['upper'], self.colors[0],
+                       self.lw, self.style)
+        self.plot_line(self.values['middler'], self.colors[1],
+                       self.lw, self.style)
+        self.plot_line(self.values['lower'], self.colors[2],
+                       self.lw, self.style)
 
 
 #class RSI(TechnicalBase):
@@ -154,12 +161,13 @@ class BOLL(TechnicalBase):
     #def _qtplot(self, widget, fillcolor):
         #raise  NotImplementedError
 
-from quantdigger.widgets.widget_plot import PlotInterface
+
 class Volume(PlotInterface):
     ## @TODO 改成技术指标
     """ 柱状图。 """
     @plot_init
-    def __init__(self, open, close, volume, name='volume', colorup='r', colordown='b', width=1):
+    def __init__(self, open, close, volume, name='volume',
+                 colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(name, None)
         self.values = transform2ndarray(volume)
 
@@ -168,10 +176,12 @@ class Volume(PlotInterface):
         finance.volume_overlay(widget, self.open, self.close, self.volume,
                                self.colorup, self.colordown, self.width)
 
+
 class EquityCurve(PlotInterface):
     """ 资金曲线 """
     @plot_init
-    def __init__(self, data, name='EquityCurve', color='black', lw=1, style='line'):
+    def __init__(self, data, name='EquityCurve',
+                 color='black', lw=1, style='line'):
         super(EquityCurve, self).__init__(name, None)
         self.values = data
 

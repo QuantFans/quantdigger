@@ -12,9 +12,9 @@ _default_datasource = dstushare.CachedStockTsSource('tscache')
 def run(TheStrategy, code, datasource=_default_datasource):
     print 'code: ' + code
     pcon = stock(code)
-    #dt_start = '20130101'
+    dt_start = '20130101'
     #dt_end = '20150819'
-    dt_start = None
+    #dt_start = None
     dt_end = None
     simulator = ExecuteUnit([pcon], dt_start, dt_end, datasource=datasource)
     algo = TheStrategy(simulator)
