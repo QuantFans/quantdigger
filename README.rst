@@ -1,4 +1,4 @@
-QuantDigger 0.4.0
+QuantDigger 0.4.4
 ==================
 
 QuantDigger目前是一个基于python的量化回测框架。作者最初是因为对数据处理和机器学习感兴趣而选择了这个行业，

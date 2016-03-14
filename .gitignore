@@ -1,8 +1,12 @@
 *.pyc
 *.swp
+*.DS_Store
+
 
 .idea/
 dist/
 *.egg-info/
 build/
+demo/data/1DAY/
+tests/work/
 *.whl
