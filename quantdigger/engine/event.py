@@ -1,12 +1,15 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
  # event.py
 #from flufl.enum import Enum
+
+
 class EventsPool(object):
     """ 事件池，每个策略有一个。"""
     _pool = []
+
     def __init__(self, container=None):
         """ container决定是否是线程安全的。
-        
+
         Args:
             container (list or Queue): 事件容器
         """
@@ -47,7 +50,7 @@ class MarketEvent(object):
 
 class SignalEvent(object):
     """ 由策略函数产生的交易信号事件。 """
-    
+
     def __init__(self, orders):
         self.type = Event.SIGNAL
         self.orders = orders
@@ -60,10 +63,12 @@ class OrderEvent(object):
         self.type = Event.ORDER
         self.order = order
 
+
 class OnceEvent(object):
 
     def __init__(self):
         self.type = Event.ONCE
+
 
 class FillEvent(object):
     """ 委托成交事件。 """

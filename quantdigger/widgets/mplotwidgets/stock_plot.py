@@ -16,8 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import operator
 import pandas as pd
-#from pylab import *  
-#mpl.rcParams['font.sans-serif'] =  ['Microsoft YaHei'] #指定默认字体  
+#from pylab import *
+#mpl.rcParams['font.sans-serif'] =  ['Microsoft YaHei'] #指定默认字体
+
 
 def accumulate(iterable, func=operator.add):
     'Return running totals'
@@ -25,14 +26,14 @@ def accumulate(iterable, func=operator.add):
     # accumulate([1,2,3,4,5], operator.mul) --> 1 2 6 24 120
     it = iter(iterable)
     total = next(it)
-    #rst = []
+    # rst = []
     yield total
     for element in it:
         total = func(total, element)
         yield total
 
-font = FontProperties(size=8) 
-font_big = FontProperties(size=14) 
+font = FontProperties(size=8)
+font_big = FontProperties(size=14)
 
 
 class EventHandler(object):
@@ -41,93 +42,123 @@ class EventHandler(object):
         self.fig = fig
         self.data = data
         self.pre_x = None
-    
+
     def on_pick(self, event):
-        '''docstring for on_motion''' 
-        print "888888" 
+        '''docstring for on_motion'''
+        print "888888"
         print str(event.mouseevent.xdata)
         #print event.artist
 
     def on_move(self, event):
-        '''docstring for on_motion''' 
+        '''docstring for on_motion'''
         if isinstance(event.xdata, np.float64):
             i = int(event.xdata)/1
             if self.pre_x != i:
                 print self.data.index[i]
                 print self.data[i]
-                c = pd.to_datetime(self.data.index[i]).strftime("%Y-%m-%d %H:%M:%S") + "\n" + "hh" 
+                c = pd.to_datetime(self.data.index[i])\
+                      .strftime("%Y-%m-%d %H:%M:%S") + "\n" + "hh"
                 self.fig.axes[2].set_xlabel(c)
                 self.pre_x = i
 
 
 def plot_simple_entry(fig, entry_nbar_best, entry_nbar_worst, nbar):
-    '''docstring for plot_simple_entry''' 
+    '''docstring for plot_simple_entry'''
     fig.canvas.set_window_title(u'入场信息')
     ax1 = fig.add_subplot(1, 1, 1)
     entry_nbar_best = entry_nbar_best.order()
     entry_nbar_worst = entry_nbar_worst.reindex(entry_nbar_best.index)
-    if len(entry_nbar_best)>0:
-        entry_nbar_best.plot(ax=ax1, kind='bar', color='red', grid=False, use_index=False, label=u"%s根最优"%nbar)
+    if len(entry_nbar_best) > 0:
+        entry_nbar_best.plot(
+            ax=ax1, kind='bar', color='red',
+            grid=False, use_index=False, label=u"%s根最优" % nbar)
         #ax1.bar(range(len(entry_nbar_best)), entry_nbar_best, color='r', label=u"%s根最优"%nbar)
-        entry_nbar_worst.plot(ax=ax1, kind='bar', color='y', grid=False, use_index=False, label=u"%s根最差"%nbar)
-        temp = entry_nbar_worst[entry_nbar_worst<0]
-        ax1.plot(range(len(entry_nbar_best)), [temp.mean()]*len(entry_nbar_best), 'y--', label=u"平均风险: %s"%temp.mean())
-        temp = entry_nbar_best[entry_nbar_best>0]
-        ax1.plot(range(len(entry_nbar_best)), [temp.mean()]*len(entry_nbar_best), 
-                    'r--', label=u'平均最优: %s'%temp.mean() )
-        ax1.legend(loc='upper left',prop=font).get_frame().set_alpha(0.5)
+        entry_nbar_worst.plot(
+            ax=ax1, kind='bar', color='y',
+            grid=False, use_index=False, label=u"%s根最差" % nbar)
+        temp = entry_nbar_worst[entry_nbar_worst < 0]
+        ax1.plot(range(len(entry_nbar_best)),
+                 [temp.mean()]*len(entry_nbar_best),
+                 'y--',
+                 label=u"平均风险: %s" % temp.mean())
+        temp = entry_nbar_best[entry_nbar_best > 0]
+        ax1.plot(range(len(entry_nbar_best)),
+                 [temp.mean()]*len(entry_nbar_best),
+                 'r--',
+                 label=u'平均最优: %s' % temp.mean())
+        ax1.legend(loc='upper left', prop=font).get_frame().set_alpha(0.5)
         ax1.set_xticklabels([])
         ax1.set_xlabel("")
     return [ax1], []
 
 
-def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry_nbar_worst, nbar, binwidth=1):
+def plot_entry(fig, exit_profit, entry_best, entry_worst,
+               entry_nbar_best, entry_nbar_worst, nbar, binwidth=1):
     fig.canvas.set_window_title(u'入场信息')
-    axescolor  = '#f6f6f6'  # the axes background color
+    axescolor = '#f6f6f6'  # the axes background color
     left, width = 0.1, 0.8
-    rect1 = [left, 0.7, width, 0.2]#left, bottom, width, height
+    rect1 = [left, 0.7, width, 0.2]  # left, bottom, width, height
     rect2 = [left, 0.3, width, 0.4]
     rect3 = [left, 0.1, width, 0.2]
 
     ax1 = fig.add_axes(rect1, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex = ax1)
-    ax3  = fig.add_axes(rect3, axisbg=axescolor, sharex = ax1)
-    (entry_best-exit_profit).plot(ax=ax1, kind='bar', grid = False, use_index = False, label=u"优实差")
-    entry_worst.plot(ax=ax1, kind='bar', grid = False, use_index = False, color = 'y', label=u"最大不利偏移")
-    if nbar>0:
-        entry_nbar_best.plot(ax=ax3, kind='bar', color='red', grid=False, use_index=False, label=u"%s根最优"%nbar)
+    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
+    ax3 = fig.add_axes(rect3, axisbg=axescolor, sharex=ax1)
+    (entry_best-exit_profit).plot(ax=ax1, kind='bar', grid=False,
+                                  use_index=False, label=u"优实差")
+    entry_worst.plot(ax=ax1, kind='bar', grid=False,
+                     use_index=False, color='y', label=u"最大不利偏移")
+    if nbar > 0:
+        entry_nbar_best.plot(ax=ax3, kind='bar', color='red',
+                             grid=False, use_index=False,
+                             label=u"%s根最优" % nbar)
         #ax3.bar(range(len(entry_nbar_best)), entry_nbar_best, color='r', label=u"%s根最优"%nbar)
-        entry_nbar_worst.plot(ax=ax3, kind='bar', color='y', grid=False, use_index=False, label=u"%s根最差"%nbar)
-        temp = entry_nbar_worst[entry_nbar_worst<0]
-        ax3.plot(range(len(entry_nbar_best)), [temp.mean()]*len(entry_nbar_best), 'y--', label=u"平均风险: %s"%temp.mean())
-        temp = entry_nbar_best[entry_nbar_best>0]
-        ax3.plot(range(len(entry_nbar_best)), [temp.mean()]*len(entry_nbar_best), 
-                    'r--', label=u'平均最优: %s'%temp.mean() )
-        ax3.legend(loc='upper left',prop=font).get_frame().set_alpha(0.5)
+        entry_nbar_worst.plot(ax=ax3, kind='bar', color='y',
+                              grid=False, use_index=False,
+                              label=u"%s根最差" % nbar)
+        temp = entry_nbar_worst[entry_nbar_worst < 0]
+        ax3.plot(range(len(entry_nbar_best)),
+                 [temp.mean()]*len(entry_nbar_best),
+                 'y--',
+                 label=u"平均风险: %s" % temp.mean())
+        temp = entry_nbar_best[entry_nbar_best > 0]
+        ax3.plot(range(len(entry_nbar_best)),
+                 [temp.mean()]*len(entry_nbar_best),
+                 'r--',
+                 label=u'平均最优: %s' % temp.mean())
+        ax3.legend(loc='upper left', prop=font).get_frame().set_alpha(0.5)
 
     for i in xrange(len(exit_profit)):
-        if(entry_best[i]>0 and exit_profit[i]>0): 
+        if entry_best[i] > 0 and exit_profit[i] > 0:
             px21 = ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
-            px22 = ax2.bar(i, entry_best[i]-exit_profit[i], width=binwidth, color='red', bottom = exit_profit[i])
-        elif(entry_best[i]<0 and exit_profit[i]<0):
+            px22 = ax2.bar(i, entry_best[i]-exit_profit[i],
+                           width=binwidth,
+                           color='red',
+                           bottom=exit_profit[i])
+        elif entry_best[i] < 0 and exit_profit[i] < 0:
             ax2.bar(i, entry_best[i], width=binwidth, color='red')
-            ax2.bar(i, exit_profit[i]-entry_best[i], width=binwidth, color='blue', bottom = entry_best[i])
+            ax2.bar(i, exit_profit[i]-entry_best[i],
+                    width=binwidth, color='blue', bottom=entry_best[i])
         else:
             ax2.bar(i, entry_best[i], width=binwidth, color='red')
             ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
 
-    ax2.legend((px21[0], px22[0]), (u'实际盈利', u'早出最优盈利'), loc='upper left', prop=font).get_frame().set_alpha(0.5)
+    ax2.legend((px21[0], px22[0]), (u'实际盈利', u'早出最优盈利'),
+               loc='upper left',
+               prop=font).get_frame().set_alpha(0.5)
     ax1.legend(loc='upper left', prop=font).get_frame().set_alpha(0.5)
-    ax1.set_ylabel(u"交易区间内的差值", fontproperties = font)
-    ax2.set_ylabel(u"交易区间内的盈利", fontproperties = font)
+    ax1.set_ylabel(u"交易区间内的差值", fontproperties=font)
+    ax2.set_ylabel(u"交易区间内的盈利", fontproperties=font)
     for ax in ax1, ax2, ax3:
-        #if ax!=ax3:
+        # if ax!=ax3:
         ax.set_xticklabels([])
 
     ax3.set_xlabel("")
     ax1.set_title(u"入场相关信息", fontproperties=font_big)
-    c1 = Cursor(ax2, useblit=True, color='red', linewidth=1, vertOn = True, horizOn = True)
-    multi = MultiCursor(fig.canvas, fig.axes, color='r', lw=1, horizOn=False, vertOn=True)
+    c1 = Cursor(ax2, useblit=True, color='red',
+                linewidth=1, vertOn=True, horizOn=True)
+    multi = MultiCursor(fig.canvas, fig.axes, color='r',
+                        lw=1, horizOn=False, vertOn=True)
 
     #handle = EventHandler(exit_profit, fig)
     #fig.canvas.mpl_connect('motion_notify_event', handle.on_move)
@@ -136,7 +167,9 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
     def format_coord(x, y):
         """ 状态栏信息显示 """
         i = int(x)/1
-        c = pd.to_datetime(exit_profit.index[i]).strftime("%Y-%m-%d %H:%M:%S") + " Profit: %s MAE: %s"%(exit_profit[i], entry_worst[i])
+        c = pd.to_datetime(exit_profit.index[i])\
+            .strftime("%Y-%m-%d %H:%M:%S") + \
+            " Profit: %s MAE: %s" % (exit_profit[i], entry_worst[i])
         return str(c)
     ax1.format_coord = format_coord
     ax2.format_coord = format_coord
@@ -144,9 +177,10 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
     return [ax1, ax2, ax3], [multi, c1]
 
 
-def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, risks, nbar, binwidth=1):
-    #fig.canvas.set_window_title(u'出场信息')
-    axescolor  = '#f6f6f6'  # the axes background color
+def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst,
+              profits_more, risks, nbar, binwidth=1):
+    # fig.canvas.set_window_title(u'出场信息')
+    axescolor = '#f6f6f6'  # the axes background color
     left, width = 0.1, 0.8
     rect2 = [left, 0.4, width, 0.4]
     rect3 = [left, 0.1, width, 0.3]
@@ -154,7 +188,7 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
     ax1 = fig.add_axes(rect3, axisbg=axescolor)
     ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
     if nbar > 0:
-        print "**66666" 
+        print "**66666"
         # plot ax1
         profits_more.plot(ax=ax1, kind='bar', grid = False, use_index = False, label=u"%s根最优"%nbar)
         risks.plot(ax=ax1, kind='bar', grid = False, use_index = False, color = 'y', label=u"%s根最差"%nbar)
@@ -171,10 +205,10 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
 
         # plot ax2
         for i in xrange(len(exit_profit)):
-            if(exit_nbar_best[i]>exit_profit[i] and exit_profit[i]>0): 
+            if(exit_nbar_best[i]>exit_profit[i] and exit_profit[i]>0):
                 px21 = ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
                 px22 = ax2.bar(i, exit_nbar_best[i]-exit_profit[i], width=binwidth, color='red', bottom = exit_profit[i])
-            elif(exit_nbar_best[i]<exit_profit[i] and exit_profit[i]>0 and exit_nbar_best[i]>0): 
+            elif(exit_nbar_best[i]<exit_profit[i] and exit_profit[i]>0 and exit_nbar_best[i]>0):
                 ax2.bar(i, exit_nbar_best[i], width=binwidth, color='red')
                 ax2.bar(i, exit_profit[i]-exit_nbar_best[i], width=binwidth, color='blue', bottom = exit_nbar_best[i])
             elif(exit_nbar_best[i]<exit_profit[i] and exit_profit[i]<0):
@@ -200,7 +234,7 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
         return [], []
 
 
-def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry_nbar_worst, 
+def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry_nbar_worst,
                     exit_nbar_best, exit_nbar_worst, profits_more, risks, NBAR):
     fig.canvas.set_window_title(u'画图汇总')
     ax11 = fig.add_subplot(3, 2, 1)
@@ -266,7 +300,7 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
         enbest = entry_nbar_best.reindex(entry_nbar_best[entry_nbar_best>0].index).order()
         enbest.plot(ax=ax31,style='r', grid=False, use_index=False, label=u"%s根最优平均: %s"%(NBAR, entry_nbar_best[entry_nbar_best>0].mean()))
         enworst = (0-entry_nbar_worst.reindex(entry_nbar_worst[entry_nbar_worst<0].index).order(ascending=False))
-        enworst.plot(ax=ax31, style='y', grid=False, use_index=False, 
+        enworst.plot(ax=ax31, style='y', grid=False, use_index=False,
                 label=u"%s根最差平均: %s"%(NBAR, entry_nbar_worst[entry_nbar_worst<0].mean()))
         ax31.axhline(0, c='black')
         ax31.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
@@ -291,15 +325,15 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
 
     cursors = []
     for ax in [ax11, ax12, ax21, ax22, ax31, ax32]:
-        cursors.append(Cursor(ax, useblit=True, color='red', linewidth=1, 
+        cursors.append(Cursor(ax, useblit=True, color='red', linewidth=1,
                             vertOn = True, horizOn = True))
     return [ax11, ax12, ax21, ax22, ax31, ax32], cursors
 
 
 def plot_scatter(fig, x, y, x2, y2, binnum):
-    '''docstring for plot_test''' 
+    '''docstring for plot_test'''
     fig.canvas.set_window_title(u'交易鸟瞰图')
-    # definitions for the axes 
+    # definitions for the axes
     left, width = 0.1, 0.65
     bottom, height = 0.1, 0.65
     bottom_h = left_h = left+width+0.02
@@ -353,7 +387,7 @@ def plot_scatter(fig, x, y, x2, y2, binnum):
     return [axScatter, axHistx, axHisty], [c]
 
 
-def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entry_nbar_worsts, 
+def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entry_nbar_worsts,
                     exit_nbar_bests, exit_nbar_worsts, profits_mores, risks, colors, names, NBAR):
     fig = plt.figure(facecolor='white')
     fig.canvas.set_window_title(u'画图汇总一')
@@ -400,7 +434,7 @@ def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entr
         temp = bins[bins<0]
         ax12.plot(temp.tolist(), n.reindex(temp.index).tolist(), '%s--'%c, label=u'%s亏损分布'%nm)
         ax12.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
-        
+
 
         # MAE
         MAE = entry_worst.reindex(exit_profit[exit_profit>0].index)
@@ -452,13 +486,13 @@ def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entr
 
     cursors = []
     for ax in [ax11, ax12, ax21, ax22, ax31, ax32]:
-        cursors.append(Cursor(ax, useblit=True, color='red', linewidth=1, 
+        cursors.append(Cursor(ax, useblit=True, color='red', linewidth=1,
                             vertOn = True, horizOn = True))
     return fig, cursors
 
 
 def ax_normed_data(x1list, y1list, ax_ymax):
-    '''docstring for normed_data''' 
+    '''docstring for normed_data'''
     unit = ax_ymax / max(abs(y1list))
     nxlist = []
     nylist = []
@@ -471,9 +505,9 @@ def ax_normed_data(x1list, y1list, ax_ymax):
 
 
 def plot_contribution(ax, bins, v, style):
-    '''docstring for plot_contribution''' 
+    '''docstring for plot_contribution'''
     ctri = np.array(range(len(bins)-1))
-    ymin, ymax = ax.get_ylim() 
+    ymin, ymax = ax.get_ylim()
     for i in range(len(bins)-1):
         t = v[bins[i]<=v]
         t = t[t<bins[i+1]]
@@ -488,7 +522,7 @@ def plot_contribution(ax, bins, v, style):
     winy = []
     for i in range(len(x)):
         if x[i]<0:
-            losex.append(x[i]) 
+            losex.append(x[i])
             losey.append(ctri[i])
         else:
             winx.append(x[i])
@@ -498,7 +532,7 @@ def plot_contribution(ax, bins, v, style):
     winy = [i for i in accumulate(winy)]
     nx, ny = ax_normed_data(x, np.array(losey+winy), ymax)
     ax.plot(nx, ny, 'k')
-        
+
 
 def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
                     exit_nbar_best, exit_nbar_worst, nbar):
@@ -513,7 +547,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
     ax11.plot(rtn.order().tolist(), 'b')
 
     ax11.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
-    cursors.append(Cursor(ax11, useblit=True, color='red', linewidth=1, 
+    cursors.append(Cursor(ax11, useblit=True, color='red', linewidth=1,
                                 vertOn = True, horizOn = True))
 
     ax11.set_xlabel(u'回撤', fontproperties=font_big)
@@ -526,7 +560,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
     n, bins = rst[0], rst[1]
     plot_contribution(ax12, bins, rtn, 'bo--')
     ax12.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
-    cursors.append(Cursor(ax12, useblit=True, color='red', linewidth=1, 
+    cursors.append(Cursor(ax12, useblit=True, color='red', linewidth=1,
                                 vertOn = True, horizOn = True))
 
     #ax21 = fig.add_subplot(3, 2, 3)
@@ -537,7 +571,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
     #ax21.set_xticklabels([])
     #ax21.set_xlabel(u'回吐', fontproperties=font_big)
     #ax21.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
-    #cursors.append(Cursor(ax21, useblit=True, color='red', linewidth=1, 
+    #cursors.append(Cursor(ax21, useblit=True, color='red', linewidth=1,
                                 #vertOn = True, horizOn = True))
 
 
@@ -550,7 +584,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
     #n, bins = rst[0], rst[1]
     #plot_contribution(ax22, bins, diff, 'bo--')
     #ax22.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
-    #cursors.append(Cursor(ax22, useblit=True, color='red', linewidth=1, 
+    #cursors.append(Cursor(ax22, useblit=True, color='red', linewidth=1,
                                 #vertOn = True, horizOn = True))
     if nbar>0:
         ax31 = fig.add_subplot(2, 2, 3)
@@ -565,9 +599,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
         ax31.plot(len(bl)+np.arange(len(ww)), ww.tolist(), 'k')
         ax31.fill_between(len(bl)+np.arange(len(ww)), bw, ww, facecolor='r', label=u'hello')
         ax31.plot(data_lose['exit_profit'].abs().reindex(bl.index), 'b')
-        cursors.append(Cursor(ax31, useblit=True, color='red', linewidth=1, 
+        cursors.append(Cursor(ax31, useblit=True, color='red', linewidth=1,
                                     vertOn = True, horizOn = True))
         ax31.axhline(color='k')
     return [ax11, ax12, ax31], cursors
-
-

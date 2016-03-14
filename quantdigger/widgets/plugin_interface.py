@@ -2,6 +2,7 @@
 
 import abc
 
+
 class PluginInterface(object):
     """
      插件接口

@@ -1,9 +1,10 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 from matplotlib.widgets import AxesWidget
 from matplotlib.widgets import MultiCursor
 import matplotlib.ticker as mticker
 from matplotlib.ticker import Formatter
-from  mplots import Candles
+from mplots import Candles
+
 
 def strtime_format(delta):
     if delta.days >= 1:
@@ -13,6 +14,7 @@ def strtime_format(delta):
     else:
         # 日内其它分钟
         return '%m-%d'
+
 
 def slider_strtime_format(delta):
     if delta.days >= 1:
@@ -32,7 +34,7 @@ class RangeWidget(object):
         self.ax.plot(data)
 
     def update(self):
-        """""" 
+        """"""
         #self.zorder = 1000
         #self.ax.visible = True
         #self.ax.figure.canvas.draw()
@@ -73,7 +75,7 @@ class Slider(AxesWidget):
 
     Call :meth:`add_observer` to connect to the slider event
     """
-    def __init__(self, ax, name, label, valmin, valmax, valinit=0.5, width=1, valfmt='%1.2f', 
+    def __init__(self, ax, name, label, valmin, valmax, valinit=0.5, width=1, valfmt='%1.2f',
                  time_index = None, closedmin=True, closedmax=True, slidermin=None,
                  slidermax=None, drag_enabled=True, **kwargs):
         """
@@ -142,7 +144,7 @@ class Slider(AxesWidget):
         self._connect()
 
     def _value_format(self, x):
-        """docstring for timess""" 
+        """docstring for timess"""
         ind = int(round(x))
         if ind>=len(self._index) or ind<0: return ''
         return self._index[ind].strftime(self._fmt)
@@ -269,9 +271,9 @@ class CandleWindow(object):
         self.min_wdlength = min_wdlength
         self.voffset = 0
 
-        # 当前显示的范围。 
+        # 当前显示的范围。
         #self.xmax = len(data)
-        #self.xmin = max(0, self.xmax-self.wdlength) 
+        #self.xmin = max(0, self.xmax-self.wdlength)
         #self.ymax = np.max(data.high[self.xmin : self.xmax].values) + self.voffset
         #self.ymin = np.min(data.low[self.xmin : self.xmax].values) - self.voffset
 
@@ -281,7 +283,7 @@ class CandleWindow(object):
         self.main_plot = None
 
     def set_parent(self, parent, ith_axes):
-        """docstring for init_widget""" 
+        """docstring for init_widget"""
         self.ax = parent.axes[ith_axes]
         #ax.set_xlim((self.xmin, self.xmax))
         #ax.set_ylim((self.ymin, self.ymax))
@@ -293,7 +295,7 @@ class CandleWindow(object):
 
 
     def on_slider(self, val, event):
-        #'''docstring for update(val)''' 
+        #'''docstring for update(val)'''
         pass
         #val = int(val)
         #self.xmax = val
@@ -334,7 +336,7 @@ class CandleWindow(object):
 
 
     def _update_observer(self, obname):
-        #"通知进度条改变宽度" 
+        #"通知进度条改变宽度"
         #for name, obj in self.observers.iteritems():
             #if name == obname and obname == "slider":
                 #obj.update(obj.val, self.wdlength)
@@ -363,9 +365,9 @@ class MultiWidgets(object):
             w_width (int): 窗口的初始宽度。
 
             *args (tuple): 窗口布局。
-        
+
         """
-        self.name = "MultiWidgets" 
+        self.name = "MultiWidgets"
         self._fig = fig
         self._subwidget2plots = { } # 窗口坐标到指标的映射。
         self._cursor = None
@@ -396,7 +398,7 @@ class MultiWidgets(object):
             #ax.get_yaxis().get_major_formatter().set_scientific(False)
 
         for ax in self.axes:
-            ax.format_coord = self._format_coord 
+            ax.format_coord = self._format_coord
         delta = (data.index[1] - data.index[0])
         self._fmt = slider_strtime_format(delta)
         self._formatter = TimeFormatter(data.index, strtime_format(delta))
@@ -417,12 +419,12 @@ class MultiWidgets(object):
         self.top = top
 
     def draw_widgets(self):
-        """ 显示控件 """ 
+        """ 显示控件 """
         self._update_widgets()
 
     def add_indicator(self, ith_axes, indicator, twinx=False):
         """ 在第ith_axes个子窗口上画指标。
-        
+
         Args:
 
             ith_axes (Axes): 第ith_axes个窗口。
@@ -454,12 +456,12 @@ class MultiWidgets(object):
     def register_plot(self, ith_axes, plot, twinx=False):
         """ 注册指标。
             axes到指标的映射。
-        """ 
+        """
         try:
             plot.twinx = twinx
             ax_plots = self._subwidget2plots.get(ith_axes, [])
             if ax_plots:
-                ax_plots.append(plot) 
+                ax_plots.append(plot)
             else:
                 self._subwidget2plots[ith_axes] = [plot]
             return plot
@@ -468,7 +470,7 @@ class MultiWidgets(object):
 
     def replace_indicator(self, ith_axes, indicator):
         """ 在ith_axes上画指标indicator, 删除其它指标。
-        
+
         Args:
 
             ith_axes (Axes): 第i个窗口。
@@ -489,13 +491,13 @@ class MultiWidgets(object):
 
     def add_widget(self, ith_axes, widget, ymain=False, connect_slider=False):
         """ 添加一个能接收消息事件的控件。
-        
+
         Args:
 
             ith_axes (Axes): 第i个窗口。
 
             widget (AxesWidget): 控件。
-        
+
         Returns:
 
             AxesWidget. widget
@@ -539,10 +541,10 @@ class MultiWidgets(object):
 
     def on_keyrelease(self, event):
         if event.key == "down":
-            self._w_width += self._w_width/2 
+            self._w_width += self._w_width/2
             self._w_width = min(self._data_length, self._w_width)
         elif event.key == "up" :
-            self._w_width -= self._w_width/2 
+            self._w_width -= self._w_width/2
             self._w_width= max(self._w_width, self._w_width_min)
 
         middle = (self._w_left+self._w_right)/2
@@ -559,7 +561,7 @@ class MultiWidgets(object):
         if event.inaxes is self._slider_ax: #or event.inaxes is self._bigger_picture:
             self._cursor = None
             event.canvas.draw()
-            return 
+            return
 
     def on_leave_axes(self, event):
         return
@@ -589,7 +591,7 @@ class MultiWidgets(object):
         self._slider_ax = self._fig.add_axes([self._left, self._bottom, self._width,
                                              self._slider_height], axisbg='gray')
 
-        self._bigger_picture = self._fig.add_axes([self._left, self._bottom+self._slider_height, 
+        self._bigger_picture = self._fig.add_axes([self._left, self._bottom+self._slider_height,
                                                     self._width, self._bigger_picture_height],
                                                 zorder = 0, frameon=False,
                                                 #sharex=self._slider_ax,
@@ -607,7 +609,7 @@ class MultiWidgets(object):
         args = list(reversed(args))
         # 默认子窗口数量为1
         if len(args) ==  0:
-            args = (1,) 
+            args = (1,)
         total_units = sum(args)
         unit = (0.95 - self._top) / total_units
         bottom = self._top
@@ -638,7 +640,7 @@ class MultiWidgets(object):
         f = x % 1
         index = x-f if f < 0.5 else min(x-f+1, len(self._data['open']) - 1)
         #print len(self.kwindow.rects.get_array())
-       
+
         ## @note 字符串太长会引起闪烁
         return "[dt=%s o=%.2f c=%.2f h=%.2f l=%.2f]" % (
                 self._data.index[index].strftime(self._fmt),
@@ -683,7 +685,7 @@ class MultiWidgets(object):
         return self.axes.__iter__()
 
     def _update_widgets(self):
-        """ 改变可视区域， 在坐标移动后被调用。""" 
+        """ 改变可视区域， 在坐标移动后被调用。"""
         self.axes[0].set_xlim((self._w_left, self._w_right))
         self._set_cur_ylim(self._w_left, self._w_right)
         self._fig.canvas.draw()
@@ -702,7 +704,7 @@ class MultiWidgets(object):
             else:
                 for plot in plots:
                     if plot.twinx:
-                        continue 
+                        continue
                     ymax, ymin = plot.y_interval(w_left, w_right)
                     ## @todo move ymax, ymin 计算到plot中去。
                     all_ymax.append(ymax)

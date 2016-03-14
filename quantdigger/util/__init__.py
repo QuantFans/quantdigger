@@ -14,10 +14,12 @@ dlogger = Logger('data')
         #return rst
     #return wrapper
 
+
 def time2int(t):
-     """ datetime转化为unix毫秒时间。 """
-     epoch =  int(time.mktime(t.timetuple())*1000)
-     return epoch
+    """ datetime转化为unix毫秒时间。 """
+    epoch = int(time.mktime(t.timetuple())*1000)
+    return epoch
+
 
 def int2time(tf):
     return datetime.datetime.fromtimestamp(float(tf)/1000)
