@@ -28,7 +28,7 @@ pip安装
       按照指示安装ta-lib动态库: https://github.com/mrjbq7/ta-lib
       pip install quantdigger
 
-或者克隆github代码后本地安装
+或者克隆github代码后本地安装(推荐)
    
   ::
        

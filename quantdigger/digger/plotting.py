@@ -4,7 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 from quantdigger.widgets.mplotwidgets import widgets, mplots
-from quantdigger.technicals import EquityCurve
+from quantdigger.technicals import EquityCurve, Volume
 
 
 def xticks_to_display(data_length):
@@ -26,8 +26,8 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[]):
     fig = plt.figure()
     frame = widgets.MultiWidgets(
         fig, price_data,
-        50         # 窗口显示k线数量。
-        # 4, 1     # 两个1:1大小的窗口
+        50,         # 窗口显示k线数量。
+         4, 1     # 两个1:1大小的窗口
     )
 
     # 添加k线
@@ -40,10 +40,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[]):
     if len(curve) > 0:
         curve = EquityCurve(curve)
         frame.add_indicator(0, curve, True)
-    ## @bug indicators导致的双水平线!
-    ## @todo 完mplot_demo上套。
-    #frame.add_indicator(0, Volume(None, price_data.open, price_data.close, price_data.volume))
-
+    frame.add_indicator(1, Volume(price_data.open, price_data.close, price_data.volume))
     ## 添加指标
     for name, indic in indicators.iteritems():
         frame.add_indicator(0, indic)

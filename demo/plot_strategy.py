@@ -24,7 +24,7 @@ class DemoStrategy(Strategy):
         """初始化数据""" 
         ctx.ma100 = MA(ctx.close, 100, 'ma100', 'y', 2) #, 'ma200', 'b', '1')
         ctx.ma200 = MA(ctx.close, 200, 'ma200', 'b', 2) #, 'ma200', 'b', '1')
-        ctx.boll = BOLL(ctx.close, 20)
+        #ctx.boll = BOLL(ctx.close, 20)
         ctx.ma2 = NumberSeries()
 
     #def on_symbol(self, ctx):
@@ -40,9 +40,9 @@ class DemoStrategy(Strategy):
                  ctx.ma100[1] < ctx.ma200[1]:
                 ctx.sell(ctx.close, ctx.pos()) 
 
-        boll['upper'].append(ctx.boll['upper'][0])
-        boll['middler'].append(ctx.boll['middler'][0])
-        boll['lower'].append(ctx.boll['lower'][0])
+        #boll['upper'].append(ctx.boll['upper'][0])
+        #boll['middler'].append(ctx.boll['middler'][0])
+        #boll['lower'].append(ctx.boll['lower'][0])
         return
 
     def on_exit(self, ctx):
@@ -72,6 +72,7 @@ class DemoStrategy2(Strategy):
     def on_exit(self, ctx):
         return
 
+
 if __name__ == '__main__':
     import timeit
     start = timeit.default_timer()
@@ -93,11 +94,12 @@ if __name__ == '__main__':
     curve1 = finance.create_equity_curve(profile.all_holdings(1))
     curve = finance.create_equity_curve(profile.all_holdings())
     plotting.plot_strategy(profile.data(0), profile.technicals(0),
-                            profile.deals(0), curve.equity)
-    plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
-                        colors=['r', 'g', 'b'],
-                        names=[profile.name(0), profile.name(1), 'A0'])
-    # 绘制净值曲线
-    plotting.plot_curves([curve.networth])
-    # 打印统计信息
-    print finance.summary_stats(curve, 252*4*60)
+                            profile.deals(0), curve0.equity.values)
+    #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
+                        #colors=['r', 'g', 'b'],
+                        #names=[profile.name(0), profile.name(1), 'A0'])
+    ## 绘制净值曲线
+    #plotting.plot_curves([curve.networth])
+    ## 打印统计信息
+    #print finance.summary_stats(curve, 252*4*60)
+    ## @TODO 直接单击的时候只有数直线
