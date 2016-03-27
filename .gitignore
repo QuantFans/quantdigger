@@ -9,4 +9,3 @@ dist/
 build/
 demo/data/1DAY/
 tests/work/
-*.whl
