@@ -367,12 +367,12 @@ class MultiWidgets(object):
                                                 #sharex=self._slider_ax,
                                                 axisbg='gray', alpha = '0.1' )
         #
+        self._bigger_picture.set_xticklabels([]);
         self._slider = Slider(self._slider_ax, "slider", '', 0, self._data_length-1,
-                                    self._data_length-1, self._data_length/50, "%d",
-                                    self._data.index)
+                                    self._data_length-1, self._data_length/50, "%d", self._data.index)
         self._bigger_picture.plot(self._data['close'], 'y')
-        self._bigger_picture.set_yticks([])
         self._bigger_picture.set_xticks([])
+        self._bigger_picture.set_yticks([])
         self._slider.add_observer(self)
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
                                                                 fmt='%Y-%m-%d'))

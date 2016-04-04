@@ -39,7 +39,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
         frame.add_indicator(0, signal)
     if len(curve) > 0:
         curve = Line(curve)
-        #frame.add_indicator(0, curve, True)
+        frame.add_indicator(0, curve, True)
     frame.add_indicator(1, Volume(price_data.open, price_data.close, price_data.volume))
     ## 添加指标
     for name, indic in indicators.iteritems():

@@ -22,8 +22,8 @@ class DemoStrategy(Strategy):
     
     def on_init(self, ctx):
         """初始化数据""" 
-        ctx.ma100 = MA(ctx.close, 100, 'ma100', 'y', 2) #, 'ma200', 'b', '1')
-        ctx.ma200 = MA(ctx.close, 200, 'ma200', 'b', 2) #, 'ma200', 'b', '1')
+        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 1) #, 'ma20', 'b', '1')
+        ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 1) #, 'ma20', 'b', '1')
         #ctx.boll = BOLL(ctx.close, 20)
         ctx.dt = DateTimeSeries()
         ctx.month_price = NumberSeries()
@@ -36,13 +36,13 @@ class DemoStrategy(Strategy):
         #print ctx.dt[1].isocalendar()[1], ctx.dt[0].isocalendar()[1]
         if ctx.dt[1].month != ctx.dt[0].month:
             ctx.month_price.update(ctx.close)
-        if ctx.curbar > 200:
-            if ctx.pos() == 0 and ctx.ma100[2] < ctx.ma200[2] and ctx.ma100[1] > ctx.ma200[1]:
+        if ctx.curbar > 20:
+            if ctx.pos() == 0 and ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
                 ctx.buy(ctx.close, 1) 
-            elif ctx.pos() > 0 and ctx.ma100[2] > ctx.ma200[2] and \
-                 ctx.ma100[1] < ctx.ma200[1]:
+            elif ctx.pos() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
+                 ctx.ma10[1] < ctx.ma20[1]:
                 ctx.sell(ctx.close, ctx.pos()) 
-        ctx.plot_line("month_price", ctx.curbar, ctx.month_price, 'b-', lw=2)
+        ctx.plot_line("month_price", ctx.curbar, ctx.month_price, 'y--', lw=2)
         #boll['upper'].append(ctx.boll['upper'][0])
         #boll['middler'].append(ctx.boll['middler'][0])
         #boll['lower'].append(ctx.boll['lower'][0])
@@ -100,11 +100,11 @@ if __name__ == '__main__':
     plotting.plot_strategy(profile.data(0), profile.technicals(0),
                             profile.deals(0), curve0.equity.values,
                             profile.marks(0))
-    #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
-                        #colors=['r', 'g', 'b'],
-                        #names=[profile.name(0), profile.name(1), 'A0'])
-    ## 绘制净值曲线
-    #plotting.plot_curves([curve.networth])
-    ## 打印统计信息
-    #print finance.summary_stats(curve, 252*4*60)
-    ## @TODO 直接单击的时候只有数直线
+    plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
+                        colors=['r', 'g', 'b'],
+                        names=[profile.name(0), profile.name(1), 'A0'])
+    # 绘制净值曲线
+    plotting.plot_curves([curve.networth])
+    # 打印统计信息
+    print finance.summary_stats(curve, 252*4*60)
+    # @TODO 直接单击的时候只有数直线
