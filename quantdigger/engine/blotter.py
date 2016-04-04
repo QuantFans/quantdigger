@@ -21,8 +21,17 @@ from quantdigger.datastruct import (
 
 class Profile(object):
     """ 组合结果 """
-    def __init__(self, blotters, dcontexts, strpcon, i):
-        self._blts = blotters  # 组合内所有策略的blotter
+    def __init__(self, scontexts, dcontexts, strpcon, i):
+        """
+        
+        Args:
+            scontexts (list): 策略上下文集合
+            dcontexts (list): 数据上下文集合
+            strpcon (str): 主合约
+            i (int): 当前profile所对应的组合索引
+        """
+        self._marks = [ctx.marks for ctx in scontexts]
+        self._blts = [ctx.blotter for ctx in scontexts]
         self._dcontexts = {}
         self._ith_comb = i   # 对应于第几个组合
         self._main_pcontract = strpcon
@@ -93,17 +102,6 @@ class Profile(object):
                 hd['equity'] += rhd['equity']
         return holdings
 
-    #def current_positions(self, j):
-        #""" 当前持仓
-
-        #Args:
-            #j (int): 第j个策略
-
-        #Returns:
-            #dict. { Contract: Position }
-        #"""
-        #return self._blts[j].current_positions.values()
-
     def holding(self, j=None):
         """ 当前账号情况
 
@@ -126,8 +124,15 @@ class Profile(object):
             holdings['history_profit'] += rhd['history_profit']
         return holdings
 
+    def marks(self, j=None):
+        """ 返回第j个策略的绘图标志集合 """
+        if j is not None:
+            return self._marks[j]
+        return self._marks[0]
+
     def technicals(self, j=None, strpcon=None):
         # @TODO test case
+        # @TODO 没必要针对不同的strpcon做分析
         """ 返回第j个策略的指标, 默认返回组合的所有指标。
 
         Args:
@@ -353,9 +358,6 @@ class SimpleBlotter(Blotter):
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = pos_profit
-        #if self.name == 'A2' and append == False:
-            #print dh['equity'], "**" , self._datetime
-
         if append:
             self._all_holdings.append(dh)
         else:
@@ -389,8 +391,6 @@ class SimpleBlotter(Blotter):
                 pos = self.positions[
                     PositionKey(order.contract, order.direction)]
                 pos.closable -= order.quantity
-        #print "Receive %d signals!" % len(event.orders)
-        #self.generate_naive_order(event.orders)
 
     def update_fill(self, event):
         """ 处理委托单成交事件。 """
@@ -441,10 +441,6 @@ class SimpleBlotter(Blotter):
             flag = 1 if trans.direction == Direction.LONG else -1
             profit = (trans.price-self.positions[poskey].cost) * \
                 trans.quantity * flag * trans.volume_multiple
-            #print profit, trans.price, trans.quantity
-            #if self.name == 'A1': # 平仓调试
-                #print "***********"
-                #print self._datetime, profit
             self.holding['history_profit'] += profit
         self._all_transactions.append(trans)
 

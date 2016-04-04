@@ -204,6 +204,7 @@ class StrategyContext(object):
     :ivar name: 策略名
     :ivar blotter: 订单管理
     :ivar exchange: 价格撮合器
+    :ivar marks: 绘图标志集合
     """
     def __init__(self, name, settings={}):
         self.events_pool = EventsPool()
@@ -211,6 +212,8 @@ class StrategyContext(object):
         self.blotter = SimpleBlotter(name, self.events_pool, settings)
         self.exchange = Exchange(name, self.events_pool, strict=True)
         self.name = name
+        # 0: line_marks, 1: text_marks
+        self.marks = [{}, {}]
         self._entry_orders = []
         self._exit_orders = []
         self._datetime = None
@@ -246,6 +249,35 @@ class StrategyContext(object):
             self.events_pool.put(OnceEvent())
             self._process_trading_events(at_baropen, append)
 
+    def plot_line(self, name, x, y, styles, lw=1, ms=10):
+        """ 绘制曲线
+
+        Args:
+            name (str): 标志名称
+            x (datetime): 时间坐标
+            y (float): y坐标
+            styles (str): 控制颜色，线的风格，点的风格
+            lw (int): 线宽
+            ms (int): 点的大小
+        """
+        mark = self.marks[0].setdefault(name, [])
+        mark.append((x, y, styles, lw, ms))
+
+    def plot_text(self, name, x, y, text, color='black', size=10, rotation=0):
+        """ 绘制文本
+
+        Args:
+            name (str): 标志名称
+            x (float): x坐标
+            y (float): y坐标
+            text (str): 文本内容
+            color (str): 颜色
+            size (int): 字体大小
+            rotation (float): 旋转角度
+        """
+        mark = self.marks[1].setdefault(name, [])
+        mark.append((x, y, text, color, size, rotation))
+
     def _process_trading_events(self, at_baropen, append):
         """"""
         while True:
@@ -257,9 +289,9 @@ class StrategyContext(object):
             except IndexError:
                 break
             else:
-                #if event.type == 'MARKET':
-                    ##strategy.calculate_signals(event)
-                    #port.update_timeindex(event)
+                # if event.type == 'MARKET':
+                    # strategy.calculate_signals(event)
+                    # port.update_timeindex(event)
                 if event.type == Event.SIGNAL:
                     assert(not at_baropen)
                     self.blotter.update_signal(event)
@@ -414,9 +446,9 @@ class Context(object):
         return (self._cur_data_context.datetime[0] <= self.ctx_datetime and
                 self._cur_data_context.last_date <= self.ctx_datetime)
         ## 第一根是必须运行
-        #return  (self._cur_data_context.datetime[0] <= self.ctx_dt_series and
-                #self._cur_data_context.ctx_dt_series <= self.ctx_dt_series) or \
-                #self._cur_data_context.curbar == 0
+        # return  (self._cur_data_context.datetime[0] <= self.ctx_dt_series and
+                # self._cur_data_context.ctx_dt_series <= self.ctx_dt_series) or \
+                # self._cur_data_context.curbar == 0
 
     def switch_to_strategy(self, i, j, trading=False):
         self._trading = trading
@@ -498,7 +530,7 @@ class Context(object):
 
     @property
     def curbar(self):
-        """ 当前是第几根k线, 从0开始 """
+        """ 当前是第几根k线, 从1开始 """
         if self.on_bar:
             return self.step + 1
         else:
@@ -716,6 +748,12 @@ class Context(object):
             #logger.warn('只有on_bar函数内能查询总盈亏！')
             #return
         pass
+
+    def plot_line(self, name, x, y, styles, lw=1, ms=10):
+        self._cur_strategy_context.plot_line(name, x-1, float(y), styles, lw, ms)
+
+    def plot_text(self, name, x, y, text, color='black', size=10, rotation=0):
+        self._cur_strategy_context.plot_text(name, x-1, float(y), text, color, size, rotation)
 
     def day_profit(self, contract=None):
         """ 当前持仓的浮动盈亏 """

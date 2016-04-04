@@ -15,11 +15,6 @@ class Trader(object):
         """ 连接器 """
         pass
 
-    #@abstractmethod
-    #def register_handlers(self, handlers):
-        #"""  注册回调函数 """
-        #pass
-
     @abstractmethod
     def query_contract(self, contract, sync=False):
         """ 合约查询 """

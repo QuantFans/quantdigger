@@ -21,9 +21,13 @@ class ExecuteUnit(object):
         """
         Args:
             pcontracts (list): list of pcontracts(string)
+
             dt_start (datetime/str): start time of all pcontracts
+
             dt_end (datetime/str): end time of all pcontracts
+
             n (int): last n bars
+
             spec_date (dict): time range for specific pcontracts
         """
         self.finished_data = []
@@ -122,8 +126,7 @@ class ExecuteUnit(object):
                 # logger.debug(iset)
             ctxs.append(StrategyContext(s.name, iset))
         self.context.add_strategy_context(ctxs)
-        blotters = [ctx.blotter for ctx in ctxs]
-        return blotter.Profile(blotters,
+        return blotter.Profile(ctxs,
                                self._all_data,
                                self.pcontracts[0],
                                len(self._combs)-1)

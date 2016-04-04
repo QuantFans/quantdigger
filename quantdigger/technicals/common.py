@@ -8,15 +8,15 @@
 import talib
 import matplotlib.finance as finance
 from quantdigger.technicals.base import \
-    TechnicalBase, transform2ndarray, tech_init, plot_init
-from quantdigger.widgets.widget_plot import PlotInterface
+    TechnicalBase, transform2ndarray, tech_init
+from quantdigger.widgets.widget_plot import PlotInterface, plot_init
 
 
 class MA(TechnicalBase):
     """ 移动平均线指标。 """
     @tech_init
     def __init__(self, data, n, name='MA',
-                 color='y', lw=1, style="line"):
+                 style='y', lw=1):
         """ data (NumberSeries/np.ndarray/list) """
         super(MA, self).__init__(name)
         # 必须的函数参数
@@ -34,19 +34,20 @@ class MA(TechnicalBase):
             data (np.ndarray): 数据
             n (int): 时间窗口大小
         """
+        # 绘图和指标基类都会用到self.values
         self.values = talib.SMA(data, n)
 
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """
         self.widget = widget
-        self.plot_line(self.values, self.color, self.lw, self.style)
+        self.plot_line(self.values, self.style, lw=self.lw)
 
 
 class BOLL(TechnicalBase):
     """ 布林带指标。 """
     @tech_init
     def __init__(self, data, n, name='BOLL',
-                 colors=('y', 'b', 'g'), lw=1, style="line"):
+            styles=('y', 'b', 'g'), lw=1):
         super(BOLL, self).__init__(name)
         ### @TODO 只有在逐步运算中需给self.values先赋值,
         ## 去掉逐步运算后删除
@@ -75,12 +76,9 @@ class BOLL(TechnicalBase):
     def plot(self, widget):
         """ 绘图，参数可由UI调整。 """
         self.widget = widget
-        self.plot_line(self.values['upper'], self.colors[0],
-                       self.lw, self.style)
-        self.plot_line(self.values['middler'], self.colors[1],
-                       self.lw, self.style)
-        self.plot_line(self.values['lower'], self.colors[2],
-                       self.lw, self.style)
+        self.plot_line(self.values['upper'], self.styles[0], lw=self.lw)
+        self.plot_line(self.values['middler'], self.styles[1], lw=self.lw)
+        self.plot_line(self.values['lower'], self.styles[2], lw=self.lw)
 
 
 #class RSI(TechnicalBase):
@@ -176,16 +174,28 @@ class Volume(PlotInterface):
         finance.volume_overlay(widget, self.open, self.close, self.volume,
                                self.colorup, self.colordown, self.width)
 
-
-class EquityCurve(PlotInterface):
-    """ 资金曲线 """
+## @TODO merge Line and LineWithX and move to plotting module
+class Line(PlotInterface):
+    """ 画线 """
     @plot_init
-    def __init__(self, data, name='EquityCurve',
-                 color='black', lw=1, style='line'):
-        super(EquityCurve, self).__init__(name, None)
-        self.values = data
+    def __init__(self, ydata, name='Line', style='black', lw=1):
+        super(Line, self).__init__(name, None)
+        self.values = ydata
 
     def plot(self, widget):
         self.widget = widget
-        self.plot_line(self.values, self.color, self.lw, self.style)
-__all__ = ['MA', 'BOLL', 'Volume', 'EquityCurve']
+        self.plot_line(self.values, self.style, lw=self.lw)
+
+
+class LineWithX(PlotInterface):
+    """ 画线 """
+    @plot_init
+    def __init__(self, xdata, ydata, name='LineWithX', style='black', lw=1, ms=1):
+        super(LineWithX, self).__init__(name, None)
+        self.values = ydata
+        self._xdata = xdata
+
+    def plot(self, widget):
+        self.widget = widget
+        self.plot_line(self.xdata, self.values, self.style, lw=self.lw, ms=self.ms)
+__all__ = ['MA', 'BOLL', 'Volume', 'Line', 'LineWithX']

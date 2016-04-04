@@ -53,32 +53,6 @@ def tech_init(method):
     return wrapper
 
 
-def plot_init(method):
-    """ 根据被修饰函数的参数构造属性。
-        并且触发绘图范围计算。
-    """
-    def wrapper(self, *args, **kwargs):
-        magic = inspect.getargspec(method)
-        arg_names = magic.args[1:]
-        # 默认参数
-        default = dict(
-            (x, y) for x, y in zip(magic.args[-len(magic.defaults):],
-                                   magic.defaults))
-        # 调用参数
-        method_args = {}
-        for i, arg in enumerate(args):
-            method_args[arg_names[i]] = arg
-        method_args.update(kwargs)
-        #
-        default.update(method_args)
-        # 属性创建
-        for key, value in default.iteritems():
-            setattr(self, key, value)
-        # 运行构造函数
-        rst = method(self, *args, **kwargs)
-        self._init_bound()
-        return rst
-    return wrapper
 
 # 带参数decorator
 #def invoke_algo(algo, *arg):

@@ -4,7 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 from quantdigger.widgets.mplotwidgets import widgets, mplots
-from quantdigger.technicals import EquityCurve, Volume
+from quantdigger.technicals import Line, LineWithX, Volume
 
 
 def xticks_to_display(data_length):
@@ -18,7 +18,7 @@ def xticks_to_display(data_length):
     return xticks
 
 
-def plot_strategy(price_data, indicators={}, deals=[], curve=[]):
+def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     """
         显示回测结果。
     """
@@ -38,12 +38,37 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[]):
         signal = mplots.TradingSignalPos(price_data, deals, lw=2)
         frame.add_indicator(0, signal)
     if len(curve) > 0:
-        curve = EquityCurve(curve)
-        frame.add_indicator(0, curve, True)
+        curve = Line(curve)
+        #frame.add_indicator(0, curve, True)
     frame.add_indicator(1, Volume(price_data.open, price_data.close, price_data.volume))
     ## 添加指标
     for name, indic in indicators.iteritems():
         frame.add_indicator(0, indic)
+    # 绘制标志
+    if marks:
+        if marks[0]:
+            # plot lines
+            for name, values in marks[0].iteritems():
+                v = values[0]
+                line_pieces = [[v[0]], [v[1]], v[2], v[3], v[4]]
+                line = []
+                for v in values[1: ]:
+                    ## @TODO 如果是带“点”的，以点的特征聚类，会减少indicator对象的数目
+                    if v[2] != line_pieces[2] or v[3] != line_pieces[3] or v[4] != line_pieces[4]:
+                        line.append(line_pieces)
+                        line_pieces = [[v[0]], [v[1]], v[2], v[3], v[4]]
+                    else:
+                        line_pieces[0].append(v[0])
+                        line_pieces[1].append(v[1])
+                line.append(line_pieces)
+                for v in line:
+                    ## @TODO 这里的sytle明确指出有点奇怪，不一致。
+                    curve = LineWithX(v[0], v[1], style=v[2], lw=v[3], ms=v[4])
+                    frame.add_indicator(0, curve, False)
+        if marks[1]:
+            # plot texts
+            for name, values in marks[0].iteritems():
+                print name
     frame.draw_widgets()
     plt.show()
 

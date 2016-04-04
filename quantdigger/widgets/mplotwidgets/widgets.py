@@ -11,17 +11,10 @@ log = logbook.Logger('engine')
 log.level = logbook.INFO
 
 
-def strtime_format(delta):
-    if delta.days >= 1:
-        return '%Y-%m'
-    elif delta.seconds == 60:
-        return '%m-%d %H:%M'
-    else:
-        # 日内其它分钟
-        return '%m-%d'
 
 
 def slider_strtime_format(delta):
+    """ 根据时间间隔判断周期及slider上相应的显示形式 """
     if delta.days >= 1:
         return '%Y-%m'
     elif delta.seconds == 60:
@@ -353,18 +346,6 @@ class MultiWidgets(object):
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
                                     color='r', lw=2, horizOn=True,
                                     vertOn=True)
-        for ax in self.axes:
-            ax.get_yaxis().get_major_formatter().set_useOffset(False)
-            #ax.get_yaxis().get_major_formatter().set_scientific(False)
-        for ax in self.axes:
-            ax.format_coord = self._format_coord
-        delta = (data.index[1] - data.index[0])
-        self._fmt = slider_strtime_format(delta)
-        self._formatter = TimeFormatter(data.index, strtime_format(delta))
-        self._slider_ax.xaxis.set_major_formatter(TimeFormatter(data.index, '%Y-%m-%d'))
-        self._slider_ax.set_xticks(self._slider_xticks_to_display())
-        self.axes[0].xaxis.set_major_formatter(self._formatter)
-        self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
 
 
     def _init_layout(self, w_width):
@@ -386,12 +367,16 @@ class MultiWidgets(object):
                                                 #sharex=self._slider_ax,
                                                 axisbg='gray', alpha = '0.1' )
         #
-        self._bigger_picture.set_xticklabels([]);
         self._slider = Slider(self._slider_ax, "slider", '', 0, self._data_length-1,
-                                    self._data_length-1, self._data_length/50, "%d", self._data.index)
+                                    self._data_length-1, self._data_length/50, "%d",
+                                    self._data.index)
         self._bigger_picture.plot(self._data['close'], 'y')
         self._bigger_picture.set_yticks([])
+        self._bigger_picture.set_xticks([])
         self._slider.add_observer(self)
+        self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
+                                                                fmt='%Y-%m-%d'))
+        self._slider_ax.set_xticks(self._slider_xticks_to_display())
         return
 
     @property
@@ -429,6 +414,7 @@ class MultiWidgets(object):
                 indicator.plot(self.axes[ith_axes])
             return self.register_plot(ith_axes, indicator, twinx)
         except Exception as e:
+            log.error(indicator.name)
             raise e
 
     def register_plot(self, ith_axes, indicator, twinx=False):
@@ -581,6 +567,16 @@ class MultiWidgets(object):
         self._axes = list(reversed(user_axes))
         map(lambda x: x.grid(True), self._axes)
         map(lambda x: x.set_xticklabels([]), self._axes[1:])
+        for ax in self.axes:
+            ax.get_yaxis().get_major_formatter().set_useOffset(False)
+            # ax.get_yaxis().get_major_formatter().set_scientific(False)
+        for ax in self.axes:
+            ax.format_coord = self._format_coord
+        delta = (self._data.index[1] - self._data.index[0])
+        self.axes[0].xaxis.set_major_formatter(TimeFormatter(self._data.index, delta))
+        self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
+        for ax in self.axes[0:-1]:
+            [label.set_visible(False) for label in ax.get_xticklabels()]
 
     def get_subwidgets(self):
         """ 返回子窗口。 """
@@ -623,9 +619,11 @@ class MultiWidgets(object):
         index = x
         f = x % 1
         index = x-f if f < 0.5 else min(x-f+1, len(self._data['open']) - 1)
+        delta = (self._data.index[1] - self._data.index[0])
+        fmt = slider_strtime_format(delta)
         ## @note 字符串太长会引起闪烁
         return "[dt=%s o=%.2f c=%.2f h=%.2f l=%.2f]" % (
-                self._data.index[index].strftime(self._fmt),
+                self._data.index[index].strftime(fmt),
                 self._data['open'][index],
                 self._data['close'][index],
                 self._data['high'][index],
@@ -664,12 +662,21 @@ class MultiWidgets(object):
 
 class TimeFormatter(Formatter):
     # 分类 －－format
-    def __init__(self, dates, fmt='%Y-%m-%d %H:%M'):
+    def __init__(self, dates, delta=None, fmt='%Y-%m-%d %H:%M'):
         self.dates = dates
-        self.fmt = fmt
+        self.fmt = self._strtime_format(delta) if delta else fmt
 
     def __call__(self, x, pos=0):
         'Return the label for time x at position pos'
         ind = int(round(x))
         if ind>=len(self.dates) or ind<0: return ''
         return self.dates[ind].strftime(self.fmt)
+
+    def _strtime_format(self, delta):
+        if delta.days >= 1:
+            return '%Y-%m'
+        elif delta.seconds == 60:
+            return '%m-%d %H:%M'
+        else:
+            # 日内其它分钟
+            return '%m-%d'

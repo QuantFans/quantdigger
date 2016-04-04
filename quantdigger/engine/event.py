@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
- # event.py
-#from flufl.enum import Enum
+# from flufl.enum import Enum
 
 
 class EventsPool(object):

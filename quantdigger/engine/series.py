@@ -34,24 +34,16 @@ class SeriesBase(object):
             # 序列系统变量
             self.data = data
 
-    #def _sort_data(self):
-        #temp = self.data[self._index]
-        #max_index = self.window_size-1
-        #for i in range(0, max_index):
-            #ordered_index = (self.curbar - (max_index-self._index)) % self._window_size
-            #self.data[self._index] = self.data[ordered_index]
-            #self._index = ordered_index
-        #self.data[max_index] = temp
-        #self._index = max_index
-        #return
-
     def update_curbar(self, curbar):
         """ 更新当前Bar索引 """
         self.curbar = curbar
 
     def update(self, v):
         """ 更新最后一个值 """
-        self.data[self.curbar] = v
+        if isinstance(v, SeriesBase):
+            self.data[self.curbar] = v[0]
+        else:
+            self.data[self.curbar] = v
 
     def __len__(self):
         return len(self.data)
@@ -202,6 +194,7 @@ class NumberSeries(SeriesBase):
 class DateTimeSeries(SeriesBase):
     """ 时间序列变量 """
     DEFAULT_VALUE = datetime.datetime(1980, 1, 1)
+    value_type = datetime.datetime
 
     def __init__(self, data=[], name='DateTimeSeries'):
         super(DateTimeSeries, self).__init__(data, name,

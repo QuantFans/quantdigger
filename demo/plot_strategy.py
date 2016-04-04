@@ -25,21 +25,24 @@ class DemoStrategy(Strategy):
         ctx.ma100 = MA(ctx.close, 100, 'ma100', 'y', 2) #, 'ma200', 'b', '1')
         ctx.ma200 = MA(ctx.close, 200, 'ma200', 'b', 2) #, 'ma200', 'b', '1')
         #ctx.boll = BOLL(ctx.close, 20)
-        ctx.ma2 = NumberSeries()
+        ctx.dt = DateTimeSeries()
+        ctx.month_price = NumberSeries()
 
     #def on_symbol(self, ctx):
         #pass
 
     def on_bar(self, ctx):
-        if ctx.curbar > 1:
-            ctx.ma2.update((ctx.close + ctx.close[1])/2)
+        ctx.dt.update(ctx.datetime)
+        #print ctx.dt[1].isocalendar()[1], ctx.dt[0].isocalendar()[1]
+        if ctx.dt[1].month != ctx.dt[0].month:
+            ctx.month_price.update(ctx.close)
         if ctx.curbar > 200:
             if ctx.pos() == 0 and ctx.ma100[2] < ctx.ma200[2] and ctx.ma100[1] > ctx.ma200[1]:
                 ctx.buy(ctx.close, 1) 
             elif ctx.pos() > 0 and ctx.ma100[2] > ctx.ma200[2] and \
                  ctx.ma100[1] < ctx.ma200[1]:
                 ctx.sell(ctx.close, ctx.pos()) 
-
+        ctx.plot_line("month_price", ctx.curbar, ctx.month_price, 'b-', lw=2)
         #boll['upper'].append(ctx.boll['upper'][0])
         #boll['middler'].append(ctx.boll['middler'][0])
         #boll['lower'].append(ctx.boll['lower'][0])
@@ -67,6 +70,7 @@ class DemoStrategy2(Strategy):
             elif ctx.pos() > 0 and ctx.ma50[2] > ctx.ma100[2] and \
                  ctx.ma50[1] < ctx.ma100[1]:
                 ctx.sell(ctx.close, ctx.pos()) 
+
         return
 
     def on_exit(self, ctx):
@@ -94,7 +98,8 @@ if __name__ == '__main__':
     curve1 = finance.create_equity_curve(profile.all_holdings(1))
     curve = finance.create_equity_curve(profile.all_holdings())
     plotting.plot_strategy(profile.data(0), profile.technicals(0),
-                            profile.deals(0), curve0.equity.values)
+                            profile.deals(0), curve0.equity.values,
+                            profile.marks(0))
     #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
                         #colors=['r', 'g', 'b'],
                         #names=[profile.name(0), profile.name(1), 'A0'])
