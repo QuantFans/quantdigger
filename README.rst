@@ -87,9 +87,9 @@ pip安装
             if ctx.curbar > 20:
                 if ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
                     ctx.buy(ctx.close, 1) 
-                elif ctx.position() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
+                elif ctx.pos() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
                      ctx.ma10[1] < ctx.ma20[1]:
-                    ctx.sell(ctx.close, ctx.position()) 
+                    ctx.sell(ctx.close, ctx.pos()) 
 
         def on_exit(self, ctx):
             return
@@ -110,9 +110,9 @@ pip安装
             if ctx.curbar > 10:
                 if ctx.ma5[2] < ctx.ma10[2] and ctx.ma5[1] > ctx.ma10[1]:
                     ctx.buy(ctx.close, 1) 
-                elif ctx.position() > 0 and ctx.ma5[2] > ctx.ma10[2] and \
+                elif ctx.pos() > 0 and ctx.ma5[2] > ctx.ma10[2] and \
                      ctx.ma5[1] < ctx.ma10[1]:
-                    ctx.sell(ctx.close, ctx.position()) 
+                    ctx.sell(ctx.close, ctx.pos()) 
 
         def on_exit(self, ctx):
             return
