@@ -146,7 +146,10 @@ pip安装
 
 * k线和信号线
 
-  .. image:: images/figure_signal.png
+k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块控制显示区域，可以通过鼠标拖拽改变显示区域。
+`上下方向键` 来进行缩放。 
+
+  .. image:: images/plot.png
      :width: 500px
 
 * 2个策略和组合的资金曲线。
@@ -167,14 +170,9 @@ pip安装
 
 界面控制
 ~~~~~~~
-k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块控制显示区域，可以通过鼠标拖拽改变显示区域。
-`上下方向键` 来进行缩放。 
 
 其它
 ~~~
-**mplot_demo.py  matplotlib画k线，指标线的demo。**
-  .. image:: images/plot.png
-     :width: 500px
 
 **pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。**
   .. image:: images/pyquant.png
