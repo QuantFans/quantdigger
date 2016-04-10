@@ -264,6 +264,7 @@ class CandleWindow(object):
         #ax.set_xlim((self.xmin, self.xmax))
         #ax.set_ylim((self.ymin, self.ymax))
         candles = Candles(None, self.data, self.name)
+        candles.twinx = False
         parent.register_plot(ith_axes, candles)
         self.lines, self.rects = candles.plot(self.ax)
         self.main_plot = candles
@@ -338,13 +339,14 @@ class MultiWidgets(object):
         self._subwidget2plots = { } # 窗口坐标到指标的映射。
         self._cursor = None
         self._data = data
+        self._cursor_axes_index = { }
         # 布局参数
         self._init_layout(w_width)
         #
         self._init_widgets(*args)
         self._connect()
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
-                                    color='r', lw=2, horizOn=True,
+                                    color='r', lw=2, horizOn=False,
                                     vertOn=True)
 
 
@@ -383,6 +385,9 @@ class MultiWidgets(object):
     def axes(self):
         return self._axes
 
+    def plot_text(self, name, ith_ax, x, y, text, color='black', size=10, rotation=0):
+        self.axes[ith_ax].text(x, y, text, color=color, fontsize=size, rotation=rotation)
+
     def draw_widgets(self):
         """ 显示控件 """
         self._update_widgets()
@@ -403,34 +408,38 @@ class MultiWidgets(object):
 
     def _add_plot(self, ith_axes, indicator, twinx=False):
         try:
+            ax_plots = self._subwidget2plots.get(ith_axes, [])
+            if not ax_plots:
+                twinx = False 
             if twinx:
                 twaxes = self.axes[ith_axes].twinx()
+                twaxes.format_coord = self._format_coord
                 self.axes.append(twaxes)
                 indicator.plot(twaxes)
-                self._cursor = MultiCursor(self._fig.canvas, self.axes,
-                                            color='r', lw=2, horizOn=True,
+                self._cursor_axes_index[ith_axes] = len(self.axes) - 1
+                axes = [self.axes[i] for i in self._cursor_axes_index.values()]
+                axes = list(reversed(axes))
+                self._cursor = MultiCursor(self._fig.canvas, axes,
+                                            color='r', lw=2, horizOn=False,
                                             vertOn=True)
             else:
                 indicator.plot(self.axes[ith_axes])
-            return self.register_plot(ith_axes, indicator, twinx)
+            indicator.twinx = twinx
+            return self.register_plot(ith_axes, indicator)
         except Exception as e:
             log.error(indicator.name)
             raise e
 
-    def register_plot(self, ith_axes, indicator, twinx=False):
+    def register_plot(self, ith_axes, indicator):
         """ 注册指标。
             axes到指标的映射。
         """
-        try:
-            indicator.twinx = twinx
-            ax_plots = self._subwidget2plots.get(ith_axes, [])
-            if ax_plots:
-                ax_plots.append(indicator)
-            else:
-                self._subwidget2plots[ith_axes] = [indicator]
-            return indicator
-        except Exception as e:
-            raise e
+        ax_plots = self._subwidget2plots.get(ith_axes, [])
+        if ax_plots:
+            ax_plots.append(indicator)
+        else:
+            self._subwidget2plots[ith_axes] = [indicator]
+        return indicator
 
     def replace_indicator(self, ith_axes, indicator):
         """ 在ith_axes上画指标indicator, 删除其它指标。
@@ -525,7 +534,9 @@ class MultiWidgets(object):
     def on_leave_axes(self, event):
         if event.inaxes is self._slider_ax:
             # 进入后会创建_slider_cursor,离开后复原
-            self._cursor = MultiCursor(self._fig.canvas, self.axes, color='r', lw=2, horizOn=True, vertOn=True)
+            axes = [self.axes[i] for i in self._cursor_axes_index.values()]
+            #axes = list(reversed(axes)) # 很奇怪，如果没有按顺序给出，显示会有问题。
+            self._cursor = MultiCursor(self._fig.canvas, axes, color='r', lw=2, horizOn=False, vertOn=True)
             event.canvas.draw()
             log.debug("on_leave_axes")
 
@@ -577,6 +588,8 @@ class MultiWidgets(object):
         self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
         for ax in self.axes[0:-1]:
             [label.set_visible(False) for label in ax.get_xticklabels()]
+        for i in range(0, len(self.axes)):
+            self._cursor_axes_index[i] = i
 
     def get_subwidgets(self):
         """ 返回子窗口。 """

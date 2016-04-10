@@ -198,4 +198,6 @@ class LineWithX(PlotInterface):
     def plot(self, widget):
         self.widget = widget
         self.plot_line(self.xdata, self.values, self.style, lw=self.lw, ms=self.ms)
+
+
 __all__ = ['MA', 'BOLL', 'Volume', 'Line', 'LineWithX']

@@ -6,9 +6,9 @@ def install_talib_for_windows():
 	#target = 'ta-lib-0.4.0-msvc.zip'
 	#util.download(url,target)
 	#util.decompressZip(target,'C:\\')
-        cmd = 'pip install setupscripts\TA_Lib-0.4.9-cp27-none-win_amd64.whl'
-        result = os.popen(cmd).readlines()
-        util.printCommandResult(result)
+    cmd = 'pip install setupscripts\TA_Lib-0.4.9-cp27-none-win_amd64.whl'
+    result = os.popen(cmd).readlines()
+    util.printCommandResult(result)
 
 def install_talib_for_linux():
 	url = 'http://downloads.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz'
@@ -53,6 +53,7 @@ def create_dependencies(platform):
              ('pandas', 'pandas'),
              ('dateutil', 'python-dateutil'),
              ('matplotlib', 'matplotlib'),
+             ('progressbar', 'progressbar'),
              ('logbook', 'logbook')
 #             ('talib' , 'TA-Lib == 0.4.8') 
     ]

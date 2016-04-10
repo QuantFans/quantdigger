@@ -170,7 +170,6 @@ class PlotInterface(object):
             self._upper = self._lower = []
             if isinstance(self.values, dict):
                 # 多值指标
-                # @TODO self.values可能是个字典 tuple
                 values = zip(*self.values.itervalues())
                 self._upper = [max(value) for value in values]
                 self._lower = [min(value) for value in values]
@@ -178,7 +177,8 @@ class PlotInterface(object):
                 self._upper = self.values
                 self._lower = self.values
             if self._xdata:
-                # 用户使用plot_line接口的时候可能触发这里
+                # 用户使用plot_line接口的时候触发这里
+                # @NOTE 重排，强制绘图点是按x有序的。
                 temp = zip(self._xdata, self.values)
                 sdata = sorted(temp, key=lambda x: x[0])
                 temp = zip(*sdata)

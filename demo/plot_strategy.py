@@ -39,10 +39,14 @@ class DemoStrategy(Strategy):
         if ctx.curbar > 20:
             if ctx.pos() == 0 and ctx.ma10[2] < ctx.ma20[2] and ctx.ma10[1] > ctx.ma20[1]:
                 ctx.buy(ctx.close, 1) 
+                ctx.plot_text("buy", 1, ctx.curbar, ctx.close, "buy", 'black', 15);
             elif ctx.pos() > 0 and ctx.ma10[2] > ctx.ma20[2] and \
                  ctx.ma10[1] < ctx.ma20[1]:
+                ctx.plot_text("sell", 1, ctx.curbar, ctx.close, "sell", 'blue', 15);
                 ctx.sell(ctx.close, ctx.pos()) 
-        ctx.plot_line("month_price", ctx.curbar, ctx.month_price, 'y--', lw=2)
+        ctx.plot_line("month_price", 1, ctx.curbar, ctx.month_price, 'y--', lw=2)
+
+    #def plot_text(self, name, x, y, text, color='black', size=10, rotation=0):
         #boll['upper'].append(ctx.boll['upper'][0])
         #boll['middler'].append(ctx.boll['middler'][0])
         #boll['lower'].append(ctx.boll['lower'][0])
@@ -100,11 +104,11 @@ if __name__ == '__main__':
     plotting.plot_strategy(profile.data(0), profile.technicals(0),
                             profile.deals(0), curve0.equity.values,
                             profile.marks(0))
-    plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
-                        colors=['r', 'g', 'b'],
-                        names=[profile.name(0), profile.name(1), 'A0'])
-    # 绘制净值曲线
-    plotting.plot_curves([curve.networth])
-    # 打印统计信息
-    print finance.summary_stats(curve, 252*4*60)
-    # @TODO 直接单击的时候只有数直线
+    #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],
+                        #colors=['r', 'g', 'b'],
+                        #names=[profile.name(0), profile.name(1), 'A0'])
+    ## 绘制净值曲线
+    #plotting.plot_curves([curve.networth])
+    ## 打印统计信息
+    #print finance.summary_stats(curve, 252*4*60)
+    ## @TODO 直接单击的时候只有数直线

@@ -50,25 +50,32 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
             # plot lines
             for name, values in marks[0].iteritems():
                 v = values[0]
-                line_pieces = [[v[0]], [v[1]], v[2], v[3], v[4]]
+                ith_ax = v[0]
+                twinx = v[1]
+                line_pieces = [[v[2]], [v[3]], v[4], v[5], v[6]]
                 line = []
                 for v in values[1: ]:
                     ## @TODO 如果是带“点”的，以点的特征聚类，会减少indicator对象的数目
-                    if v[2] != line_pieces[2] or v[3] != line_pieces[3] or v[4] != line_pieces[4]:
+                    x, y, style, lw, ms = v[2], v[3], v[4], v[5], v[6]
+                    if style != line_pieces[2] or lw != line_pieces[3] or ms != line_pieces[4]:
                         line.append(line_pieces)
-                        line_pieces = [[v[0]], [v[1]], v[2], v[3], v[4]]
+                        line_pieces = [[x], [y], style, lw, ms]
                     else:
-                        line_pieces[0].append(v[0])
-                        line_pieces[1].append(v[1])
+                        line_pieces[0].append(x)
+                        line_pieces[1].append(y)
                 line.append(line_pieces)
                 for v in line:
                     ## @TODO 这里的sytle明确指出有点奇怪，不一致。
-                    curve = LineWithX(v[0], v[1], style=v[2], lw=v[3], ms=v[4])
-                    frame.add_indicator(0, curve, False)
+                    x, y, style, lw, marksize = v[0], v[1], v[2], v[3], v[4]
+                    curve = LineWithX(x, y, style=style, lw=lw, ms=marksize)
+                    frame.add_indicator(ith_ax, curve, twinx)
         if marks[1]:
             # plot texts
-            for name, values in marks[0].iteritems():
-                print name
+            for name, values in marks[1].iteritems():
+                for v in values:
+                    ith_ax, x, y, text = v[0], v[1], v[2], v[3]
+                    color, size, rotation = v[4], v[5], v[6]
+                    frame.plot_text(name, ith_ax, x, y, text, color, size, rotation)
     frame.draw_widgets()
     plt.show()
 

@@ -249,11 +249,12 @@ class StrategyContext(object):
             self.events_pool.put(OnceEvent())
             self._process_trading_events(at_baropen, append)
 
-    def plot_line(self, name, x, y, styles, lw=1, ms=10):
+    def plot_line(self, name, ith_window, x, y, styles, lw=1, ms=10, twinx=False):
         """ 绘制曲线
 
         Args:
             name (str): 标志名称
+            ith_window (int): 在第几个窗口显示，从1开始。
             x (datetime): 时间坐标
             y (float): y坐标
             styles (str): 控制颜色，线的风格，点的风格
@@ -261,13 +262,14 @@ class StrategyContext(object):
             ms (int): 点的大小
         """
         mark = self.marks[0].setdefault(name, [])
-        mark.append((x, y, styles, lw, ms))
+        mark.append((ith_window, twinx, x, y, styles, lw, ms))
 
-    def plot_text(self, name, x, y, text, color='black', size=10, rotation=0):
+    def plot_text(self, name, ith_window, x, y, text, color='black', size=15, rotation=0):
         """ 绘制文本
 
         Args:
             name (str): 标志名称
+            ith_window (int): 在第几个窗口显示，从1开始。
             x (float): x坐标
             y (float): y坐标
             text (str): 文本内容
@@ -276,7 +278,7 @@ class StrategyContext(object):
             rotation (float): 旋转角度
         """
         mark = self.marks[1].setdefault(name, [])
-        mark.append((x, y, text, color, size, rotation))
+        mark.append((ith_window, x, y, text, color, size, rotation))
 
     def _process_trading_events(self, at_baropen, append):
         """"""
@@ -749,11 +751,13 @@ class Context(object):
             #return
         pass
 
-    def plot_line(self, name, x, y, styles, lw=1, ms=10):
-        self._cur_strategy_context.plot_line(name, x-1, float(y), styles, lw, ms)
+    def plot_line(self, name, ith_window, x, y, styles, lw=1, ms=10, twinx=False):
+        self._cur_strategy_context.plot_line(name, ith_window-1, x-1, float(y),
+                styles, lw, ms, twinx)
 
-    def plot_text(self, name, x, y, text, color='black', size=10, rotation=0):
-        self._cur_strategy_context.plot_text(name, x-1, float(y), text, color, size, rotation)
+    def plot_text(self, name, ith_window, x, y, text, color='black', size=15, rotation=0):
+        self._cur_strategy_context.plot_text(name, ith_window-1, x-1, float(y),
+                                                text, color, size, rotation)
 
     def day_profit(self, contract=None):
         """ 当前持仓的浮动盈亏 """
