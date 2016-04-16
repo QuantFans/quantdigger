@@ -265,7 +265,7 @@ class CandleWindow(object):
         #ax.set_ylim((self.ymin, self.ymax))
         candles = Candles(None, self.data, self.name)
         candles.twinx = False
-        parent.register_plot(ith_axes, candles)
+        parent.register_technical(ith_axes, candles)
         self.lines, self.rects = candles.plot(self.ax)
         self.main_plot = candles
         self.connect()
@@ -392,21 +392,18 @@ class MultiWidgets(object):
         """ 显示控件 """
         self._update_widgets()
 
-    def add_indicator(self, ith_axes, indicator, twinx=False):
+    def add_technical(self, ith_axes, technical, twinx=False):
         """ 在第ith_axes个子窗口上画指标。
 
         Args:
             ith_axes (Axes): 第ith_axes个窗口。
-            indicator  (Indicator): 指标.
+            technical  (technical): 指标.
             twinx  (Bool): 是否是独立坐标。
             ymain  (Bool): 是否作为y轴计算的唯一参考。
 
         Returns:
-            Indicator. 传进来的指标变量。
+            technical. 传进来的指标变量。
         """
-        self._add_plot(ith_axes, indicator, twinx)
-
-    def _add_plot(self, ith_axes, indicator, twinx=False):
         try:
             ax_plots = self._subwidget2plots.get(ith_axes, [])
             if not ax_plots:
@@ -415,7 +412,7 @@ class MultiWidgets(object):
                 twaxes = self.axes[ith_axes].twinx()
                 twaxes.format_coord = self._format_coord
                 self.axes.append(twaxes)
-                indicator.plot(twaxes)
+                technical.plot(twaxes)
                 self._cursor_axes_index[ith_axes] = len(self.axes) - 1
                 axes = [self.axes[i] for i in self._cursor_axes_index.values()]
                 axes = list(reversed(axes))
@@ -423,39 +420,39 @@ class MultiWidgets(object):
                                             color='r', lw=2, horizOn=False,
                                             vertOn=True)
             else:
-                indicator.plot(self.axes[ith_axes])
-            indicator.twinx = twinx
-            return self.register_plot(ith_axes, indicator)
+                technical.plot(self.axes[ith_axes])
+            technical.twinx = twinx
+            return self.register_technical(ith_axes, technical)
         except Exception as e:
-            log.error(indicator.name)
+            log.error(technical.name)
             raise e
 
-    def register_plot(self, ith_axes, indicator):
+    def register_technical(self, ith_axes, technical):
         """ 注册指标。
             axes到指标的映射。
         """
         ax_plots = self._subwidget2plots.get(ith_axes, [])
         if ax_plots:
-            ax_plots.append(indicator)
+            ax_plots.append(technical)
         else:
-            self._subwidget2plots[ith_axes] = [indicator]
-        return indicator
+            self._subwidget2plots[ith_axes] = [technical]
+        return technical
 
-    def replace_indicator(self, ith_axes, indicator):
-        """ 在ith_axes上画指标indicator, 删除其它指标。
+    def replace_technical(self, ith_axes, technical):
+        """ 在ith_axes上画指标technical, 删除其它指标。
 
         Args:
             ith_axes (Axes): 第i个窗口。
-            indicator  (Indicator): 指标.
+            technical  (TechnicalBase): 指标.
 
         Returns:
-            Indicator. 传进来的指标变量。
+            TechnicalBase. 传进来的指标变量。
         """
         try:
             ## @todo remove paint
-            self._subwidget2plots[ith_axes] = [indicator]
-            indicator.plot(self.axes[ith_axes])
-            return indicator
+            self._subwidget2plots[ith_axes] = [technical]
+            technical.plot(self.axes[ith_axes])
+            return technical
         except Exception as e:
             raise e
 
@@ -670,7 +667,6 @@ class MultiWidgets(object):
             else:
                 xticks.append(0)
         return xticks
-
 
 
 class TimeFormatter(Formatter):

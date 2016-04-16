@@ -181,7 +181,7 @@ class Direction(object):
             cls.LONG: 'long',
             cls.SHORT: 'short'
         }
-        return type2str[type]
+        return type2str[type_]
 
 
 class Transaction(object):

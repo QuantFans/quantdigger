@@ -11,7 +11,7 @@ import unittest
 import pandas as pd
 import os
 from logbook import Logger
-from quantdigger.datastruct import TradeSide, Contract
+from quantdigger.datastruct import TradeSide, Contract, Direction
 from quantdigger import *
 
 logger = Logger('test')
@@ -372,6 +372,14 @@ class TestOneDataOneCombination(unittest.TestCase):
                     ctx.short(ctx['future2.TEST-1.Minute'].close, 2, 'future2.TEST') 
                 else:
                     if curtime == sell1:
+                        all_postions =  ctx.all_positions()
+                        assert(len(all_postions) == 2)
+                        assert(all_postions[0].quantity == 6)
+                        assert(all_postions[0].closable == 6)
+                        assert(all_postions[0].direction == Direction.SHORT)
+                        assert(all_postions[1].quantity == 3)
+                        assert(all_postions[1].closable == 3)
+                        assert(all_postions[1].direction == Direction.LONG)
                         assert(ctx.pos('long', 'future.TEST') == 3 and '持仓测试失败！')
                         ctx.sell(ctx.close, 2) 
                         assert(ctx.pos('short', 'future2.TEST') == 6 and '持仓测试失败！')

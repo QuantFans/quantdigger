@@ -36,14 +36,14 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     # 交易信号。
     if deals:
         signal = mplots.TradingSignalPos(price_data, deals, lw=2)
-        frame.add_indicator(0, signal)
+        frame.add_technical(0, signal)
     if len(curve) > 0:
         curve = Line(curve)
-        frame.add_indicator(0, curve, True)
-    frame.add_indicator(1, Volume(price_data.open, price_data.close, price_data.volume))
+        frame.add_technical(0, curve, True)
+    frame.add_technical(1, Volume(price_data.open, price_data.close, price_data.volume))
     ## 添加指标
     for name, indic in indicators.iteritems():
-        frame.add_indicator(0, indic)
+        frame.add_technical(0, indic)
     # 绘制标志
     if marks:
         if marks[0]:
@@ -68,7 +68,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
                     ## @TODO 这里的sytle明确指出有点奇怪，不一致。
                     x, y, style, lw, marksize = v[0], v[1], v[2], v[3], v[4]
                     curve = LineWithX(x, y, style=style, lw=lw, ms=marksize)
-                    frame.add_indicator(ith_ax, curve, twinx)
+                    frame.add_technical(ith_ax, curve, twinx)
         if marks[1]:
             # plot texts
             for name, values in marks[1].iteritems():
