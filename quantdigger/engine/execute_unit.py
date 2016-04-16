@@ -32,7 +32,8 @@ class ExecuteUnit(object):
         self._combs = []
         self._data_manager = DataManager()
         # str(PContract): DataWrapper
-        self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        if settings['source'] == 'csv':
+            self.pcontracts = self._parse_pcontracts(self.pcontracts)
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,
@@ -142,7 +143,6 @@ class ExecuteUnit(object):
             self.context.switch_to_contract(pcon)
             self.context.rolling_forward()
         while True:
-            print "abcd..."
             self.context.on_bar = False
             # 遍历数据轮的所有合约
             for pcon, data in self._all_data.iteritems():

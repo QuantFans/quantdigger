@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 from codecs import open
 
 from setuptools import setup, find_packages
@@ -26,6 +26,7 @@ setup(
         "pandas>=0.17.1",
         "python-dateutil>=2.4.2",
         "numpy==1.10.4",
+        "pymongo>=3.1.1",
         #"lxml>=3.5.0",
         #"cython>=0.23.4",
     ],
