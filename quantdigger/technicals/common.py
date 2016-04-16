@@ -9,7 +9,7 @@ import talib
 import matplotlib.finance as finance
 from quantdigger.technicals.base import \
     TechnicalBase, transform2ndarray, tech_init
-from quantdigger.widgets.widget_plot import PlotInterface, plot_init
+from quantdigger.widgets.plotinterface import PlotInterface, plot_init
 
 
 class MA(TechnicalBase):

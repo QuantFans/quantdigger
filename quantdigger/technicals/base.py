@@ -10,7 +10,7 @@ import inspect
 import numpy as np
 import pandas
 from quantdigger.engine import series
-from quantdigger.widgets.widget_plot import PlotInterface
+from quantdigger.widgets.plotinterface import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
 
