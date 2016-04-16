@@ -15,7 +15,7 @@ def set_config(cfg):
     from quantdigger.datasource.data import locd
     if 'source' in cfg:
         cfg['source'] = cfg['source'].lower()
-        assert(cfg['source'] in ['sqlite', 'csv'])
+        assert(cfg['source'] in ['sqlite', 'csv', 'mongodb'])
     settings.update(cfg)
     locd.set_source(settings)
 

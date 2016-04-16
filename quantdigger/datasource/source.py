@@ -2,6 +2,8 @@
 import os
 import pandas as pd
 import sqlite3
+import pymongo
+from pymongo import MongoClient
 from quantdigger.errors import FileDoesNotExist, DataFieldError
 from quantdigger.datasource import datautil
 from quantdigger.util import int2time
@@ -27,6 +29,18 @@ class SourceWrapper(object):
 class SqliteSourceWrapper(SourceWrapper):
     def __init__(self, pcontract, data, max_length):
         super(SqliteSourceWrapper, self).__init__(pcontract, data, max_length)
+
+    def rolling_forward(self):
+        self.curbar += 1
+        if self.curbar == self._max_length:
+            return False, self.curbar
+        else:
+            return True, self.curbar
+
+
+class MongoSourceWrapper(SourceWrapper):
+    def __init__(self, pcontract, data, max_length):
+        super(MongoSourceWrapper, self).__init__(pcontract, data, max_length)
 
     def rolling_forward(self):
         self.curbar += 1
@@ -133,7 +147,7 @@ class SqlLiteSource(object):
         tbname = strpcon.split('-')[0].split('.')
         tbname = "_".join([tbname[1], tbname[0]])
         for dt in tbdata['datetime']:
-            id,  utime = datautil.encode2id(strdt, dt)
+            id, utime = datautil.encode2id(strdt, dt)
             ids.append(id)
             utimes.append(utime)
         data = zip(ids, utimes, tbdata['open'],
@@ -338,3 +352,97 @@ class CsvSource(object):
     def get_tables(self):
         """ 返回数据库所有的表格"""
         pass
+
+
+class MongoSource(object):
+    """
+    MongoDB数据源
+    """
+    def __init__(self, address='localhost', port='27017',
+                 dbname='quantdigger'):
+         # TODO: address, port
+        self.client = MongoClient()
+        self.db = self.client[dbname]
+
+    def __get_collection_name(self, period, exchange, code):
+        return '{period}.{exchange}.{code}'.format(
+            period=str(period).replace('.', ''),
+            exchange=exchange,
+            code=code)
+
+    def get_code2strpcon(self):
+        from collections import defaultdict
+        return defaultdict(lambda: [], {}), defaultdict(lambda: [], {})
+
+    def get_bars(self, pcontract, dt_start, dt_end):
+        id_start, _ = datautil.encode2id(pcontract.period, dt_start)
+        id_end, _ = datautil.encode2id(pcontract.period, dt_end)
+        colname = self.__get_collection_name(
+            pcontract.period,
+            pcontract.contract.exchange,
+            pcontract.contract.code)
+        cursor = self.db[colname].find({
+            'id': {
+                '$gt': id_start,
+                '$lt': id_end
+            }
+        }).sort('id', pymongo.ASCENDING)
+        data = pd.DataFrame(list(cursor)).set_index('datetime')
+        return MongoSourceWrapper(pcontract, data, len(data))
+
+    def get_last_bars(self):
+        raise NotImplementedError
+
+    def get_tables(self): pass
+
+    def get_table_fields(self): pass
+
+    def get_contracts(self):
+        colname = 'contract'
+        cursor = self.db[colname].find()
+        return pd.DataFrame(list(cursor))
+
+    def get_exchanges(self): pass
+
+    def import_bars(self, tbdata, pcontract):
+        strpcon = str(pcontract).upper()
+        code_exchange, strdt = strpcon.split('-')
+        code, exchange = code_exchange.split('.')
+        colname = self.__get_collection_name(strdt, exchange, code)
+        ts = map(lambda dt: datautil.encode2id(strdt, dt), tbdata['datetime'])
+        ids, utimes = zip(*ts)
+        data = map(lambda (_id, _datetime,
+                           _open, _close,
+                           _high, _low,
+                           _volume): {
+            'id': _id, 'datetime': _datetime,
+            'open': _open, 'close': _close,
+            'high': _high, 'low': _low,
+            'volume': _volume
+        }, zip(ids, tbdata['datetime'], tbdata['open'], tbdata['close'],
+               tbdata['high'], tbdata['low'], tbdata['volume']))
+        self.db[colname].insert_many(data)
+
+    def import_contracts(self, data):
+        colname = 'contract'
+        data['key'] = map(lambda x: x.upper(), data['key'])
+        data = map(lambda (_key, _code,
+                           _exchange, _name,
+                           _spell, _long_margin_ratio,
+                           _short_margin_ratio, _price_tick,
+                           _volume_multiple): {
+            'key': _key, 'code': _code,
+            'exchange': _exchange, 'name': _name,
+            'spell': _spell, 'long_margin_ratio': _long_margin_ratio,
+            'short_margin_ratio': short_margin_ratio,
+            'price_tick': _price_tick,
+            'volume_multiple': _volume_multiple
+        }, zip(data['key'], data['code'], data['exchange'], data['name'],
+               data['spell'], data['long_margin_ratio'],
+               data['short_margin_ratio'], data['price_tick'],
+               data['volume_multiple']))
+        self.db[colname].insert_many(data)
+
+    def export_bars(self): pass
+
+    def clear_db(self): pass
