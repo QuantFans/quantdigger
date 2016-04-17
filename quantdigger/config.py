@@ -2,6 +2,7 @@
 
 settings = {
     'source': 'csv',
+    #'source': 'mongodb',
     'data_path': './data',
     'stock_commission': 3 / 10000.0,
     'future_commission': 1 / 10000.0,

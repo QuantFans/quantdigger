@@ -10,7 +10,7 @@ from datetime import datetime
 import os
 import pandas as pd
 from quantdigger.errors import FileDoesNotExist
-from quantdigger.datasource.source import CsvSource, SqlLiteSource
+from quantdigger.datasource.source import CsvSource, SqlLiteSource, MongoSource
 from quantdigger.datasource.datautil import tick2period
 from quantdigger.datastruct import PContract, Contract
 
@@ -43,6 +43,8 @@ class LocalData(object):
                 self._src = SqlLiteSource(path)
             except sqlite3.OperationalError:
                 raise FileDoesNotExist(file=path)
+        elif settings['source'] == 'mongodb':
+            self._src = MongoSource() # TODO: address, port
         elif settings['source'] == 'csv':
             self._src = CsvSource(settings['data_path'])
         try:
