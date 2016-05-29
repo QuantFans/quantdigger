@@ -74,6 +74,9 @@ class DemoStrategy2(Strategy):
 
 if __name__ == '__main__':
     import timeit
+    set_config({
+        'source': 'mongodb'
+        })
     start = timeit.default_timer()
     set_symbols(['BB.SHFE-1.Minute']) 
     #set_symbols(['BB.SHFE']) 

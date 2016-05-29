@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from quantdigger.util import elogger as logger
 from quantdigger.errors import TradingError
 from quantdigger.engine.api import SimulateTraderAPI
-from quantdigger.engine.event import Event
+from quantdigger.event import Event
 from quantdigger.config import settings
 from quantdigger.datastruct import (
     Direction,

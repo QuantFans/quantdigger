@@ -17,6 +17,10 @@ class QError(Exception):
     __repr__ = __str__
 
 
+class InvalidRPCClientArguments(QError):
+    msg = "RPC远程调用的参数类型必须是dict, 但传入的参数类型是{argtype}"
+
+
 class TradingError(QError):
     """
     """

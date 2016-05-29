@@ -24,8 +24,8 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     """
     print "plotting.."
     fig = plt.figure()
-    frame = widgets.MultiWidgets(
-        fig, price_data,
+    frame = widgets.TechnicalWidget(fig, price_data)
+    frame.init_layout(
         50,         # 窗口显示k线数量。
          4, 1     # 两个1:1大小的窗口
     )
@@ -44,7 +44,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     ## 添加指标
     for name, indic in indicators.iteritems():
         frame.add_technical(0, indic)
-    # 绘制标志
+    ## 绘制标志
     if marks:
         if marks[0]:
             # plot lines

@@ -86,7 +86,8 @@ if __name__ == '__main__':
     start = timeit.default_timer()
     #set_symbols(['BB.SHFE-1.Minute']) 
     #set_symbols(['BB.SHFE']) 
-    set_symbols(['BB'])
+    set_config({ 'source': 'csv' })
+    set_symbols(['BB.SHFE-1.Day'])
     profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
                             { 'capital': 50000.0, 'ratio': [0.5, 0.5] })
 
@@ -110,5 +111,5 @@ if __name__ == '__main__':
     ## 绘制净值曲线
     #plotting.plot_curves([curve.networth])
     ## 打印统计信息
-    #print finance.summary_stats(curve, 252*4*60)
+    print finance.summary_stats(curve, 252)
     ## @TODO 直接单击的时候只有数直线

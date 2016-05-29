@@ -44,6 +44,8 @@ http://www.quantfans.org
 * Python (2.7.8+, **暂不支持3.x**)
 * tushare_ (可选, 一个非常强大的股票信息抓取工具)
 * TA-Lib
+* Pyqt (可选)
+* IPython (可选)
 
 * 如果要安装tushare必须先安装`lxml`库, `pip install lxml --upgrade`.
 

@@ -434,7 +434,7 @@ class MongoSource(object):
             'key': _key, 'code': _code,
             'exchange': _exchange, 'name': _name,
             'spell': _spell, 'long_margin_ratio': _long_margin_ratio,
-            'short_margin_ratio': short_margin_ratio,
+            'short_margin_ratio': _short_margin_ratio,
             'price_tick': _price_tick,
             'volume_multiple': _volume_multiple
         }, zip(data['key'], data['code'], data['exchange'], data['name'],

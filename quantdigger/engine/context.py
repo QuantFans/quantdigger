@@ -12,8 +12,7 @@ import Queue
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.exchange import Exchange
 from quantdigger.engine.series import SeriesBase, NumberSeries, DateTimeSeries
-from quantdigger.engine.event import Event, EventsPool, SignalEvent, OnceEvent
-from quantdigger.errors import TradingError
+from quantdigger.event import Event, EventsPool, SignalEvent, OnceEvent
 from quantdigger.technicals.base import TechnicalBase
 from quantdigger.util import elogger as logger
 from quantdigger.datastruct import (

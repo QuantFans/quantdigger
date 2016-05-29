@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from quantdigger.engine.event import OrderEvent
+from quantdigger.event import OrderEvent
 from abc import ABCMeta, abstractmethod
 
 

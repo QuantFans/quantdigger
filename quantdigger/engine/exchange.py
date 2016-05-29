@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from quantdigger.datastruct import Transaction, PriceType, TradeSide, Direction
-from quantdigger.engine.event import FillEvent
+from quantdigger.event import FillEvent
 from quantdigger.util import elogger as logger
 
 

@@ -3,6 +3,7 @@
 # from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
+from quantdigger.util import dlogger as logger
 
 
 class TradeSide(object):
@@ -365,7 +366,7 @@ class Contract(object):
             code = info[0].upper()
             exchange = info[1].upper()
         else:
-            # @TODO throw 'wrong format error'
+            logger.error('错误的合约格式！')
             assert(False)
         self.exchange = exchange
         self.code = code

@@ -322,9 +322,9 @@ class MyLocator(mticker.MaxNLocator):
         return mticker.MaxNLocator.__call__(self, *args, **kwargs)
 
 
-class MultiWidgets(object):
+class TechnicalWidget(object):
     """ 多窗口控件 """
-    def __init__(self, fig, data, w_width, *args):
+    def __init__(self, fig, data, left=0.1, width=0.85, bottom=0.05, height=0.9):
         """ 多窗口联动控件。
 
         Args:
@@ -334,13 +334,21 @@ class MultiWidgets(object):
             *args (tuple): 窗口布局。
         """
         self.name = "MultiWidgets"
-        self.in_qt = False
         self._fig = fig
         self._subwidget2plots = { } # 窗口坐标到指标的映射。
         self._cursor = None
         self._data = data
         self._cursor_axes_index = { }
+
+        self._left, self._width = left, width
+        self._bottom, self._height  = bottom, height
+        self._slider_height = 0.1
+        self._bigger_picture_height = 0.3    # 鸟瞰图高度
+        return
+
+    def init_layout(self, w_width, *args):
         # 布局参数
+        self._w_width_min = 50
         self._init_layout(w_width)
         #
         self._init_widgets(*args)
@@ -349,21 +357,18 @@ class MultiWidgets(object):
                                     color='r', lw=2, horizOn=False,
                                     vertOn=True)
 
-
     def _init_layout(self, w_width):
-        self._left, self._width = 0.1, 0.85
+
+        self._slidder_lower = self._bottom
+        self._slidder_upper = self._bottom + self._slider_height
+        self._bigger_picture_lower = self._slidder_upper
         self._data_length = len(self._data)
         self._w_left = self._data_length - w_width
         self._w_right = self._data_length
         self._w_width = w_width
-        self._w_width_min = 50
-        self._bottom = 0.05
-        self._slider_height = 0.1
-        self._bigger_picture_height = 0.3    # 鸟瞰图高度
-        self._top = self._bottom + self._slider_height
-        self._slider_ax = self._fig.add_axes([self._left, self._bottom, self._width,
+        self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
                                              self._slider_height], axisbg='gray')
-        self._bigger_picture = self._fig.add_axes([self._left, self._bottom+self._slider_height,
+        self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
                                                     self._width, self._bigger_picture_height],
                                                 zorder = 0, frameon=False,
                                                 #sharex=self._slider_ax,
@@ -454,6 +459,7 @@ class MultiWidgets(object):
             technical.plot(self.axes[ith_axes])
             return technical
         except Exception as e:
+            log.exception()
             raise e
 
     def add_widget(self, ith_axes, widget, ymain=False, connect_slider=False):
@@ -472,6 +478,7 @@ class MultiWidgets(object):
                 self._slider.add_observer(widget)
             return widget
         except Exception, e:
+            log.exception()
             raise e
 
     def on_slider(self, val, event):
@@ -504,13 +511,22 @@ class MultiWidgets(object):
         #self._fig.canvas.draw()
         pass
 
+    def _clear(self):
+        """""" 
+        return
+
     def on_keyrelease(self, event):
-        if event.key == "down":
+        if event.key == u"down":
             self._w_width += self._w_width/2
             self._w_width = min(self._data_length, self._w_width)
-        elif event.key == "up" :
+        elif event.key == u"up" :
             self._w_width -= self._w_width/2
             self._w_width= max(self._w_width, self._w_width_min)
+        elif event.key == u"super+up":
+            print event.key, "**", type(event.key) 
+        elif event.key == u"super+down":
+            print event.key, "**", type(event.key) 
+            # @TODO page upper down
 
         middle = (self._w_left+self._w_right)/2
         self._w_left =  middle - self._w_width/2
@@ -559,8 +575,8 @@ class MultiWidgets(object):
         if len(args) ==  0:
             args = (1,)
         total_units = sum(args)
-        unit = (0.95 - self._top) / total_units
-        bottom = self._top
+        unit = (self._bottom + self._height - self._slidder_upper) / total_units
+        bottom = self._slidder_upper
         user_axes = []
         first_user_axes = None
         for i, ratio in enumerate(args):
@@ -631,6 +647,7 @@ class MultiWidgets(object):
         index = x-f if f < 0.5 else min(x-f+1, len(self._data['open']) - 1)
         delta = (self._data.index[1] - self._data.index[0])
         fmt = slider_strtime_format(delta)
+        index = int(index)
         ## @note 字符串太长会引起闪烁
         return "[dt=%s o=%.2f c=%.2f h=%.2f l=%.2f]" % (
                 self._data.index[index].strftime(fmt),
