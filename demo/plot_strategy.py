@@ -84,9 +84,9 @@ class DemoStrategy2(Strategy):
 if __name__ == '__main__':
     import timeit
     start = timeit.default_timer()
-    #set_symbols(['BB.SHFE-1.Minute']) 
+    set_symbols(['BB.SHFE-1.Minute']) 
     #set_symbols(['BB.SHFE']) 
-    set_symbols(['BB'])
+    #set_symbols(['BB'])
     profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
                             { 'capital': 50000.0, 'ratio': [0.5, 0.5] })
 

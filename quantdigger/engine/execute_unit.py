@@ -36,8 +36,8 @@ class ExecuteUnit(object):
         self._combs = []
         self._data_manager = DataManager()
         # str(PContract): DataWrapper
-        if settings['source'] == 'csv':
-            self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        # if settings['source'] == 'csv':
+        #     self.pcontracts = self._parse_pcontracts(self.pcontracts)
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,
