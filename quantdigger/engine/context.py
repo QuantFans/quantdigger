@@ -126,8 +126,6 @@ class DataContext(object):
 
     def get_item(self, name):
         """ 获取用户在策略on_init函数中初始化的变量 """
-        print self._all_variables
-        print '[%s %s %s]' % (self.i, self.j, name)
         return self._all_variables[self.i][self.j][name]
 
     def add_item(self, name, value):

@@ -1,6 +1,6 @@
+from quantdigger.config_util import ConfigUtil
 from quantdigger.infras.ioc import *
 from quantdigger.infras.logger import logger
-from quantdigger.config import settings
 
 _ds_container = IoCContainer()
 
@@ -15,8 +15,8 @@ class _DatasourceTrunk(IoCTrunk):
                     cls=self.cls, name=name)
 
     def construct(self):
-        a = [settings[k] for k in self.args]
-        ka = {k: settings[name] for k, name in self.kwargs.items()}
+        a = [ConfigUtil.get(k) for k in self.args]
+        ka = {k: ConfigUtil.get(name) for k, name in self.kwargs.items()}
         return self.cls(*a, **ka)
 
 
@@ -25,5 +25,5 @@ resolve_datasource = resolve_from(_ds_container)
 
 
 def get_setting_datasource():
-    ds_type = settings['source']
+    ds_type = ConfigUtil.get('source')
     return resolve_datasource(ds_type)
