@@ -4,7 +4,7 @@ def overload_setter(setter):
         for k, v in d.items():
             setter(k, v)
 
-    def wrapper(*args, **kwargs):
+    def new_setter(*args, **kwargs):
         # args
         if len(args) == 1:
             multiple_set(args[0])
@@ -13,4 +13,4 @@ def overload_setter(setter):
         # kwargs
         multiple_set(kwargs)
 
-    return wrapper
+    return new_setter

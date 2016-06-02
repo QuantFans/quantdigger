@@ -5,13 +5,12 @@ from quantdigger.config import settings
 from quantdigger.config_util import ConfigUtil
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.technicals.common import *
-# from quantdigger.datasource import locd
+from quantdigger.infras.logger import deprecated
 
 __version__ = '0.4.0'
 
-# TODO: @deprecated
 
-
+@deprecated
 def set_config(cfg):
     """"""
     # from quantdigger.datasource.data import locd
@@ -20,10 +19,6 @@ def set_config(cfg):
     #     assert(cfg['source'] in ['sqlite', 'csv', 'mongodb'])
     settings.update(cfg)
     # locd.set_source(settings)
-
-
-def get_config(key):
-    return settings[key]
 
 
 # set_config(settings)

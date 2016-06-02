@@ -1,5 +1,6 @@
 class SourceWrapper(object):
     """ 数据源包装器，使相关数据源支持逐步读取操作 """
+
     def __init__(self, pcontract, data,  max_length):
         self.data = data
         self._max_length = max_length
@@ -16,3 +17,19 @@ class SourceWrapper(object):
             return False, self.curbar
         else:
             return True, self.curbar
+
+
+class DataSourceAbstract(object):
+    '''数据源抽象基类'''
+
+    def get_code2strpcon(self):
+        raise NotImplementedError
+
+    def get_bars(self, pcontract, dt_start, dt_end):
+        raise NotImplementedError
+
+    def get_last_bars(self, pcontract, n):
+        raise NotImplementedError
+
+    def get_contracts(self):
+        raise NotImplementedError

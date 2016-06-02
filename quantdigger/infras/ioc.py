@@ -41,12 +41,12 @@ class IoCTrunk(object):
 
 def register_to(ioc_container, trunk_cls):
     def register(name, *args, **kwargs):
-        def decorator(cls):
+        def wrapper(cls):
             trunk = trunk_cls(cls, args, kwargs)
             trunk.on_register(name)
             ioc_container.register(name, trunk)
             return cls
-        return decorator
+        return wrapper
     return register
 
 

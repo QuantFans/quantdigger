@@ -25,6 +25,3 @@ class DataManager(object):
     def get_last_bars(self, strpcon, n):
         pcontract = PContract.from_string(strpcon)
         return self._src.get_last_bars(pcontract, n)
-
-    def get_code2strpcon(self):
-        pass  # TODO: 什么意思？

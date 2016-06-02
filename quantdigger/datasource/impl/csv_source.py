@@ -4,16 +4,15 @@ import os
 import pandas as pd
 
 from quantdigger.datasource.dsUtil import *
-from quantdigger.datasource.source import SourceWrapper
+from quantdigger.datasource.source import SourceWrapper, DataSourceAbstract
 
 
 @register_datasource('csv', 'data_path')
-class CsvSource(object):
+class CsvSource(DataSourceAbstract):
+    '''CSV数据源'''
+
     def __init__(self, root):
         self._root = root
-
-    def get_code2strpcon(self):
-        pass  # TODO
 
     def get_bars(self, pcontract, dt_start, dt_end):
         data = self._load_bars(pcontract)
