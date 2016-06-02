@@ -3,6 +3,7 @@
 # from flufl.enum import Enum
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
+from quantdigger.infras.logger import logger
 
 
 class TradeSide(object):
@@ -377,6 +378,9 @@ class Contract(object):
             self.is_stock = True
         elif self.exchange == 'TEST':
             self.is_stock = False
+        else:
+            logger.error('Unknown exchange: {0}', self.exchange)
+            assert(False)
 
     def __str__(self):
         """"""

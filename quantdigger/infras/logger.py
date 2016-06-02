@@ -8,6 +8,9 @@ class _Logger:
     def warn(self, tmpl, *args, **kwargs):
         self.output('WARN', tmpl, *args, **kwargs)
 
+    def error(self, tmpl, *args, **kwargs):
+        self.output('ERROR', tmpl, *args, **kwargs)
+
     def output(self, level, tmpl, *args, **kwargs):
         msg = tmpl.format(*args, **kwargs)
         msg = '[' + level + '] ' + msg

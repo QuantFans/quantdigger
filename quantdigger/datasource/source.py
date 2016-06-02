@@ -22,9 +22,6 @@ class SourceWrapper(object):
 class DataSourceAbstract(object):
     '''数据源抽象基类'''
 
-    def get_code2strpcon(self):
-        raise NotImplementedError
-
     def get_bars(self, pcontract, dt_start, dt_end):
         raise NotImplementedError
 
