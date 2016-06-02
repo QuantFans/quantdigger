@@ -2,7 +2,7 @@
 
 from quantdigger.engine.qd import *
 from quantdigger.config import settings
-from quantdigger.config_util import ConfigUtil
+from quantdigger.configutil import ConfigUtil
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.technicals.common import *
 from quantdigger.infras.logger import deprecated

@@ -3,7 +3,7 @@
 import os
 import pandas as pd
 
-from quantdigger.datasource.dsUtil import *
+from quantdigger.datasource.dsutil import *
 from quantdigger.datasource.source import SourceWrapper, DataSourceAbstract
 
 

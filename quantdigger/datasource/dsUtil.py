@@ -1,4 +1,4 @@
-from quantdigger.config_util import ConfigUtil
+from quantdigger.configutil import ConfigUtil
 from quantdigger.infras.ioc import *
 from quantdigger.infras.logger import logger
 
