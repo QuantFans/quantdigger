@@ -4,7 +4,7 @@ import pandas as pd
 import tushare as ts
 
 from quantdigger.datasource.dsutil import register_datasource
-from quantdigger.datasource.source import SourceWrapper, DataSourceAbstract
+from quantdigger.datasource.source import SourceWrapper, DatasourceAbstract
 
 
 def _process_ts_dt(dt):
@@ -12,7 +12,7 @@ def _process_ts_dt(dt):
 
 
 @register_datasource('tushare')
-class TuShareSource(DataSourceAbstract):
+class TuShareSource(DatasourceAbstract):
     '''TuShare数据源'''
 
     def __init__(self):

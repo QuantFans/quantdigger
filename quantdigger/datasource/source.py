@@ -19,7 +19,7 @@ class SourceWrapper(object):
             return True, self.curbar
 
 
-class DataSourceAbstract(object):
+class DatasourceAbstract(object):
     '''数据源抽象基类'''
 
     def get_bars(self, pcontract, dt_start, dt_end):

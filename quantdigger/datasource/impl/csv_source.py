@@ -4,11 +4,11 @@ import os
 import pandas as pd
 
 from quantdigger.datasource.dsutil import *
-from quantdigger.datasource.source import SourceWrapper, DataSourceAbstract
+from quantdigger.datasource.source import SourceWrapper, DatasourceAbstract
 
 
 @register_datasource('csv', 'data_path')
-class CsvSource(DataSourceAbstract):
+class CsvSource(DatasourceAbstract):
     '''CSV数据源'''
 
     def __init__(self, root):
