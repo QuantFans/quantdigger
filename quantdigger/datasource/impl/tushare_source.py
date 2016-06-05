@@ -3,8 +3,10 @@
 import pandas as pd
 import tushare as ts
 
+from quantdigger.datasource.cache import CachedDatasource
 from quantdigger.datasource.dsutil import register_datasource
 from quantdigger.datasource.source import SourceWrapper, DatasourceAbstract
+from quantdigger.datasource.impl.localfs_cache import LocalFsCache
 
 
 def _process_ts_dt(dt):
@@ -32,8 +34,14 @@ class TuShareSource(DatasourceAbstract):
         dts = _process_ts_dt(dt_start)
         dte = _process_ts_dt(dt_end)
         data = ts.get_h_data(code, start=dts, end=dte)
+        data.index.names = ['datetime']
         return data.iloc[::-1]
 
     def get_contracts(self):
         # TODO
         return pd.DataFrame([])
+
+
+@register_datasource('cached-tushare', 'cache_path')
+def CachedTuShareSource(cache_path):
+    return CachedDatasource(TuShareSource(), LocalFsCache(cache_path))

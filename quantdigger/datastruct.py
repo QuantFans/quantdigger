@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # from flufl.enum import Enum
+from datetime import timedelta
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
 from quantdigger.infras.logger import logger
@@ -462,6 +463,21 @@ class Period(object):
     def __str__(self):
         return "%d.%s" % (self.count, self.unit)
 
+    def to_timedelta(self):
+        m = {
+            'DAY': 'days',
+            'HOUR': 'hours',
+            'MINUTE': 'minutes',
+            'SECOND': 'seconds',
+            'MILLISECOND': 'milliseconds',
+        }
+        try:
+            u = m[self.unit]
+            kwargs = {u: 1}
+            return timedelta(**kwargs)
+        except KeyError:
+            raise Exception('unit "%s" is not supported' % self.unit)
+
 
 class PContract(object):
     """ 特定周期的合约。
@@ -491,6 +507,9 @@ class PContract(object):
 
     def __eq__(self, r):
         return self._hash == r._hash
+
+    def __str__(self):
+        return '%s-%s' % (str(self.contract), str(self.period))
 
 
 class PositionKey(object):

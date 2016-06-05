@@ -49,9 +49,11 @@ class Stg1(Strategy):
 if __name__ == '__main__':
     import timeit
     start = timeit.default_timer()
-    ConfigUtil.set(source='tushare')
+    #ConfigUtil.set(source='tushare')
+    ConfigUtil.set(source='cached-tushare',
+                   cache_path='test_cache')
     set_symbols(['600096.SH-1.Day'], '2010-1-1', '2011-1-1')
-    #set_symbols(['BB.SHFE-1.Minute'])
+    # set_symbols(['BB.SHFE-1.Minute'])
     profile = add_strategy([Stg1('S1')], {'captial': 500000.0})
     run()
     stop = timeit.default_timer()
