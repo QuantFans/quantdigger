@@ -9,3 +9,5 @@ dist/
 build/
 demo/data/1DAY/
 tests/work/
+
+_local_*
