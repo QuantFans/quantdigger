@@ -39,7 +39,7 @@ class TuShareSource(DatasourceAbstract):
 
     def get_contracts(self):
         # TODO
-        return pd.DataFrame([])
+        return pd.DataFrame()
 
 
 @register_datasource('cached-tushare', 'cache_path')

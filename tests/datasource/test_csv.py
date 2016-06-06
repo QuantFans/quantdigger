@@ -11,7 +11,7 @@ _DT_START = '1980-1-1'
 _DT_END = '2100-1-1'
 
 
-class TestDataSource(unittest.TestCase):
+class TestCsvSource(unittest.TestCase):
 
     def test_csv_source(self):
         source_bak = ConfigUtil.get('source')

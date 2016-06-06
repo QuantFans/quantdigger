@@ -48,6 +48,8 @@ class LocalFsCache(CacheAbstract):
 
     def get_bars(self, pcontract, dt_start, dt_end):
         key = self._to_key(pcontract)
+        dt_start = pd.to_datetime(dt_start)
+        dt_end = pd.to_datetime(dt_end)
         try:
             cached_start, cached_end = self._meta[key]
             missing_range = _missing_range(
