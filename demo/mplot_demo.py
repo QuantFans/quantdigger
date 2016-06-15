@@ -9,7 +9,7 @@ from quantdigger.technicals.common import MA, Volume
 import pandas as pd
 
 
-price_data = pd.read_csv('./work/IF111.csv', index_col=0, parse_dates=True)
+price_data = pd.read_csv('./data/IF000.csv', index_col=0, parse_dates=True)
 print len(price_data)
 fig = plt.figure()
 frame = widgets.TechnicalWidget(fig, price_data, height=0.85)

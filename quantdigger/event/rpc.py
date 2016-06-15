@@ -5,7 +5,9 @@
 # @author wondereamer
 # @version 0.1
 # @date 2016-05-17
-from time import sleep
+import time
+import json
+import zmq  
 from datetime import datetime
 from threading import Thread, Condition, Lock
 from quantdigger.util import elogger as log
@@ -13,7 +15,39 @@ from quantdigger.errors import InvalidRPCClientArguments
 from quantdigger.event.eventengine import Event
 
 
-class RPCClient(object):
+class RPCServer(object):
+    def __init__(self):
+        self._routes = { }
+        self._routes_lock = Lock()
+
+    def _process_request(self, event):
+        pass
+
+
+    def register(self, route, handler):
+        """ 注册服务函数。
+        
+        Args:
+            route (str): 服务名
+            handler (function): 回调函数
+        
+        Returns:
+            Bool. 是否注册成功。
+        """
+        if route in self._routes:
+            return False 
+        with self._routes_lock:
+            self._routes[route] = handler
+        return True
+
+    def unregister(self, route):
+        """ 注销服务函数 """
+        with self._routes_lock:
+            if route in self._routes:
+                del self._routes[route]
+
+
+class EventRPCClient(object):
     def __init__(self, event_engine, service, event_client=None, event_server=None):
         self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
         self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
@@ -46,7 +80,7 @@ class RPCClient(object):
                     log.debug("[RPCClient._runtimer] 处理超时, delete rid; %s" % self.rid)
                     self._timeout = 0
                     self._notify_server_data()
-            sleep(self._timer_sleep)
+            time.sleep(self._timer_sleep)
 
     def _process_apiback(self, event):
         assert(event.route == self.EVENT_SERVER)
@@ -127,14 +161,13 @@ class RPCClient(object):
             self._pause_condition.notify()
 
 
-class RPCServer(object):
+class EventRPCServer(RPCServer):
     def __init__(self, event_engine, service, event_client=None, event_server=None):
+        super(EventRPCServer, self).__init__()
         self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
         self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
         self._event_engine = event_engine
         self._event_engine.register(self.EVENT_CLIENT, self._process_request)
-        self._routes = { }
-        self._routes_lock = Lock()
 
     def _process_request(self, event):
         #print "rpcsever: ", event.route, event.args
@@ -157,24 +190,69 @@ class RPCServer(object):
             log.debug('RPCServer emit')
             self._event_engine.emit(Event(self.EVENT_SERVER, args))
 
-    def register(self, route, handler):
-        """ 注册服务函数。
-        
-        Args:
-            route (str): 服务名
-            handler (function): 回调函数
-        
-        Returns:
-            Bool. 是否注册成功。
-        """
-        if route in self._routes:
-            return False 
-        with self._routes_lock:
-            self._routes[route] = handler
-        return True
 
-    def unregister(self, route):
-        """ 注销服务函数 """
-        with self._routes_lock:
-            if route in self._routes:
-                del self._routes[route]
+class ZMQRPCServer(RPCServer):
+    """docstring for ZMQRPCServer"""
+    def __init__(self):
+        super(ZMQRPCServer, self).__init__()
+        self._context = zmq.Context()  
+        self._socket = self._context.socket(zmq.REP)  
+        self._socket.bind("tcp://*:5555")  
+        #worker = Thread(target = self._process_request)
+        ### @todo maybe remove daemon
+        #worker.daemon = True
+        #worker.start()
+        self._process_request()
+
+    def _process_request(self):
+        while True:  
+            #  Wait for next request from client  
+            message = self._socket.recv()  
+            message = json.loads(message)
+            log.debug('RPCServer process: %s' % message['apiname'])
+            try:
+                with self._routes_lock:
+                    handler = self._routes[message['apiname']]
+                ret = handler(message['data'])
+            except Exception as e:
+                print e, "****" 
+            else:
+                log.debug('RPCServer emit')
+                ret = json.dumps(ret)
+                self._socket.send(ret)
+
+
+class ZMQRPCClient(object):
+    """docstring for ZMQRPCClient"""
+    def __init__(self):
+        print "Connecting to hello world server..."  
+        self._context = zmq.Context()  
+        self._socket = self._context.socket(zmq.REQ)  
+        self._socket.connect ("tcp://localhost:5555")  
+
+    def call(self, apiname, args, handler):
+        pass
+
+    def sync_call(self, apiname, args, timeout=10):
+        data = {
+            'apiname': apiname,
+            'data': args
+        }
+        self._socket.send(json.dumps(data))  
+
+        message = self._socket.recv()  
+        ret = json.loads(message)
+        return ret
+
+
+if __name__ == '__main__':
+
+    def print_hello(self, data):
+        """""" 
+        print "hello" 
+        print data
+        return "123"
+
+    server = ZMQRPCServer()
+    #server.register("print_hello", print_hello)
+    time.sleep(1000)
