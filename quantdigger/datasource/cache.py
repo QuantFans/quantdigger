@@ -48,3 +48,6 @@ class LoadCacheException(Exception):
         assert(missing_range)
         self.cached_data = cached_data
         self.missing_range = missing_range
+
+    def __str__(self):
+        return str(self.missing_range)

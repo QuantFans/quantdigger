@@ -47,7 +47,7 @@ class BOLL(TechnicalBase):
     """ 布林带指标。 """
     @tech_init
     def __init__(self, data, n, name='BOLL',
-            styles=('y', 'b', 'g'), lw=1):
+                 styles=('y', 'b', 'g'), lw=1):
         super(BOLL, self).__init__(name)
         ### @TODO 只有在逐步运算中需给self.values先赋值,
         ## 去掉逐步运算后删除
