@@ -12,7 +12,7 @@ import Queue
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.exchange import Exchange
 from quantdigger.engine.series import SeriesBase, NumberSeries, DateTimeSeries
-from quantdigger.event import Event, EventsPool, SignalEvent, OnceEvent
+from quantdigger.event import Event, EventsPool
 from quantdigger.technicals.base import TechnicalBase
 from quantdigger.util import elogger as logger
 from quantdigger.datastruct import (
@@ -232,20 +232,20 @@ class StrategyContext(object):
         entry_flag = True
         exit_flag = True
         if self._exit_orders:
-            self.events_pool.put(SignalEvent(self._exit_orders))
+            self.events_pool.put(Event(self._exit_orders))
             self._process_trading_events(at_baropen, at_baropen)
             self._exit_orders = []
             exit_flag = False
             append = False
         if self._entry_orders:
-            self.events_pool.put(SignalEvent(self._entry_orders))
+            self.events_pool.put(Event(self._entry_orders))
             self._process_trading_events(at_baropen, append)
             self._entry_orders = []
             entry_flag = False
             append = False
         # 没有交易信号，确保至少运行一次
         if exit_flag and entry_flag:
-            self.events_pool.put(OnceEvent())
+            self.events_pool.put(Event(Event.ONCE))
             self._process_trading_events(at_baropen, append)
 
     def plot_line(self, name, ith_window, x, y, styles, lw=1, ms=10, twinx=False):
@@ -293,18 +293,18 @@ class StrategyContext(object):
                 # if event.type == 'MARKET':
                     # strategy.calculate_signals(event)
                     # port.update_timeindex(event)
-                if event.type == Event.SIGNAL:
+                if event.route == Event.SIGNAL:
                     assert(not at_baropen)
                     self.blotter.update_signal(event)
-                elif event.type == Event.ORDER:
+                elif event.route == Event.ORDER:
                     assert(not at_baropen)
                     self.exchange.insert_order(event)
-                elif event.type == Event.FILL:
+                elif event.route == Event.FILL:
                     # 模拟交易接口收到报单成交
                     self.blotter.api.on_transaction(event)
             # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
             # @TODO tick 回测不一样
-            if event.type == Event.ONCE or event.type == Event.ORDER:
+            if event.route == Event.ONCE or event.route == Event.ORDER:
                 self.exchange.make_market(self.blotter._bars, at_baropen)
         self.blotter.update_status(self._datetime, at_baropen, append)
         return

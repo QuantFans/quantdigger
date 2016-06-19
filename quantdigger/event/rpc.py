@@ -12,7 +12,7 @@ from datetime import datetime
 from threading import Thread, Condition, Lock
 from quantdigger.util import elogger as log
 from quantdigger.errors import InvalidRPCClientArguments
-from quantdigger.event.eventengine import Event
+from event import Event
 
 
 class RPCServer(object):
@@ -86,7 +86,6 @@ class EventRPCClient(object):
         assert(event.route == self.EVENT_SERVER)
         self._timeout = 0
         rid = event.args['rid']
-        #print rid, "**" 
         try:
             with self._handlers_lock:
                 handler = self._handlers[rid]
@@ -95,8 +94,10 @@ class EventRPCClient(object):
         else:
             try:
                 if handler:
+                    # 异步
                     handler(event.args['ret'])
                 else:
+                    # 同步
                     self._sync_ret = event.args['ret']
                     self._notify_server_data()
             except Exception as e:
@@ -133,7 +134,8 @@ class EventRPCClient(object):
             args (dict): 给服务API的参数。
             handler (function): 回调函数。
         """
-        log.debug('sync_call: %s', apiname)
+        log.debug('sync_call: %s' % apiname)
+        print('sync_call: %s' % apiname)
         if not isinstance(args, dict):
             self._timeout = 0
             self._sync_ret = None
@@ -144,12 +146,12 @@ class EventRPCClient(object):
         with self._sync_call_time_lock:
             self._sync_call_time = datetime.now()
         self._timeout = timeout
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
         with self._handlers_lock:
             self._handlers[self.rid] = None
+        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
         self._waiting_server_data()
         ret = self._sync_ret
-        self._sync_ret = None
+        #self._sync_ret = None
         return ret
 
     def _waiting_server_data(self):
@@ -164,7 +166,9 @@ class EventRPCClient(object):
 class EventRPCServer(RPCServer):
     def __init__(self, event_engine, service, event_client=None, event_server=None):
         super(EventRPCServer, self).__init__()
+        # server监听的client事件
         self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
+        # client监听的server事件
         self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
         self._event_engine = event_engine
         self._event_engine.register(self.EVENT_CLIENT, self._process_request)
@@ -191,68 +195,84 @@ class EventRPCServer(RPCServer):
             self._event_engine.emit(Event(self.EVENT_SERVER, args))
 
 
-class ZMQRPCServer(RPCServer):
-    """docstring for ZMQRPCServer"""
-    def __init__(self):
-        super(ZMQRPCServer, self).__init__()
-        self._context = zmq.Context()  
-        self._socket = self._context.socket(zmq.REP)  
-        self._socket.bind("tcp://*:5555")  
-        #worker = Thread(target = self._process_request)
-        ### @todo maybe remove daemon
+#class ZMQRPCServer(RPCServer):
+    #"""docstring for ZMQRPCServer"""
+    #SERVER_ADDR = "tcp://*:5555"
+
+    #def __init__(self, addr):
+        #super(ZMQRPCServer, self).__init__()
+        #self._context = zmq.Context()  
+        #self._socket = self._context.socket(zmq.REP)  
+        #self._socket.bind(addr)  
+        #worker = Thread(target=self._process_request)
+        #### @todo maybe remove daemon
         #worker.daemon = True
         #worker.start()
-        self._process_request()
 
-    def _process_request(self):
-        while True:  
-            #  Wait for next request from client  
-            message = self._socket.recv()  
-            message = json.loads(message)
-            log.debug('RPCServer process: %s' % message['apiname'])
-            try:
-                with self._routes_lock:
-                    handler = self._routes[message['apiname']]
-                ret = handler(message['data'])
-            except Exception as e:
-                print e, "****" 
-            else:
-                log.debug('RPCServer emit')
-                ret = json.dumps(ret)
-                self._socket.send(ret)
+    #def _process_request(self):
+        #while True:  
+            ###  Wait for next request from client  
+            #message = self._socket.recv()  
+            #data = json.loads(message)
+            #log.info('RPCServer process: %s' % data['apiname'])
+            #try:
+                #with self._routes_lock:
+                    #handler = self._routes[data['apiname']]
+                #ret = handler(data['data'])
+            #except Exception as e:
+                #print e, "****" 
+            #else:
+                #log.info('RPCServer emit')
+                #ret = json.dumps(ret)
+                #print "emit" 
+                #self._socket.send(ret)
 
 
-class ZMQRPCClient(object):
-    """docstring for ZMQRPCClient"""
-    def __init__(self):
-        print "Connecting to hello world server..."  
-        self._context = zmq.Context()  
-        self._socket = self._context.socket(zmq.REQ)  
-        self._socket.connect ("tcp://localhost:5555")  
+#class ZMQRPCClient(object):
+    #"""docstring for ZMQRPCClient"""
+    #CLIENT_ADDR = "tcp://localhost:5555"
 
-    def call(self, apiname, args, handler):
-        pass
+    #def __init__(self, addr):
+        #print "Connecting to hello world server..."  
+        #self._context = zmq.Context()  
+        #self._socket = self._context.socket(zmq.REQ)  
+        #self._socket.connect(addr)  
 
-    def sync_call(self, apiname, args, timeout=10):
-        data = {
-            'apiname': apiname,
-            'data': args
-        }
-        self._socket.send(json.dumps(data))  
+    #def call(self, apiname, args, handler):
+        #pass
 
-        message = self._socket.recv()  
-        ret = json.loads(message)
-        return ret
+    #def sync_call(self, apiname, args, timeout=10):
+        #data = {
+            #'apiname': apiname,
+            #'data': args
+        #}
+        #self._socket.send(json.dumps(data))  
+
+        #message = self._socket.recv()  
+        #ret = json.loads(message)
+        #return ret
+
+    #def __init__(self, event_engine, service, event_client=None, event_server=None):
 
 
 if __name__ == '__main__':
 
-    def print_hello(self, data):
+    from eventengine import ZMQEventEngine
+    import sys
+
+    def print_hello(data):
         """""" 
-        print "hello" 
         print data
         return "123"
+    server_engine = ZMQEventEngine()
+    server_engine.start()
+    server = EventRPCServer(server_engine, 'test')
+    server.register("print_hello", print_hello)
+    print "***************"
 
-    server = ZMQRPCServer()
-    #server.register("print_hello", print_hello)
-    time.sleep(1000)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        server_engine.stop()
+        sys.exit(0)

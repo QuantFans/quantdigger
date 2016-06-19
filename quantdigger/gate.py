@@ -13,10 +13,18 @@ class KernelGate(object):
         """docstring for get_data""" 
         pass
 
-    def run_strategy(self, name, data):
-        """docstring for run_strategy""" 
-        pass
+    def run_strategy(self, name):
+        """""" 
+        return
 
-    def run_technical(self, name, data):
+    def run_technical(self, name):
         """docstring for run_technical""" 
-        pass
+        return
+
+    def get_technicals(self):
+        """docstring for get_technicals""" 
+        return
+
+    def get_strategies(self):
+        """docstring for get_strategies""" 
+        return
