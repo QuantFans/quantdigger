@@ -17,12 +17,12 @@ tushare_ 库的作者 Jimmy_
 
 
 文档
----
+-----
 http://www.quantfans.org
 
 
 安装
----
+-----
 
 克隆github代码后本地安装(推荐)
    
@@ -33,7 +33,7 @@ http://www.quantfans.org
 
 
 依赖库
------
+-------
 * matplotlib 
 * numpy
 * logbook
