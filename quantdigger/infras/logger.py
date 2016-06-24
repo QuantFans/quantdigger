@@ -1,4 +1,7 @@
 class _Logger:
+    def __init__(self):
+        self.ignore_list = []
+
     def info(self, tmpl, *args, **kwargs):
         self.output('INFO', tmpl, *args, **kwargs)
 
@@ -12,9 +15,14 @@ class _Logger:
         self.output('ERROR', tmpl, *args, **kwargs)
 
     def output(self, level, tmpl, *args, **kwargs):
+        if level in self.ignore_list:
+            return
         msg = tmpl.format(*args, **kwargs)
         msg = '[' + level + '] ' + msg
         print msg
+
+    def ignore(self, *args):
+        self.ignore_list.extend(args)
 
 
 logger = _Logger()

@@ -5,7 +5,7 @@ from quantdigger.config import settings
 from quantdigger.configutil import ConfigUtil
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.technicals.common import *
-from quantdigger.infras.logger import deprecated
+from quantdigger.infras.logger import logger, deprecated
 
 __version__ = '0.4.0'
 
