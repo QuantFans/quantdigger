@@ -368,7 +368,7 @@ class SimpleBlotter(Blotter):
 
         可能产生一系列order事件，在bar的开盘时间交易。
         """
-        assert event.type == Event.SIGNAL
+        assert event.route == Event.SIGNAL
         new_orders = []
         for order in event.orders:
             errmsg = self._valid_order(order)
@@ -395,7 +395,7 @@ class SimpleBlotter(Blotter):
     def update_fill(self, event):
         """ 处理委托单成交事件。 """
         # @TODO 订单编号和成交编号区分开
-        assert event.type == Event.FILL
+        assert event.route == Event.FILL
         trans = event.transaction
         try:
             self.open_orders.remove(trans.order)

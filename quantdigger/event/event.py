@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # from flufl.enum import Enum
+import json
 
-
+## @TODO REMOVE EventsPool
 class EventsPool(object):
     """ 事件池，每个策略有一个。"""
     _pool = []
@@ -30,47 +31,77 @@ class Event(object):
     :ivar ORDER: 委托下单事件, 由下单控制器产生。
     :ivar FILL: 订单成交事件, 由交易模拟器产生。
     """
-    MARKET = 1
-    SIGNAL = 2
-    ORDER = 3
-    FILL = 4
-    ONCE = 5
+    MARKET = 'MARKET' 
+    SIGNAL = 'SIGNAL' 
+    ORDER = 'ORDER' 
+    FILL = 'FILL' 
+    ONCE = 'ONCE' 
+    TIMER = 'TIMER' 
+    def __init__(self, route, args):
+        self.data = { 
+            'route': route,
+            'data': args 
+        }
+
+    def __str__(self):
+        return "route: %s\nargs: %s" % (self.data['route'], self.data['data'])
+
+    @property
+    def route(self):
+        """""" 
+        return self.data['route']
+
+    @property
+    def args(self):
+        """""" 
+        return self.data['data']
+
+    @classmethod
+    def message_to_event(self, message):
+        route, args = message.split(']')
+        route = route[1:]
+        return Event(route=route, args=json.loads(args))
+
+    @classmethod
+    def event_to_message(self, event):
+        return '[%s]' % event.route + json.dumps(event.args)
 
 
-class MarketEvent(object):
-    """ 市场数据到达事件。 """
 
-    def __init__(self):
-        """
-        Initialises the MarketEvent.
-        """
-        self.type = Event.MARKET
-
-
-class SignalEvent(object):
+class SignalEvent(Event):
     """ 由策略函数产生的交易信号事件。 """
 
     def __init__(self, orders):
-        self.type = Event.SIGNAL
-        self.orders = orders
+        super(SignalEvent, self).__init__(Event.SIGNAL, orders)
+
+    @property
+    def orders(self):
+        return self.data['data']
 
 
-class OrderEvent(object):
+class OrderEvent(Event):
     """ 委托下单事件。 """
 
     def __init__(self, order):
-        self.type = Event.ORDER
-        self.order = order
+        super(OrderEvent, self).__init__(Event.ORDER, order)
+
+    @property
+    def order(self):
+        return self.data['data']
 
 
-class OnceEvent(object):
+class OnceEvent(Event):
 
     def __init__(self):
-        self.type = Event.ONCE
+        super(OnceEvent, self).__init__(Event.ONCE, None)
 
 
-class FillEvent(object):
-    """ 委托成交事件。 """
+class FillEvent(Event):
+    """ 委托下单事件。 """
+
     def __init__(self, transaction):
-        self.type = Event.FILL
-        self.transaction = transaction
+        super(FillEvent, self).__init__(Event.FILL, transaction)
+
+    @property
+    def transaction(self):
+        return self.data['data']

@@ -293,18 +293,18 @@ class StrategyContext(object):
                 # if event.type == 'MARKET':
                     # strategy.calculate_signals(event)
                     # port.update_timeindex(event)
-                if event.type == Event.SIGNAL:
+                if event.route == Event.SIGNAL:
                     assert(not at_baropen)
                     self.blotter.update_signal(event)
-                elif event.type == Event.ORDER:
+                elif event.route == Event.ORDER:
                     assert(not at_baropen)
                     self.exchange.insert_order(event)
-                elif event.type == Event.FILL:
+                elif event.route == Event.FILL:
                     # 模拟交易接口收到报单成交
                     self.blotter.api.on_transaction(event)
             # 价格撮合。note: bar价格撮合要求撮合置于运算后面。
             # @TODO tick 回测不一样
-            if event.type == Event.ONCE or event.type == Event.ORDER:
+            if event.route == Event.ONCE or event.route == Event.ORDER:
                 self.exchange.make_market(self.blotter._bars, at_baropen)
         self.blotter.update_status(self._datetime, at_baropen, append)
         return
@@ -578,8 +578,7 @@ class Context(object):
 
     def __getitem__(self, strpcon):
         """ 获取跨品种合约 """
-        # @TODO 字典，数字做key表序号, 合并key
-        # @TODO 根据exception自动判断优先级
+        # @TODO 字典， 合并key
         strpcon = strpcon.upper()
         try:
             # xxxxx.xx

@@ -324,7 +324,7 @@ class MyLocator(mticker.MaxNLocator):
 
 class TechnicalWidget(object):
     """ 多窗口控件 """
-    def __init__(self, fig, data, left=0.1, width=0.85, bottom=0.05, height=0.9):
+    def __init__(self, fig, data, left=0.1, bottom=0.05, width=0.85, height=0.9):
         """ 多窗口联动控件。
 
         Args:
@@ -344,6 +344,7 @@ class TechnicalWidget(object):
         self._bottom, self._height  = bottom, height
         self._slider_height = 0.1
         self._bigger_picture_height = 0.3    # 鸟瞰图高度
+        self._all_axes = []
         return
 
     def init_layout(self, w_width, *args):
@@ -384,6 +385,8 @@ class TechnicalWidget(object):
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
                                                                 fmt='%Y-%m-%d'))
         self._slider_ax.set_xticks(self._slider_xticks_to_display())
+        # TechnicalWidget 创建的所有_all_axes
+        self._all_axes = [self._slider_ax, self._bigger_picture]
         return
 
     @property
@@ -583,10 +586,12 @@ class TechnicalWidget(object):
             rect = [self._left, bottom, self._width, unit * ratio]
             if i > 0:
                 # 共享x轴
-                self._fig.add_axes(rect, sharex=first_user_axes)  #axisbg=axescolor)
+                ax = self._fig.add_axes(rect, sharex=first_user_axes)  #axisbg=axescolor)
+                self._all_axes.append(ax)
             else:
                 first_user_axes = self._fig.add_axes(rect)
-            user_axes = self._fig.axes[2:]
+                self._all_axes.append(first_user_axes)
+            user_axes = self._all_axes[2:]
             bottom += unit * ratio
         self._axes = list(reversed(user_axes))
         map(lambda x: x.grid(True), self._axes)

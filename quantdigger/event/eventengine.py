@@ -1,30 +1,22 @@
 # encoding: UTF-8
 ##
-# @file eventengine.py
+# @file eventenvine.py
 # @brief 
 # @author wondereamer
 # @version 0.1
-# @date 2016-05-29
-from datetime import datetime
-from Queue import Queue, Empty
-from threading import Thread, Condition, Lock
+# @date 2016-05-17
+import zmq  
+import time
+import json
 from time import sleep
-
+from threading import Thread, Condition, Lock
+from Queue import Queue, Empty
 from quantdigger.util import elogger as logger
-from quantdigger.errors import InvalidRPCClientArguments
-
-EVENT_TIMER = 'timer'
-
-class Event:
-    def __init__(self, route=None, args={ }):
-        self.route = route
-        self.args = args
-
-    def __str__(self):
-        return "route: %s\nargs: %s" % (self.route, self.args)
+from event import Event
 
 
-class _Timer(object):
+class Timer(object):
+    """ 定时器，会定时往事件队列中发送定时事件。 """
     def __init__(self, event_engine, seconds=1):
         # 计时器，用于触发计时器事件
         self._timer = Thread(target = self._run_timer)
@@ -37,21 +29,22 @@ class _Timer(object):
     def set_timer(self, seconds):
         self._timer_sleep = seconds
 
-    def start_timer(self):
+    def start(self):
+        logger.info('start timer')
         self._timer_active = True
         self._timer.start()
 
-    def pause_timer(self):
+    def stop(self):
         self._timer_active = False
         self._timer_pause_condition.acquire()
 
-    def resume_timer(self):
+    def resume(self):
         self._timer_active = True
         self._timer_pause_condition.notify()
         self._timer_pause_condition.release()
 
     def _run_timer(self):
-        event = Event(route=EVENT_TIMER)
+        event = Event(route=Event.TIMER)
         while True:
             with self._timer_pause_condition:
                 if not self._timer_active:
@@ -59,47 +52,39 @@ class _Timer(object):
                 self._event_engine.emit(event)    
             # 等待
             sleep(self._timer_sleep)
-    
 
-class _QueueEventEngine(object):
-    """
-    计时器使用python线程的事件驱动引擎        
-    """
+
+class EventEngine(object):
+    """docstring for Eve"""
     def __init__(self):
-        """初始化事件引擎"""
-        # 事件队列
-        self._queue = Queue()
         self._active = False
         self._routes = {}
-        self._thread = Thread(target=self._run)
-        self._thread.daemon = True
 
     def start(self):
         """引擎启动"""
         #print self._routes
         self._active = True
-        self._thread.start()
     
     def stop(self):
         """停止引擎"""
         self._active = False
-        self._timer_active = False
-        # 等待事件处理线程退出
-        #self._thread.join()
             
     def register(self, route, handler):
         """注册事件处理函数监听,
-          不重复注册同样事件的同样回调。
+          不重复注册同一事件的同样回调。
         """
         if route not in self._routes:
             self._routes[route] = [handler]
-            return
+            return True
         handlers = self._routes[route]
         if handler not in handlers:
             handlers.append(handler) 
+            return True
+        return False
 
     def unregister(self, route, handler):
-        """注销事件处理函数监听"""
+        """注销事件处理函数监听
+        """
         try:
             handlerList = self._routes[route]
             # 如果该函数存在于列表中，则移除
@@ -109,177 +94,177 @@ class _QueueEventEngine(object):
             if not handlerList:
                 del self._routes[route]
         except KeyError:
-            pass     
+            return
         
     def emit(self, event):
         """向事件队列中存入事件"""
-        self._queue.emit(event)
+        raise NotImplementedError
+        
+    def _run(self):
+        """引擎运行"""
+        raise NotImplementedError
+            
+    def _process(self, event):
+        """处理事件"""
+        if event.route not in self._routes:
+            logger.warning("事件%s 没有被处理" % event.route)
+            return
+        for handler in self._routes[event.route]:
+            try:
+                # @NOTE 会阻塞事件队列，除非另起线程。
+                logger.debug("处理事件%s" % event.route)
+                handler(event)    
+            except Exception as e:
+                print e
+
+    
+class QueueEventEngine(EventEngine):
+    """
+    基于线程队列, 且带有定时器的事件引擎。
+    ## @note 必须注册完所有消息以后再启动。
+    """
+    def __init__(self):
+        # 事件队列
+        EventEngine.__init__(self)
+        #Timer.__init__(self, self)
+        self._queue = Queue()
+        self._thread = Thread(target=self._run)
+        #self._thread.daemon = True
+
+    def emit(self, event):
+        """向事件队列中存入事件"""
+        self._queue.put(event)
+
+    def start(self):
+        """引擎启动"""
+        EventEngine.start(self)
+        self._thread.start()
+
+    def stop(self):
+        """停止引擎"""
+        EventEngine.stop(self)
+        # 等待事件处理线程退出
+        self._thread.join()
         
     def _run(self):
         """引擎运行"""
         while self._active == True:
             try:
-                # 获取事件的阻塞时间设为1秒
+                # 获取事件的阻塞时间设为1秒, 这样关闭的时候
+                # self._active才会发挥作用。
                 event = self._queue.get(block=True, timeout=1)
                 self._process(event)
             except Empty:
                 pass
             
-    def _process(self, event):
-        """处理事件"""
-        if event.route in self._routes:
-            for handler in self._routes[event.route]:
-                try:
-                    handler(event)    
-                except Exception as e:
-                    print e
 
+class ZMQEventEngine(EventEngine):
+    """ 基于zeromq的事件引擎 """
+    def __init__(self, event_protocol="tcp://127.0.0.1:5555", register_protocol="tcp://127.0.0.1:5557"):
+        EventEngine.__init__(self)
+        context = zmq.Context()  
+        try:
+            self._broadcast_event_socket = context.socket(zmq.PUB)  
+            self._broadcast_event_socket.bind(event_protocol)  
+            self._server_recv_event_socket = context.socket(zmq.PULL)
+            self._server_recv_event_socket.bind(register_protocol)
+            self._is_server = True
+        except zmq.error.ZMQError:
+            logger.info('start a ZMQEventEngine client')
+            self._is_server = False
 
-class QueueEventEngine(_QueueEventEngine, _Timer):
-    """ 事件引擎，必须注册完所有消息以后再启动。 """
-    def __init__(self):
-        _QueueEventEngine.__init__(self)
-        _Timer.__init__(self, self)
+        self._emit_event_socket = context.socket(zmq.PUSH)  
+        self._emit_event_socket.connect(register_protocol)  
+        self._client_recv_event_socket = context.socket(zmq.SUB)  
+        self._client_recv_event_socket.connect(event_protocol)  
 
-    def start(self):
-        """""" 
-        _QueueEventEngine.start(self)
-        _Timer.start_timer(self)
+        self._thread = Thread(target=self._run)
+        self._queue_engine = QueueEventEngine()
+        time.sleep(1)
+
+    def emit(self, event):
+        """ client or event""" 
+        msg = Event.event_to_message(event)
+        self._emit_event_socket.send(msg)
         return
 
+    def start(self):
+        """引擎启动"""
+        EventEngine.start(self)
+        self._queue_engine.start()
+        self._thread.start()
 
-class RPCClient(object):
-    def __init__(self, event_engine, service, event_client=None, event_server=None):
-        self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
-        self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
-        self.rid = 0
-        self._handlers = { }
-        self._handlers_lock = Lock()
-        self._event_engine = event_engine
-        self._event_engine.register(self.EVENT_SERVER, self._process_apiback)
-        self._pause_condition = Condition()
-        self._sync_ret = None
-        self._timeout = 0
-        self._timer_sleep = 1
-        self._sync_call_time_lock = Lock()
-        self._sync_call_time = datetime.now()
-        timer = Thread(target = self._run_timer)
-        timer.daemon = True
-        timer.start()
-
-    def _run_timer(self):
-        while True:
-            if not self._timeout == 0:
-                with self._sync_call_time_lock:
-                    mtime = self._sync_call_time
-                delta = (datetime.now()-mtime).seconds
-                if delta >= self._timeout:
-                    #print "timeout", self._timeout, delta
-                    # 不可重入，保证self.rid就是超时的那个
-                    with self._handlers_lock:
-                        del self._handlers[self.rid]
-                    logger.debug("[RPCClient._runtimer] 处理超时, delete rid; %s" % self.rid)
-                    self._timeout = 0
-                    self._notify_server_data()
-            sleep(self._timer_sleep)
-
-    def _process_apiback(self, event):
-        assert(event.route == self.EVENT_SERVER)
-        self._timeout = 0
-        rid = event.args['rid']
-        try:
-            with self._handlers_lock:
-                handler = self._handlers[rid]
-        except KeyError:
-            logger.info('[RPCClient._process_apiback] 放弃超时任务的返回结果')
-        else:
-            try:
-                if handler:
-                    handler(event.args['ret'])
-                else:
-                    self._sync_ret = event.args['ret']
-                    self._notify_server_data()
-            except Exception as e:
-                print e
-            logger.debug("[RPCClient._process_apiback] 删除已经完成的任务 rid; %s" % rid)
-            with self._handlers_lock:
-                del self._handlers[rid]
-
-    def call(self, apiname, args, handler):
-        if not isinstance(args, dict):
-            raise InvalidRPCClientArguments(argtype=type(args))
-        assert(not handler ==  None)
-        self.rid += 1
-        args['apiname'] = apiname
-        args['rid'] = self.rid
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
-        with self._handlers_lock:
-            self._handlers[self.rid] = handler
-
-    def sync_call(self, apiname, args, timeout=10):
-        if not isinstance(args, dict):
-            self._timeout = 0
-            self._sync_ret = None
-            raise InvalidRPCClientArguments(argtype=type(args))
-        self.rid += 1
-        args['apiname'] = apiname
-        args['rid'] = self.rid
-        with self._sync_call_time_lock:
-            self._sync_call_time = datetime.now()
-        self._timeout = timeout
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
-        with self._handlers_lock:
-            self._handlers[self.rid] = None
-        self._waiting_server_data()
-        ret = self._sync_ret
-        self._sync_ret = None
-        return ret
-
-    def _waiting_server_data(self):
-        with self._pause_condition:
-            self._pause_condition.wait()
-
-    def _notify_server_data(self):
-        with self._pause_condition:
-            self._pause_condition.notify()
-
-
-class RPCServer(object):
-    def __init__(self, event_engine, service, event_client=None, event_server=None):
-        self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
-        self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
-        self._event_engine = event_engine
-        self._event_engine.register(self.EVENT_CLIENT, self._process_request)
-        self._routes = { }
-        self._routes_lock = Lock()
-
-    def _process_request(self, event):
-        #print "rpcsever: ", event.route, event.args
-        args = event.args
-        rid = args['rid']
-        apiname = args['apiname']
-        del args['rid']
-        del args['apiname']
-        try:
-            with self._routes_lock:
-                handler = self._routes[apiname]
-            ret = handler(args)
-        except Exception as e:
-            print e, "****" 
-        else:
-            args = { 'ret': ret,
-                    'rid': rid
-            }
-            self._event_engine.emit(Event(self.EVENT_SERVER, args))
+    def stop(self):
+        """停止引擎"""
+        EventEngine.stop(self)
+        self._queue_engine.stop()
+        self._thread.join()
 
     def register(self, route, handler):
-        if route in self._routes:
-            return False 
-        with self._routes_lock:
-            self._routes[route] = handler
-        return True
+        """ 接受指定的事件。 """
+        if self._queue_engine.register(route, handler):
+            self._client_recv_event_socket.setsockopt(zmq.SUBSCRIBE, b'[%s]'%route)
 
-    def unregister(self, route):
-        with self._routes_lock:
-            if route in self._routes:
-                del self._routes[route]
+    def unregister(self, route, handler):
+        self._queue_engine.unregister(route, handler)
+        if route not in self._routes:
+            self._client_recv_event_socket.setsockopt(zmq.UNSUBSCRIBE, b'[%s]'%route)
+
+    def _run(self):
+        """""" 
+        poller = zmq.Poller()
+        poller.register(self._client_recv_event_socket, zmq.POLLIN)
+        if self._is_server:
+            poller.register(self._server_recv_event_socket, zmq.POLLIN)
+        logger.info('Run ZMQEventEngine...')
+        while self._active:
+            socks = dict(poller.poll(1))
+            if self._client_recv_event_socket in socks and \
+                    socks[self._client_recv_event_socket] == zmq.POLLIN:
+                self._run_client()
+
+            if self._is_server and  self._server_recv_event_socket in socks and \
+                socks[self._server_recv_event_socket] == zmq.POLLIN:
+                self._run_server()
+        return
+
+    def _run_client(self):
+        message = self._client_recv_event_socket.recv()
+        event = Event.message_to_event(message)
+        logger.debug("[client] receive message: %s" % event)
+        self._queue_engine.emit(event)
+
+    def _run_server(self):
+        strevent = self._server_recv_event_socket.recv()
+        self._broadcast_event_socket.send(strevent)
+        logger.debug("[server] broadcast message: %s" % strevent)
+
+if __name__ == '__main__':
+    import time, datetime, sys
+
+    def simpletest(event):
+        print str(datetime.datetime.now()), event
+    
+    ee = ZMQEventEngine()
+    ee.register(Event.TIMER, simpletest)
+    timer = Timer(ee)
+    ee.start()
+    timer.start()
+    event = Event(route=Event.TIMER)
+
+    timer.stop()
+    time.sleep(2)
+    timer.resume()
+    time.sleep(2)
+    timer.stop()
+    client = ZMQEventEngine()
+    event = Event(route=Event.TIMER, args = { 'data': 'from client' })
+    client.start()
+    client.emit(event)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        ee.stop()
+        client.stop()
+        sys.exit(0)
