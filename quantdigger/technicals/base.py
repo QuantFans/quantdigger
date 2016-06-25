@@ -18,7 +18,7 @@ def transform2ndarray(data):
     """ 如果是序列变量，返回ndarray浅拷贝 """
     if isinstance(data, series.NumberSeries):
         data = data.data
-    elif isinstance(data, pandas.Series):
+    elif isinstance(data, pandas.Series) or isinstance(data, list):
         data = np.asarray(data)
     if not isinstance(data, np.ndarray):
         raise DataFormatError(type=type(data))
