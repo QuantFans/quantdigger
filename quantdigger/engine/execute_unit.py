@@ -7,6 +7,7 @@ from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import blotter
 from quantdigger.util import elogger as logger
+from quantdigger.infras.logger import deprecated
 
 
 class ExecuteUnit(object):
@@ -36,8 +37,8 @@ class ExecuteUnit(object):
         self._combs = []
         self._data_manager = DataManager()
         # str(PContract): DataWrapper
-        if settings['source'] == 'csv':
-            self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        # if settings['source'] == 'csv':
+        #     self.pcontracts = self._parse_pcontracts(self.pcontracts)
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,
@@ -54,6 +55,7 @@ class ExecuteUnit(object):
                     self.context.switch_to_strategy(i, j)
                     s.on_init(self.context)
 
+    @deprecated
     def _parse_pcontracts(self, pcontracts):
         # @TODO test
         code2strpcon, exch_period2strpcon = \

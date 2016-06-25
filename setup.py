@@ -27,6 +27,7 @@ setup(
         "python-dateutil>=2.4.2",
         "numpy==1.10.4",
         "pymongo>=3.1.1",
+        "pyzmq>=4.1.5",
         #"lxml>=3.5.0",
         #"cython>=0.23.4",
     ],

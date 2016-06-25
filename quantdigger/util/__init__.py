@@ -6,6 +6,15 @@ import time
 
 elogger = Logger('engine')
 dlogger = Logger('data')
+rlogger = Logger('runtime')
+
+
+def deprecated(f):
+    def ff(*args, **kwargs):
+        print '{0} is deprecated!'.format(str(f))
+        return f(*args, **kwargs)
+    return ff
+
 
 #def api(method):
     #def wrapper(*args, **kwargs):

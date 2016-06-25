@@ -9,3 +9,5 @@ dist/
 build/
 demo/work/*
 tests/work/
+
+_local_*

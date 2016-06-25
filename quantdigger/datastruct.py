@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # from flufl.enum import Enum
+from datetime import timedelta
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
 from quantdigger.util import dlogger as logger
@@ -378,6 +379,9 @@ class Contract(object):
             self.is_stock = True
         elif self.exchange == 'TEST':
             self.is_stock = False
+        else:
+            logger.error('Unknown exchange: {0}', self.exchange)
+            assert(False)
 
     def __str__(self):
         """"""
@@ -403,7 +407,7 @@ class Contract(object):
         try:
             return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
-            print "Can't not find contract: %s" % strcontract
+            logger.warn("Can't not find contract: %s" % strcontract)
             return 1
             # assert(False)
 
@@ -412,7 +416,7 @@ class Contract(object):
         try:
             return cls.info.ix[strcontract.upper(), 'short_margin_ratio']
         except KeyError:
-            print "Can't not find contract: %s" % strcontract
+            logger.warn("Can't not find contract: %s" % strcontract)
             return 1
             # assert(False)
 
@@ -421,7 +425,7 @@ class Contract(object):
         try:
             return cls.info.ix[strcontract.upper(), 'volume_multiple']
         except KeyError:
-            print "Can't not find contract: %s" % strcontract
+            logger.warn("Can't not find contract: %s" % strcontract)
             return 1
             # assert(False)
 
@@ -459,6 +463,21 @@ class Period(object):
     def __str__(self):
         return "%d.%s" % (self.count, self.unit)
 
+    def to_timedelta(self):
+        m = {
+            'DAY': 'days',
+            'HOUR': 'hours',
+            'MINUTE': 'minutes',
+            'SECOND': 'seconds',
+            'MILLISECOND': 'milliseconds',
+        }
+        try:
+            u = m[self.unit]
+            kwargs = {u: 1}
+            return timedelta(**kwargs)
+        except KeyError:
+            raise Exception('unit "%s" is not supported' % self.unit)
+
 
 class PContract(object):
     """ 特定周期的合约。
@@ -488,6 +507,9 @@ class PContract(object):
 
     def __eq__(self, r):
         return self._hash == r._hash
+
+    def __str__(self):
+        return '%s-%s' % (str(self.contract), str(self.period))
 
 
 class PositionKey(object):
