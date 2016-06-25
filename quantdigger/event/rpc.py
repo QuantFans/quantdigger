@@ -1,13 +1,11 @@
 # encoding: UTF-8
 ##
-# @file eventenvine.py
+# @file rpc.py
 # @brief 
 # @author wondereamer
 # @version 0.1
 # @date 2016-05-17
 import time
-import json
-import zmq  
 from datetime import datetime
 from threading import Thread, Condition, Lock
 from quantdigger.util import elogger as log
@@ -135,7 +133,6 @@ class EventRPCClient(object):
             handler (function): 回调函数。
         """
         log.debug('sync_call: %s' % apiname)
-        print('sync_call: %s' % apiname)
         if not isinstance(args, dict):
             self._timeout = 0
             self._sync_ret = None
@@ -184,6 +181,7 @@ class EventRPCServer(RPCServer):
         try:
             with self._routes_lock:
                 handler = self._routes[apiname]
+            ## @TODO async    
             ret = handler(args)
         except Exception as e:
             print e, "****" 
@@ -262,13 +260,15 @@ if __name__ == '__main__':
 
     def print_hello(data):
         """""" 
-        print data
+        print "***************"
+        print "print_hello" 
+        print "args: ", data
+        print "return: ", 123
         return "123"
     server_engine = ZMQEventEngine()
     server_engine.start()
     server = EventRPCServer(server_engine, 'test')
     server.register("print_hello", print_hello)
-    print "***************"
 
     try:
         while True:

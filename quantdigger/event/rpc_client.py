@@ -8,8 +8,11 @@ import sys
 client_engine = ZMQEventEngine()
 client_engine.start()
 client = EventRPCClient(client_engine, 'test')
-for i in xrange(0, 10):
-    print client.sync_call("print_hello", { 'data': 'from_rpc_client' })
+for i in xrange(0, 5):
+    print "sync_call: print_hello "
+    print "return: ", client.sync_call("print_hello",
+                            { 'data': 'from_rpc_client' })
+    time.sleep(1)
 print "***************" 
 try:
     while True:

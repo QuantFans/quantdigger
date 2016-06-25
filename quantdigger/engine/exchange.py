@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from quantdigger.datastruct import Transaction, PriceType, TradeSide, Direction
-from quantdigger.event import Event
+from quantdigger.event import FillEvent
 from quantdigger.util import elogger as logger
 
 
@@ -28,7 +28,7 @@ class Exchange(object):
             if order.side == TradeSide.CANCEL:
                 fill_orders.add(order)
                 transact = Transaction(order)
-                self.events.put(Event(Event.FILL, transact))
+                self.events.put(FillEvent(transact))
                 continue
             try:
                 bar = bars[order.contract]
@@ -49,14 +49,14 @@ class Exchange(object):
                                 transact.price = order.price
                                 transact.datetime = bar.datetime
                                 fill_orders.add(order)
-                                self.events.put(Event(Event.FILL, transact))
+                                self.events.put(FillEvent(transact))
                     elif order.price_type == PriceType.MKT:
                         transact.price = bar.open
                         transact.datetime = bar.datetime
                         # recompute commission when price changed
                         transact.compute_commission()
                         fill_orders.add(order)
-                        self.events.put(Event(Event.FILL, transact))
+                        self.events.put(FillEvent(transact))
                 else:
                     if order.price_type == PriceType.LMT:
                         # 限价单以最高和最低价格为成交的判断条件．
@@ -70,7 +70,7 @@ class Exchange(object):
                                 # Bar的结束时间做为交易成交时间.
                                 transact.datetime = bar.datetime
                                 fill_orders.add(order)
-                                self.events.put(Event(Event.FILL, transact))
+                                self.events.put(FillEvent(transact))
                     elif order.price_type == PriceType.MKT:
                         # 市价单以最高或最低价格为成交价格．
                         if order.side == TradeSide.KAI:
@@ -87,12 +87,12 @@ class Exchange(object):
                         # recompute commission when price changed
                         transact.compute_commission()
                         fill_orders.add(order)
-                        self.events.put(Event(Event.FILL, transact))
+                        self.events.put(FillEvent(transact))
             else:
                 transact.datetime = bar.datetime
                 fill_orders.add(order)
                 #
-                self.events.put(Event(Event.FILL, transact))
+                self.events.put(FillEvent(transact))
             # end of for
         if fill_orders:
             self._open_orders -= fill_orders

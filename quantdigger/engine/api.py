@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from quantdigger.event import Event
+from quantdigger.event import OrderEvent
 from abc import ABCMeta, abstractmethod
 
 
@@ -143,7 +143,7 @@ class SimulateTraderAPI(Trader):
 
     def order(self, order):
         """ 模拟下单 """
-        self._events.put(Event(Event.ORDER, order))
+        self._events.put(OrderEvent(order))
 
     def cancel_order(self, orderid):
         """ 撤单操作请求 """

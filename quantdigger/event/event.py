@@ -2,38 +2,7 @@
 # from flufl.enum import Enum
 import json
 
-class Event:
-    """ 事件类型。
-
-    :ivar MARKET: 市场数据事件, 目前未用到。
-    :ivar SIGNAL: 交易信号事件, 由策略函数产生。
-    :ivar ORDER: 委托下单事件, 由下单控制器产生。
-    :ivar FILL: 订单成交事件, 由交易模拟器产生。
-    """
-    MARKET = 'MARKET' 
-    SIGNAL = 'SIGNAL' 
-    ORDER = 'ORDER' 
-    FILL = 'FILL' 
-    ONCE = 'ONCE' 
-    TIMER = 'TIMER' 
-    def __init__(self, route=None, args={ }):
-        self.route = route
-        self.args = args
-
-    def __str__(self):
-        return "route: %s\nargs: %s" % (self.route, self.args)
-
-    @classmethod
-    def message_to_event(self, message):
-        route, args = message.split(']')
-        route = route[1:]
-        return Event(route=route, args=json.loads(args))
-
-    @classmethod
-    def event_to_message(self, event):
-        return '[%s]' % event.route + json.dumps(event.args)
-
-
+## @TODO REMOVE EventsPool
 class EventsPool(object):
     """ 事件池，每个策略有一个。"""
     _pool = []
@@ -54,28 +23,85 @@ class EventsPool(object):
         return self._pool.pop(0)
 
 
+class Event(object):
+    """ 事件类型。
+
+    :ivar MARKET: 市场数据事件, 目前未用到。
+    :ivar SIGNAL: 交易信号事件, 由策略函数产生。
+    :ivar ORDER: 委托下单事件, 由下单控制器产生。
+    :ivar FILL: 订单成交事件, 由交易模拟器产生。
+    """
+    MARKET = 'MARKET' 
+    SIGNAL = 'SIGNAL' 
+    ORDER = 'ORDER' 
+    FILL = 'FILL' 
+    ONCE = 'ONCE' 
+    TIMER = 'TIMER' 
+    def __init__(self, route, args):
+        self.data = { 
+            'route': route,
+            'data': args 
+        }
+
+    def __str__(self):
+        return "route: %s\nargs: %s" % (self.data['route'], self.data['data'])
+
+    @property
+    def route(self):
+        """""" 
+        return self.data['route']
+
+    @property
+    def args(self):
+        """""" 
+        return self.data['data']
+
+    @classmethod
+    def message_to_event(self, message):
+        route, args = message.split(']')
+        route = route[1:]
+        return Event(route=route, args=json.loads(args))
+
+    @classmethod
+    def event_to_message(self, event):
+        return '[%s]' % event.route + json.dumps(event.args)
 
 
 
-#class SignalEvent(object):
-    #""" 由策略函数产生的交易信号事件。 """
+class SignalEvent(Event):
+    """ 由策略函数产生的交易信号事件。 """
 
-    #def __init__(self, orders):
-        #self.type = Event.SIGNAL
-        #self.orders = orders
+    def __init__(self, orders):
+        super(SignalEvent, self).__init__(Event.SIGNAL, orders)
 
-
-#class OrderEvent(object):
-    #""" 委托下单事件。 """
-
-    #def __init__(self, order):
-        #self.type = Event.ORDER
-        #self.order = order
+    @property
+    def orders(self):
+        return self.data['data']
 
 
+class OrderEvent(Event):
+    """ 委托下单事件。 """
 
-#class FillEvent(object):
-    #""" 委托成交事件。 """
-    #def __init__(self, transaction):
-        #self.type = Event.FILL
-        #self.transaction = transaction
+    def __init__(self, order):
+        super(OrderEvent, self).__init__(Event.ORDER, order)
+
+    @property
+    def order(self):
+        return self.data['data']
+
+
+class OnceEvent(Event):
+
+    def __init__(self):
+        super(OnceEvent, self).__init__(Event.ONCE, None)
+
+
+class FillEvent(Event):
+    """ 委托下单事件。 """
+
+    def __init__(self, transaction):
+        super(FillEvent, self).__init__(Event.FILL, transaction)
+
+    @property
+    def transaction(self):
+        return self.data['data']
