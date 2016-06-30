@@ -189,11 +189,12 @@ def import_from_csv(self, paths):
         self.import_bars(df, tbname, strdt)
 
 
-def import_data(fpaths, ld):
+def import_data(fpaths, ds):
     """ 批量导入特定路径下规定格式的csv文件到系统。
     """
+    # TODO: 更通用的导入
     for path in fpaths:
-        if not path.endswith(".csv") and not path.endswith(".CSV"):
+        if not path.lower().endswith('.csv'):
             # @TODO
             print(path)
             raise Exception("错误的文件格式")
@@ -208,7 +209,7 @@ def import_data(fpaths, ld):
                 lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"),
                 df['datetime'])
         strpcon = path.split(os.path.sep)[-1].rstrip('.csv')
-        ld.import_bars(df, strpcon)
+        ds.import_bars(df, strpcon)
 
 
 __all__ = ['csv2frame', 'encode2id', 'tick2period',

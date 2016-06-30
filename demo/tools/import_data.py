@@ -1,8 +1,14 @@
-from quantdigger import locd, set_config
-from quantdigger.datasource import import_data
+from quantdigger import ConfigUtil
+from quantdigger.datasource import import_data, ds_impl
 
-set_config({ 'data_path': '../data', 'source': 'csv'})
-import_data(['../work/AA.SHFE-1.Minute.csv', '../work/BB.SHFE-1.Minute.csv', '../work/BB.SHFE-1.Day.csv'], locd)
+csv_ds = ds_impl.csv_source.CsvSource('../data')
+import_data(['../work/AA.SHFE-1.Minute.csv',
+             '../work/BB.SHFE-1.Minute.csv',
+             '../work/BB.SHFE-1.Day.csv'],
+            csv_ds)
 
-set_config({ 'data_path': '../data', 'source': 'sqlite'})
-import_data(['../work/AA.SHFE-1.Minute.csv', '../work/BB.SHFE-1.Minute.csv', '../work/BB.SHFE-1.Day.csv'], locd)
+sqlite_ds = ds_impl.sqlite_source.SqliteSource('../data.db')
+import_data(['../work/AA.SHFE-1.Minute.csv',
+             '../work/BB.SHFE-1.Minute.csv',
+             '../work/BB.SHFE-1.Day.csv'],
+            sqlite_ds)
