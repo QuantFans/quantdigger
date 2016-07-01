@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-from quantdigger import locd, set_config
+from quantdigger import ConfigUtil
+from quantdigger.datasource import ds_impl
+
 
 def import_contracts(decode=False):
-    """ 从文件导入合约到数据库""" 
+    """ 从文件导入合约到数据库 """
     df = pd.read_csv('./contracts.txt')
     contracts = []
     codes = set()
@@ -15,31 +17,44 @@ def import_contracts(decode=False):
             else:
                 row['exchangeId'] = 'SH'
             if decode:
-                data = (row['code']+'.'+row['exchangeId'], row['code'], row['exchangeId'],
+                data = (row['code']+'.'+row['exchangeId'],
+                        row['code'],
+                        row['exchangeId'],
                         row['name'].decode('utf8'), row['pinyin'], 1, 1, 0, 1)
             else:
-                data = (row['code']+'.'+row['exchangeId'], row['code'], row['exchangeId'],
+                data = (row['code']+'.'+row['exchangeId'],
+                        row['code'],
+                        row['exchangeId'],
                         row['name'], row['pinyin'], 1, 1, 0, 1)
             contracts.append(data)
         else:
-            data = (row['code']+'.'+row['exchangeId'], row['code'], row['exchangeId'],
+            data = (row['code']+'.'+row['exchangeId'],
+                    row['code'],
+                    row['exchangeId'],
                     row['code'], row['code'], row['long_margin_ratio'],
-                    row['short_margin_ratio'], row['price_tick'], row['volume_multiple'])
+                    row['short_margin_ratio'],
+                    row['price_tick'],
+                    row['volume_multiple'])
             contracts.append(data)
             # 修正ctp部分合约只有3位日期。
             if not row['code'][-4].isdigit():
                 row['code'] = row['code'][0:-3] + '1' + row['code'][-3:]
                 # 支持两种日期
-                data = (row['code']+'.'+row['exchangeId'], row['code'], row['exchangeId'],
+                data = (row['code']+'.'+row['exchangeId'],
+                        row['code'],
+                        row['exchangeId'],
                         row['code'], row['code'], row['long_margin_ratio'],
-                        row['short_margin_ratio'], row['price_tick'], row['volume_multiple'])
+                        row['short_margin_ratio'],
+                        row['price_tick'],
+                        row['volume_multiple'])
                 contracts.append(data)
             # 无日期指定的期货合约
             code = row['code'][0:-4]
             if code not in codes:
                 t = (code+'.'+row['exchangeId'], code, row['exchangeId'],
-                        code, code, row['long_margin_ratio'],
-                        row['short_margin_ratio'], row['price_tick'], row['volume_multiple'])
+                     code, code, row['long_margin_ratio'],
+                     row['short_margin_ratio'], row['price_tick'],
+                     row['volume_multiple'])
                 contracts.append(t)
                 codes.add(code)
     contracts = zip(*contracts)
@@ -58,9 +73,9 @@ def import_contracts(decode=False):
 
 print("import contracts..")
 contracts = import_contracts()
-set_config({ 'data_path': '../data', 'source': 'csv' })
-locd.import_contracts(contracts)
+csv_ds = ds_impl.csv_source.CsvSource('../data')
+csv_ds.import_contracts(contracts)
 
 contracts = import_contracts(True)
-set_config({ 'data_path': '../data', 'source': 'sqlite' })
-locd.import_contracts(contracts)
+sqlite_ds = ds_impl.sqlite_source.SqliteSource('../data/digger.db')
+sqlite_ds.import_contracts(contracts)

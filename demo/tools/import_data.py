@@ -7,7 +7,7 @@ import_data(['../work/AA.SHFE-1.Minute.csv',
              '../work/BB.SHFE-1.Day.csv'],
             csv_ds)
 
-sqlite_ds = ds_impl.sqlite_source.SqliteSource('../data.db')
+sqlite_ds = ds_impl.sqlite_source.SqliteSource('../data/digger.db')
 import_data(['../work/AA.SHFE-1.Minute.csv',
              '../work/BB.SHFE-1.Minute.csv',
              '../work/BB.SHFE-1.Day.csv'],
