@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from quantdigger.configutil import ConfigUtil
 from quantdigger.infras.ioc import *
 from quantdigger.util import dlogger as logger

@@ -368,7 +368,7 @@ class Contract(object):
             exchange = info[1].upper()
         else:
             logger.error('错误的合约格式！')
-            assert(False)
+            logger.exception()
         self.exchange = exchange
         self.code = code
         if self.exchange == 'SZ' or self.exchange == 'SH':

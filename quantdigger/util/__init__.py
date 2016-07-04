@@ -1,12 +1,14 @@
 
 # -*- coding: utf8 -*-
-import datetime
-from logbook import Logger
+import sys
 import time
+import datetime
+import logbook
+logbook.StreamHandler(sys.stdout).push_application()
 
-elogger = Logger('engine')
-dlogger = Logger('data')
-rlogger = Logger('runtime')
+elogger = logbook.Logger('engine')
+dlogger = logbook.Logger('data')
+rlogger = logbook.Logger('runtime')
 
 
 def deprecated(f):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from quantdigger.datasource.source import DatasourceAbstract
 from quantdigger.util import dlogger as logger
 from quantdigger.infras.object import HashObject

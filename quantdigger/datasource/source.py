@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class SourceWrapper(object):
     """ 数据源包装器，使相关数据源支持逐步读取操作 """
 
