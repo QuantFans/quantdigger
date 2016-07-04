@@ -9,7 +9,8 @@ import pandas as pd
 
 from quantdigger.widgets.mplotwidgets import widgets
 from quantdigger.technicals.common import MA, Volume
-from quantdigger.event.rpc import ZMQRPCClient
+from quantdigger.event.rpc import EventRPCClient
+from quantdigger.event.eventengine import ZMQEventEngine
 
 price_data = pd.read_csv('./data/IF000.csv', index_col=0, parse_dates=True)
 print len(price_data)
@@ -18,16 +19,40 @@ fig = plt.figure()
 
 
 class MainWindow(object):
-    """docstring for Mai"""
-    def __init__(self, arg):
-        self._rpcclient = ZMQRPCClient()
+    def __init__(self):
+        engine = ZMQEventEngine()
+        engine.start()
+        self._rpcclient = EventRPCClient(engine, 'mainwindow')
+        pass
 
     def next(self, event):
-
         plt.draw()
 
     def prev(self, event):
         plt.draw()
+
+    def get_all_contracts(self):
+        """docstring for get_all_contracts""" 
+        pass
+
+    def get_pcontract(self, pcontract):
+        """docstring for get_data""" 
+        pass
+
+    def run_strategy(self, name):
+        """""" 
+        return
+
+    def run_technical(self, name):
+        return
+
+    def get_technicals(self):
+        """ 获取系统的所有指标。 """
+        return
+
+    def get_strategies(self):
+        """ 获取系统的所有策略。 """
+        return
     
     
 
@@ -60,3 +85,4 @@ frame.draw_widgets()
 ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
 
 plt.show()
+
