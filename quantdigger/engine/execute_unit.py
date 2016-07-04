@@ -7,7 +7,7 @@ from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import blotter
 from quantdigger.util import elogger as logger
-from quantdigger.infras.logger import deprecated
+from quantdigger.util import deprecated
 
 
 class ExecuteUnit(object):
