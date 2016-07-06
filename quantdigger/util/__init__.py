@@ -1,11 +1,14 @@
 
 # -*- coding: utf8 -*-
 import datetime
-from logbook import Logger
+import logbook
 import time
+import sys
 
-elogger = Logger('engine')
-dlogger = Logger('data')
+logbook.StreamHandler(sys.stdout).push_application()
+elogger = logbook.Logger('engine')
+dlogger = logbook.Logger('data')
+mlogger = logbook.Logger('msg')
 
 #def api(method):
     #def wrapper(*args, **kwargs):

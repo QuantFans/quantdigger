@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 #import os, sys
 #sys.path.append(os.path.join('..', '..'))
+
+import pandas as pd
 import matplotlib
-from matplotlib.widgets import Button
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import pandas as pd
+from matplotlib.widgets import Button
 
 from quantdigger.widgets.mplotwidgets import widgets
 from quantdigger.technicals.common import MA, Volume
@@ -20,10 +21,13 @@ fig = plt.figure()
 
 class MainWindow(object):
     def __init__(self):
-        engine = ZMQEventEngine()
-        engine.start()
-        self._rpcclient = EventRPCClient(engine, 'mainwindow')
+        self._engine = ZMQEventEngine('MainWindow')
+        self._engine.start()
+        self._rpcclient = EventRPCClient(self._engine, 'MainWindow')
         pass
+
+    def stop(self):
+        self._engine.stop()
 
     def next(self, event):
         plt.draw()
@@ -86,3 +90,11 @@ ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
 
 plt.show()
 
+if __name__ == '__main__':
+    import time, sys
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        callback.stop()
+        sys.exit(0)

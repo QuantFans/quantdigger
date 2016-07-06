@@ -11,7 +11,7 @@ import json
 from time import sleep
 from threading import Thread, Condition, Lock
 from Queue import Queue, Empty
-from quantdigger.util import elogger as logger
+from quantdigger.util import mlogger as log
 from event import Event
 
 
@@ -30,7 +30,7 @@ class Timer(object):
         self._timer_sleep = seconds
 
     def start(self):
-        logger.info('start timer')
+        log.info('start timer')
         self._timer_active = True
         self._timer.start()
 
@@ -107,12 +107,12 @@ class EventEngine(object):
     def _process(self, event):
         """处理事件"""
         if event.route not in self._routes:
-            logger.warning("事件%s 没有被处理" % event.route)
+            log.warning("事件%s 没有被处理" % event.route)
             return
         for handler in self._routes[event.route]:
             try:
                 # @NOTE 会阻塞事件队列，除非另起线程。
-                logger.debug("处理事件%s" % event.route)
+                log.debug("处理事件%s" % event.route)
                 handler(event)    
             except Exception as e:
                 print e
@@ -159,9 +159,12 @@ class QueueEventEngine(EventEngine):
             
 
 class ZMQEventEngine(EventEngine):
-    """ 基于zeromq的事件引擎 """
-    def __init__(self, event_protocol="tcp://127.0.0.1:5555", register_protocol="tcp://127.0.0.1:5557"):
+    """ 基于zeromq的事件引擎, 同一个地址的实例只会有一个服务器(同时也是客户端)，可有
+    多个客户端实例。
+    """
+    def __init__(self, name, event_protocol="tcp://127.0.0.1:5555", register_protocol="tcp://127.0.0.1:5557"):
         EventEngine.__init__(self)
+        self._name = name
         context = zmq.Context()  
         try:
             self._broadcast_event_socket = context.socket(zmq.PUB)  
@@ -169,8 +172,9 @@ class ZMQEventEngine(EventEngine):
             self._server_recv_event_socket = context.socket(zmq.PULL)
             self._server_recv_event_socket.bind(register_protocol)
             self._is_server = True
+            log.info('ZMQEventEngine Server: %s' % self._name)
         except zmq.error.ZMQError:
-            logger.info('start a ZMQEventEngine client')
+            log.info('ZMQEventEngine client: %s' % self._name)
             self._is_server = False
 
         self._emit_event_socket = context.socket(zmq.PUSH)  
@@ -216,7 +220,6 @@ class ZMQEventEngine(EventEngine):
         poller.register(self._client_recv_event_socket, zmq.POLLIN)
         if self._is_server:
             poller.register(self._server_recv_event_socket, zmq.POLLIN)
-        logger.info('Run ZMQEventEngine...')
         while self._active:
             socks = dict(poller.poll(1))
             if self._client_recv_event_socket in socks and \
@@ -231,13 +234,13 @@ class ZMQEventEngine(EventEngine):
     def _run_client(self):
         message = self._client_recv_event_socket.recv()
         event = Event.message_to_event(message)
-        logger.debug("[client] receive message: %s" % event)
+        log.debug("[client] receive message: %s" % event)
         self._queue_engine.emit(event)
 
     def _run_server(self):
         strevent = self._server_recv_event_socket.recv()
         self._broadcast_event_socket.send(strevent)
-        logger.debug("[server] broadcast message: %s" % strevent)
+        log.debug("[server] broadcast message: %s" % strevent)
 
 if __name__ == '__main__':
     import time, datetime, sys
@@ -245,7 +248,7 @@ if __name__ == '__main__':
     def simpletest(event):
         print str(datetime.datetime.now()), event
     
-    ee = ZMQEventEngine()
+    ee = ZMQEventEngine('text')
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
     ee.start()
