@@ -160,17 +160,19 @@ class QueueEventEngine(EventEngine):
 
 class ZMQEventEngine(EventEngine):
     """ 基于zeromq的事件引擎 """
-    def __init__(self, event_protocol="tcp://127.0.0.1:5555", register_protocol="tcp://127.0.0.1:5557"):
+    def __init__(self, name, event_protocol="tcp://127.0.0.1:5555", register_protocol="tcp://127.0.0.1:5557"):
         EventEngine.__init__(self)
         context = zmq.Context()  
+        self._name = name
         try:
             self._broadcast_event_socket = context.socket(zmq.PUB)  
             self._broadcast_event_socket.bind(event_protocol)  
             self._server_recv_event_socket = context.socket(zmq.PULL)
             self._server_recv_event_socket.bind(register_protocol)
             self._is_server = True
+            logger.info('Start a ZMQEventEngine server: %s'%self._name)
         except zmq.error.ZMQError:
-            logger.info('start a ZMQEventEngine client')
+            logger.info('Start a ZMQEventEngine client: %s'%self._name)
             self._is_server = False
 
         self._emit_event_socket = context.socket(zmq.PUSH)  
@@ -245,7 +247,7 @@ if __name__ == '__main__':
     def simpletest(event):
         print str(datetime.datetime.now()), event
     
-    ee = ZMQEventEngine()
+    ee = ZMQEventEngine('test')
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
     ee.start()
@@ -257,7 +259,7 @@ if __name__ == '__main__':
     timer.resume()
     time.sleep(2)
     timer.stop()
-    client = ZMQEventEngine()
+    client = ZMQEventEngine('test')
     event = Event(route=Event.TIMER, args = { 'data': 'from client' })
     client.start()
     client.emit(event)
