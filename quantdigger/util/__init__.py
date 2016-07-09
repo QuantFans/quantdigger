@@ -9,6 +9,10 @@ logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
 dlogger = logbook.Logger('data')
 mlogger = logbook.Logger('msg')
+gen_logger = logbook.Logger('general')
+
+mlogger.level = logbook.INFO
+gen_logger.level = logbook.INFO
 
 #def api(method):
     #def wrapper(*args, **kwargs):

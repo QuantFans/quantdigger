@@ -7,12 +7,12 @@
 # @date 2016-05-17
 import zmq  
 import time
-import json
 from time import sleep
 from threading import Thread, Condition, Lock
 from Queue import Queue, Empty
+
 from quantdigger.util import mlogger as log
-from event import Event
+from quantdigger.event import Event
 
 
 class Timer(object):
@@ -172,9 +172,9 @@ class ZMQEventEngine(EventEngine):
             self._server_recv_event_socket = context.socket(zmq.PULL)
             self._server_recv_event_socket.bind(register_protocol)
             self._is_server = True
-            log.info('ZMQEventEngine Server: %s' % self._name)
+            log.info('Start ZMQEventEngine Server: %s' % self._name)
         except zmq.error.ZMQError:
-            log.info('ZMQEventEngine client: %s' % self._name)
+            log.info('Start ZMQEventEngine client: %s' % self._name)
             self._is_server = False
 
         self._emit_event_socket = context.socket(zmq.PUSH)  

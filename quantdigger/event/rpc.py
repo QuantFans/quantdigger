@@ -10,7 +10,7 @@ from datetime import datetime
 from threading import Thread, Condition, Lock
 from quantdigger.util import elogger as log
 from quantdigger.errors import InvalidRPCClientArguments
-from event import Event
+from quantdigger.event import Event
 
 
 class RPCServer(object):
@@ -46,11 +46,12 @@ class RPCServer(object):
 
 
 class EventRPCClient(object):
-    def __init__(self, event_engine, service, event_client=None, event_server=None):
+    def __init__(self, name, event_engine, service, event_client=None, event_server=None):
         self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
         self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
         self.rid = 0
         self._handlers = { }
+        self._name = name
         self._handlers_lock = Lock()
         self._event_engine = event_engine
         self._event_engine.register(self.EVENT_SERVER, self._process_apiback)
@@ -123,7 +124,7 @@ class EventRPCClient(object):
         with self._handlers_lock:
             self._handlers[self.rid] = handler
 
-    def sync_call(self, apiname, args, timeout=10):
+    def sync_call(self, apiname, args={ }, timeout=10):
         """ 给定参数args，同步调用RPCServer的apiname服务,
         返回该服务的处理结果。如果超时，返回None。
         
@@ -182,7 +183,7 @@ class EventRPCServer(RPCServer):
             with self._routes_lock:
                 handler = self._routes[apiname]
             ## @TODO async    
-            ret = handler(args)
+            ret = handler(**args)
         except Exception as e:
             print e, "****" 
         else:
@@ -192,65 +193,6 @@ class EventRPCServer(RPCServer):
             log.debug('RPCServer emit')
             self._event_engine.emit(Event(self.EVENT_SERVER, args))
 
-
-#class ZMQRPCServer(RPCServer):
-    #"""docstring for ZMQRPCServer"""
-    #SERVER_ADDR = "tcp://*:5555"
-
-    #def __init__(self, addr):
-        #super(ZMQRPCServer, self).__init__()
-        #self._context = zmq.Context()  
-        #self._socket = self._context.socket(zmq.REP)  
-        #self._socket.bind(addr)  
-        #worker = Thread(target=self._process_request)
-        #### @todo maybe remove daemon
-        #worker.daemon = True
-        #worker.start()
-
-    #def _process_request(self):
-        #while True:  
-            ###  Wait for next request from client  
-            #message = self._socket.recv()  
-            #data = json.loads(message)
-            #log.info('RPCServer process: %s' % data['apiname'])
-            #try:
-                #with self._routes_lock:
-                    #handler = self._routes[data['apiname']]
-                #ret = handler(data['data'])
-            #except Exception as e:
-                #print e, "****" 
-            #else:
-                #log.info('RPCServer emit')
-                #ret = json.dumps(ret)
-                #print "emit" 
-                #self._socket.send(ret)
-
-
-#class ZMQRPCClient(object):
-    #"""docstring for ZMQRPCClient"""
-    #CLIENT_ADDR = "tcp://localhost:5555"
-
-    #def __init__(self, addr):
-        #print "Connecting to hello world server..."  
-        #self._context = zmq.Context()  
-        #self._socket = self._context.socket(zmq.REQ)  
-        #self._socket.connect(addr)  
-
-    #def call(self, apiname, args, handler):
-        #pass
-
-    #def sync_call(self, apiname, args, timeout=10):
-        #data = {
-            #'apiname': apiname,
-            #'data': args
-        #}
-        #self._socket.send(json.dumps(data))  
-
-        #message = self._socket.recv()  
-        #ret = json.loads(message)
-        #return ret
-
-    #def __init__(self, event_engine, service, event_client=None, event_server=None):
 
 
 if __name__ == '__main__':
@@ -265,7 +207,7 @@ if __name__ == '__main__':
         print "args: ", data
         print "return: ", 123
         return "123"
-    server_engine = ZMQEventEngine()
+    server_engine = ZMQEventEngine('test')
     server_engine.start()
     server = EventRPCServer(server_engine, 'test')
     server.register("print_hello", print_hello)
