@@ -292,7 +292,7 @@ class CsvSource(object):
             long_margin_ratio, short_margin_ratio, price_tick, volume_multiple}
 
         """
-        fname = os.path.join(self._root, "CONTRACTS.csv")
+        fname = os.path.join(self._root, "contracts.csv")
         df = pd.DataFrame(data)
         df.to_csv(fname, columns=[
             'code', 'exchange', 'name', 'spell',
@@ -337,7 +337,7 @@ class CsvSource(object):
         Returns:
             pd.DataFrame
         """
-        fname = os.path.join(self._root, "CONTRACTS.csv")
+        fname = os.path.join(self._root, "contracts.csv")
         df = pd.read_csv(fname)
         df.index = df['code'] + '.' + df['exchange']
         df.index = map(lambda x: x.upper(), df.index)
