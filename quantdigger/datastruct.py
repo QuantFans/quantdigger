@@ -367,7 +367,7 @@ class Contract(object):
             code = info[0].upper()
             exchange = info[1].upper()
         else:
-            logger.error('错误的合约格式！')
+            logger.error('错误的合约格式: %s' % str_contract)
             logger.exception()
         self.exchange = exchange
         self.code = code
