@@ -14,7 +14,7 @@ from quantdigger.widgets.plotinterface import PlotInterface
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
 
-def transform2ndarray(data):
+def ndarray(data):
     """ 如果是序列变量，返回ndarray浅拷贝 """
     if isinstance(data, series.NumberSeries):
         data = data.data
@@ -103,7 +103,7 @@ class TechnicalBase(PlotInterface):
             raise Exception("每个指标都必须有_args属性，代表指标计算的参数！")
         self.data = self._args[0]
         # 数据转化成ta-lib能处理的格式
-        self._args[0] = transform2ndarray(self._args[0])
+        #self._args[0] = ndarray(self._args[0])
         apply(self._vector_algo, tuple(self._args))
         if not hasattr(self, 'values'):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
@@ -134,7 +134,7 @@ class TechnicalBase(PlotInterface):
         #if self._cache[cache_index][0] == self.curbar:
             #values = self._cache[cache_index][1] # 缓存命中
         #else:
-            #self._rolling_data = transform2ndarray(self.data)  # 输入
+            #self._rolling_data = ndarray(self.data)  # 输入
             ## 指标一次返回多个值
             #args =  (self._rolling_data, ) + self._args + (rolling_index,)
             #values = apply(self._rolling_algo, args)
@@ -283,4 +283,4 @@ class TechnicalBase(PlotInterface):
         #self._data[self._curbar] %= r
         #return self
 
-__all__ = ['TechnicalBase', 'transform2ndarray']
+__all__ = ['TechnicalBase', 'ndarray']

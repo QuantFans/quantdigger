@@ -8,7 +8,7 @@
 import talib
 import matplotlib.finance as finance
 from quantdigger.technicals.base import \
-    TechnicalBase, transform2ndarray, tech_init
+    TechnicalBase, ndarray, tech_init
 from quantdigger.widgets.plotinterface import PlotInterface, plot_init
 
 
@@ -20,7 +20,7 @@ class MA(TechnicalBase):
         """ data (NumberSeries/np.ndarray/list) """
         super(MA, self).__init__(name)
         # 必须的函数参数
-        self._args = [data, n]
+        self._args = [ndarray(data), n]
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。"""
@@ -56,7 +56,7 @@ class BOLL(TechnicalBase):
                 #('middler', []),
                 #('lower', [])
                 #])
-        self._args = [data, n, 2, 2]
+        self._args = [ndarray(data), n, 2, 2]
 
     def _rolling_algo(self, data, n, a1, a2, i):
         """ 逐步运行函数。"""
@@ -167,7 +167,7 @@ class Volume(PlotInterface):
     def __init__(self, open, close, volume, name='volume',
                  colorup='r', colordown='b', width=1):
         super(Volume, self).__init__(name, None)
-        self.values = transform2ndarray(volume)
+        self.values = ndarray(volume)
 
     def plot(self, widget):
         self.widget = widget
