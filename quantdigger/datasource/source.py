@@ -31,3 +31,6 @@ class DatasourceAbstract(object):
 
     def get_contracts(self):
         raise NotImplementedError
+
+    def get_code2strpcon(self):
+        raise NotImplementedError

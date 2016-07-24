@@ -1,13 +1,15 @@
 
 # -*- coding: utf8 -*-
-import sys
-import time
 import datetime
 import logbook
-logbook.StreamHandler(sys.stdout).push_application()
+import time
+import sys
 
+logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
 dlogger = logbook.Logger('data')
+mlogger = logbook.Logger('msg')
+gen_logger = logbook.Logger('general')
 rlogger = logbook.Logger('runtime')
 
 
@@ -17,6 +19,8 @@ def deprecated(f):
         return f(*args, **kwargs)
     return ff
 
+mlogger.level = logbook.INFO
+gen_logger.level = logbook.INFO
 
 #def api(method):
     #def wrapper(*args, **kwargs):
