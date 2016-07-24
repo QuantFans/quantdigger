@@ -91,3 +91,28 @@ class CsvSource(DatasourceAbstract):
             'long_margin_ratio', 'short_margin_ratio', 'price_tick',
             'volume_multiple'
         ], index=False)
+
+    def get_code2strpcon(self):
+        symbols = {}  # code -> string pcontracts
+        period_exchange2strpcon = {}  # exchange.period -> string pcontracts
+        for parent, dirs, files in os.walk(self._root):
+            if dirs == []:
+                t = parent.split(os.sep)
+                period, exch = t[-2], t[-1]
+                for i, a in enumerate(period):
+                    if not a.isdigit():
+                        sepi = i
+                        break
+                count = period[0:sepi]
+                unit = period[sepi:]
+                period = '.'.join([count, unit])
+                strpcons = period_exchange2strpcon.setdefault(
+                    ''.join([exch, '-', period]), [])
+                for file_ in files:
+                    if file_.endswith('csv'):
+                        code = file_.split('.')[0]
+                        t = symbols.setdefault(code, [])
+                        rst = ''.join([code, '.', exch, '-', period])
+                        t.append(rst)
+                        strpcons.append(rst)
+        return symbols, period_exchange2strpcon

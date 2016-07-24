@@ -47,3 +47,6 @@ class MongoDBSource(DatasourceAbstract):
         colname = 'contract'
         cursor = self.db[colname].find()
         return pd.DataFrame(list(cursor))
+
+    def get_code2strpcon(self):
+        raise NotImplementedError

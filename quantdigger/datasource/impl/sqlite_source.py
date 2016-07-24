@@ -121,3 +121,6 @@ class SqliteSource(DatasourceAbstract):
         sql = "INSERT INTO %s VALUES (?,?,?,?,?,?,?,?,?)" % (tbname)
         self._cursor.executemany(sql, data)
         self._db.commit()
+
+    def get_code2strpcon(self):
+        raise NotImplementedError
