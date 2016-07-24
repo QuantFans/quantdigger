@@ -5,7 +5,7 @@ import sys
 
 
 
-client_engine = ZMQEventEngine('text')
+client_engine = ZMQEventEngine('test')
 client_engine.start()
 client = EventRPCClient('test', client_engine, 'test')
 for i in xrange(0, 5):

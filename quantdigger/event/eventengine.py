@@ -166,6 +166,7 @@ class ZMQEventEngine(EventEngine):
         EventEngine.__init__(self)
         self._name = name
         context = zmq.Context()  
+        self._name = name
         try:
             self._broadcast_event_socket = context.socket(zmq.PUB)  
             self._broadcast_event_socket.bind(event_protocol)  
@@ -248,7 +249,7 @@ if __name__ == '__main__':
     def simpletest(event):
         print str(datetime.datetime.now()), event
     
-    ee = ZMQEventEngine('text')
+    ee = ZMQEventEngine('test')
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
     ee.start()
@@ -260,7 +261,7 @@ if __name__ == '__main__':
     timer.resume()
     time.sleep(2)
     timer.stop()
-    client = ZMQEventEngine()
+    client = ZMQEventEngine('test')
     event = Event(route=Event.TIMER, args = { 'data': 'from client' })
     client.start()
     client.emit(event)
