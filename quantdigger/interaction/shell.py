@@ -3,6 +3,7 @@ from interface import BackendInterface, UIInterface
 print "import shell" 
 
 class IpyGate(BackendInterface, UIInterface):
+    """ 终端接口类，可通过它在python终端上操作界面和后台代码。 """
     def __init__(self):
         pass
 

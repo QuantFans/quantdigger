@@ -3,46 +3,16 @@
 # @file rpc.py
 # @brief 
 # @author wondereamer
-# @version 0.1
+# @version 0.5
 # @date 2016-05-17
 import time
 from datetime import datetime
 from threading import Thread, Condition, Lock
-from quantdigger.util import elogger as log
+from quantdigger.util import mlogger as log
 from quantdigger.errors import InvalidRPCClientArguments
 from quantdigger.event import Event
 
 
-class RPCServer(object):
-    def __init__(self):
-        self._routes = { }
-        self._routes_lock = Lock()
-
-    def _process_request(self, event):
-        pass
-
-
-    def register(self, route, handler):
-        """ 注册服务函数。
-        
-        Args:
-            route (str): 服务名
-            handler (function): 回调函数
-        
-        Returns:
-            Bool. 是否注册成功。
-        """
-        if route in self._routes:
-            return False 
-        with self._routes_lock:
-            self._routes[route] = handler
-        return True
-
-    def unregister(self, route):
-        """ 注销服务函数 """
-        with self._routes_lock:
-            if route in self._routes:
-                del self._routes[route]
 
 
 class EventRPCClient(object):
@@ -124,7 +94,7 @@ class EventRPCClient(object):
         with self._handlers_lock:
             self._handlers[self.rid] = handler
 
-    def sync_call(self, apiname, args={ }, timeout=10):
+    def sync_call(self, apiname, args={ }, timeout=5):
         """ 给定参数args，同步调用RPCServer的apiname服务,
         返回该服务的处理结果。如果超时，返回None。
         
@@ -161,15 +131,39 @@ class EventRPCClient(object):
             self._pause_condition.notify()
 
 
-class EventRPCServer(RPCServer):
+class EventRPCServer(object):
     def __init__(self, event_engine, service, event_client=None, event_server=None):
         super(EventRPCServer, self).__init__()
+        self._routes = { }
+        self._routes_lock = Lock()
         # server监听的client事件
         self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
         # client监听的server事件
         self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
         self._event_engine = event_engine
         self._event_engine.register(self.EVENT_CLIENT, self._process_request)
+
+    def register(self, route, handler):
+        """ 注册服务函数。
+        
+        Args:
+            route (str): 服务名
+            handler (function): 回调函数
+        
+        Returns:
+            Bool. 是否注册成功。
+        """
+        if route in self._routes:
+            return False 
+        with self._routes_lock:
+            self._routes[route] = handler
+        return True
+
+    def unregister(self, route):
+        """ 注销服务函数 """
+        with self._routes_lock:
+            if route in self._routes:
+                del self._routes[route]
 
     def _process_request(self, event):
         #print "rpcsever: ", event.route, event.args

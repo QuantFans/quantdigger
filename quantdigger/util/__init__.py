@@ -20,6 +20,7 @@ def deprecated(f):
     return ff
 
 mlogger.level = logbook.INFO
+elogger.level = logbook.INFO
 gen_logger.level = logbook.INFO
 
 #def api(method):

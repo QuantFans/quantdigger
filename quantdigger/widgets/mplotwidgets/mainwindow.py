@@ -8,31 +8,32 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
-from quantdigger.widgets.mplotwidgets import widgets
-from quantdigger.technicals.common import MA, Volume
+from quantdigger.config import ConfigInteraction
+from quantdigger.datastruct import PContract
 from quantdigger.event.rpc import EventRPCClient, EventRPCServer
 from quantdigger.event.eventengine import ZMQEventEngine
-from quantdigger.datastruct import PContract
+from quantdigger.interaction.interface import BackendInterface
+from quantdigger.technicals.common import MA, Volume
 from quantdigger.util import gen_logger as log
-from interface import BackendInterface
+from quantdigger.widgets.mplotwidgets import widgets
 
-price_data = pd.read_csv('../data/IF000.csv', index_col=0, parse_dates=True)
+#price_data = pd.read_csv('../data/IF000.csv', index_col=0, parse_dates=True)
 
 
 class WindowGate(BackendInterface):
     def __init__(self, widget):
         self._engine = ZMQEventEngine('WindowGate')
         self._engine.start()
-        self._backend = EventRPCClient('WindowGate', self._engine, 'backend4ui')
-        self._ipy_srv = EventRPCServer(self._engine, 'ui4ipython')
+        self._backend = EventRPCClient('WindowGate', self._engine, 
+                ConfigInteraction.backend_server_for_ui)
+        self._ipy_srv = EventRPCServer(self._engine, ConfigInteraction.ui_server_for_shell)
         self._period = None
         self._contract = None
         self._widget = widget
         self._register_functions(self._ipy_srv)
-        print self.get_all_contracts()
 
     def _register_functions(self, server):
-        server.register('plot', self.get_all_contracts)
+        server.register('get_all_contracts', self.get_all_contracts)
 
     def add_widget(self, ith, type_):
         self._widget.add_widget
@@ -87,6 +88,9 @@ class WindowGate(BackendInterface):
     
 
 class MainWindow(object):
+    """  主界面，负责界面的创建，ui信号和WindowGate函数的对接。
+        WindowGate是界面和其它模块交互的入口。
+    """
     def __init__(self):
         super(MainWindow, self).__init__()
         self._fig = plt.figure()
@@ -102,21 +106,22 @@ class MainWindow(object):
         self.btn_prev = Button(axprev, '1Min')
 
     def _create_technical_window(self):
-        self.frame = widgets.TechnicalWidget(self._fig, price_data, height=0.85)
-        self.frame.init_layout(50, 4, 1)
-        ax_candles,  ax_volume = self.frame.get_subwidgets()
-        # at most 5 ticks, pruning the upper and lower so they don't overlap
-        # with other ticks
-        ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
+        #self.frame = widgets.TechnicalWidget(self._fig, price_data, height=0.85)
+        #self.frame.init_layout(50, 4, 1)
+        #ax_candles,  ax_volume = self.frame.get_subwidgets()
+        ## at most 5 ticks, pruning the upper and lower so they don't overlap
+        ## with other ticks
+        #ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
 
-        # 添加k线和交易信号。
-        kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
-        candle_widget = self.frame.add_widget(0, kwindow, True)
-        # 添加指标
-        self.frame.add_technical(0, MA(price_data.close, 20, 'MA20', 'y', 2))
-        self.frame.add_technical(0, MA(price_data.close, 30, 'MA30', 'b', 2))
-        self.frame.add_technical(1, Volume(price_data.open, price_data.close, price_data.vol))
-        self.frame.draw_widgets()
+        ## 添加k线和交易信号。
+        #kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
+        #candle_widget = self.frame.add_widget(0, kwindow, True)
+        ## 添加指标
+        #self.frame.add_technical(0, MA(price_data.close, 20, 'MA20', 'y', 2))
+        #self.frame.add_technical(0, MA(price_data.close, 30, 'MA30', 'b', 2))
+        #self.frame.add_technical(1, Volume(price_data.open, price_data.close, price_data.vol))
+        #self.frame.draw_widgets()
+        pass
 
     def _connect_signal(self):
         self.btn_next.on_clicked(self._gate.next)

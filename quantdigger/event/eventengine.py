@@ -3,7 +3,7 @@
 # @file eventenvine.py
 # @brief 
 # @author wondereamer
-# @version 0.1
+# @version 0.5
 # @date 2016-05-17
 import zmq  
 import time
@@ -129,7 +129,7 @@ class QueueEventEngine(EventEngine):
         #Timer.__init__(self, self)
         self._queue = Queue()
         self._thread = Thread(target=self._run)
-        #self._thread.daemon = True
+        self._thread.daemon = True
 
     def emit(self, event):
         """向事件队列中存入事件"""
@@ -144,7 +144,7 @@ class QueueEventEngine(EventEngine):
         """停止引擎"""
         EventEngine.stop(self)
         # 等待事件处理线程退出
-        self._thread.join()
+        #self._thread.join()
         
     def _run(self):
         """引擎运行"""
@@ -184,6 +184,7 @@ class ZMQEventEngine(EventEngine):
         self._client_recv_event_socket.connect(event_protocol)  
 
         self._thread = Thread(target=self._run)
+        self._thread.daemon = True
         self._queue_engine = QueueEventEngine()
         time.sleep(1)
 
@@ -203,17 +204,19 @@ class ZMQEventEngine(EventEngine):
         """停止引擎"""
         EventEngine.stop(self)
         self._queue_engine.stop()
-        self._thread.join()
+        #self._thread.join()
 
     def register(self, route, handler):
         """ 接受指定的事件。 """
         if self._queue_engine.register(route, handler):
-            self._client_recv_event_socket.setsockopt(zmq.SUBSCRIBE, b'[%s]'%route)
+            self._client_recv_event_socket.setsockopt(zmq.SUBSCRIBE,
+                    Event.message_header(route))
 
     def unregister(self, route, handler):
         self._queue_engine.unregister(route, handler)
         if route not in self._routes:
-            self._client_recv_event_socket.setsockopt(zmq.UNSUBSCRIBE, b'[%s]'%route)
+            self._client_recv_event_socket.setsockopt(zmq.UNSUBSCRIBE,
+                    Event.message_header(route))
 
     def _run(self):
         """""" 

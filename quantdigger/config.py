@@ -9,4 +9,10 @@ settings = {
     'tick_test': False,
 }
 
-__all__ = ['settings']
+class ConfigInteraction(object):
+    backend_server_for_ui = 'backend4ui' 
+    backend_server_for_shell = "backend4shell" 
+    ui_server_for_shell = "ui4shell" 
+    
+
+__all__ = ['settings', 'ConfigInteraction' ]

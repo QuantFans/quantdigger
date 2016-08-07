@@ -489,9 +489,9 @@ class PContract(object):
         self.contract = contract
         self.period = period
 
-    def __str__(self):
-        """ return string like 'IF000.SHEF-10.Minutes'  """
-        return "%s-%s" % (self.contract, self.period)
+    #def __str__(self):
+        #""" return string like 'IF000.SHEF-10.Minutes'  """
+        #return "%s-%s" % (self.contract, self.period)
 
     @classmethod
     def from_string(cls, strpcon):

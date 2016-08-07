@@ -109,7 +109,7 @@ if __name__ == '__main__':
                         #colors=['r', 'g', 'b'],
                         #names=[profile.name(0), profile.name(1), 'A0'])
     ## 绘制净值曲线
-    #plotting.plot_curves([curve.networth])
+    plotting.plot_curves([curve.networth])
     ## 打印统计信息
     print finance.summary_stats(curve, 252)
     ## @TODO 直接单击的时候只有数直线

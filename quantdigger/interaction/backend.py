@@ -1,8 +1,22 @@
 # -*- coding: utf-8 -*-
-from quantdigger.event.rpc import EventRPCServer, EventRPCClient
+##
+# @file backend.py
+# @brief 
+# @author wondereamer
+# @version 0.5
+# @date 2016-07-10
+
+
+from quantdigger.config import ConfigInteraction
+from quantdigger.event.rpc import EventRPCServer
 from quantdigger.event.eventengine import ZMQEventEngine
+from quantdigger.interaction.interface import BackendInterface
 from quantdigger.util import mlogger as log
-from interface import BackendInterface
+from quantdigger.datasource.data import DataManager
+from quantdigger.serialize import (
+    serialize_pcontract_bars,
+    serialize_all_pcontracts,
+)
 
     
 
@@ -12,9 +26,11 @@ class Backend(BackendInterface):
         self._engine = ZMQEventEngine('Backend')
         self._engine.start()
 
-        self._ipy_srv = EventRPCServer(self._engine, 'backend4ipython')
-        self._ui_srv = EventRPCServer(self._engine, 'backend4ui')
-        self.register_functions(self._ipy_srv)
+        self._shell_srv = EventRPCServer(self._engine, 
+                                ConfigInteraction.backend_server_for_shell)
+        self._ui_srv = EventRPCServer(self._engine, 
+                                ConfigInteraction.backend_server_for_ui)
+        self.register_functions(self._shell_srv)
         self.register_functions(self._ui_srv)
 
     def register_functions(self, server):
@@ -29,11 +45,14 @@ class Backend(BackendInterface):
         self._engine.stop()
 
     def get_all_contracts(self):
-        return "get_all_contracts from backend" 
+        # 模拟接口
+        data = ['BB.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
+        return serialize_all_pcontracts(data)
 
-    def get_pcontract(self, pcontract):
-        """docstring for get_data""" 
-        pass
+    def get_pcontract(self, str_pcontract):
+        dm = DataManager()
+        da = dm.get_bars(str_pcontract)
+        return serialize_pcontract_bars(str_pcontract, da.data)
 
     def run_strategy(self, name):
         """""" 
@@ -49,27 +68,10 @@ class Backend(BackendInterface):
     def get_strategies(self):
         return 'hello' 
 
-gate = Backend()
+backend = Backend()
+#backend.get_all_contracts()
+#backend.get_pcontract('BB.TEST-1.MINUTE')
 
-def test_backend():
-    """""" 
-    import time, sys
-    client = EventRPCClient(gate._engine, 'backend4ui')
-    ipy_client = EventRPCClient(gate._engine, 'backend4ipython')
-    for i in xrange(0, 5):
-        print "sync_call: print_hello "
-        print "ui_client return: ", client.sync_call("get_all_contracts")
-        print "ipy_client return: ", ipy_client.sync_call("get_strategies")
-        time.sleep(1)
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        gate.stop()
-        sys.exit(0)
-
-#if __name__ == '__main__':
-    #test_backend()
 
 if __name__ == '__main__':
     import time, sys
@@ -77,5 +79,5 @@ if __name__ == '__main__':
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        gate.stop()
+        backend.stop()
         sys.exit(0)

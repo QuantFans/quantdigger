@@ -93,8 +93,8 @@ class CsvSource(DatasourceAbstract):
         ], index=False)
 
     def get_code2strpcon(self):
-        symbols = {}  # code -> string pcontracts
-        period_exchange2strpcon = {}  # exchange.period -> string pcontracts
+        symbols = {}  # code -> string pcontracts, 所有周期
+        period_exchange2strpcon = {}  # exchange.period -> string pcontracts , 所有合约
         for parent, dirs, files in os.walk(self._root):
             if dirs == []:
                 t = parent.split(os.sep)
