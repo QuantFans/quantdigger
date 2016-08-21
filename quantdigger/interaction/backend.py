@@ -13,21 +13,24 @@ from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface
 from quantdigger.util import mlogger as log
 from quantdigger.datasource.data import DataManager
-from quantdigger.serialize import (
+from quantdigger.datastruct import PContract
+from quantdigger.interaction.serialize import (
     serialize_pcontract_bars,
     serialize_all_pcontracts,
+    serialize_all_contracts,
 )
 
     
 
 class Backend(BackendInterface):
     def __init__(self):
-        log.info("Init Backend")
+        log.info("Init Backend..")
         self._engine = ZMQEventEngine('Backend')
         self._engine.start()
 
         self._shell_srv = EventRPCServer(self._engine, 
                                 ConfigInteraction.backend_server_for_shell)
+
         self._ui_srv = EventRPCServer(self._engine, 
                                 ConfigInteraction.backend_server_for_ui)
         self.register_functions(self._shell_srv)
@@ -35,6 +38,7 @@ class Backend(BackendInterface):
 
     def register_functions(self, server):
         server.register('get_all_contracts', self.get_all_contracts)
+        server.register('get_all_pcontracts', self.get_all_pcontracts)
         server.register('get_pcontract', self.get_pcontract)
         server.register('get_strategies', self.get_strategies)
         server.register('run_strategy', self.run_strategy)
@@ -47,7 +51,15 @@ class Backend(BackendInterface):
     def get_all_contracts(self):
         # 模拟接口
         data = ['BB.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
-        return serialize_all_pcontracts(data)
+        pcons =  [PContract.from_string(d) for d in data]
+        contracts =  [pcon.contract for pcon in pcons]
+        return serialize_all_contracts(contracts)
+
+    def get_all_pcontracts(self):
+        # 模拟接口
+        data = ['BB.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
+        pcontracts =  [PContract.from_string(d) for d in data]
+        return serialize_all_pcontracts(pcontracts)
 
     def get_pcontract(self, str_pcontract):
         dm = DataManager()

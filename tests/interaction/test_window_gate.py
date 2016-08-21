@@ -12,19 +12,35 @@ import unittest
 
 from quantdigger.config import ConfigInteraction
 from quantdigger.event.rpc import EventRPCClient
+from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.backend import backend
 from quantdigger.widgets.mplotwidgets.mainwindow import  mainwindow
 
 
-class TestWindowGate(object):
-    gate = EventRPCClient('test_window_gate', mainwindow._gate._engine,
-                            ConfigInteraction.ui_server_for_shell)
+class TestWindowGateCallBackend(object):
+    """ WindowGate call backend """
 
+    def __init__(self):
+        self.engine = ZMQEventEngine('TestWindowGate')
+        self.engine.start()
+        self.gate = mainwindow._gate
+
+    #def test_get_all_contracts(self):
+        #ret = self.gate.sync_call("get_all_contracts")
+        #print "***********" 
+        ##print json.loads(ret)
+        #print ret
+        #print "***********" 
 
     def test_get_all_contracts(self):
-        ret = self.gate.sync_call("get_all_contracts")
+        ret = self.gate.get_all_contracts()
         print "***********" 
-        #print json.loads(ret)
+        print ret
+        print "***********" 
+
+    def test_get_all_pcontracts(self):
+        ret = self.gate.get_all_pcontracts()
+        print "***********" 
         print ret
         print "***********" 
 
@@ -46,5 +62,6 @@ if __name__ == '__main__':
         ### @BUG 如果异常退出，系统可能遗留连接，导致多次回调。
         #backend.stop()
         #sys.exit(0)
-    t = TestWindowGate()
+    t = TestWindowGateCallBackend()
     t.test_get_all_contracts()
+    t.test_get_all_pcontracts()

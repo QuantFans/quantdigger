@@ -362,6 +362,7 @@ class Contract(object):
     info = None
 
     def __init__(self, str_contract):
+        ## @TODO 修改参数为（code, exchange)
         info = str_contract.split('.')
         if len(info) == 2:
             code = info[0].upper()
@@ -382,6 +383,10 @@ class Contract(object):
         else:
             logger.error('Unknown exchange: {0}', self.exchange)
             assert(False)
+    
+    @classmethod
+    def from_string(cls, strcontract):
+        return cls(strcontract)
 
     def __str__(self):
         """"""

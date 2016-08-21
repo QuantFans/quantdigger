@@ -87,6 +87,7 @@ class EventRPCClient(object):
         if not isinstance(args, dict):
             raise InvalidRPCClientArguments(argtype=type(args))
         assert(not handler ==  None)
+        log.debug('RPCClient [%s] sync_call: %s' % (self._name, apiname))
         self.rid += 1
         args['apiname'] = apiname
         args['rid'] = self.rid
@@ -103,7 +104,7 @@ class EventRPCClient(object):
             args (dict): 给服务API的参数。
             handler (function): 回调函数。
         """
-        log.debug('sync_call: %s' % apiname)
+        log.debug('RPCClient [%s] sync_call: %s' % (self._name, apiname))
         if not isinstance(args, dict):
             self._timeout = 0
             self._sync_ret = None
@@ -142,6 +143,7 @@ class EventRPCServer(object):
         self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
         self._event_engine = event_engine
         self._event_engine.register(self.EVENT_CLIENT, self._process_request)
+        self._name = service.upper()
 
     def register(self, route, handler):
         """ 注册服务函数。
@@ -166,25 +168,24 @@ class EventRPCServer(object):
                 del self._routes[route]
 
     def _process_request(self, event):
-        #print "rpcsever: ", event.route, event.args
         args = event.args
         rid = args['rid']
         apiname = args['apiname']
         del args['rid']
         del args['apiname']
-        log.debug('RPCServer process: %s' % apiname)
+        log.debug('RPCServer [%s] process: %s' % (self._name, apiname))
         try:
             with self._routes_lock:
                 handler = self._routes[apiname]
             ## @TODO async    
             ret = handler(**args)
         except Exception as e:
-            print e, "****" 
+            log.exception(e)
         else:
             args = { 'ret': ret,
                     'rid': rid
             }
-            log.debug('RPCServer emit')
+            log.debug('RPCServer [%s] emit %s' % (self._name, str(Event(self.EVENT_SERVER, args))))
             self._event_engine.emit(Event(self.EVENT_SERVER, args))
 
 

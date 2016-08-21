@@ -48,7 +48,7 @@ class ExecuteUnit(object):
     def _init_strategies(self):
         for pcon, dcontext in self._all_data.iteritems():
             # switch context
-            self.context.switch_to_contract(pcon)
+            self.context.switch_to_pcontract(pcon)
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
@@ -144,13 +144,13 @@ class ExecuteUnit(object):
         tick_test = settings['tick_test']
         # 遍历每个数据轮, 次数为数据的最大长度
         for pcon, data in self._all_data.iteritems():
-            self.context.switch_to_contract(pcon)
+            self.context.switch_to_pcontract(pcon)
             self.context.rolling_forward()
         while True:
             self.context.on_bar = False
             # 遍历数据轮的所有合约
             for pcon, data in self._all_data.iteritems():
-                self.context.switch_to_contract(pcon)
+                self.context.switch_to_pcontract(pcon)
                 if self.context.time_aligned():
                     self.context.update_system_vars()
                     # 组合遍历
@@ -161,7 +161,7 @@ class ExecuteUnit(object):
                             self.context.update_user_vars()
                             s.on_symbol(self.context)
             # 确保单合约回测的默认值
-            self.context.switch_to_contract(self.pcontracts[0])
+            self.context.switch_to_pcontract(self.pcontracts[0])
             self.context.on_bar = True
             # 遍历组合策略每轮数据的最后处理
             for i, combination in enumerate(self._combs):
@@ -181,7 +181,7 @@ class ExecuteUnit(object):
             #
             toremove = []
             for pcon, data in self._all_data.iteritems():
-                self.context.switch_to_contract(pcon)
+                self.context.switch_to_pcontract(pcon)
                 has_next = self.context.rolling_forward()
                 if not has_next:
                     toremove.append(pcon)

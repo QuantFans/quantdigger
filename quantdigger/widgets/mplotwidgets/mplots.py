@@ -41,7 +41,7 @@ class Candles(object):
     """
     画蜡烛线。
     """
-    def __init__(self, tracker, data, name='candle',
+    def __init__(self, tracker, name='candle',
                  width=0.6, colorup='r', colordown='g',
                  lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
@@ -61,8 +61,7 @@ class Candles(object):
         return value is lineCollection, barCollection
         """
         # super(Candles, self).__init__(tracker, name)
-        self.set_yrange(data.low.values, data.high.values)
-        self.data = data
+        self.data = None
         self.name = name
         self.width = width
         self.colorup = colorup
@@ -73,8 +72,10 @@ class Candles(object):
     # note this code assumes if any value open, close, low, high is
     # missing they all are missing
     @override_attributes
-    def plot(self, widget, width=0.6,
+    def plot(self, widget, data, width=0.6, 
              colorup='r', colordown='g', lc='k', alpha=1):
+        self.set_yrange(data.low.values, data.high.values)
+        self.data = data
         """docstring for plot"""
         delta = self.width/2.
         barVerts = [((i-delta, open),
@@ -132,6 +133,7 @@ class Candles(object):
         #ax.plot(self.data.close, color = 'y')
         #lineCollection, barCollection = None, None
         return lineCollection, barCollection
+
 
     def set_yrange(self, lower, upper=[]):
         self.upper = upper if len(upper) > 0 else lower

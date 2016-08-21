@@ -58,6 +58,7 @@ class Slider(AxesWidget):
 
     Call :meth:`add_observer` to connect to the slider event
     """
+
     def __init__(self, ax, name, label, valmin, valmax, valinit=0.5, width=1, valfmt='%1.2f',
                  time_index = None, closedmin=True, closedmax=True, slidermin=None,
                  slidermax=None, drag_enabled=True, **kwargs):
@@ -86,44 +87,27 @@ class Slider(AxesWidget):
         valid property names (e.g., *facecolor*, *edgecolor*, *alpha*, ...)
         """
         AxesWidget.__init__(self, ax)
-
-        self._index = time_index
-        self.valmin = valmin
-        self.valmax = valmax
-        self.val = valinit
-        self.valinit = valinit
-        self.ax = ax
-        self.width = width
-        # 滑动条的形状
-        self.poly = ax.axvspan(valmax-self.width/2,valmax+self.width/2, 0, 1, **kwargs)
-        self.name = name
-        #axhspan
-        #self.vline = ax.axvline(valinit, 0, 1, color='r', lw=1)
-        self._fmt = slider_strtime_format(time_index[1] - time_index[0])
-
-        self.valfmt = valfmt
-        ax.set_yticks([])
-        ax.set_xlim((valmin, valmax))
-        #ax.set_xticks([]) # disable ticks
-        ax.set_navigate(False)
-
         self.label = ax.text(-0.02, 0.5, label, transform=ax.transAxes,
                              verticalalignment='center',
                              horizontalalignment='right')
+        self.ax = ax
+        self.valtext = None
+        self.poly = None
+        self.reinit(valmin, valmax, valinit, width, valfmt, time_index, **kwargs)
 
-        #self.valtext = ax.text(1.02, 0.5, valfmt % valinit,
-        self.valtext = ax.text(1.005, 0.5,self._value_format(valinit),
-                               transform=ax.transAxes,
-                               verticalalignment='center',
-                               horizontalalignment='left')
+        self.name = name
         self.cnt = 0
-        self.observers = {}
         self.closedmin = closedmin
         self.closedmax = closedmax
         self.slidermin = slidermin
         self.slidermax = slidermax
         self.drag_active = False
         self.drag_enabled = drag_enabled
+        self.observers = {}
+        ax.set_yticks([])
+        ax.set_xlim((valmin, valmax))
+        #ax.set_xticks([]) # disable ticks
+        ax.set_navigate(False)
         self._connect()
 
     def _value_format(self, x):
@@ -131,6 +115,36 @@ class Slider(AxesWidget):
         ind = int(round(x))
         if ind>=len(self._index) or ind<0: return ''
         return self._index[ind].strftime(self._fmt)
+
+        self._slider = Slider(0, self._data_length-1,
+                                    self._data_length-1, self._data_length/50, "%d",
+                                    self._data.index)
+
+    def reinit(self, valmin, valmax, valinit=0.5, width=1, valfmt='%1.2f',
+            time_index = None, **kwargs):
+        self._index = time_index
+        self.valmin = valmin
+        self.valmax = valmax
+        self.val = valinit
+        self.valinit = valinit
+        self.width = width
+        self.valfmt = valfmt
+        self._fmt = slider_strtime_format(time_index[1] - time_index[0])
+
+        if self.valtext:
+            self.valtext.remove() 
+        if self.poly:
+            self.poly.remove() 
+        # 滑动条的形状
+        self.poly = self.ax.axvspan(valmax-self.width/2,valmax+self.width/2, 0, 1, **kwargs)
+        #axhspan
+        #self.vline = ax.axvline(valinit, 0, 1, color='r', lw=1)
+
+        #self.valtext = ax.text(1.02, 0.5, valfmt % valinit,
+        self.valtext = self.ax.text(1.005, 0.5,self._value_format(valinit),
+                               transform=self.ax.transAxes,
+                               verticalalignment='center',
+                               horizontalalignment='left')
 
     def add_observer(self, obj):
         """
@@ -236,7 +250,7 @@ class CandleWindow(object):
     蜡烛线控件。
 
     """
-    def __init__(self, name, data, wdlength, min_wdlength):
+    def __init__(self, name, wdlength, min_wdlength):
         """
         Create a slider from *valmin* to *valmax* in axes *ax*
 
@@ -246,6 +260,8 @@ class CandleWindow(object):
         self.wdlength = wdlength
         self.min_wdlength = min_wdlength
         self.voffset = 0
+        self.lines = None
+        self.rects = None
 
         # 当前显示的范围。
         #self.xmax = len(data)
@@ -255,20 +271,23 @@ class CandleWindow(object):
 
         self.cnt = 0
         self.observers = {}
-        self.data = data
-        self.main_plot = None
 
-    def set_parent(self, parent, ith_axes):
-        """docstring for init_widget"""
-        self.ax = parent.axes[ith_axes]
+    def init_plot(self, ax):
+        """ frame.add_widget调用 """
+        self.ax = ax
         #ax.set_xlim((self.xmin, self.xmax))
         #ax.set_ylim((self.ymin, self.ymax))
-        candles = Candles(None, self.data, self.name)
-        candles.twinx = False
-        parent.register_technical(ith_axes, candles)
-        self.lines, self.rects = candles.plot(self.ax)
-        self.main_plot = candles
+        self.candles = Candles(None, self.name)
+        self.candles.twinx = False
         self.connect()
+        return self.candles
+
+    def plot(self, data):
+        if self.lines:
+            self.lines.remove()
+        if self.rects:
+            self.rects.remove()
+        self.lines, self.rects = self.candles.plot(self.ax, data)
 
     def on_slider(self, val, event):
         #'''docstring for update(val)'''
@@ -337,7 +356,6 @@ class TechnicalWidget(object):
         self._fig = fig
         self._subwidget2plots = { } # 窗口坐标到指标的映射。
         self._cursor = None
-        self._data = data
         self._cursor_axes_index = { }
 
         self._left, self._width = left, width
@@ -345,28 +363,27 @@ class TechnicalWidget(object):
         self._slider_height = 0.1
         self._bigger_picture_height = 0.3    # 鸟瞰图高度
         self._all_axes = []
-        return
+
+        self._data = data
 
     def init_layout(self, w_width, *args):
         # 布局参数
         self._w_width_min = 50
-        self._init_layout(w_width)
-        #
+        self._w_width = w_width
+        self._init_layout()
         self._init_widgets(*args)
+
+
         self._connect()
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
                                     color='r', lw=2, horizOn=False,
                                     vertOn=True)
 
-    def _init_layout(self, w_width):
+    def _init_layout(self):
 
         self._slidder_lower = self._bottom
         self._slidder_upper = self._bottom + self._slider_height
         self._bigger_picture_lower = self._slidder_upper
-        self._data_length = len(self._data)
-        self._w_left = self._data_length - w_width
-        self._w_right = self._data_length
-        self._w_width = w_width
         self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
                                              self._slider_height], axisbg='gray')
         self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
@@ -374,20 +391,37 @@ class TechnicalWidget(object):
                                                 zorder = 0, frameon=False,
                                                 #sharex=self._slider_ax,
                                                 axisbg='gray', alpha = '0.1' )
-        #
         self._bigger_picture.set_xticklabels([]);
-        self._slider = Slider(self._slider_ax, "slider", '', 0, self._data_length-1,
-                                    self._data_length-1, self._data_length/50, "%d", self._data.index)
-        self._bigger_picture.plot(self._data['close'], 'y')
         self._bigger_picture.set_xticks([])
         self._bigger_picture.set_yticks([])
-        self._slider.add_observer(self)
+        self._all_axes = [self._slider_ax, self._bigger_picture]
+        self._slider = None
+        self._bigger_picture_plot = None
+        self.load_data(self._data)
+
+
+    def load_data(self, data):
+        """docstring for load_data""" 
+        self._data = data
+        self._data_length = len(self._data)
+        self._w_left = self._data_length - self._w_width
+        self._w_right = self._data_length
+
+        self._slider_ax.set_xticks(self._slider_xticks_to_display())
+        if self._slider is None:
+            self._slider = Slider(self._slider_ax, "slider", '', 0, self._data_length-1,
+                                        self._data_length-1, self._data_length/50, "%d",
+                                        self._data.index)
+            self._slider.add_observer(self)
+        else:
+            self._slider.reinit( 0, self._data_length-1, self._data_length-1,
+                    self._data_length/50, "%d", self._data.index)
+
+        if self._bigger_picture_plot:
+            self._bigger_picture_plot.pop(0).remove()
+        self._bigger_picture_plot = self._bigger_picture.plot(self._data['close'], 'y')
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
                                                                 fmt='%Y-%m-%d'))
-        self._slider_ax.set_xticks(self._slider_xticks_to_display())
-        # TechnicalWidget 创建的所有_all_axes
-        self._all_axes = [self._slider_ax, self._bigger_picture]
-        return
 
     @property
     def axes(self):
@@ -476,7 +510,8 @@ class TechnicalWidget(object):
             AxesWidget. widget
         """
         try:
-            widget.set_parent(self, ith_axes)
+            plot = widget.init_plot(self.axes[ith_axes])
+            self.register_technical(ith_axes, plot)
             if connect_slider:
                 self._slider.add_observer(widget)
             return widget

@@ -1,13 +1,24 @@
 # -*- coding: utf-8 -*-
-from interface import BackendInterface, UIInterface
-print "import shell" 
 
-class IpyGate(BackendInterface, UIInterface):
+from quantdigger.config import ConfigInteraction
+from quantdigger.event.rpc import EventRPCClient
+from quantdigger.event.eventengine import ZMQEventEngine
+from quantdigger.interaction.interface import BackendInterface, UIInterface
+from quantdigger.util import mlogger as log
+
+class Shell(BackendInterface, UIInterface):
     """ 终端接口类，可通过它在python终端上操作界面和后台代码。 """
     def __init__(self):
+        log.info("Init Shell..")
+        self._engine = ZMQEventEngine('Shell')
+        self._engine.start()
+        self.gate = EventRPCClient('Shell', self._engine,
+                                ConfigInteraction.ui_server_for_shell)
+
+    def get_all_pcontracts(self):
         pass
 
-    def get_all_contracts(self, pcontract):
+    def get_all_contracts(self):
         pass
         #"""docstring for get_all_contracts""" 
         #print "------------------" 
@@ -15,6 +26,11 @@ class IpyGate(BackendInterface, UIInterface):
         #print pcontract
         #print "------------------" 
         #return "world" 
+    def show_data(self, strpcontract):
+        """docstring for load_pcontract""" 
+        return self.gate.sync_call("show_data", {
+            'pcontract': strpcontract
+            })
 
     def get_pcontract(self, pcontract):
         """docstring for get_data""" 
@@ -39,4 +55,4 @@ class IpyGate(BackendInterface, UIInterface):
         print "plot" 
 
 
-gate = IpyGate()
+shell = Shell()

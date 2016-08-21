@@ -5,10 +5,12 @@ import logbook
 import time
 import sys
 
+from log import gen_log
+
 logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
 dlogger = logbook.Logger('data')
-mlogger = logbook.Logger('msg')
+mlogger = gen_log
 gen_logger = logbook.Logger('general')
 rlogger = logbook.Logger('runtime')
 
@@ -19,8 +21,6 @@ def deprecated(f):
         return f(*args, **kwargs)
     return ff
 
-mlogger.level = logbook.INFO
-elogger.level = logbook.INFO
 gen_logger.level = logbook.INFO
 
 #def api(method):

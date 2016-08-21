@@ -111,28 +111,32 @@ class EventEngine(object):
             return
         for handler in self._routes[event.route]:
             try:
-                # @NOTE 会阻塞事件队列，除非另起线程。
                 log.debug("处理事件%s" % event.route)
-                handler(event)    
+                thread = Thread(target=handler, args=(event,))
+                thread.daemon = True
+                thread.start()
+                #handler(event)    
             except Exception as e:
-                print e
+                log.error(e)
 
-    
+
 class QueueEventEngine(EventEngine):
     """
     基于线程队列, 且带有定时器的事件引擎。
     ## @note 必须注册完所有消息以后再启动。
     """
-    def __init__(self):
+    def __init__(self, name):
         # 事件队列
         EventEngine.__init__(self)
         #Timer.__init__(self, self)
         self._queue = Queue()
         self._thread = Thread(target=self._run)
         self._thread.daemon = True
+        self._name = name
 
     def emit(self, event):
-        """向事件队列中存入事件"""
+        #"""向事件队列中存入事件"""
+        #print self._queue.qsize()
         self._queue.put(event)
 
     def start(self):
@@ -162,30 +166,30 @@ class ZMQEventEngine(EventEngine):
     """ 基于zeromq的事件引擎, 同一个地址的实例只会有一个服务器(同时也是客户端)，可有
     多个客户端实例。
     """
-    def __init__(self, name, event_protocol="tcp://127.0.0.1:5555", register_protocol="tcp://127.0.0.1:5557"):
+    def __init__(self, name, event_protocol="tcp://127.0.0.1:5555",
+		    register_protocol="tcp://127.0.0.1:5557"):
         EventEngine.__init__(self)
         self._name = name
-        context = zmq.Context()  
-        self._name = name
+        self._context = zmq.Context()  
         try:
-            self._broadcast_event_socket = context.socket(zmq.PUB)  
+            self._broadcast_event_socket = self._context.socket(zmq.PUB)  
             self._broadcast_event_socket.bind(event_protocol)  
-            self._server_recv_event_socket = context.socket(zmq.PULL)
+            self._server_recv_event_socket = self._context.socket(zmq.PULL)
             self._server_recv_event_socket.bind(register_protocol)
             self._is_server = True
-            log.info('Start ZMQEventEngine Server: %s' % self._name)
+            log.info('Run ZMQEventEngine Server: %s' % self._name)
         except zmq.error.ZMQError:
-            log.info('Start ZMQEventEngine client: %s' % self._name)
+            log.info('Run ZMQEventEngine client: %s' % self._name)
             self._is_server = False
 
-        self._emit_event_socket = context.socket(zmq.PUSH)  
+        self._emit_event_socket = self._context.socket(zmq.PUSH)  
         self._emit_event_socket.connect(register_protocol)  
-        self._client_recv_event_socket = context.socket(zmq.SUB)  
+        self._client_recv_event_socket = self._context.socket(zmq.SUB)  
         self._client_recv_event_socket.connect(event_protocol)  
 
         self._thread = Thread(target=self._run)
         self._thread.daemon = True
-        self._queue_engine = QueueEventEngine()
+        self._queue_engine = QueueEventEngine(self._name)
         time.sleep(1)
 
     def emit(self, event):
@@ -204,6 +208,7 @@ class ZMQEventEngine(EventEngine):
         """停止引擎"""
         EventEngine.stop(self)
         self._queue_engine.stop()
+        self._context.destroy()
         #self._thread.join()
 
     def register(self, route, handler):
@@ -238,13 +243,14 @@ class ZMQEventEngine(EventEngine):
     def _run_client(self):
         message = self._client_recv_event_socket.recv()
         event = Event.message_to_event(message)
-        log.debug("[client] receive message: %s" % event)
+        log.debug("[engine: %s] receive message: %s" % (self._name, event))
         self._queue_engine.emit(event)
 
     def _run_server(self):
         strevent = self._server_recv_event_socket.recv()
         self._broadcast_event_socket.send(strevent)
-        log.debug("[server] broadcast message: %s" % strevent)
+        log.debug("[engine: %s] broadcast message: %s" % (self._name, strevent))
+
 
 if __name__ == '__main__':
     import time, datetime, sys

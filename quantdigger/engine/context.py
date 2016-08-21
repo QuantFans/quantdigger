@@ -440,7 +440,7 @@ class Context(object):
     def add_strategy_context(self, ctxs):
         self._strategy_contexts.append(ctxs)
 
-    def switch_to_contract(self, pcon):
+    def switch_to_pcontract(self, pcon):
         self._cur_data_context = self._data_contexts[pcon]
 
     def time_aligned(self):

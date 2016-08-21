@@ -5,6 +5,7 @@ import pandas as pd
 
 from quantdigger.datasource.dsutil import *
 from quantdigger.datasource.source import SourceWrapper, DatasourceAbstract
+from quantdigger.errors import FileDoesNotExist
 
 
 @register_datasource('csv', 'data_path')
