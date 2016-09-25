@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
+import sys
 from matplotlib.widgets import AxesWidget
 from matplotlib.widgets import MultiCursor
-import matplotlib.ticker as mticker
 from matplotlib.ticker import Formatter
-from mplots import Candles
-import logbook
-import sys
-logbook.StreamHandler(sys.stdout).push_application()
-log = logbook.Logger('engine')
-log.level = logbook.INFO
+import matplotlib.ticker as mticker
+import numpy as np
 
-
+from quantdigger.widgets.mplotwidgets.mplots import Candles
+from quantdigger.util import gen_log as log
 
 
 def slider_strtime_format(delta):
@@ -105,10 +102,20 @@ class Slider(AxesWidget):
         self.drag_enabled = drag_enabled
         self.observers = {}
         ax.set_yticks([])
-        ax.set_xlim((valmin, valmax))
+
         #ax.set_xticks([]) # disable ticks
         ax.set_navigate(False)
         self._connect()
+
+    def _xticks_to_display(self, valmax):
+        interval = valmax / 5
+        v = 0
+        xticks = []
+        for i in range(0, 6):
+            xticks.append(v)
+            v += interval
+        return xticks
+
 
     def _value_format(self, x):
         """docstring for timess"""
@@ -122,6 +129,8 @@ class Slider(AxesWidget):
 
     def reinit(self, valmin, valmax, valinit=0.5, width=1, valfmt='%1.2f',
             time_index = None, **kwargs):
+        """ [valmin, valmax] """
+        self.ax.set_xticks(self._xticks_to_display(valmax))
         self._index = time_index
         self.valmin = valmin
         self.valmax = valmax
@@ -130,6 +139,8 @@ class Slider(AxesWidget):
         self.width = width
         self.valfmt = valfmt
         self._fmt = slider_strtime_format(time_index[1] - time_index[0])
+        self.ax.set_xlim((valmin, valmax))
+        self._data_length = valmax
 
         if self.valtext:
             self.valtext.remove() 
@@ -169,12 +180,12 @@ class Slider(AxesWidget):
 
     def _connect(self):
         # 信号连接。
-        self.connect_event('button_press_event', self.on_mouse)
-        self.connect_event('button_release_event', self.on_mouse)
+        self.connect_event('button_press_event', self.on_event)
+        self.connect_event('button_release_event', self.on_event)
         if self.drag_enabled:
-            self.connect_event('motion_notify_event', self.on_mouse)
+            self.connect_event('motion_notify_event', self.on_event)
 
-    def on_mouse(self, event):
+    def on_event(self, event):
         """update the slider position"""
         if self.ignore(event):
             return
@@ -343,85 +354,41 @@ class MyLocator(mticker.MaxNLocator):
 
 class TechnicalWidget(object):
     """ 多窗口控件 """
-    def __init__(self, fig, data, left=0.1, bottom=0.05, width=0.85, height=0.9):
+    def __init__(self, fig, data, left=0.1, bottom=0.05, width=0.85, height=0.9,
+            parent=None):
         """ 多窗口联动控件。
 
         Args:
             fig (Figure): matplotlib绘图容器。
             data (DataFrame): [open, close, high, low]数据表。
-            w_width (int): 窗口的初始宽度。
-            *args (tuple): 窗口布局。
         """
         self.name = "MultiWidgets"
         self._fig = fig
         self._subwidget2plots = { } # 窗口坐标到指标的映射。
         self._cursor = None
         self._cursor_axes_index = { }
+        self._hoffset = 1
 
         self._left, self._width = left, width
         self._bottom, self._height  = bottom, height
         self._slider_height = 0.1
         self._bigger_picture_height = 0.3    # 鸟瞰图高度
         self._all_axes = []
-
-        self._data = data
+        self.load_data(data)
 
     def init_layout(self, w_width, *args):
         # 布局参数
         self._w_width_min = 50
         self._w_width = w_width
-        self._init_layout()
         self._init_widgets(*args)
-
-
         self._connect()
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
                                     color='r', lw=2, horizOn=False,
                                     vertOn=True)
 
-    def _init_layout(self):
-
-        self._slidder_lower = self._bottom
-        self._slidder_upper = self._bottom + self._slider_height
-        self._bigger_picture_lower = self._slidder_upper
-        self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
-                                             self._slider_height], axisbg='gray')
-        self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
-                                                    self._width, self._bigger_picture_height],
-                                                zorder = 0, frameon=False,
-                                                #sharex=self._slider_ax,
-                                                axisbg='gray', alpha = '0.1' )
-        self._bigger_picture.set_xticklabels([]);
-        self._bigger_picture.set_xticks([])
-        self._bigger_picture.set_yticks([])
-        self._all_axes = [self._slider_ax, self._bigger_picture]
-        self._slider = None
-        self._bigger_picture_plot = None
-        self.load_data(self._data)
-
-
     def load_data(self, data):
-        """docstring for load_data""" 
         self._data = data
         self._data_length = len(self._data)
-        self._w_left = self._data_length - self._w_width
-        self._w_right = self._data_length
-
-        self._slider_ax.set_xticks(self._slider_xticks_to_display())
-        if self._slider is None:
-            self._slider = Slider(self._slider_ax, "slider", '', 0, self._data_length-1,
-                                        self._data_length-1, self._data_length/50, "%d",
-                                        self._data.index)
-            self._slider.add_observer(self)
-        else:
-            self._slider.reinit( 0, self._data_length-1, self._data_length-1,
-                    self._data_length/50, "%d", self._data.index)
-
-        if self._bigger_picture_plot:
-            self._bigger_picture_plot.pop(0).remove()
-        self._bigger_picture_plot = self._bigger_picture.plot(self._data['close'], 'y')
-        self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
-                                                                fmt='%Y-%m-%d'))
 
     @property
     def axes(self):
@@ -432,7 +399,28 @@ class TechnicalWidget(object):
 
     def draw_widgets(self):
         """ 显示控件 """
+        self._w_left = self._data_length - self._w_width
+        self._w_right = self._data_length
+        self._reset_auxiliary_widgets()
         self._update_widgets()
+
+    def _reset_auxiliary_widgets(self):
+        if self._slider is None:
+            self._slider = Slider(self._slider_ax, "slider", '', 0, self._data_length-1,
+                                        self._data_length-1, self._data_length/50, "%d",
+                                        self._data.index)
+            self._slider.add_observer(self)
+        else:
+            self._slider.reinit( 0, self._data_length-1, self._data_length-1,
+                    self._data_length/50, "%d", self._data.index)
+        if self._bigger_picture_plot:
+            self._bigger_picture_plot.pop(0).remove()
+        self._bigger_picture_plot = self._bigger_picture.plot(self._data['close'].values,
+                                                               'b')
+        self._bigger_picture.set_ylim((min(self._data['low']), max(self._data['high'])))
+        self._bigger_picture.set_xlim((0, len(self._data['close'])))
+        self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
+                                                                fmt='%Y-%m-%d'))
 
     def add_technical(self, ith_axes, technical, twinx=False):
         """ 在第ith_axes个子窗口上画指标。
@@ -535,7 +523,10 @@ class TechnicalWidget(object):
             pass
         # 遍历axes中的每个indicator，计算显示区间。
         self._w_left = int(val)
-        self._w_right = min(self._w_left+self._w_width, self._data_length+3)
+        self._w_right = self._w_left+self._w_width
+        if self._w_right >= self._data_length:
+            self._w_right = self._data_length - 1 + self._hoffset
+            self._w_left = self._w_right - self._w_width
         self._update_widgets()
 
     def on_press(self, event):
@@ -608,6 +599,24 @@ class TechnicalWidget(object):
         #self._fig.canvas.mpl_disconnect(self.cidpress)
 
     def _init_widgets(self, *args):
+
+        self._slidder_lower = self._bottom
+        self._slidder_upper = self._bottom + self._slider_height
+        self._bigger_picture_lower = self._slidder_upper
+        self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
+                                             self._slider_height], axisbg='gray')
+        self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
+                                                    self._width, self._bigger_picture_height],
+                                                zorder = 0, frameon=False,
+                                                #sharex=self._slider_ax,
+                                                axisbg='gray', alpha = '0.1' )
+        self._bigger_picture.set_xticklabels([]);
+        self._bigger_picture.set_xticks([])
+        self._bigger_picture.set_yticks([])
+        self._all_axes = [self._slider_ax, self._bigger_picture]
+        self._slider = None
+        self._bigger_picture_plot = None
+
         args = list(reversed(args))
         # 默认子窗口数量为1
         if len(args) ==  0:
@@ -657,7 +666,7 @@ class TechnicalWidget(object):
     def _set_cur_ylim(self, w_left, w_right):
         """ 设置当前显示窗口的y轴范围。
         """
-        self.voffset = 0
+        np.amin(self._data[w_left: w_right+1])
         for i in range(0, len(self.axes)):
             all_ymax = []
             all_ymin = []
@@ -675,8 +684,9 @@ class TechnicalWidget(object):
                     all_ymin.append(ymin)
                 ymax = max(all_ymax)
                 ymin = min(all_ymin)
-                ymax += self.voffset
-                ymin -= self.voffset
+                self._voffset = (ymax-ymin) / 10.0 # 画图显示的y轴留白。
+                ymax += self._voffset
+                ymin -= self._voffset
                 self.axes[i].set_ylim((ymin, ymax))
         #self.axes[i].autoscale_view()
 
@@ -695,15 +705,6 @@ class TechnicalWidget(object):
                 self._data['close'][index],
                 self._data['high'][index],
                 self._data['low'][index])
-
-    def _slider_xticks_to_display(self):
-        interval = self._data_length / 5
-        v = 0
-        xticks = []
-        for i in range(0, 6):
-            xticks.append(v)
-            v += interval
-        return xticks
 
     def _xticks_to_display(self, start, end, delta):
         xticks = []

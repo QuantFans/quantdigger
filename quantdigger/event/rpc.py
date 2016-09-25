@@ -13,18 +13,16 @@ from quantdigger.errors import InvalidRPCClientArguments
 from quantdigger.event import Event
 
 
-
-
 class EventRPCClient(object):
     def __init__(self, name, event_engine, service, event_client=None, event_server=None):
-        self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
-        self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
+        self.EVENT_FROM_CLIENT = event_client if event_client else "EVENT_FROM_%s_CLIENT" % service.upper()
+        self.EVENT_FROM_SERVER = event_server if event_server else "EVENT_FROM_%s_SERVER" % service.upper()
         self.rid = 0
         self._handlers = { }
         self._name = name
         self._handlers_lock = Lock()
         self._event_engine = event_engine
-        self._event_engine.register(self.EVENT_SERVER, self._process_apiback)
+        self._event_engine.register(self.EVENT_FROM_SERVER, self._process_apiback)
         self._pause_condition = Condition()
         self._sync_ret = None
         self._timeout = 0
@@ -52,7 +50,7 @@ class EventRPCClient(object):
             time.sleep(self._timer_sleep)
 
     def _process_apiback(self, event):
-        assert(event.route == self.EVENT_SERVER)
+        assert(event.route == self.EVENT_FROM_SERVER)
         self._timeout = 0
         rid = event.args['rid']
         try:
@@ -91,7 +89,7 @@ class EventRPCClient(object):
         self.rid += 1
         args['apiname'] = apiname
         args['rid'] = self.rid
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
+        self._event_engine.emit(Event(self.EVENT_FROM_CLIENT, args))
         with self._handlers_lock:
             self._handlers[self.rid] = handler
 
@@ -117,7 +115,7 @@ class EventRPCClient(object):
         self._timeout = timeout
         with self._handlers_lock:
             self._handlers[self.rid] = None
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
+        self._event_engine.emit(Event(self.EVENT_FROM_CLIENT, args))
         self._waiting_server_data()
         ret = self._sync_ret
         #self._sync_ret = None
@@ -138,11 +136,11 @@ class EventRPCServer(object):
         self._routes = { }
         self._routes_lock = Lock()
         # server监听的client事件
-        self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
+        self.EVENT_FROM_CLIENT = event_client if event_client else "EVENT_FROM_%s_CLIENT" % service.upper()
         # client监听的server事件
-        self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
+        self.EVENT_FROM_SERVER = event_server if event_server else "EVENT_FROM_%s_SERVER" % service.upper()
         self._event_engine = event_engine
-        self._event_engine.register(self.EVENT_CLIENT, self._process_request)
+        self._event_engine.register(self.EVENT_FROM_CLIENT, self._process_request)
         self._name = service.upper()
 
     def register(self, route, handler):
@@ -185,8 +183,9 @@ class EventRPCServer(object):
             args = { 'ret': ret,
                     'rid': rid
             }
-            log.debug('RPCServer [%s] emit %s' % (self._name, str(Event(self.EVENT_SERVER, args))))
-            self._event_engine.emit(Event(self.EVENT_SERVER, args))
+            log.debug('RPCServer [%s] emit %s' % (self._name,
+                        str(Event(self.EVENT_FROM_SERVER, args))))
+            self._event_engine.emit(Event(self.EVENT_FROM_SERVER, args))
 
 
 

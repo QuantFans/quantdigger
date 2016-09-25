@@ -6,31 +6,30 @@
 # @version 0.1
 # @date 2016-08-07
 
-import json
-import time, sys
+import sys
 import unittest
 
 from quantdigger.config import ConfigInteraction
 from quantdigger.event.rpc import EventRPCClient
 from quantdigger.interaction.backend import backend
-from quantdigger.widgets.mplotwidgets.mainwindow import  mainwindow
+from quantdigger.interaction.shell import shell
 from quantdigger.event.eventengine import ZMQEventEngine
 
 
-class TestShellCallWindowGate(object):
+class TestShell(object):
     """ WindowGate call backend """
     def __init__(self):
-        self._engine = ZMQEventEngine('TestShell')
-        self._engine.start()
-        self.gate = EventRPCClient('TestShell', self._engine,
-                                ConfigInteraction.ui_server_for_shell)
+        pass
+        #self._engine = ZMQEventEngine('TestShell')
+        #self._engine.start()
+        #self._gate = EventRPCClient('TestShell', self._engine,
+                                #ConfigInteraction.ui_server_for_shell)
+        #self._backend = EventRPCClient('TestShell', self._engine,
+                                #ConfigInteraction.backend_server_for_shell)
 
 
     def test_get_all_contracts(self):
-        ret = self.gate.sync_call("get_all_contracts")
-        print "***********" 
-        print ret
-        print "***********" 
+        print shell.get_all_contracts()
 
 
 
@@ -52,5 +51,13 @@ if __name__ == '__main__':
         ### @BUG 如果异常退出，系统可能遗留连接，导致多次回调。
         #backend.stop()
         #sys.exit(0)
-    t = TestShellCallWindowGate()
+    import time
+    t = TestShell()
     t.test_get_all_contracts()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        ## @BUG 如果异常退出，系统可能遗留连接，导致多次回调。
+        backend.stop()
+        sys.exit(0)

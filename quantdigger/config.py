@@ -9,10 +9,12 @@ settings = {
     'tick_test': False,
 }
 
-class ConfigInteraction(object):
-    backend_server_for_ui = 'backend4ui' 
-    backend_server_for_shell = "backend4shell" 
-    ui_server_for_shell = "ui4shell" 
+
+class ConfigLog(object):
+    log_level = 'INFO'
+    log_to_file = True
+    log_to_console = True
+    log_path = './log'
     
 
-__all__ = ['settings', 'ConfigInteraction' ]
+__all__ = ['settings', 'ConfigLog']

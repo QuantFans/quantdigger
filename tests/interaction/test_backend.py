@@ -10,23 +10,22 @@ import json
 import time, sys
 import unittest
 
-from quantdigger.config import ConfigInteraction
 from quantdigger.event.rpc import EventRPCClient
 from quantdigger.interaction.backend import backend
 
 class TestBackend(unittest.TestCase):
 
     ui = EventRPCClient('test_ui', backend._engine,
-                            ConfigInteraction.backend_server_for_ui)
+                            backend.SERVER_FOR_UI)
     shell = EventRPCClient('test_shell', backend._engine,
-                                ConfigInteraction.backend_server_for_shell)
+                                backend.SERVER_FOR_SHELL)
 
 
     def test_get_all_contracts(self):
         ret = self.ui.sync_call("get_all_contracts")
         ret = self.shell.sync_call("get_all_contracts")
         print "***********" 
-        print json.loads(ret)
+        print ret
         print "***********" 
 
     def test_get_pcontract(self):

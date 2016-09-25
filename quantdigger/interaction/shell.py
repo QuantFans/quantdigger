@@ -5,6 +5,7 @@ from quantdigger.event.rpc import EventRPCClient
 from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface, UIInterface
 from quantdigger.util import mlogger as log
+from quantdigger.interaction.backend import backend
 
 class Shell(BackendInterface, UIInterface):
     """ 终端接口类，可通过它在python终端上操作界面和后台代码。 """
@@ -15,11 +16,17 @@ class Shell(BackendInterface, UIInterface):
         self.gate = EventRPCClient('Shell', self._engine,
                                 ConfigInteraction.ui_server_for_shell)
 
+        self._backend = EventRPCClient('test_shell', self._engine,
+                                    ConfigInteraction.backend_server_for_shell)
+
     def get_all_pcontracts(self):
         pass
 
     def get_all_contracts(self):
-        pass
+        ret = self._backend.sync_call("get_all_contracts")
+        print "****" 
+        print ret
+        print "****" 
         #"""docstring for get_all_contracts""" 
         #print "------------------" 
         #print "get-all-contracts" 

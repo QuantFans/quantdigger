@@ -6,12 +6,12 @@
 # @version 0.5
 # @date 2016-07-10
 
-from quantdigger.config import ConfigInteraction
 from quantdigger.datastruct import PContract
 from quantdigger.event.rpc import EventRPCClient, EventRPCServer
 from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface
 from quantdigger.util import gen_logger as log
+from quantdigger.interaction.backend import backend
 
 from quantdigger.interaction.serialize import (
     deserialize_all_pcontracts,
@@ -22,14 +22,13 @@ from quantdigger.interaction.serialize import (
 
 
 class WindowGate(BackendInterface):
+    SERVER_FOR_SHELL = "ui4shell"
     def __init__(self, widget):
         log.info("Init WindowGate..")
         self._engine = ZMQEventEngine('WindowGate')
         self._engine.start()
-        self._backend = EventRPCClient('WindowGate', self._engine, 
-                ConfigInteraction.backend_server_for_ui)
-
-        self._shell_srv = EventRPCServer(self._engine, ConfigInteraction.ui_server_for_shell)
+        self._backend = EventRPCClient('WindowGate', self._engine, backend.SERVER_FOR_UI)
+        self._shell_srv = EventRPCServer(self._engine, self.SERVER_FOR_SHELL)
         self._register_functions(self._shell_srv)
         self._period = None
         self._contract = None

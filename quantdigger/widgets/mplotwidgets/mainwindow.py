@@ -11,7 +11,8 @@ from quantdigger.interaction.windowgate import WindowGate
 from quantdigger.widgets.mplotwidgets import widgets
 
 import pandas as pd
-price_data = pd.read_csv('../demo/data/IF000.csv', index_col=0, parse_dates=True)
+price_data = pd.read_csv('../demo/data/1DAY/SHFE/BB.csv', index_col=0, parse_dates=True)
+#price_data = pd.read_csv('../demo/data/IF000.csv', index_col=0, parse_dates=True)
 
 class SubWindowData(object):
     """ 子窗口的数据。"""
@@ -30,14 +31,14 @@ class MainWindow(object):
         super(MainWindow, self).__init__()
         self._fig = plt.figure()
         self._gate = WindowGate(self)
-        self._create_toolbar()
-        self._create_technical_window()
-        self._connect_signal()
-        self._cur_period = 0
-
         self._cur_contract_index = 0
         self._pcontracts_of_contract = { } # {[], []}
         self._subwindows = []
+        self._cur_period = 0
+
+        self._create_toolbar()
+        self._create_technical_window()
+        self._connect_signal()
 
         pcons = self._gate.get_all_pcontracts()
         for pcon in pcons:

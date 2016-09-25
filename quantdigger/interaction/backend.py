@@ -7,7 +7,6 @@
 # @date 2016-07-10
 
 
-from quantdigger.config import ConfigInteraction
 from quantdigger.event.rpc import EventRPCServer
 from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface
@@ -23,16 +22,17 @@ from quantdigger.interaction.serialize import (
     
 
 class Backend(BackendInterface):
+    SERVER_FOR_UI = 'backend4ui' 
+    SERVER_FOR_SHELL = "backend4shell" 
     def __init__(self):
         log.info("Init Backend..")
         self._engine = ZMQEventEngine('Backend')
         self._engine.start()
 
         self._shell_srv = EventRPCServer(self._engine, 
-                                ConfigInteraction.backend_server_for_shell)
-
+                                self.SERVER_FOR_SHELL)
         self._ui_srv = EventRPCServer(self._engine, 
-                                ConfigInteraction.backend_server_for_ui)
+                                self.SERVER_FOR_UI)
         self.register_functions(self._shell_srv)
         self.register_functions(self._ui_srv)
 
@@ -50,14 +50,14 @@ class Backend(BackendInterface):
 
     def get_all_contracts(self):
         # 模拟接口
-        data = ['BB.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
+        data = ['ONEDAY.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
         pcons =  [PContract.from_string(d) for d in data]
         contracts =  [pcon.contract for pcon in pcons]
         return serialize_all_contracts(contracts)
 
     def get_all_pcontracts(self):
         # 模拟接口
-        data = ['BB.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
+        data = ['ONEDAY.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
         pcontracts =  [PContract.from_string(d) for d in data]
         return serialize_all_pcontracts(pcontracts)
 
@@ -80,6 +80,7 @@ class Backend(BackendInterface):
     def get_strategies(self):
         return 'hello' 
 
+## @TODO singleton
 backend = Backend()
 #backend.get_all_contracts()
 #backend.get_pcontract('BB.TEST-1.MINUTE')

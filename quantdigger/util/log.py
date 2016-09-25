@@ -3,7 +3,7 @@
 import logging
 import sys
 from datetime import datetime
-from vikiqa.config import ConfigDefault
+from quantdigger.config import ConfigLog
 try:
     import curses  # type: ignore
 except ImportError:
@@ -229,8 +229,8 @@ def add_stdout_handler():
         l.addHandler(handler)
         l.setLevel(logging.DEBUG)
 
-#if ConfigDefault.log_to_console:
-add_stdout_handler()
+if ConfigLog.log_to_console:
+    add_stdout_handler()
 #if ConfigDefault.log_to_file:
     #add_log_handler(ConfigDefault.log_path)
-gen_log.setLevel(logging.getLevelName("INFO"))
+gen_log.setLevel(ConfigLog.log_level)
