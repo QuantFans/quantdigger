@@ -39,6 +39,7 @@ class ExecuteUnit(object):
         # str(PContract): DataWrapper
         if settings['source'] == 'csv':
             self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        self._default_pcontract = self.pcontracts[0]
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,
@@ -161,7 +162,7 @@ class ExecuteUnit(object):
                             self.context.update_user_vars()
                             s.on_symbol(self.context)
             # 确保单合约回测的默认值
-            self.context.switch_to_contract(self.pcontracts[0])
+            self.context.switch_to_contract(self._default_pcontract)
             self.context.on_bar = True
             # 遍历组合策略每轮数据的最后处理
             for i, combination in enumerate(self._combs):
