@@ -7,6 +7,7 @@ from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import blotter
 from quantdigger.util import elogger as logger
+from quantdigger.datastruct import PContract
 
 
 class ExecuteUnit(object):
@@ -201,19 +202,21 @@ class ExecuteUnit(object):
         max_window = -1
         logger.info("loading data...")
         pbar = ProgressBar().start()
-        for i, pcon in enumerate(strpcons):
-            # print "load data: %s" % pcon
-            if pcon in spec_date:
-                dt_start = spec_date[pcon][0]
-                dt_end = spec_date[pcon][1]
+        pcontracts = [PContract.from_string(s) for s in strpcons]
+        pcontracts = sorted(pcontracts, reverse=True)
+        for i, pcon in enumerate(pcontracts):
+            strpcon = str(pcon)
+            if strpcon in spec_date:
+                dt_start = spec_date[strpcon][0]
+                dt_end = spec_date[strpcon][1]
             assert(dt_start < dt_end)
             if n:
-                wrapper = self._data_manager.get_last_bars(pcon, n)
+                wrapper = self._data_manager.get_last_bars(strpcon, n)
             else:
-                wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
+                wrapper = self._data_manager.get_bars(strpcon, dt_start, dt_end)
             if len(wrapper) == 0:
                 continue
-            all_data[pcon] = DataContext(wrapper)
+            all_data[strpcon] = DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
             pbar.update(i*100.0/len(strpcons))
             # progressbar.log('')

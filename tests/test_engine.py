@@ -402,23 +402,21 @@ class TestDiffPeriod(unittest.TestCase):
                 on_symbol['count'] += 1
                 on_symbol['diffPeriod'].append("%s %s %s %s"%(ctx.pcontract,
                     ctx.strategy, ctx.datetime, ctx.curbar))
-                #print on_symbol['diffPeriod'][-1]
                 pass
 
             def on_bar(self, ctx):
                 on_bar['strategy'].append(ctx.strategy)
                 t = ctx['oneday.TEST-1.Minute']
                 on_bar['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
-                #print on_bar['diffPeriod'][-1]
                 t = ctx['TWODAY.TEST-5.Second']
                 on_bar['diffPeriod'].append("%s %s %s"%(t.pcontract, t.datetime, t.curbar))
-                #print on_bar['diffPeriod'][-1]
 
             def on_exit(self, ctx):
                 on_exit['strategy'].append(ctx.strategy)
                 return
 
         set_symbols(['TWODAY.TEST-5.Second', 'oneday.TEST-1.Minute'])
+        # 每个策略的没个时间点会允许一次on_bar。
         add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
         add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
         run()
@@ -452,6 +450,7 @@ class TestDiffPeriod(unittest.TestCase):
                     i+=1
                 self.assertTrue(t == source[i].rstrip('\n'), "跨周期合约引用失败")
                 i+=1
+
         self.assertTrue(['A1', 'A2', 'B1', 'B2'] * 6498 == on_bar['strategy'],
                         'on_bar测试失败！')
         self.assertFalse(['C1', 'A2', 'B1', 'B2'] * 6498 == on_bar['strategy'],
@@ -463,6 +462,29 @@ class TestDiffPeriod(unittest.TestCase):
         logger.info('-- 跨周期多组合策略测试成功 --')
 
         logger.info('***** 跨周期多组合策略测试结束 *****\n')
+
+
+class TestPContractsWithSameContract(unittest.TestCase):
+        
+    def test_case(self):
+        logger.info('***** 序列变量测试开始 *****')
+
+        class DemoStrategy(Strategy):
+            
+            def on_init(self, ctx):
+                """初始化数据""" 
+                return
+
+            def on_bar(self, ctx):
+                # 相同合约不同周期的数据，当前价总是等于最小周期的数据。
+                assert(ctx.open == ctx['TWODAY.TEST-5.Second'].open)
+                assert(ctx.close == ctx['TWODAY.TEST-5.Second'].close)
+                assert(ctx.high == ctx['TWODAY.TEST-5.Second'].high)
+                assert(ctx.low == ctx['TWODAY.TEST-5.Second'].low)
+
+        set_symbols(['TWODAY.TEST-5.Second', 'TWODAY.TEST-1.Minute'])
+        add_strategy([DemoStrategy('A1')])
+        run()
 
 
 if __name__ == '__main__':
