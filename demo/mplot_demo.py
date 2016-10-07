@@ -17,8 +17,9 @@ frame.init_layout(50, 4, 1)
 ax_candles,  ax_volume = frame.get_subwidgets()
 
 # 添加k线和交易信号。
-kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
+kwindow = widgets.CandleWindow("kwindow", 100, 50)
 candle_widget = frame.add_widget(0, kwindow, True)
+candle_widget.plot(price_data)
 
 # 添加指标
 ma = frame.add_technical(0, MA(price_data.close, 20, 'MA20', 'y', 2))
