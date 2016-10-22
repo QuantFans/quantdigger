@@ -8,6 +8,7 @@ from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import blotter
 from quantdigger.util import elogger as logger
 from quantdigger.util import deprecated
+from quantdigger.datastruct import PContract
 
 
 class ExecuteUnit(object):
@@ -36,8 +37,10 @@ class ExecuteUnit(object):
         self.pcontracts = pcontracts
         self._combs = []
         self._data_manager = DataManager()
-         #str(PContract): DataWrapper
-        self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        # str(PContract): DataWrapper
+        if settings['source'] == 'csv':
+            self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        self._default_pcontract = self.pcontracts[0]
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,
@@ -161,7 +164,7 @@ class ExecuteUnit(object):
                             self.context.update_user_vars()
                             s.on_symbol(self.context)
             # 确保单合约回测的默认值
-            self.context.switch_to_pcontract(self.pcontracts[0])
+            self.context.switch_to_pcontract(self._default_pcontract)
             self.context.on_bar = True
             # 遍历组合策略每轮数据的最后处理
             for i, combination in enumerate(self._combs):
@@ -176,8 +179,8 @@ class ExecuteUnit(object):
             # print self.context.ctx_datetime
             self.context.ctx_datetime = datetime(2100, 1, 1)
             self.context.step += 1
-            if self.context.step <= self._max_window:
-                pbar.update(self.context.step*100.0/self._max_window)
+            #if self.context.step <= self._max_window:
+                #pbar.update(self.context.step*100.0/self._max_window)
             #
             toremove = []
             for pcon, data in self._all_data.iteritems():
@@ -202,19 +205,21 @@ class ExecuteUnit(object):
         max_window = -1
         logger.info("loading data...")
         pbar = ProgressBar().start()
-        for i, pcon in enumerate(strpcons):
-            # print "load data: %s" % pcon
-            if pcon in spec_date:
-                dt_start = spec_date[pcon][0]
-                dt_end = spec_date[pcon][1]
+        pcontracts = [PContract.from_string(s) for s in strpcons]
+        pcontracts = sorted(pcontracts, reverse=True)
+        for i, pcon in enumerate(pcontracts):
+            strpcon = str(pcon)
+            if strpcon in spec_date:
+                dt_start = spec_date[strpcon][0]
+                dt_end = spec_date[strpcon][1]
             assert(dt_start < dt_end)
             if n:
-                wrapper = self._data_manager.get_last_bars(pcon, n)
+                wrapper = self._data_manager.get_last_bars(strpcon, n)
             else:
-                wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
+                wrapper = self._data_manager.get_bars(strpcon, dt_start, dt_end)
             if len(wrapper) == 0:
                 continue
-            all_data[pcon] = DataContext(wrapper)
+            all_data[strpcon] = DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
             pbar.update(i*100.0/len(strpcons))
             # progressbar.log('')
