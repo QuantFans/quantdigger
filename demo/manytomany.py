@@ -7,9 +7,6 @@
 # @date 2015-12-09
 
 
-#from quantdigger.engine.series import NumberSeries
-#from quantdigger.indicators.common import MA
-#from quantdigger.util import  pcontract
 from quantdigger import *
 
 class DemoStrategy(Strategy):
@@ -17,8 +14,8 @@ class DemoStrategy(Strategy):
     
     def on_init(self, ctx):
         """初始化数据""" 
-        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2) #, 'ma20', 'b', '1')
-        ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2) #, 'ma20', 'b', '1')
+        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2)
+        ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2)
 
     def on_bar(self, ctx):
         if ctx.curbar > 20:
@@ -42,8 +39,8 @@ class DemoStrategy2(Strategy):
     
     def on_init(self, ctx):
         """初始化数据""" 
-        ctx.ma5 = MA(ctx.close, 5, 'ma5', 'y', 2) #, 'ma20', 'b', '1')
-        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'black', 2) #, 'ma20', 'b', '1')
+        ctx.ma5 = MA(ctx.close, 5, 'ma5', 'y', 2)
+        ctx.ma10 = MA(ctx.close, 10, 'ma10', 'black', 2)
 
     def on_bar(self, ctx):
         if ctx.curbar > 10:

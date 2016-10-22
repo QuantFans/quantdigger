@@ -177,8 +177,8 @@ class ExecuteUnit(object):
             # print self.context.ctx_datetime
             self.context.ctx_datetime = datetime(2100, 1, 1)
             self.context.step += 1
-            if self.context.step <= self._max_window:
-                pbar.update(self.context.step*100.0/self._max_window)
+            #if self.context.step <= self._max_window:
+                #pbar.update(self.context.step*100.0/self._max_window)
             #
             toremove = []
             for pcon, data in self._all_data.iteritems():

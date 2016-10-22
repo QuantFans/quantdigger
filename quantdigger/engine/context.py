@@ -683,7 +683,7 @@ class Context(object):
                                          contract)
 
     def position(self, direction='long', symbol=None):
-        """ 当前仓位。
+        """ 合约当前持仓仓位。
 
         Args:
             direction (str/int): 持仓方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
@@ -703,6 +703,7 @@ class Context(object):
         return self._cur_strategy_context.position(contract, direction)
 
     def all_positions(self):
+        """ 返回所有持仓列表 [Position] """
         return self._cur_strategy_context.all_positions()
 
     def pos(self, direction='long', symbol=None):
