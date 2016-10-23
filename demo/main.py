@@ -3,11 +3,11 @@ import subprocess
 import time
 import os
 from quantdigger.util import gen_log as log
+from quantdigger.util import project_dir
 
-curdir =  os.path.abspath(os.path.dirname(__file__))
-ui_path = os.path.join(curdir, "widgets", "mplotwidgets", "mainwindow.py" )
-shell_path = os.path.join(curdir, "interaction", "ipython_config.py")
-backend_path = os.path.join(curdir, "interaction", "backend.py")
+ui_path = os.path.join(project_dir, "quantdigger", "widgets", "mplotwidgets", "mainwindow.py" )
+shell_path = os.path.join(project_dir, "quantdigger", "interaction", "ipython_config.py")
+backend_path = os.path.join(project_dir, "quantdigger", "interaction", "backend.py")
 
 log.info("启动后台..")
 backend = subprocess.Popen('python %s' % backend_path, shell=True)

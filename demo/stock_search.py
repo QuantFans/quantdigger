@@ -44,25 +44,22 @@ class DemoStrategy(Strategy):
         return
 
     def on_exit(self, ctx):
+        print("策略运行结束．")
         return
 
 
 
 if __name__ == '__main__':
     # 
-    set_symbols(['BB.SHFE-1.Minute', 'AA.SHFE-1.Minute'])
+    set_symbols(['AA.SHFE-1.Minute', 'CC.SHFE-1.Minute'])
     algo = DemoStrategy('A1')
-    profile = add_strategy([algo])
+    profile = add_strategy([algo], { 'capital': 500000.0 })
 
-    # 绘制k线，交易信号线
-    from quantdigger.digger import finance, plotting
-    # 绘制策略A1, 策略A2, 组合的资金曲线
     run()
 
+    from quantdigger.digger import finance, plotting
     curve = finance.create_equity_curve(profile.all_holdings())
-    plotting.plot_strategy(profile.data(0), profile.technicals(0),
+    plotting.plot_strategy(profile.data('AA.SHFE-1.Minute'), profile.technicals(0),
                             profile.deals(0), curve.equity.values)
     ## 绘制净值曲线
     plotting.plot_curves([curve.networth])
-
-    print "done!" 

@@ -102,7 +102,7 @@ if __name__ == '__main__':
     curve0 = finance.create_equity_curve(profile.all_holdings(0))
     curve1 = finance.create_equity_curve(profile.all_holdings(1))
     curve = finance.create_equity_curve(profile.all_holdings())
-    plotting.plot_strategy(profile.data(0), profile.technicals(0),
+    plotting.plot_strategy(profile.data(), profile.technicals(0),
                             profile.deals(0), curve0.equity.values,
                             profile.marks(0))
     #plotting.plot_curves([curve0.equity, curve1.equity, curve.equity],

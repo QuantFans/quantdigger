@@ -2,6 +2,7 @@
 # -*- coding: utf8 -*-
 import datetime
 import logbook
+import os
 import time
 import sys
 
@@ -14,6 +15,9 @@ mlogger = gen_log
 gen_logger = logbook.Logger('general')
 rlogger = logbook.Logger('runtime')
 
+
+project_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+source_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 def deprecated(f):
     def ff(*args, **kwargs):

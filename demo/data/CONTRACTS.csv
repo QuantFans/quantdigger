@@ -1,4 +1,6 @@
 code,exchange,name,spell,long_margin_ratio,short_margin_ratio,price_tick,volume_multiple
+AA,SHFE,AA,AA,1.0,1.0,0.0,1
+CC,SHFE,CC,CC,1.0,1.0,0.0,1
 002776,SZ,002776,bbl,1,1,0,1
 002765,SZ,002765,ldcd,1,1,0,1
 002772,SZ,002772,zxjy,1,1,0,1
