@@ -50,14 +50,14 @@ class Backend(BackendInterface):
 
     def get_all_contracts(self):
         # 模拟接口
-        data = ['ONEDAY.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
+        data = ['CC.SHFE-1.MINUTE', 'BB.SHFE-1.MINUTE']
         pcons =  [PContract.from_string(d) for d in data]
         contracts =  [pcon.contract for pcon in pcons]
         return serialize_all_contracts(contracts)
 
     def get_all_pcontracts(self):
         # 模拟接口
-        data = ['ONEDAY.TEST-1.MINUTE', 'AA.TEST-1.MINUTE']
+        data = ['CC.SHFE-1.MINUTE', 'BB.SHFE-1.MINUTE']
         pcontracts =  [PContract.from_string(d) for d in data]
         return serialize_all_pcontracts(pcontracts)
 
