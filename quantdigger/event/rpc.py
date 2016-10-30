@@ -68,7 +68,7 @@ class EventRPCClient(object):
                     self._sync_ret = event.args['ret']
                     self._notify_server_data()
             except Exception as e:
-                print e
+                log.error(e)
             log.debug("[RPCClient._process_apiback] 删除已经完成的任务 rid; %s" % rid)
             with self._handlers_lock:
                 del self._handlers[rid]
@@ -114,7 +114,7 @@ class EventRPCClient(object):
             self._sync_call_time = datetime.now()
         self._timeout = timeout
         with self._handlers_lock:
-            self._handlers[self.rid] = None
+            self._handlers[self.rid] = None #
         self._event_engine.emit(Event(self.EVENT_FROM_CLIENT, args))
         self._waiting_server_data()
         ret = self._sync_ret
@@ -141,6 +141,7 @@ class EventRPCServer(object):
         self.EVENT_FROM_SERVER = event_server if event_server else "EVENT_FROM_%s_SERVER" % service.upper()
         self._event_engine = event_engine
         self._event_engine.register(self.EVENT_FROM_CLIENT, self._process_request)
+        log.info("[Create RPCServer  %s]" % self.EVENT_FROM_CLIENT)
         self._name = service.upper()
 
     def register(self, route, handler):
@@ -184,7 +185,8 @@ class EventRPCServer(object):
                     'rid': rid
             }
             log.debug('RPCServer [%s] emit %s' % (self._name,
-                        str(Event(self.EVENT_FROM_SERVER, args))))
+                        str(self.EVENT_FROM_SERVER)))
+                        #str(Event(self.EVENT_FROM_SERVER, args))))
             self._event_engine.emit(Event(self.EVENT_FROM_SERVER, args))
 
 

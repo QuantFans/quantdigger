@@ -19,7 +19,6 @@ from quantdigger.interaction.serialize import (
     serialize_all_contracts,
 )
 
-    
 
 class Backend(BackendInterface):
     SERVER_FOR_UI = 'backend4ui' 
@@ -80,13 +79,12 @@ class Backend(BackendInterface):
     def get_strategies(self):
         return 'hello' 
 
-## @TODO singleton
-backend = Backend()
 #backend.get_all_contracts()
 #backend.get_pcontract('BB.TEST-1.MINUTE')
 
 
 if __name__ == '__main__':
+    backend = Backend()
     import time, sys
     try:
         while True:

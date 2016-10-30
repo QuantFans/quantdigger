@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from quantdigger.config import ConfigInteraction
 from quantdigger.event.rpc import EventRPCClient
 from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface, UIInterface
+from quantdigger.interaction import(
+    BackendInterface,
+    Backend,
+    WindowGate,
+    UIInterface
+)
 from quantdigger.util import mlogger as log
-from quantdigger.interaction.backend import backend
 
 class Shell(BackendInterface, UIInterface):
     """ 终端接口类，可通过它在python终端上操作界面和后台代码。 """
@@ -13,11 +17,13 @@ class Shell(BackendInterface, UIInterface):
         log.info("Init Shell..")
         self._engine = ZMQEventEngine('Shell')
         self._engine.start()
-        self.gate = EventRPCClient('Shell', self._engine,
-                                ConfigInteraction.ui_server_for_shell)
+        self.gate = EventRPCClient('Shell',
+                                  self._engine,
+                                  WindowGate.SERVER_FOR_SHELL)
 
-        self._backend = EventRPCClient('test_shell', self._engine,
-                                    ConfigInteraction.backend_server_for_shell)
+        self._backend = EventRPCClient('test_shell',
+                                      self._engine,
+                                      Backend.SERVER_FOR_SHELL)
 
     def get_all_pcontracts(self):
         pass
