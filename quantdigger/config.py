@@ -9,4 +9,12 @@ settings = {
     'tick_test': False,
 }
 
-__all__ = ['settings']
+
+class ConfigLog(object):
+    log_level = 'INFO'
+    log_to_file = True
+    log_to_console = True
+    log_path = './log'
+    
+
+__all__ = ['settings', 'ConfigLog']

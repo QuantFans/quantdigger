@@ -58,14 +58,17 @@ class Event(object):
 
     @classmethod
     def message_to_event(self, message):
-        route, args = message.split(']')
+        route, args = message.split('&')
         route = route[1:]
         return Event(route=route, args=json.loads(args))
 
     @classmethod
     def event_to_message(self, event):
-        return '[%s]' % event.route + json.dumps(event.args)
+        return '<%s&' % event.route + json.dumps(event.args)
 
+    @classmethod
+    def message_header(self, route):
+        return b'<%s&'%route
 
 
 class SignalEvent(Event):

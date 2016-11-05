@@ -4,5 +4,5 @@ c =  get_config()
     #'shell.py'
 #]
 c.InteractiveShellApp.exec_lines = [
-    'import shell'
+    'from quantdigger.interaction.shell import shell as qd' 
 ]

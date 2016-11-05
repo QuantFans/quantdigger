@@ -5,7 +5,11 @@ class BackendInterface(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def get_all_contracts(self, pcontract):
+    def get_all_contracts(self):
+        pass
+
+    @abstractmethod
+    def get_all_pcontracts(self):
         pass
 
     @abstractmethod

@@ -8,6 +8,7 @@ from quantdigger.engine.context import Context, DataContext, StrategyContext
 from quantdigger.engine import blotter
 from quantdigger.util import elogger as logger
 from quantdigger.util import deprecated
+from quantdigger.datastruct import PContract
 
 
 class ExecuteUnit(object):
@@ -36,8 +37,10 @@ class ExecuteUnit(object):
         self.pcontracts = pcontracts
         self._combs = []
         self._data_manager = DataManager()
-         #str(PContract): DataWrapper
-        self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        # str(PContract): DataWrapper
+        if settings['source'] == 'csv':
+            self.pcontracts = self._parse_pcontracts(self.pcontracts)
+        self._default_pcontract = self.pcontracts[0]
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,
@@ -48,7 +51,7 @@ class ExecuteUnit(object):
     def _init_strategies(self):
         for pcon, dcontext in self._all_data.iteritems():
             # switch context
-            self.context.switch_to_contract(pcon)
+            self.context.switch_to_pcontract(pcon)
             for i, combination in enumerate(self._combs):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
@@ -144,13 +147,13 @@ class ExecuteUnit(object):
         tick_test = settings['tick_test']
         # 遍历每个数据轮, 次数为数据的最大长度
         for pcon, data in self._all_data.iteritems():
-            self.context.switch_to_contract(pcon)
+            self.context.switch_to_pcontract(pcon)
             self.context.rolling_forward()
         while True:
             self.context.on_bar = False
             # 遍历数据轮的所有合约
             for pcon, data in self._all_data.iteritems():
-                self.context.switch_to_contract(pcon)
+                self.context.switch_to_pcontract(pcon)
                 if self.context.time_aligned():
                     self.context.update_system_vars()
                     # 组合遍历
@@ -161,7 +164,7 @@ class ExecuteUnit(object):
                             self.context.update_user_vars()
                             s.on_symbol(self.context)
             # 确保单合约回测的默认值
-            self.context.switch_to_contract(self.pcontracts[0])
+            self.context.switch_to_pcontract(self._default_pcontract)
             self.context.on_bar = True
             # 遍历组合策略每轮数据的最后处理
             for i, combination in enumerate(self._combs):
@@ -181,7 +184,7 @@ class ExecuteUnit(object):
             #
             toremove = []
             for pcon, data in self._all_data.iteritems():
-                self.context.switch_to_contract(pcon)
+                self.context.switch_to_pcontract(pcon)
                 has_next = self.context.rolling_forward()
                 if not has_next:
                     toremove.append(pcon)
@@ -202,19 +205,21 @@ class ExecuteUnit(object):
         max_window = -1
         logger.info("loading data...")
         pbar = ProgressBar().start()
-        for i, pcon in enumerate(strpcons):
-            # print "load data: %s" % pcon
-            if pcon in spec_date:
-                dt_start = spec_date[pcon][0]
-                dt_end = spec_date[pcon][1]
+        pcontracts = [PContract.from_string(s) for s in strpcons]
+        pcontracts = sorted(pcontracts, reverse=True)
+        for i, pcon in enumerate(pcontracts):
+            strpcon = str(pcon)
+            if strpcon in spec_date:
+                dt_start = spec_date[strpcon][0]
+                dt_end = spec_date[strpcon][1]
             assert(dt_start < dt_end)
             if n:
-                wrapper = self._data_manager.get_last_bars(pcon, n)
+                wrapper = self._data_manager.get_last_bars(strpcon, n)
             else:
-                wrapper = self._data_manager.get_bars(pcon, dt_start, dt_end)
+                wrapper = self._data_manager.get_bars(strpcon, dt_start, dt_end)
             if len(wrapper) == 0:
                 continue
-            all_data[pcon] = DataContext(wrapper)
+            all_data[strpcon] = DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
             pbar.update(i*100.0/len(strpcons))
             # progressbar.log('')

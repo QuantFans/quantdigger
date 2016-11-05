@@ -440,7 +440,7 @@ class Context(object):
     def add_strategy_context(self, ctxs):
         self._strategy_contexts.append(ctxs)
 
-    def switch_to_contract(self, pcon):
+    def switch_to_pcontract(self, pcon):
         self._cur_data_context = self._data_contexts[pcon]
 
     def time_aligned(self):
@@ -683,7 +683,7 @@ class Context(object):
                                          contract)
 
     def position(self, direction='long', symbol=None):
-        """ 当前仓位。
+        """ 合约当前持仓仓位。
 
         Args:
             direction (str/int): 持仓方向。多头 - 'long' / 1 ；空头 - 'short'  / 2
@@ -703,6 +703,7 @@ class Context(object):
         return self._cur_strategy_context.position(contract, direction)
 
     def all_positions(self):
+        """ 返回所有持仓列表 [Position] """
         return self._cur_strategy_context.all_positions()
 
     def pos(self, direction='long', symbol=None):

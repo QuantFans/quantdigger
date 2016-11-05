@@ -4,9 +4,9 @@ class SourceWrapper(object):
 
     def __init__(self, pcontract, data,  max_length):
         self.data = data
-        self._max_length = max_length
         self.curbar = -1
         self.pcontract = pcontract
+        self._max_length = max_length
 
     def __len__(self):
         return self._max_length

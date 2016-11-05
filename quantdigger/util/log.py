@@ -3,6 +3,7 @@
 import logging
 import sys
 from datetime import datetime
+from quantdigger.config import ConfigLog
 try:
     import curses  # type: ignore
 except ImportError:
@@ -23,9 +24,9 @@ else:
     unicode_type = unicode  # noqa
     basestring_type = basestring  # noqa
 
-#access_log = logging.getLogger("quantdigger.access")
-#app_log = logging.getLogger("quantdigger.application")
-gen_log = logging.getLogger("quantdigger.general")
+#access_log = logging.getLogger("axmservice.access")
+#app_log = logging.getLogger("axmservice.application")
+gen_log = logging.getLogger("vikiqa.general")
 
 def _stderr_supports_color():
     color = False
@@ -214,7 +215,8 @@ def add_log_handler(path, log_level=None):
         handler = DaemonFileLogHandler(path)
         handler.setFormatter(LogFormatter())
         l.addHandler(handler)
-        l.setLevel(log_level)
+        if log_level:
+            l.setLevel(log_level)
 
 def add_stdout_handler():
     for l in [gen_log, ]:
@@ -227,4 +229,8 @@ def add_stdout_handler():
         l.addHandler(handler)
         l.setLevel(logging.DEBUG)
 
-add_stdout_handler()
+if ConfigLog.log_to_console:
+    add_stdout_handler()
+#if ConfigDefault.log_to_file:
+    #add_log_handler(ConfigDefault.log_path)
+gen_log.setLevel(ConfigLog.log_level)

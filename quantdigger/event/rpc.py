@@ -3,58 +3,26 @@
 # @file rpc.py
 # @brief 
 # @author wondereamer
-# @version 0.1
+# @version 0.5
 # @date 2016-05-17
 import time
 from datetime import datetime
 from threading import Thread, Condition, Lock
-from quantdigger.util import elogger as log
+from quantdigger.util import mlogger as log
 from quantdigger.errors import InvalidRPCClientArguments
 from quantdigger.event import Event
 
 
-class RPCServer(object):
-    def __init__(self):
-        self._routes = { }
-        self._routes_lock = Lock()
-
-    def _process_request(self, event):
-        pass
-
-
-    def register(self, route, handler):
-        """ 注册服务函数。
-        
-        Args:
-            route (str): 服务名
-            handler (function): 回调函数
-        
-        Returns:
-            Bool. 是否注册成功。
-        """
-        if route in self._routes:
-            return False 
-        with self._routes_lock:
-            self._routes[route] = handler
-        return True
-
-    def unregister(self, route):
-        """ 注销服务函数 """
-        with self._routes_lock:
-            if route in self._routes:
-                del self._routes[route]
-
-
 class EventRPCClient(object):
     def __init__(self, name, event_engine, service, event_client=None, event_server=None):
-        self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
-        self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
+        self.EVENT_FROM_CLIENT = event_client if event_client else "EVENT_FROM_%s_CLIENT" % service.upper()
+        self.EVENT_FROM_SERVER = event_server if event_server else "EVENT_FROM_%s_SERVER" % service.upper()
         self.rid = 0
         self._handlers = { }
         self._name = name
         self._handlers_lock = Lock()
         self._event_engine = event_engine
-        self._event_engine.register(self.EVENT_SERVER, self._process_apiback)
+        self._event_engine.register(self.EVENT_FROM_SERVER, self._process_apiback)
         self._pause_condition = Condition()
         self._sync_ret = None
         self._timeout = 0
@@ -82,7 +50,7 @@ class EventRPCClient(object):
             time.sleep(self._timer_sleep)
 
     def _process_apiback(self, event):
-        assert(event.route == self.EVENT_SERVER)
+        assert(event.route == self.EVENT_FROM_SERVER)
         self._timeout = 0
         rid = event.args['rid']
         try:
@@ -100,7 +68,7 @@ class EventRPCClient(object):
                     self._sync_ret = event.args['ret']
                     self._notify_server_data()
             except Exception as e:
-                print e
+                log.error(e)
             log.debug("[RPCClient._process_apiback] 删除已经完成的任务 rid; %s" % rid)
             with self._handlers_lock:
                 del self._handlers[rid]
@@ -117,14 +85,15 @@ class EventRPCClient(object):
         if not isinstance(args, dict):
             raise InvalidRPCClientArguments(argtype=type(args))
         assert(not handler ==  None)
+        log.debug('RPCClient [%s] sync_call: %s' % (self._name, apiname))
         self.rid += 1
         args['apiname'] = apiname
         args['rid'] = self.rid
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
+        self._event_engine.emit(Event(self.EVENT_FROM_CLIENT, args))
         with self._handlers_lock:
             self._handlers[self.rid] = handler
 
-    def sync_call(self, apiname, args={ }, timeout=10):
+    def sync_call(self, apiname, args={ }, timeout=5):
         """ 给定参数args，同步调用RPCServer的apiname服务,
         返回该服务的处理结果。如果超时，返回None。
         
@@ -133,7 +102,7 @@ class EventRPCClient(object):
             args (dict): 给服务API的参数。
             handler (function): 回调函数。
         """
-        log.debug('sync_call: %s' % apiname)
+        log.debug('RPCClient [%s] sync_call: %s' % (self._name, apiname))
         if not isinstance(args, dict):
             self._timeout = 0
             self._sync_ret = None
@@ -145,8 +114,8 @@ class EventRPCClient(object):
             self._sync_call_time = datetime.now()
         self._timeout = timeout
         with self._handlers_lock:
-            self._handlers[self.rid] = None
-        self._event_engine.emit(Event(self.EVENT_CLIENT, args))
+            self._handlers[self.rid] = None #
+        self._event_engine.emit(Event(self.EVENT_FROM_CLIENT, args))
         self._waiting_server_data()
         ret = self._sync_ret
         #self._sync_ret = None
@@ -161,37 +130,64 @@ class EventRPCClient(object):
             self._pause_condition.notify()
 
 
-class EventRPCServer(RPCServer):
+class EventRPCServer(object):
     def __init__(self, event_engine, service, event_client=None, event_server=None):
         super(EventRPCServer, self).__init__()
+        self._routes = { }
+        self._routes_lock = Lock()
         # server监听的client事件
-        self.EVENT_CLIENT = event_client if event_client else "%s_CLIENT" % service.upper()
+        self.EVENT_FROM_CLIENT = event_client if event_client else "EVENT_FROM_%s_CLIENT" % service.upper()
         # client监听的server事件
-        self.EVENT_SERVER = event_server if event_server else "%s_SERVER" % service.upper()
+        self.EVENT_FROM_SERVER = event_server if event_server else "EVENT_FROM_%s_SERVER" % service.upper()
         self._event_engine = event_engine
-        self._event_engine.register(self.EVENT_CLIENT, self._process_request)
+        self._event_engine.register(self.EVENT_FROM_CLIENT, self._process_request)
+        log.info("[Create RPCServer  %s]" % self.EVENT_FROM_CLIENT)
+        self._name = service.upper()
+
+    def register(self, route, handler):
+        """ 注册服务函数。
+        
+        Args:
+            route (str): 服务名
+            handler (function): 回调函数
+        
+        Returns:
+            Bool. 是否注册成功。
+        """
+        if route in self._routes:
+            return False 
+        with self._routes_lock:
+            self._routes[route] = handler
+        return True
+
+    def unregister(self, route):
+        """ 注销服务函数 """
+        with self._routes_lock:
+            if route in self._routes:
+                del self._routes[route]
 
     def _process_request(self, event):
-        #print "rpcsever: ", event.route, event.args
         args = event.args
         rid = args['rid']
         apiname = args['apiname']
         del args['rid']
         del args['apiname']
-        log.debug('RPCServer process: %s' % apiname)
+        log.debug('RPCServer [%s] process: %s' % (self._name, apiname))
         try:
             with self._routes_lock:
                 handler = self._routes[apiname]
             ## @TODO async    
             ret = handler(**args)
         except Exception as e:
-            print e, "****" 
+            log.exception(e)
         else:
             args = { 'ret': ret,
                     'rid': rid
             }
-            log.debug('RPCServer emit')
-            self._event_engine.emit(Event(self.EVENT_SERVER, args))
+            log.debug('RPCServer [%s] emit %s' % (self._name,
+                        str(self.EVENT_FROM_SERVER)))
+                        #str(Event(self.EVENT_FROM_SERVER, args))))
+            self._event_engine.emit(Event(self.EVENT_FROM_SERVER, args))
 
 
 

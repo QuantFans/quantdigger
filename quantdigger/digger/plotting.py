@@ -31,8 +31,9 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     )
 
     # 添加k线
-    kwindow = widgets.CandleWindow("kwindow", price_data, 100, 50)
-    frame.add_widget(0, kwindow, True)
+    kwindow = widgets.CandleWindow("kwindow", 100, 50)
+    candle_widget = frame.add_widget(0, kwindow, True)
+    candle_widget.plot(price_data)
     # 交易信号。
     if deals:
         signal = mplots.TradingSignalPos(price_data, deals, lw=2)

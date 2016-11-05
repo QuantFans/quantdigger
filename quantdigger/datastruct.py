@@ -362,6 +362,7 @@ class Contract(object):
     info = None
 
     def __init__(self, str_contract):
+        ## @TODO 修改参数为（code, exchange)
         info = str_contract.split('.')
         if len(info) == 2:
             code = info[0].upper()
@@ -382,6 +383,10 @@ class Contract(object):
         else:
             logger.error('Unknown exchange: {0}', self.exchange)
             assert(False)
+    
+    @classmethod
+    def from_string(cls, strcontract):
+        return cls(strcontract)
 
     def __str__(self):
         """"""
@@ -397,6 +402,9 @@ class Contract(object):
     def __eq__(self, r):
         return self._hash == r._hash
 
+    def __cmp__(self, r):
+        return str(self) < str(r)
+
     @classmethod
     def trading_interval(cls, contract):
         """ 获取合约的交易时段。"""
@@ -405,6 +413,7 @@ class Contract(object):
     @classmethod
     def long_margin_ratio(cls, strcontract):
         try:
+            ## @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
             return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
@@ -445,8 +454,16 @@ class Period(object):
         #Months = "Months" 
         #Seasons = "Seasons" 
         #Years = "Years" 
-    periods = ["MILLISECOND", "SECOND", "MINUTE", "HOUR",
-               "DAY", "MONTH", "SEASON", "YEAR"]
+    periods = {
+        "MILLISECOND": 0, 
+        "SECOND" : 1,
+        "MINUTE": 2,
+        "HOUR": 3,
+        "DAY": 4,
+        "MONTH": 5,
+        "SEASON": 6,
+        "YEAR": 7
+    }
 
     def __init__(self, strperiod):
         period = strperiod.split('.')
@@ -455,7 +472,7 @@ class Period(object):
             time_unit = period[1].upper()
         else:
             raise PeriodTypeError
-        if time_unit not in self.periods:
+        if time_unit not in self.periods.keys():
             raise PeriodTypeError(period=time_unit)
         self.unit = time_unit
         self.count = unit_count
@@ -478,6 +495,20 @@ class Period(object):
         except KeyError:
             raise Exception('unit "%s" is not supported' % self.unit)
 
+    def __cmp__(self, r):
+        cmp_unit = Period.periods[self.unit]
+        cmp_unit_r = Period.periods[r.unit]
+        if cmp_unit < cmp_unit_r:
+            return -1
+        elif cmp_unit > cmp_unit_r:
+            return 1
+        else:
+            if self.count < r.count:
+                return -1
+            elif self.count > r.count:
+                return 1
+            else:
+                return 0
 
 class PContract(object):
     """ 特定周期的合约。
@@ -489,9 +520,9 @@ class PContract(object):
         self.contract = contract
         self.period = period
 
-    def __str__(self):
-        """ return string like 'IF000.SHEF-10.Minutes'  """
-        return "%s-%s" % (self.contract, self.period)
+    #def __str__(self):
+        #""" return string like 'IF000.SHEF-10.Minutes'  """
+        #return "%s-%s" % (self.contract, self.period)
 
     @classmethod
     def from_string(cls, strpcon):
@@ -511,6 +542,18 @@ class PContract(object):
     def __str__(self):
         return '%s-%s' % (str(self.contract), str(self.period))
 
+    def __cmp__(self, r):
+        if self.period < r.period:
+            return -1 
+        elif self.period > r.period:
+            return 1
+        else:
+            if self.contract < r.contract:
+                return -1 
+            elif self.contract > r.contract:
+                return 1
+            else:
+                return 0
 
 class PositionKey(object):
     def __init__(self, contract, direction):

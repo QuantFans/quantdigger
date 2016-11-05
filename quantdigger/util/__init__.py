@@ -2,16 +2,22 @@
 # -*- coding: utf8 -*-
 import datetime
 import logbook
+import os
 import time
 import sys
+
+from log import gen_log
 
 logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
 dlogger = logbook.Logger('data')
-mlogger = logbook.Logger('msg')
+mlogger = gen_log
 gen_logger = logbook.Logger('general')
 rlogger = logbook.Logger('runtime')
 
+
+project_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+source_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 def deprecated(f):
     def ff(*args, **kwargs):
@@ -19,7 +25,6 @@ def deprecated(f):
         return f(*args, **kwargs)
     return ff
 
-mlogger.level = logbook.INFO
 gen_logger.level = logbook.INFO
 
 #def api(method):
