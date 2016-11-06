@@ -72,6 +72,13 @@ class EventEngine(object):
     def register(self, route, handler):
         """注册事件处理函数监听,
           不重复注册同一事件的同样回调。
+        
+        Args:
+            route (str): 事件名
+            handler (function): 回调函数
+        
+        Returns:
+            Bool. 是否注册成功。
         """
         if route not in self._routes:
             self._routes[route] = [handler]
@@ -83,8 +90,7 @@ class EventEngine(object):
         return False
 
     def unregister(self, route, handler):
-        """注销事件处理函数监听
-        """
+        """ 注销事件处理函数监听 """
         try:
             handlerList = self._routes[route]
             # 如果该函数存在于列表中，则移除
@@ -128,7 +134,6 @@ class QueueEventEngine(EventEngine):
     def __init__(self, name):
         # 事件队列
         EventEngine.__init__(self)
-        #Timer.__init__(self, self)
         self._queue = Queue()
         self._thread = Thread(target=self._run)
         self._thread.daemon = True

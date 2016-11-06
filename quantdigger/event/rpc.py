@@ -34,6 +34,7 @@ class EventRPCClient(object):
         timer.start()
 
     def _run_timer(self):
+        ## @TODO 用python自带的Event替代。
         while True:
             if not self._timeout == 0:
                 with self._sync_call_time_lock:
