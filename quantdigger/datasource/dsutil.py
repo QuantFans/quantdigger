@@ -16,8 +16,8 @@ class _DatasourceTrunk(IoCTrunk):
                     cls=self.cls, name=name)
 
     def construct(self):
-        a = [ConfigUtil.get(k) for k in self.args]
-        ka = {k: ConfigUtil.get(name) for k, name in self.kwargs.items()}
+        a = [ConfigUtil.get(k, None) for k in self.args]
+        ka = {k: ConfigUtil.get(name, None) for k, name in self.kwargs.items()}
         return self.cls(*a, **ka)
 
 

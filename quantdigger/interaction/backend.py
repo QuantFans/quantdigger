@@ -74,7 +74,8 @@ class Backend(BackendInterface):
 
     def get_technicals(self):
         """ 获取系统的所有指标。 """
-        return
+        from quantdigger.technicals import get_techs
+        return get_techs()
 
     def get_strategies(self):
         return 'hello' 

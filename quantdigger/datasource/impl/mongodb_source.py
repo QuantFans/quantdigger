@@ -16,7 +16,7 @@ class MongoDBSource(DatasourceAbstract):
     def __init__(self, address, port, dbname):
         # TODO address, port
         self._client = MongoClient()
-        self._db = self._client([dbname])
+        self._db = self._client[dbname]
 
     def _get_collection_name(self, period, exchange, code):
         return '{period}.{exchange}.{code}'.format(
@@ -24,7 +24,12 @@ class MongoDBSource(DatasourceAbstract):
             exchange=exchange,
             code=code)
 
+    def _parse_collection_name(self, collection_name):
+        return collection_name.split('.')
+
     def get_bars(self, pcontract, dt_start, dt_end):
+        dt_start = pd.to_datetime(dt_start)
+        dt_end = pd.to_datetime(dt_end)
         id_start, _ = datautil.encode2id(pcontract.period, dt_start)
         id_end, _ = datautil.encode2id(pcontract.period, dt_end)
         colname = self._get_collection_name(
@@ -45,8 +50,21 @@ class MongoDBSource(DatasourceAbstract):
 
     def get_contracts(self):
         colname = 'contract'
-        cursor = self.db[colname].find()
+        cursor = self._db[colname].find()
         return pd.DataFrame(list(cursor))
 
     def get_code2strpcon(self):
-        raise NotImplementedError
+        symbols = {}
+        period_exchange2strpcon = {}
+        names = self._db.collection_names()
+        symbols = {}
+        period_exchange2strpcon = {}
+        for name in filter(lambda n: n == 'system.indexes', names):
+            period, exch, code = self._parse_collection_names(name)
+            period_exch = '%s-%s' % (exch, period)
+            strpcon = '%s.%s' % (code, period_exch)
+            lst = symbols.setdefault(code, [])
+            lst.append(strpcon)
+            lst = period_exchange2strpcon(period_exch, [])
+            lst.append(strpcon)
+            return symbols, period_exchange2strpcon
