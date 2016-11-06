@@ -64,6 +64,7 @@ class Event(object):
 
     @classmethod
     def event_to_message(self, event):
+        # 消息头 ＋ json字符串
         return '<%s&' % event.route + json.dumps(event.args)
 
     @classmethod

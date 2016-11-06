@@ -5,11 +5,14 @@
 # @author wondereamer
 # @version 0.5
 # @date 2016-05-17
-import zmq  
+
+import abc
 import time
 from time import sleep
 from threading import Thread, Condition, Lock
+import thread
 from Queue import Queue, Empty
+import zmq  
 
 from quantdigger.util import mlogger as log
 from quantdigger.event import Event
@@ -54,8 +57,10 @@ class Timer(object):
             sleep(self._timer_sleep)
 
 
-class EventEngine(object):
-    """docstring for Eve"""
+class EventEngine:
+
+    __metaclass__ =  abc.ABCMeta
+
     def __init__(self):
         self._active = False
         self._routes = {}
@@ -72,6 +77,13 @@ class EventEngine(object):
     def register(self, route, handler):
         """注册事件处理函数监听,
           不重复注册同一事件的同样回调。
+        
+        Args:
+            route (str): 事件名
+            handler (function): 回调函数
+        
+        Returns:
+            Bool. 是否注册成功。
         """
         if route not in self._routes:
             self._routes[route] = [handler]
@@ -83,8 +95,7 @@ class EventEngine(object):
         return False
 
     def unregister(self, route, handler):
-        """注销事件处理函数监听
-        """
+        """ 注销事件处理函数监听 """
         try:
             handlerList = self._routes[route]
             # 如果该函数存在于列表中，则移除
@@ -96,25 +107,25 @@ class EventEngine(object):
         except KeyError:
             return
         
+    @abc.abstractmethod
     def emit(self, event):
         """向事件队列中存入事件"""
         raise NotImplementedError
         
+    @abc.abstractmethod
     def _run(self):
         """引擎运行"""
         raise NotImplementedError
             
     def _process(self, event):
-        """处理事件"""
+        """ 基于多线程的处理事件 """
         if event.route not in self._routes:
             log.warning("事件%s 没有被处理" % event.route)
             return
         for handler in self._routes[event.route]:
             try:
                 log.debug("处理事件%s" % event.route)
-                thread = Thread(target=handler, args=(event,))
-                thread.daemon = True
-                thread.start()
+                thread.start_new_thread(handler, (event,))
                 #handler(event)    
             except Exception as e:
                 log.error(e)
@@ -128,7 +139,6 @@ class QueueEventEngine(EventEngine):
     def __init__(self, name):
         # 事件队列
         EventEngine.__init__(self)
-        #Timer.__init__(self, self)
         self._queue = Queue()
         self._thread = Thread(target=self._run)
         self._thread.daemon = True

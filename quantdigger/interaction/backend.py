@@ -21,6 +21,7 @@ from quantdigger.interaction.serialize import (
 
 
 class Backend(BackendInterface):
+    ## @TODO singleton
     SERVER_FOR_UI = 'backend4ui' 
     SERVER_FOR_SHELL = "backend4shell" 
     def __init__(self):
