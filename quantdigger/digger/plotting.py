@@ -56,7 +56,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
                 line_pieces = [[v[2]], [v[3]], v[4], v[5], v[6]]
                 line = []
                 for v in values[1: ]:
-                    ## @TODO 如果是带“点”的，以点的特征聚类，会减少indicator对象的数目
+                    ## @TODO 如果是带“点”的，以点的特征聚类，会减少绘图对象的数目
                     x, y, style, lw, ms = v[2], v[3], v[4], v[5], v[6]
                     if style != line_pieces[2] or lw != line_pieces[3] or ms != line_pieces[4]:
                         line.append(line_pieces)
