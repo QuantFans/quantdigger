@@ -41,7 +41,7 @@ class Candles(object):
     """
     画蜡烛线。
     """
-    def __init__(self, tracker, name='candle',
+    def __init__(self, data, tracker, name='candle',
                  width=0.6, colorup='r', colordown='g',
                  lc='k', alpha=1):
         """ Represent the open, close as a bar line and high low range as a
@@ -61,19 +61,27 @@ class Candles(object):
         return value is lineCollection, barCollection
         """
         # super(Candles, self).__init__(tracker, name)
-        self.data = None
+        self.data = data
         self.name = name
         self.width = width
         self.colorup = colorup
         self.colordown = colordown
         self.lc = lc
         self.alpha = alpha
+        self.lineCollection = []
+        self.barCollection = []
 
     # note this code assumes if any value open, close, low, high is
     # missing they all are missing
     @override_attributes
     def plot(self, widget, data, width=0.6, 
              colorup='r', colordown='g', lc='k', alpha=1):
+
+        if self.lineCollection:
+            self.lineCollection.remove()
+        if self.barCollection:
+            self.barCollection.remove()
+
         self.set_yrange(data.low.values, data.high.values)
         self.data = data
         """docstring for plot"""
@@ -108,13 +116,13 @@ class Candles(object):
         lw = 0.5,   # and here
         r, g, b = colorConverter.to_rgb(self.lc)
         linecolor = r, g, b, self.alpha
-        lineCollection = LineCollection(rangeSegments,
+        self.lineCollection = LineCollection(rangeSegments,
                                         colors=(linecolor,),
                                         linewidths=lw,
                                         antialiaseds=useAA,
                                         zorder=0)
 
-        barCollection = PolyCollection(barVerts,
+        self.barCollection = PolyCollection(barVerts,
                                        facecolors=colors,
                                        edgecolors=colors,
                                        antialiaseds=useAA,
@@ -127,12 +135,12 @@ class Candles(object):
         #ax.update_datalim(corners)
         widget.autoscale_view()
         # add these last
-        widget.add_collection(barCollection)
-        widget.add_collection(lineCollection)
+        widget.add_collection(self.barCollection)
+        widget.add_collection(self.lineCollection)
 
         #ax.plot(self.data.close, color = 'y')
         #lineCollection, barCollection = None, None
-        return lineCollection, barCollection
+        return self.lineCollection, self.barCollection
 
 
     def set_yrange(self, lower, upper=[]):

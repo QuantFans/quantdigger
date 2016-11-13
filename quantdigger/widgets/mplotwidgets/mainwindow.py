@@ -9,6 +9,7 @@ from quantdigger.technicals.common import MA, Volume
 from quantdigger.util import gen_logger as log
 from quantdigger.interaction.windowgate import WindowGate
 from quantdigger.widgets.mplotwidgets import widgets
+from quantdigger.widgets.mplotwidgets.mplots import Candles
 
 import pandas as pd
 price_data = pd.read_csv('../demo/data/1DAY/SHFE/BB.csv', index_col=0, parse_dates=True)
@@ -49,10 +50,9 @@ class MainWindow(object):
     def show_data(self, str_pcontract):
         """""" 
         pcon, data = self._gate.get_pcontract(str_pcontract)
-        self.candle_widget.plot(data)
+        self.candle_widget.plot_with_plotter('candles', data)
         self._frame.load_data(data)
         self.frame.draw_widgets()
-        print "show_data" , "**" 
         return
 
     def _create_toolbar(self):
@@ -63,16 +63,17 @@ class MainWindow(object):
 
     def _create_technical_window(self):
         self.frame = widgets.TechnicalWidget(self._fig, price_data, height=0.85)
-        self.frame.init_layout(50, 4, 1)
-        ax_candles,  ax_volume = self.frame.get_subwidgets()
+        axes = self.frame.init_layout(50, 4, 1)
+        ax_candles,  ax_volume = axes[0], axes[1]
         # at most 5 ticks, pruning the upper and lower so they don't overlap
         # with other ticks
         ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
 
         # 添加k线和交易信号。
-        kwindow = widgets.CandleWindow("kwindow", 100, 50)
-        self.candle_widget = self.frame.add_widget(0, kwindow, True)
-        self.candle_widget.plot(price_data)
+        subwidget1 = widgets.FrameWidget(axes[0], "subwidget1", 100, 50)
+        candles = Candles(price_data, None, 'candles')
+        subwidget1.add_plotter(candles, False)
+        self.candle_widget = self.frame.add_widget(0, subwidget1, True)
         ## 添加指标
         #self.frame.add_technical(0, MA(price_data.close, 20, 'MA20', 'y', 2))
         #self.frame.add_technical(0, MA(price_data.close, 30, 'MA30', 'b', 2))
@@ -105,7 +106,7 @@ class MainWindow(object):
             pcon = self._pcontracts_of_contract[contract][self._cur_period]
             pcon, data = self._gate.get_pcontract(str(pcon))
             self.frame.load_data(data)
-            self.candle_widget.plot(data)
+            self.candle_widget.plot_with_plotter('candles', data)
             self.frame.draw_widgets()
             print "next" , str(pcon), "**" 
         else:
@@ -119,7 +120,7 @@ class MainWindow(object):
             pcon = self._pcontracts_of_contract[contract][self._cur_period]
             pcon, data = self._gate.get_pcontract(str(pcon))
             self.frame.load_data(data)
-            self.candle_widget.plot(data)
+            self.candle_widget.plot_with_plotter('candles', data)
             self.frame.draw_widgets()
             print "prev" , str(pcon), "**" 
         else:

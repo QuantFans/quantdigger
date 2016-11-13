@@ -6,7 +6,6 @@ from matplotlib.ticker import Formatter
 import matplotlib.ticker as mticker
 import numpy as np
 
-from quantdigger.widgets.mplotwidgets.mplots import Candles
 from quantdigger.util import gen_log as log
 
 
@@ -87,7 +86,6 @@ class Slider(AxesWidget):
         self.label = ax.text(-0.02, 0.5, label, transform=ax.transAxes,
                              verticalalignment='center',
                              horizontalalignment='right')
-        self.ax = ax
         self.valtext = None
         self.poly = None
         self.reinit(valmin, valmax, valinit, width, valfmt, time_index, **kwargs)
@@ -256,23 +254,23 @@ class Slider(AxesWidget):
                 print(e)
 
 
-class CandleWindow(object):
+class FrameWidget(AxesWidget):
     """
     蜡烛线控件。
 
     """
-    def __init__(self, name, wdlength, min_wdlength):
+    def __init__(self, ax, name, wdlength, min_wdlength):
         """
         Create a slider from *valmin* to *valmax* in axes *ax*
 
         """
-        #AxesWidget.__init__(self, ax)
+        AxesWidget.__init__(self, ax)
         self.name = name
         self.wdlength = wdlength
         self.min_wdlength = min_wdlength
         self.voffset = 0
-        self.lines = None
-        self.rects = None
+        self.connect()
+        self.plotters = { }
 
         # 当前显示的范围。
         #self.xmax = len(data)
@@ -283,25 +281,46 @@ class CandleWindow(object):
         self.cnt = 0
         self.observers = {}
 
-    def init_plot(self, ax):
-        """ frame.add_widget调用 """
-        self.ax = ax
-        #ax.set_xlim((self.xmin, self.xmax))
-        #ax.set_ylim((self.ymin, self.ymax))
-        self.candles = Candles(None, self.name)
-        self.candles.twinx = False
-        self.connect()
-        return self.candles
+    def add_plotter(self, plotter, twinx):
+        """ 添加并绘制, 不允许重名的plotter """
+        if plotter.name in self.plotters:
+            raise 
+        if not self.plotters:
+            twinx = False 
+        if twinx:
+            twaxes = self.ax.twinx()
+            plotter.plot(twaxes)
+            plotter.ax = twaxes
+            plotter.twinx = True
+        else:
+            plotter.plot(self.ax)
+            plotter.ax = self.ax
+            plotter.twinx = False
+        self.plotters[plotter.name] = plotter
 
-    def plot(self, data):
-        if self.lines:
-            self.lines.remove()
-        if self.rects:
-            self.rects.remove()
-        self.lines, self.rects = self.candles.plot(self.ax, data)
+    def plot_with_plotter(self, plotter_name, *args):
+        self.plotters[plotter_name].plot(self.ax, *args)
+
+    def set_ylim(self, w_left, w_right):
+        all_ymax = []
+        all_ymin = []
+        for plotter in self.plotters.values():
+            if plotter.twinx:
+                continue
+            ymax, ymin = plotter.y_interval(w_left, w_right)
+            ## @todo move ymax, ymin 计算到plot中去。
+            all_ymax.append(ymax)
+            all_ymin.append(ymin)
+        ymax = max(all_ymax)
+        ymin = min(all_ymin)
+        self._voffset = (ymax-ymin) / 10.0 # 画图显示的y轴留白。
+        ymax += self._voffset
+        ymin -= self._voffset
+        self.ax.set_ylim((ymin, ymax))
 
     def on_slider(self, val, event):
         #'''docstring for update(val)'''
+        ## @TODO _set_ylim 分解到这里
         pass
         #val = int(val)
         #self.xmax = val
@@ -364,7 +383,7 @@ class TechnicalWidget(object):
         """
         self.name = "MultiWidgets"
         self._fig = fig
-        self._subwidget2plots = { } # 窗口坐标到指标的映射。
+        self._subwidgets = { }
         self._cursor = None
         self._cursor_axes_index = { }
         self._hoffset = 1
@@ -375,6 +394,7 @@ class TechnicalWidget(object):
         self._bigger_picture_height = 0.3    # 鸟瞰图高度
         self._all_axes = []
         self.load_data(data)
+        self._cursor_axes = { }
 
     def init_layout(self, w_width, *args):
         # 布局参数
@@ -385,6 +405,7 @@ class TechnicalWidget(object):
         self._cursor = MultiCursor(self._fig.canvas, self.axes,
                                     color='r', lw=2, horizOn=False,
                                     vertOn=True)
+        return self.axes
 
     def load_data(self, data):
         self._data = data
@@ -422,90 +443,31 @@ class TechnicalWidget(object):
         self._slider_ax.xaxis.set_major_formatter(TimeFormatter(self._data.index,
                                                                 fmt='%Y-%m-%d'))
 
-    def add_technical(self, ith_axes, technical, twinx=False):
-        """ 在第ith_axes个子窗口上画指标。
-
-        Args:
-            ith_axes (Axes): 第ith_axes个窗口。
-            technical  (technical): 指标.
-            twinx  (Bool): 是否是独立坐标。
-            ymain  (Bool): 是否作为y轴计算的唯一参考。
-
-        Returns:
-            technical. 传进来的指标变量。
-        """
-        try:
-            ax_plots = self._subwidget2plots.get(ith_axes, [])
-            if not ax_plots:
-                twinx = False 
-            if twinx:
-                twaxes = self.axes[ith_axes].twinx()
-                twaxes.format_coord = self._format_coord
-                self.axes.append(twaxes)
-                technical.plot(twaxes)
-                self._cursor_axes_index[ith_axes] = len(self.axes) - 1
-                axes = [self.axes[i] for i in self._cursor_axes_index.values()]
-                axes = list(reversed(axes))
-                self._cursor = MultiCursor(self._fig.canvas, axes,
-                                            color='r', lw=2, horizOn=False,
-                                            vertOn=True)
-            else:
-                technical.plot(self.axes[ith_axes])
-            technical.twinx = twinx
-            return self.register_technical(ith_axes, technical)
-        except Exception as e:
-            log.error(technical.name)
-            raise e
-
-    def register_technical(self, ith_axes, technical):
-        """ 注册指标。
-            axes到指标的映射。
-        """
-        ax_plots = self._subwidget2plots.get(ith_axes, [])
-        if ax_plots:
-            ax_plots.append(technical)
-        else:
-            self._subwidget2plots[ith_axes] = [technical]
-        return technical
-
-    def replace_technical(self, ith_axes, technical):
-        """ 在ith_axes上画指标technical, 删除其它指标。
-
-        Args:
-            ith_axes (Axes): 第i个窗口。
-            technical  (TechnicalBase): 指标.
-
-        Returns:
-            TechnicalBase. 传进来的指标变量。
-        """
-        try:
-            ## @todo remove paint
-            self._subwidget2plots[ith_axes] = [technical]
-            technical.plot(self.axes[ith_axes])
-            return technical
-        except Exception as e:
-            log.exception()
-            raise e
-
-    def add_widget(self, ith_axes, widget, ymain=False, connect_slider=False):
+    def add_widget(self, ith_subwidget, widget, ymain=False, connect_slider=False):
         """ 添加一个能接收消息事件的控件。
 
         Args:
-            ith_axes (Axes): 第i个窗口。
+            ith_subwidget (int.): 子窗口序号。
             widget (AxesWidget): 控件。
 
         Returns:
             AxesWidget. widget
         """
-        try:
-            plot = widget.init_plot(self.axes[ith_axes])
-            self.register_technical(ith_axes, plot)
-            if connect_slider:
-                self._slider.add_observer(widget)
-            return widget
-        except Exception, e:
-            log.exception()
-            raise e
+        # 对新创建的Axes做相应的处理
+        # 并且调整Cursor
+        for plotter in widget.plotters.values():
+            if plotter.twinx:
+                plotter.ax.format_coord = self._format_coord
+                self.axes.append(plotter.ax)
+                #self._cursor_axes[ith_subwidget] = plotter.ax
+                self._cursor = MultiCursor(self._fig.canvas,
+                        self._cursor_axes.values(),
+                                            color='r', lw=2, horizOn=False,
+                                            vertOn=True)
+        self._subwidgets[ith_subwidget] = widget
+        if connect_slider:
+            self._slider.add_observer(widget)
+        return widget
 
     def on_slider(self, val, event):
         """ 滑块事件处理。 """
@@ -643,8 +605,9 @@ class TechnicalWidget(object):
         for ax in self.axes:
             ax.get_yaxis().get_major_formatter().set_useOffset(False)
             # ax.get_yaxis().get_major_formatter().set_scientific(False)
-        for ax in self.axes:
+        for i, ax in enumerate(self.axes):
             ax.format_coord = self._format_coord
+            self._cursor_axes[i] = ax
         delta = (self._data.index[1] - self._data.index[0])
         self.axes[0].xaxis.set_major_formatter(TimeFormatter(self._data.index, delta))
         self.axes[0].set_xticks(self._xticks_to_display(0, self._data_length, delta));
@@ -652,44 +615,20 @@ class TechnicalWidget(object):
             [label.set_visible(False) for label in ax.get_xticklabels()]
         for i in range(0, len(self.axes)):
             self._cursor_axes_index[i] = i
-
-    def get_subwidgets(self):
-        """ 返回子窗口。 """
-        return self.axes.__iter__()
+        
 
     def _update_widgets(self):
         """ 改变可视区域， 在坐标移动后被调用。"""
         self.axes[0].set_xlim((self._w_left, self._w_right))
-        self._set_cur_ylim(self._w_left, self._w_right)
+        self._set_ylim(self._w_left, self._w_right)
         self._fig.canvas.draw()
 
-    def _set_cur_ylim(self, w_left, w_right):
+    def _set_ylim(self, w_left, w_right):
         """ 设置当前显示窗口的y轴范围。
         """
-        np.amin(self._data[w_left: w_right+1])
-        for i in range(0, len(self.axes)):
-            all_ymax = []
-            all_ymin = []
-            try:
-                plots = self._subwidget2plots[i]
-            except KeyError:
-                pass
-            else:
-                for plot in plots:
-                    if plot.twinx:
-                        continue
-                    ymax, ymin = plot.y_interval(w_left, w_right)
-                    ## @todo move ymax, ymin 计算到plot中去。
-                    all_ymax.append(ymax)
-                    all_ymin.append(ymin)
-                ymax = max(all_ymax)
-                ymin = min(all_ymin)
-                self._voffset = (ymax-ymin) / 10.0 # 画图显示的y轴留白。
-                ymax += self._voffset
-                ymin -= self._voffset
-                self.axes[i].set_ylim((ymin, ymax))
-        #self.axes[i].autoscale_view()
-
+        for subwidget in self._subwidgets.values():
+            subwidget.set_ylim(w_left, w_right)
+        
     def _format_coord(self, x, y):
         """ 状态栏信息显示 """
         index = x

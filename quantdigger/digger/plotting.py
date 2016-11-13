@@ -4,6 +4,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 from quantdigger.widgets.mplotwidgets import widgets, mplots
+from quantdigger.widgets.mplotwidgets.mplots import Candles
 from quantdigger.technicals import Line, LineWithX, Volume
 
 
@@ -25,27 +26,36 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     print "plotting.."
     fig = plt.figure()
     frame = widgets.TechnicalWidget(fig, price_data)
-    frame.init_layout(
+    axes = frame.init_layout(
         50,         # 窗口显示k线数量。
          4, 1     # 两个1:1大小的窗口
     )
 
+    # 绘制第一个窗口
     # 添加k线
-    kwindow = widgets.CandleWindow("kwindow", 100, 50)
-    candle_widget = frame.add_widget(0, kwindow, True)
-    candle_widget.plot(price_data)
+    subwidget1 = widgets.FrameWidget(axes[0], "subwidget1", 100, 50)
+    candles = Candles(price_data, None, 'candles')
+    subwidget1.add_plotter(candles, False)
+    #subwidget1.plot(price_data)
     # 交易信号。
     if deals:
         signal = mplots.TradingSignalPos(price_data, deals, lw=2)
-        frame.add_technical(0, signal)
+        subwidget1.add_plotter(signal, False)
     if len(curve) > 0:
         curve = Line(curve)
-        frame.add_technical(0, curve, True)
-    frame.add_technical(1, Volume(price_data.open, price_data.close, price_data.volume))
-    ## 添加指标
+        subwidget1.add_plotter(curve, True)
+    # 添加指标
     for name, indic in indicators.iteritems():
-        frame.add_technical(0, indic)
-    ## 绘制标志
+        subwidget1.add_plotter(indic, False)
+
+    # 绘制第2个窗口
+    subwidget2 = widgets.FrameWidget(axes[1], "subwidget2", 100, 50)
+    volume_plotter = Volume(price_data.open, price_data.close, price_data.volume)
+    subwidget2.add_plotter(volume_plotter, False)
+
+    subwidgets = [subwidget1, subwidget2]
+
+    ### 绘制标志
     if marks:
         if marks[0]:
             # plot lines
@@ -69,14 +79,18 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
                     ## @TODO 这里的sytle明确指出有点奇怪，不一致。
                     x, y, style, lw, marksize = v[0], v[1], v[2], v[3], v[4]
                     curve = LineWithX(x, y, style=style, lw=lw, ms=marksize)
-                    frame.add_technical(ith_ax, curve, twinx)
+                    subwidgets[ith_ax].add_plotter(curve, twinx)
         if marks[1]:
             # plot texts
             for name, values in marks[1].iteritems():
                 for v in values:
                     ith_ax, x, y, text = v[0], v[1], v[2], v[3]
                     color, size, rotation = v[4], v[5], v[6]
+                    ## @TODO move to text plotter
                     frame.plot_text(name, ith_ax, x, y, text, color, size, rotation)
+
+    frame.add_widget(0, subwidget1, True)
+    frame.add_widget(1, subwidget2, True)
     frame.draw_widgets()
     plt.show()
 
