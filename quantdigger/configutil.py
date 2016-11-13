@@ -9,5 +9,8 @@ class ConfigUtil(object):
         settings[key] = val
 
     @staticmethod
-    def get(key):
-        return settings[key]
+    def get(key, d=KeyError):
+        if d == KeyError:
+            return settings[key]
+        else:
+            return settings.get(key, d)

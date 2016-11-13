@@ -21,6 +21,9 @@ class IoCContainer(object):
             raise Exception(msg + str(self))
         self._container[key] = obj
 
+    def keys(self):
+        return self._container.keys()
+
     def __str__(self):
         return 'IoC: %s' % str(self._container)
 
@@ -39,13 +42,18 @@ class IoCTrunk(object):
         raise NotImplementedError
 
 
-def register_to(ioc_container, trunk_cls):
+def register_to(ioc_container, trunk_cls=None):
     def register(name, *args, **kwargs):
-        def wrapper(cls):
-            trunk = trunk_cls(cls, args, kwargs)
-            trunk.on_register(name)
-            ioc_container.register(name, trunk)
-            return cls
+        def wrapper(obj):
+            if trunk_cls is not None:
+                # obj is a class
+                trunk = trunk_cls(obj, args, kwargs)
+                trunk.on_register(name)
+                ioc_container.register(name, trunk)
+            else:
+                # obj is an instance
+                ioc_container.register(name, obj)
+            return obj
         return wrapper
     return register
 

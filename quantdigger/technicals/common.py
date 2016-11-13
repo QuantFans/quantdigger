@@ -10,8 +10,10 @@ import matplotlib.finance as finance
 from quantdigger.technicals.base import \
     TechnicalBase, ndarray, tech_init
 from quantdigger.widgets.plotinterface import PlotInterface, plot_init
+from quantdigger.technicals.techutil import register_tech
 
 
+@register_tech('MA')
 class MA(TechnicalBase):
     """ 移动平均线指标。 """
     @tech_init
@@ -43,6 +45,7 @@ class MA(TechnicalBase):
         self.plot_line(self.values, self.style, lw=self.lw)
 
 
+@register_tech('BOLL')
 class BOLL(TechnicalBase):
     """ 布林带指标。 """
     @tech_init
