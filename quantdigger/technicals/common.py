@@ -9,7 +9,7 @@ import talib
 import matplotlib.finance as finance
 from quantdigger.technicals.base import \
     TechnicalBase, ndarray, tech_init
-from quantdigger.widgets.plotinterface import PlotInterface, plot_init
+from quantdigger.widgets.plotter import Plotter, plot_init
 from quantdigger.technicals.techutil import register_tech
 
 
@@ -163,7 +163,7 @@ class BOLL(TechnicalBase):
         #raise  NotImplementedError
 
 
-class Volume(PlotInterface):
+class Volume(Plotter):
     ## @TODO 改成技术指标
     """ 柱状图。 """
     @plot_init
@@ -178,7 +178,7 @@ class Volume(PlotInterface):
                                self.colorup, self.colordown, self.width)
 
 ## @TODO merge Line and LineWithX and move to plotting module
-class Line(PlotInterface):
+class Line(Plotter):
     """ 画线 """
     @plot_init
     def __init__(self, ydata, name='Line', style='black', lw=1):
@@ -190,7 +190,7 @@ class Line(PlotInterface):
         self.plot_line(self.values, self.style, lw=self.lw)
 
 
-class LineWithX(PlotInterface):
+class LineWithX(Plotter):
     """ 画线 """
     @plot_init
     def __init__(self, xdata, ydata, name='LineWithX', style='black', lw=1, ms=1):

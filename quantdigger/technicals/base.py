@@ -10,7 +10,7 @@ import inspect
 import numpy as np
 import pandas
 from quantdigger.engine import series
-from quantdigger.widgets.plotinterface import PlotInterface
+from quantdigger.widgets.plotter import Plotter
 from quantdigger.errors import SeriesIndexError, DataFormatError
 
 
@@ -67,7 +67,7 @@ def tech_init(method):
     #return _algo
 
 
-class TechnicalBase(PlotInterface):
+class TechnicalBase(Plotter):
     """
     指标基类。
 
