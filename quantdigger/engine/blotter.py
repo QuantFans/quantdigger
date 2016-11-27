@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 import copy
 from abc import ABCMeta, abstractmethod
+
 from quantdigger.util import elogger as logger
 from quantdigger.errors import TradingError
 from quantdigger.engine.api import SimulateTraderAPI
 from quantdigger.event import Event
-from quantdigger.config import settings
 from quantdigger.datastruct import (
     Direction,
     OneDeal,
     Order,
-    PContract,
     Position,
     PositionKey,
     PriceType,
@@ -282,7 +281,6 @@ class SimpleBlotter(Blotter):
     def all_holdings(self):
         """ 账号历史情况，最后一根k线处平所有仓位。"""
         if self.positions:
-            # assert False
             self._force_close()
         return self._all_holdings
 
@@ -316,7 +314,7 @@ class SimpleBlotter(Blotter):
                 pos.today = 0
         self._datetime = dt
 
-    def update_status(self, dt, at_baropen, append):
+    def update_status(self, dt, at_baropen):
         """ 更新历史持仓，当前权益。"""
         # @TODO open_orders 和 postion_margin分开，valid_order调用前再统计？
         # 更新资金历史。
@@ -358,7 +356,7 @@ class SimpleBlotter(Blotter):
         self.holding['cash'] = dh['cash']
         self.holding['equity'] = dh['equity']
         self.holding['position_profit'] = pos_profit
-        if append:
+        if at_baropen:
             self._all_holdings.append(dh)
         else:
             self._all_holdings[-1] = dh
@@ -491,7 +489,7 @@ class SimpleBlotter(Blotter):
             self._update_holding(trans)
             self._update_positions(trans)
         if force_trans:
-            self.update_status(trans.datetime, False, False)
+            self.update_status(trans.datetime, False)
         self.positions = {}
         return
 

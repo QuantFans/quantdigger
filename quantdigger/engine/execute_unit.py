@@ -144,7 +144,6 @@ class ExecuteUnit(object):
         pbar = ProgressBar().start()
         # todo 对单策略优化
         has_next = True
-        tick_test = settings['tick_test']
         # 遍历每个数据轮, 次数为数据的最大长度
         for pcon, data in self._all_data.iteritems():
             self.context.switch_to_pcontract(pcon)
@@ -167,10 +166,11 @@ class ExecuteUnit(object):
             self.context.switch_to_pcontract(self._default_pcontract)
             self.context.on_bar = True
             # 遍历组合策略每轮数据的最后处理
+            tick_test = settings['tick_test']
             for i, combination in enumerate(self._combs):
                 # print self.context.ctx_datetime, "--"
                 for j, s in enumerate(combination):
-                    self.context.switch_to_strategy(i, j, True)
+                    self.context.switch_to_strategy(i, j)
                     self.context.process_trading_events(at_baropen=True)
                     s.on_bar(self.context)
                     if not tick_test:
@@ -178,9 +178,9 @@ class ExecuteUnit(object):
                         self.context.process_trading_events(at_baropen=False)
             # print self.context.ctx_datetime
             self.context.ctx_datetime = datetime(2100, 1, 1)
-            self.context.step += 1
-            if self.context.step <= self._max_window:
-                pbar.update(self.context.step*100.0/self._max_window)
+            self.context.ctx_curbar += 1
+            if self.context.ctx_curbar <= self._max_window:
+                pbar.update(self.context.ctx_curbar*100.0/self._max_window)
             #
             toremove = []
             for pcon, data in self._all_data.iteritems():
