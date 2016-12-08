@@ -1,6 +1,6 @@
 # encoding:utf-8
 
-from quantdigger.engine.qd import *
+from quantdigger.engine.strategy import *
 from quantdigger.config import settings
 from quantdigger.configutil import ConfigUtil
 from quantdigger.engine.series import NumberSeries, DateTimeSeries
