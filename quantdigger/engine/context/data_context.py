@@ -34,7 +34,7 @@ class DataContext(object):
         self.bar = Bar(None, None, None, None, None, None)
         self.new_row = False
         self.next_datetime = datetime.datetime(2100, 1, 1)
-        self._technicals = [[{}]]
+        self.technicals = [[{}]]
 
         self._curbar = -1
         self._Helper = Helper
@@ -87,7 +87,7 @@ class DataContext(object):
                 s.duplicate_last_element()
         # Update technicals if exist.
         try:
-            technicals = self._technicals[self.ith_comb][self.ith_strategy].values()
+            technicals = self.technicals[self.ith_comb][self.ith_strategy].values()
         except IndexError:
             pass
         else:
@@ -153,13 +153,13 @@ class DataContext(object):
             self._series.append([{attr: s}])
 
     def add_indicator(self, attr, indic):
-        if self.ith_comb < len(self._technicals):
-            if self.ith_strategy < len(self._technicals[self.ith_comb]):
-                self._technicals[self.ith_comb][self.ith_strategy][attr] = indic
+        if self.ith_comb < len(self.technicals):
+            if self.ith_strategy < len(self.technicals[self.ith_comb]):
+                self.technicals[self.ith_comb][self.ith_strategy][attr] = indic
             else:
-                self._technicals[self.ith_comb].append({attr: indic})
+                self.technicals[self.ith_comb].append({attr: indic})
         else:
-            self._technicals.append([{attr: indic}])
+            self.technicals.append([{attr: indic}])
 
     def add_variable(self, attr, var):
         if self.ith_comb < len(self._variables):

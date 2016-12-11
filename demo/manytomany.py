@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # @file manytomany.py
-# @brief 多个数据, 多组合策略
+# @brief 两个组合, 每个组合有两个包含两个策略。
 # @author wondereamer
 # @version 0.2
 # @date 2015-12-09

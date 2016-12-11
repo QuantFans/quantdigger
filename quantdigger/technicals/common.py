@@ -7,10 +7,11 @@
 # @date 2015-12-23
 import talib
 import matplotlib.finance as finance
+
 from quantdigger.technicals.base import \
     TechnicalBase, ndarray, tech_init
-from quantdigger.widgets.plotter import Plotter, plot_init
 from quantdigger.technicals.techutil import register_tech
+from quantdigger.widgets.plotter import Plotter, plot_init
 
 
 @register_tech('MA')
@@ -36,6 +37,7 @@ class MA(TechnicalBase):
             data (np.ndarray): 数据
             n (int): 时间窗口大小
         """
+        ## @NOTE self.values为保留字段！
         # 绘图和指标基类都会用到self.values
         self.values = talib.SMA(data, n)
 
@@ -68,7 +70,6 @@ class BOLL(TechnicalBase):
 
     def _vector_algo(self, data, n, a1, a2):
         """向量化运行"""
-        ## @NOTE self.values为保留字段！
         u, m, l = talib.BBANDS(data, n, a1, a2)
         self.values = {
                 'upper': u,

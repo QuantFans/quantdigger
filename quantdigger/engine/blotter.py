@@ -145,11 +145,11 @@ class Profile(object):
         pcon = strpcon if strpcon else self._main_pcontract
         if j is not None:
             return {v.name: v for v in self._dcontexts[pcon].
-                    indicators[self._ith_comb][j].itervalues()}
+                    technicals[self._ith_comb][j].itervalues()}
         rst = {}
         for j in range(0, len(self._blts)):
             t = {v.name: v for v in self._dcontexts[pcon].
-                 indicators[self._ith_comb][j].itervalues()}
+                 technicals[self._ith_comb][j].itervalues()}
             rst.update(t)
         return rst
 

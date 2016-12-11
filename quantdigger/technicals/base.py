@@ -9,6 +9,7 @@ from collections import OrderedDict
 import inspect
 import numpy as np
 import pandas
+
 from quantdigger.engine import series
 from quantdigger.widgets.plotter import Plotter
 from quantdigger.errors import SeriesIndexError, DataFormatError
