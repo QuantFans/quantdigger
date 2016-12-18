@@ -688,6 +688,9 @@ class OneDeal(object):
             return (self.open.price - self.close.price) * self.open.quantity *\
                     self.open.order.volume_multiple
 
+    def __str__(self):
+        return "direction: %s\nentry_datetime: %s\nentry_price: %s\nexit_datetime: %s\nexit_price: %s\n" %(Direction.type_to_str(self.direction), self.open_datetime, self.open_price, self.close_datetime, self.close_price)
+
     @property
     def open_datetime(self):
         return self.open.datetime
