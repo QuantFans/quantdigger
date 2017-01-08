@@ -18,9 +18,7 @@ tushare_ 库的作者 Jimmy_
 
 文档
 -----
-git文档_
-
-http://www.quantfans.org
+wiki文档_
 
 
 安装
@@ -188,7 +186,7 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 .. _ongbe: https://github.com/ongbe
 .. _pyalgotrade: https://github.com/gbeced/pyalgotrade
 .. _zipline: https://github.com/quantopian/zipline
-.. _git文档: https://github.com/QuantFans/quantdigger/wiki
+.. _wiki文档: https://github.com/QuantFans/quantdigger/wiki
 
 
 版本
