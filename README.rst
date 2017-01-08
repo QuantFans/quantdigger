@@ -149,17 +149,17 @@ http://www.quantfans.org
 k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块控制显示区域，可以通过鼠标拖拽改变显示区域。
 `上下方向键` 来进行缩放。 
 
-  .. image:: wiki/images/plot.png
+  .. image:: doc/images/plot.png
      :width: 500px
 
 * 2个策略和组合的资金曲线。
   
-  .. image:: wiki/images/figure_money.png
+  .. image:: doc/images/figure_money.png
      :width: 500px
 
 * 组合的历史净值
   
-  .. image:: wiki/images/figure_networth.png
+  .. image:: doc/images/figure_networth.png
      :width: 500px
 
 * 统计结果
@@ -175,7 +175,7 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 ~~~
 
 **pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。**
-  .. image:: wiki/images/pyquant.png
+  .. image:: doc/images/pyquant.png
      :width: 500px
 
 .. _TeaEra: https://github.com/TeaEra
@@ -188,7 +188,7 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 .. _ongbe: https://github.com/ongbe
 .. _pyalgotrade: https://github.com/gbeced/pyalgotrade
 .. _zipline: https://github.com/quantopian/zipline
-.. _git文档: https://github.com/QuantFans/quantdigger/wiki/wiki.md
+.. _git文档: https://github.com/QuantFans/quantdigger/wiki
 
 
 版本
