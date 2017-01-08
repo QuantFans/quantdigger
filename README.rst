@@ -1,4 +1,4 @@
-QuantDigger 0.4.4
+QuantDigger 0.5.0
 ==================
 
 QuantDigger是一个基于python的量化回测框架。它借鉴了主流商业软件（比如TB, 金字塔）简洁的策略语法，同时
@@ -188,7 +188,7 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 .. _ongbe: https://github.com/ongbe
 .. _pyalgotrade: https://github.com/gbeced/pyalgotrade
 .. _zipline: https://github.com/quantopian/zipline
-.. _git文档: https://github.com/quantdigger/wiki/wiki.md
+.. _git文档: https://github.com/QuantFans/quantdigger/wiki/wiki.md
 
 
 版本
