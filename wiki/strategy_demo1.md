@@ -109,4 +109,4 @@
 
 待续。。
 
-## _上一节_&nbsp;__[[安装]]__   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   _下一节_&nbsp;[[更多策略]]
+## _上一节_&nbsp;__[安装](install.md)__   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   _下一节_&nbsp;[更多策略](more_strategy.md) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_返回_&nbsp;[首页](wiki.md)

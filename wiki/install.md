@@ -20,4 +20,5 @@
   * pyqt (可选)
   * [tushare](https://github.com/waditu/tushare) (可选, 一个非常强大的股票信息抓取工具)
 
-## _上一节_&nbsp;[[wiki]]   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   _下一节_&nbsp;[策略接口实例](strategy_demo1.md)
+## _上一节_&nbsp;[文档首页](wiki.md)   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   _下一节_&nbsp;[策略接口实例](strategy_demo1.md) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_返回_&nbsp;[首页](wiki.md)
+
