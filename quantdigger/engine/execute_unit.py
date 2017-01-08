@@ -5,7 +5,7 @@ from progressbar import ProgressBar
 from quantdigger.config import settings
 from quantdigger.datasource.data import DataManager
 from quantdigger.engine.context import Context, DataContext, StrategyContext
-from quantdigger.engine import blotter
+from quantdigger.engine.profile import Profile
 from quantdigger.util import elogger as logger
 from quantdigger.util import deprecated
 from quantdigger.datastruct import PContract
@@ -131,10 +131,10 @@ class ExecuteUnit(object):
                 # logger.debug(iset)
             ctxs.append(StrategyContext(s.name, iset))
         self.context.add_strategy_context(ctxs)
-        return blotter.Profile(ctxs,
-                               self._all_data,
-                               self.pcontracts[0],
-                               len(self._combs)-1)
+        return Profile(ctxs,
+                       self._all_data,
+                       self.pcontracts[0],
+                       len(self._combs)-1)
 
     def run(self):
         # @TODO max_window 可用来显示回测进度
