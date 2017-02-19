@@ -166,15 +166,6 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
        
     >>> [('Total Return', '-0.99%'), ('Sharpe Ratio', '-5.10'), ('Max Drawdown', '1.72%'), ('Drawdown Duration', '3568')]
 
-界面控制
-~~~~~~~
-
-其它
-~~~
-
-**pyquant.py 基于pyqt， 集成了ipython和matplotlib的demo。**
-  .. image:: doc/images/pyquant.png
-     :width: 500px
 
 .. _TeaEra: https://github.com/TeaEra
 .. _deepfish: https://github.com/deepfish
