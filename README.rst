@@ -29,7 +29,9 @@ wiki文档_
   ::
        
       git clone https://github.com/QuantFans/quantdigger.git
-      python setupscripts\install.py  (会根据情况安装pip, 及依赖包)
+      cd quantdigger
+      python setupscripts\install.py  (windows, 会根据情况安装pip, 及依赖包)
+      python setupscripts/install.py  (linux或mac, 会根据情况安装pip, 及依赖包)
 
 
 依赖库
