@@ -232,7 +232,10 @@ class Transaction(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
     def __str__(self):
         rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s" % \
@@ -400,7 +403,10 @@ class Contract(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
     def __cmp__(self, r):
         return str(self) < str(r)
@@ -490,7 +496,7 @@ class Period(object):
         }
         try:
             u = m[self.unit]
-            kwargs = {u: 1}
+            kwargs = {u: self.count}
             return timedelta(**kwargs)
         except KeyError:
             raise Exception('unit "%s" is not supported' % self.unit)
@@ -537,7 +543,10 @@ class PContract(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
     def __str__(self):
         return '%s-%s' % (str(self.contract), str(self.period))
@@ -575,7 +584,10 @@ class PositionKey(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
 
 class Position(object):
