@@ -2,7 +2,8 @@
 # from flufl.enum import Enum
 import json
 
-## @TODO REMOVE EventsPool
+
+# @TODO REMOVE EventsPool
 class EventsPool(object):
     """ 事件池，每个策略有一个。"""
     _pool = []
@@ -31,16 +32,17 @@ class Event(object):
     :ivar ORDER: 委托下单事件, 由下单控制器产生。
     :ivar FILL: 订单成交事件, 由交易模拟器产生。
     """
-    MARKET = 'MARKET' 
-    SIGNAL = 'SIGNAL' 
-    ORDER = 'ORDER' 
-    FILL = 'FILL' 
-    ONCE = 'ONCE' 
-    TIMER = 'TIMER' 
+    MARKET = 'MARKET'
+    SIGNAL = 'SIGNAL'
+    ORDER = 'ORDER'
+    FILL = 'FILL'
+    ONCE = 'ONCE'
+    TIMER = 'TIMER'
+
     def __init__(self, route, args):
-        self.data = { 
+        self.data = {
             'route': route,
-            'data': args 
+            'data': args
         }
 
     def __str__(self):
@@ -48,12 +50,11 @@ class Event(object):
 
     @property
     def route(self):
-        """""" 
         return self.data['route']
 
     @property
     def args(self):
-        """""" 
+        """"""
         return self.data['data']
 
     @classmethod
@@ -69,7 +70,7 @@ class Event(object):
 
     @classmethod
     def message_header(self, route):
-        return b'<%s&'%route
+        return b'<%s&' % route
 
 
 class SignalEvent(Event):

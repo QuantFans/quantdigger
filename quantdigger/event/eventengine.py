@@ -1,18 +1,19 @@
 # encoding: UTF-8
 ##
 # @file eventenvine.py
-# @brief 
+# @brief
 # @author wondereamer
 # @version 0.5
 # @date 2016-05-17
 
 import abc
+import thread
 import time
+import zmq
+
+from Queue import Queue, Empty
 from time import sleep
 from threading import Thread, Condition, Lock
-import thread
-from Queue import Queue, Empty
-import zmq  
 
 from quantdigger.util import mlogger as log
 from quantdigger.event import Event
@@ -24,7 +25,7 @@ class Timer(object):
         # 计时器，用于触发计时器事件
         self._timer = Thread(target = self._run_timer)
         self._timer.daemon = True
-        self._timer_active = False                      
+        self._timer_active = False
         self._timer_sleep = seconds
         self._timer_pause_condition = Condition(Lock())
         self._event_engine = event_engine
@@ -52,7 +53,7 @@ class Timer(object):
             with self._timer_pause_condition:
                 if not self._timer_active:
                     self._timer_pause_condition.wait()
-                self._event_engine.emit(event)    
+                self._event_engine.emit(event)
             # 等待
             sleep(self._timer_sleep)
 
@@ -69,19 +70,19 @@ class EventEngine:
         """引擎启动"""
         #print self._routes
         self._active = True
-    
+
     def stop(self):
         """停止引擎"""
         self._active = False
-            
+
     def register(self, route, handler):
         """注册事件处理函数监听,
           不重复注册同一事件的同样回调。
-        
+
         Args:
             route (str): 事件名
             handler (function): 回调函数
-        
+
         Returns:
             Bool. 是否注册成功。
         """
@@ -90,7 +91,7 @@ class EventEngine:
             return True
         handlers = self._routes[route]
         if handler not in handlers:
-            handlers.append(handler) 
+            handlers.append(handler)
             return True
         return False
 
@@ -106,17 +107,17 @@ class EventEngine:
                 del self._routes[route]
         except KeyError:
             return
-        
+
     @abc.abstractmethod
     def emit(self, event):
         """向事件队列中存入事件"""
         raise NotImplementedError
-        
+
     @abc.abstractmethod
     def _run(self):
         """引擎运行"""
         raise NotImplementedError
-            
+
     def _process(self, event):
         """ 基于多线程的处理事件 """
         if event.route not in self._routes:
@@ -126,7 +127,7 @@ class EventEngine:
             try:
                 log.debug("处理事件%s" % event.route)
                 thread.start_new_thread(handler, (event,))
-                #handler(event)    
+                #handler(event)
             except Exception as e:
                 log.error(e)
 
@@ -159,7 +160,7 @@ class QueueEventEngine(EventEngine):
         EventEngine.stop(self)
         # 等待事件处理线程退出
         #self._thread.join()
-        
+
     def _run(self):
         """引擎运行"""
         while self._active == True:
@@ -170,7 +171,7 @@ class QueueEventEngine(EventEngine):
                 self._process(event)
             except Empty:
                 pass
-            
+
 
 class ZMQEventEngine(EventEngine):
     """ 基于zeromq的事件引擎, 同一个地址的实例只会有一个服务器(同时也是客户端)，可有
@@ -180,10 +181,10 @@ class ZMQEventEngine(EventEngine):
 		    register_protocol="tcp://127.0.0.1:5557"):
         EventEngine.__init__(self)
         self._name = name
-        self._context = zmq.Context()  
+        self._context = zmq.Context()
         try:
-            self._broadcast_event_socket = self._context.socket(zmq.PUB)  
-            self._broadcast_event_socket.bind(event_protocol)  
+            self._broadcast_event_socket = self._context.socket(zmq.PUB)
+            self._broadcast_event_socket.bind(event_protocol)
             self._server_recv_event_socket = self._context.socket(zmq.PULL)
             self._server_recv_event_socket.bind(register_protocol)
             self._is_server = True
@@ -192,10 +193,10 @@ class ZMQEventEngine(EventEngine):
             log.info('Run ZMQEventEngine client: %s' % self._name)
             self._is_server = False
 
-        self._emit_event_socket = self._context.socket(zmq.PUSH)  
-        self._emit_event_socket.connect(register_protocol)  
-        self._client_recv_event_socket = self._context.socket(zmq.SUB)  
-        self._client_recv_event_socket.connect(event_protocol)  
+        self._emit_event_socket = self._context.socket(zmq.PUSH)
+        self._emit_event_socket.connect(register_protocol)
+        self._client_recv_event_socket = self._context.socket(zmq.SUB)
+        self._client_recv_event_socket.connect(event_protocol)
 
         self._thread = Thread(target=self._run)
         self._thread.daemon = True
@@ -203,7 +204,7 @@ class ZMQEventEngine(EventEngine):
         time.sleep(1)
 
     def emit(self, event):
-        """ client or event""" 
+        """ client or event"""
         msg = Event.event_to_message(event)
         self._emit_event_socket.send(msg)
         return
@@ -234,7 +235,7 @@ class ZMQEventEngine(EventEngine):
                     Event.message_header(route))
 
     def _run(self):
-        """""" 
+        """"""
         poller = zmq.Poller()
         poller.register(self._client_recv_event_socket, zmq.POLLIN)
         if self._is_server:
@@ -267,7 +268,7 @@ if __name__ == '__main__':
 
     def simpletest(event):
         print str(datetime.datetime.now()), event
-    
+
     ee = ZMQEventEngine('test')
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # @file data_context.py
-# @brief 
+# @brief
 # @author wondereamer
 # @version 0.1
 # @date 2016-11-27
@@ -84,7 +84,6 @@ class StrategyContext(object):
             if event.route == Event.ONCE or event.route == Event.ORDER:
                 self.exchange.make_market(self.blotter._bars, at_baropen)
         self.blotter.update_status(self._datetime, at_baropen)
-
 
     def plot_line(self, name, ith_window, x, y, styles, lw=1, ms=10, twinx=False):
         """ 绘制曲线
