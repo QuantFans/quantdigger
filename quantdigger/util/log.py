@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 
 import logging
 import sys
@@ -24,9 +24,8 @@ else:
     unicode_type = unicode  # noqa
     basestring_type = basestring  # noqa
 
-#access_log = logging.getLogger("axmservice.access")
-#app_log = logging.getLogger("axmservice.application")
-gen_log = logging.getLogger("vikiqa.general")
+gen_log = logging.getLogger("qd.general")
+
 
 def _stderr_supports_color():
     color = False
@@ -39,13 +38,16 @@ def _stderr_supports_color():
             pass
     return color
 
+
 def _safe_unicode(s):
     try:
         return _unicode(s)
     except UnicodeDecodeError:
         return repr(s)
 
+
 _TO_UNICODE_TYPES = (unicode_type, type(None))
+
 
 def to_unicode(value):
     """Converts a string argument to a unicode string.
@@ -60,9 +62,11 @@ def to_unicode(value):
         )
     return value.decode("utf-8")
 
+
 # to_unicode was previously named _unicode not because it was private,
 # but to avoid conflicts with the built-in unicode() function/type
 _unicode = to_unicode
+
 
 class LogFormatter(logging.Formatter):
     """Log formatter used in Tornado.
@@ -218,6 +222,7 @@ def add_log_handler(path, log_level=None):
         if log_level:
             l.setLevel(log_level)
 
+
 def add_stdout_handler():
     for l in [gen_log, ]:
         if l.handlers:
@@ -229,8 +234,10 @@ def add_stdout_handler():
         l.addHandler(handler)
         l.setLevel(logging.DEBUG)
 
+
 if ConfigLog.log_to_console:
     add_stdout_handler()
-#if ConfigDefault.log_to_file:
-    #add_log_handler(ConfigDefault.log_path)
+
+# if ConfigDefault.log_to_file:
+    # add_log_handler(ConfigDefault.log_path)
 gen_log.setLevel(ConfigLog.log_level)

@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
-##
-# @file test_engine_vector.py
-# @brief 测试策略向量化运行中的序列变量，指标计算，跨周期时间对齐，策略和数据的组合遍历。
-# @author wondereamer
-# @version 0.3
-# @date 2015-12-22
-
+# encoding: utf-8
 
 import datetime
 import unittest
@@ -13,53 +6,59 @@ import pandas as pd
 import os
 import talib
 import numpy as np
-from logbook import Logger
-from quantdigger import *
+from quantdigger.util.log import gen_log as logger
+from quantdigger import (
+    add_strategy,
+    NumberSeries,
+    DateTimeSeries,
+    MA,
+    BOLL,
+    set_symbols,
+    Strategy,
+    run
+)
 
-logger = Logger('test')
 
 class TestSeries(unittest.TestCase):
-        
+    """
+    测试：
+    * 序列变量
+        1）用户时间，数字序列变量。
+        2）序列变量回溯。      ctx.open[3]
+        3) 序列变量的直接运算。ctx.open-0
+        4) NumberSeries.DEFAULT_VALUE
+        5) DateTimeSeries.DEFAULT_VALUE
+        6) open, close, high, low, volume, datetime等系统序列变量。
+    * 普通变量。   ctx.curbar_list
+    * ctx.curbar。  ctx.curbar_list
+    """
     def test_case(self):
         logger.info('***** 序列变量测试开始 *****')
         close, open, dt, high, low, volume = [], [], [], [], [], []
         open3, dt3 = [], []
-        ma3, ma2 = [], []
-        svar = []
-        transform_test = []
-        uvars = {
-                'dlist': [],
-                'numseries': [],
-                'numseries3': [],
-                'dtseries': [],
-                }
+        operator_test = []
+        user_vars = {
+            'curbar_list': [],
+            'numseries': [],
+            'numseries3': [],
+            'dtseries': [],
+        }
 
         class DemoStrategy(Strategy):
-            
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 ctx.ma3 = MA(ctx.close, 3)
-                ctx.svar = NumberSeries()
                 ctx.numseries = NumberSeries()
                 ctx.dtseries = DateTimeSeries()
-                ctx.dlist = []
-                return
+                ctx.curbar_list = []
 
             def on_symbol(self, ctx):
-                ## @TODO + - * /
-                transform_test.append(ctx.open-0 == ctx.open[0])
-                transform_test.append(ctx.close-0 == ctx.close[0])
-                transform_test.append(ctx.high-0 == ctx.high[0])
-                transform_test.append(ctx.low-0 == ctx.low[0])
-                transform_test.append(ctx.volume-0 == ctx.volume[0])
-                ctx.dlist.append(ctx.curbar)
-                if ctx.curbar >= 100 and ctx.curbar < 300:
-                    ctx.numseries.update(100) 
-                    ctx.dtseries.update(datetime.datetime(1000,1,1))
-                elif ctx.curbar >= 300:
-                    ctx.dtseries.update(datetime.datetime(3000,1,1))
-                    ctx.numseries.update(300) 
-
+                # @TODO + - * /
+                operator_test.append(ctx.open - 0 == ctx.open[0])
+                operator_test.append(ctx.close - 0 == ctx.close[0])
+                operator_test.append(ctx.high + 0 == ctx.high[0])
+                operator_test.append(ctx.low + 0 == ctx.low[0])
+                operator_test.append(ctx.volume + 0 == ctx.volume[0])
                 open.append(ctx.open[0])
                 close.append(ctx.close[0])
                 high.append(ctx.high[0])
@@ -68,122 +67,115 @@ class TestSeries(unittest.TestCase):
                 dt.append(ctx.datetime[0])
                 open3.append(ctx.open[3])
                 dt3.append(ctx.datetime[3])
-                svar.append(ctx.svar[0])
 
-                uvars['numseries3'].append(ctx.numseries[3])
-                uvars['numseries'].append(ctx.numseries[0])
-                uvars['dtseries'].append(ctx.dtseries[0])
-                uvars['dlist'] = ctx.dlist
+                if ctx.curbar >= 100 and ctx.curbar < 300:
+                    ctx.numseries.update(100)
+                    ctx.dtseries.update(datetime.datetime(1000, 1, 1))
+                elif ctx.curbar >= 300:
+                    ctx.dtseries.update(datetime.datetime(3000, 1, 1))
+                    ctx.numseries.update(300)
+                ctx.curbar_list.append(ctx.curbar)
+                user_vars['numseries3'].append(ctx.numseries[3])
+                user_vars['numseries'].append(ctx.numseries[0])
+                user_vars['dtseries'].append(ctx.dtseries[0])
+                user_vars['curbar_list'] = ctx.curbar_list
 
         set_symbols(['BB.TEST-1.Minute'])
         add_strategy([DemoStrategy('A1')])
         run()
 
-        # 默认值
-        self.assertTrue(NumberSeries.DEFAULT_VALUE == 0.0, "默认值测试成功")
-        self.assertTrue(DateTimeSeries.DEFAULT_VALUE == datetime.datetime(1980,1,1))
-        logger.info('-- 默认值测试成功 --')
+        # 序列变量默认值
+        self.assertTrue(NumberSeries.DEFAULT_VALUE == 0.0, "默认值测试失败")
+        self.assertTrue(DateTimeSeries.DEFAULT_VALUE == datetime.datetime(1980, 1, 1), "默认值测试失败")
+        self.assertTrue(all(operator_test), "类型转化错误!")
 
-        # 类型转化测试
-        self.assertTrue(all(transform_test), "类型转化错误!")
-        logger.info('-- 类型转化测试成功 --')
-
-        # 值测试
+        # 系统序列变量测试
         target = pd.DataFrame({
             'open': open,
             'close': close,
             'high': high,
             'low': low,
-            'volume': volume,
-            })
-        target = target.ix[:, ['open', 'close', 'high', 'low', 'volume']]
+            'volume': volume
+        })
         target.index = dt
+        target = target.ix[:, ['open', 'close', 'high', 'low', 'volume']]
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'BB.csv')
         source = pd.read_csv(fname, parse_dates=True, index_col=0)
-        #print 'target', target['open'][0:10]
-        #print 'source', source['open'][0:10]
         self.assertTrue(source.equals(target), "系统时间序列变量正测试出错")
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'CC.csv')
         source = pd.read_csv(fname, parse_dates=True, index_col=0)
         self.assertFalse(source.equals(target), "系统时间序列变量反测试出错")
-        logger.info('-- 系统序列变量值的正确性测试成功 --')
 
-        #
-        for i in xrange(0, len(uvars['dlist'])):
-            self.assertTrue(i+1 == uvars['dlist'][i])
-        self.assertTrue(len(uvars['numseries'])==len(open) and len(open)>0, '系列变量长度不一致')
+        # ctx.curbar，用户普通变量测试
+        for i in xrange(0, len(user_vars['curbar_list'])):
+            self.assertTrue(i + 1 == user_vars['curbar_list'][i])
+        self.assertTrue(len(user_vars['numseries'])==len(open) and len(open)>0, '系列变量长度不一致')
         logger.info('-- 用户普通变量测试成功 --')
         logger.info('-- curbar测试成功 --')
 
-        # 自动追加测试
-        numseries = uvars['numseries']
-        dtseries = uvars['dtseries']
-        dt1980 = datetime.datetime(1980,1,1)
-        dt1000 = datetime.datetime(1000,1,1)
-        dt3000 = datetime.datetime(3000,1,1)
+        # 用户序列变量
+        numseries = user_vars['numseries']
+        dtseries = user_vars['dtseries']
+        dt1980 = datetime.datetime(1980, 1, 1)
+        dt1000 = datetime.datetime(1000, 1, 1)
+        dt3000 = datetime.datetime(3000, 1, 1)
         for i in xrange(0, len(numseries)):
+            # 用户序列变量自动追加测试成功
             if i < 99:
-                self.assertTrue(numseries[i] == 0.0, '用户数字序列变量测试失败!') 
-                self.assertTrue(dtseries[i] == dt1980, '用户时间序列变量测试失败!') 
+                self.assertTrue(numseries[i] == NumberSeries.DEFAULT_VALUE, '用户数字序列变量测试失败!')
+                self.assertTrue(dtseries[i] == dt1980, '用户时间序列变量测试失败!')
             elif i >= 99 and i < 299:
-                self.assertTrue(numseries[i] == 100, '用户数字序列变量测试失败!') 
-                self.assertTrue(dtseries[i] == dt1000, '用户时间序列变量测试失败!') 
+                self.assertTrue(numseries[i] == 100, '用户数字序列变量测试失败!')
+                self.assertTrue(dtseries[i] == dt1000, '用户时间序列变量测试失败!')
             elif i >= 299:
-                self.assertTrue(numseries[i] == 300, '用户数字序列变量测试失败!') 
-                self.assertTrue(dtseries[i] == dt3000, '用户时间序列变量测试失败!') 
-        logger.info('-- 用户序列变量自动追加测试成功 --')
+                self.assertTrue(numseries[i] == 300, '用户数字序列变量测试失败!')
+                self.assertTrue(dtseries[i] == dt3000, '用户时间序列变量测试失败!')
 
-        # 回溯测试
+        # 序列变量回溯测试
         for i in xrange(0, len(open)):
-            if i-3 >= 0:
-                self.assertTrue(open3[i] == open[i-3], "系统序列变量回溯测试失败！" )
-                self.assertTrue(dt3[i] == dt[i-3], "系统序列变量回溯测试失败！" )
-                self.assertTrue(uvars['numseries3'][i] == numseries[i-3], "用户序列变量回溯测试失败！" )
+            if i - 3 >= 0:
+                self.assertTrue(open3[i] == open[i - 3], "系统序列变量回溯测试失败！")
+                self.assertTrue(dt3[i] == dt[i - 3], "系统序列变量回溯测试失败！")
+                self.assertTrue(user_vars['numseries3'][i] == numseries[i - 3], "用户序列变量回溯测试失败！")
             else:
-                self.assertTrue(open3[i] == NumberSeries.DEFAULT_VALUE,
-                                            "系统序列变量回溯测试失败！")
-                self.assertTrue(uvars['numseries3'][i] == NumberSeries.DEFAULT_VALUE,
-                                            "用户序列变量回溯测试失败！")
-                self.assertTrue(dt3[i] == DateTimeSeries.DEFAULT_VALUE,
-                                                "系统序列时间变量回溯测试失败！")
-            self.assertTrue(svar[i] == NumberSeries.DEFAULT_VALUE)
-        logger.info('-- 序列变量回溯测试成功 --')
-        logger.info('***** 序列变量测试结束 *****\n')
+                self.assertTrue(open3[i] == NumberSeries.DEFAULT_VALUE, "系统序列变量回溯测试失败！")
+                self.assertTrue(user_vars['numseries3'][i] == NumberSeries.DEFAULT_VALUE, "用户序列变量回溯测试失败！")
+                self.assertTrue(dt3[i] == DateTimeSeries.DEFAULT_VALUE, "系统序列时间变量回溯测试失败！")
+        logger.info('-- 序列变量测试成功 --')
+
 
 class TestIndicator(unittest.TestCase):
-        
+
     def test_case(self):
         logger.info('***** 指标测试开始 *****')
         close, open, ma2 = [], [], []
         pre_ma2 = []
         true_test = []
         boll = {
-                'upper': [],
-                'middler': [],
-                'lower': []
-                }
+            'upper': [],
+            'middler': [],
+            'lower': []
+        }
 
         boll3 = {
-                'upper': [],
-                'middler': [],
-                'lower': []
-                }
+            'upper': [],
+            'middler': [],
+            'lower': []
+        }
 
         class DemoStrategy(Strategy):
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 ctx.ma2 = MA(ctx.close, 2)
                 ctx.boll = BOLL(ctx.close, 2)
 
             def on_symbol(self, ctx):
                 if ctx.curbar>=2:
-                    ## @todo + - * /
-                    true_test.append(ctx.ma2-0 == ctx.ma2[0])
-                    
+                    # @todo + - * /
+                    true_test.append(ctx.ma2 - 0 == ctx.ma2[0])
+
                 pre_ma2.append(ctx.ma2[3])
                 ma2.append(ctx.ma2[0])
-                #a = (ctx.close[1] + ctx.close[0])/2
-                #print ctx.ma2[0], a
                 close.append(ctx.close[0])
                 open.append(ctx.open[0])
                 boll['upper'].append(float(ctx.boll['upper']))
@@ -192,13 +184,6 @@ class TestIndicator(unittest.TestCase):
                 boll3['upper'].append(ctx.boll['upper'][3])
                 boll3['middler'].append(ctx.boll['middler'][3])
                 boll3['lower'].append(ctx.boll['lower'][3])
-
-
-            def on_bar(self, ctx):
-                return
-
-            def on_exit(self, ctx):
-                return
 
         set_symbols(['BB.TEST-1.Minute'])
         add_strategy([DemoStrategy('A1')])
@@ -210,7 +195,7 @@ class TestIndicator(unittest.TestCase):
         source_ma2 = talib.SMA(np.asarray(close), 2)
         true_test, false_test = [], []
         for i in xrange(0, len(close)):
-            if i >=  1:
+            if i >= 1:
                 true_test.append(ma2[i] == source_ma2[i])
             else:
                 false_test.append(ma2[i] == ma2[i])
@@ -305,7 +290,7 @@ class TestIndicator(unittest.TestCase):
 class TestMultipleCombination(unittest.TestCase):
     """ 多组合策略, 测试数据、策略遍历
     """
-        
+
     def test_case(self):
         logger.info('***** 多组合策略测试开始 *****')
         on_exit = {
@@ -321,9 +306,9 @@ class TestMultipleCombination(unittest.TestCase):
                 }
 
         class DemoStrategy(Strategy):
-            
+
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 return
 
             def on_symbol(self, ctx):
@@ -373,10 +358,10 @@ class TestMultipleCombination(unittest.TestCase):
 
 
 class TestDiffPeriod(unittest.TestCase):
-    """ 跨周期多组合策略测试 
+    """ 跨周期多组合策略测试
         主要测试时间对齐和数据、策略遍历
     """
-        
+
     def test_case(self):
         logger.info('***** 跨周期多组合策略测试开始 *****')
         on_exit = {
@@ -393,9 +378,9 @@ class TestDiffPeriod(unittest.TestCase):
                 }
 
         class DemoStrategy(Strategy):
-            
+
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 return
 
             def on_symbol(self, ctx):
@@ -465,14 +450,14 @@ class TestDiffPeriod(unittest.TestCase):
 
 
 class TestPContractsWithSameContract(unittest.TestCase):
-        
+
     def test_case(self):
         logger.info('***** 序列变量测试开始 *****')
 
         class DemoStrategy(Strategy):
-            
+
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 return
 
             def on_bar(self, ctx):
