@@ -294,6 +294,7 @@ class TestTimeAlign(unittest.TestCase):
         测试：合约名称大小写不敏感。
               on_symbol时间对齐
               on_bar时间对齐, 跨合约数据引用（只测了时间）
+        Note: 更多细节看'diffPeriodOnSymbol.txt', 'diffPeriodOnSymbol.txt'。
     """
 
     def test_case(self):
