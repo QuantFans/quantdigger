@@ -345,5 +345,26 @@ class TestTimeAlign(unittest.TestCase):
         logger.info('on_symbol, on_bar 时间对齐测试成功！')
 
 
+class TestDefaultPContract(unittest.TestCase):
+
+    def test_case(self):
+        class DemoStrategy(Strategy):
+
+            def on_init(self, ctx):
+                """初始化数据"""
+                return
+
+            def on_bar(self, ctx):
+                assert(ctx.open == ctx['TWODAY.TEST-5.Second'].open)
+                assert(ctx.close == ctx['TWODAY.TEST-5.Second'].close)
+                assert(ctx.high == ctx['TWODAY.TEST-5.Second'].high)
+                assert(ctx.low == ctx['TWODAY.TEST-5.Second'].low)
+
+        set_symbols(['TWODAY.TEST-5.Second', 'TWODAY.TEST-1.Minute'])
+        add_strategy([DemoStrategy('A1')])
+        logger.info("默认合约测试成功！")
+        run()
+
+
 if __name__ == '__main__':
     unittest.main()
