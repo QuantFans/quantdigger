@@ -3,7 +3,7 @@
 # @email: qin.kang@foxmail.com
 # @Date:   2017-07-13 08:05:39
 # @Last Modified by:   Qink-DN493
-# @Last Modified time: 2017-07-13 11:27:23
+# @Last Modified time: 2017-07-13 13:34:09
 # @brief: 
 # @version: 
 
@@ -27,13 +27,14 @@
 # from demo import stg_demo
 # stg_demo.stg_demo()
 
+# 运行出错
 # from demo import stock_search
 # stock_search.stock_search()
 
 # from tests import csv_main
 # csv_main.csv_main()
 
-# 不能运行
+# 运行出错
 # from tests import import_data
 
 # from tests import test_engine
