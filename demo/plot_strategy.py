@@ -33,7 +33,7 @@ class DemoStrategy(Strategy):
 
     def on_bar(self, ctx):
         ctx.dt.update(ctx.datetime)
-        #print ctx.dt[1].isocalendar()[1], ctx.dt[0].isocalendar()[1]
+        #print( ctx.dt[1].isocalendar()[1], ctx.dt[0].isocalendar()[1])
         if ctx.dt[1].month != ctx.dt[0].month:
             ctx.month_price.update(ctx.close)
         if ctx.curbar > 20:
@@ -81,7 +81,7 @@ class DemoStrategy2(Strategy):
         return
 
 
-def plot_strategy():
+if __name__ == '__main__':
     import timeit
     start = timeit.default_timer()
     #set_symbols(['BB.SHFE-1.Minute']) 

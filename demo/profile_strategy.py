@@ -47,7 +47,7 @@ class DemoStrategy(Strategy):
         return
 
 
-def profile_strategy():
+if __name__ == '__main__':
     import timeit
     from quantdigger.digger.analyze import AnalyzeFrame
     import matplotlib.pyplot as plt

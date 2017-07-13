@@ -21,7 +21,7 @@ time.sleep(1)
 log.info("启动ipython..")
 shell = subprocess.call('ipython --config=%s' % shell_path, shell=True)
 ###notebook = subprocess.call('jupyter notebook --config=shell.py', shell=True)
-###print mainwindow.pid
+###prin(t mainwindow.pid)
 
 raw_input("Any key to quit quantdigger.")
 subprocess.Popen.kill(mainwindow)

@@ -168,7 +168,7 @@ class ExecuteUnit(object):
             # 遍历组合策略每轮数据的最后处理
             tick_test = settings['tick_test']
             for i, combination in enumerate(self._combs):
-                # print self.context.ctx_datetime, "--"
+                # print( self.context.ctx_datetime, "--")
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
                     # 确保交易状态是基于开盘时间的。
@@ -177,7 +177,7 @@ class ExecuteUnit(object):
                     if not tick_test:
                         # 保证有可能在当根Bar成交
                         self.context.process_trading_events(at_baropen=False)
-            # print self.context.ctx_datetime
+            # print( self.context.ctx_datetime)
             self.context.ctx_datetime = datetime(2100, 1, 1)
             self.context.ctx_curbar += 1
             if self.context.ctx_curbar <= self._max_window:

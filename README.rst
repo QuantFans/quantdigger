@@ -135,7 +135,7 @@ wiki文档_
         # 绘制净值曲线
         plotting.plot_curves([curve.networth])
         # 打印统计信息
-        print finance.summary_stats(curve, 252*4*60)
+        print( finance.summary_stats(curve, 252*4*60))
 
 
 策略结果

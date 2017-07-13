@@ -191,8 +191,8 @@ class TechnicalBase(Plotter):
     def __getitem__(self, index):
         # 解析多元值, 返回series
         # python 3.x 有这种机制？
-        # print self.name, index
-        # print self.series[0].data
+        # print( self.name, index)
+        # print( self.series[0].data)
         if self.is_multiple:
             return self.series[index]
         # 返回单变量的值。

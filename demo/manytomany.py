@@ -58,7 +58,7 @@ class DemoStrategy2(Strategy):
     def on_exit(self, ctx):
         return
 
-def manytomany():
+if __name__ == '__main__':
     from quantdigger.digger import finance
 
     set_symbols(['BB.SHFE-1.Minute'])

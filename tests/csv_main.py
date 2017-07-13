@@ -6,7 +6,7 @@ from . import test_future
 from . import test_stock
 from quantdigger import ConfigUtil
 
-def csv_main():
+if __name__ == '__main__':
     # 默认为csv
     assert(ConfigUtil.get('source') == 'csv')
     unittest.main()

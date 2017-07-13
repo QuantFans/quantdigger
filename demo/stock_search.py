@@ -31,12 +31,12 @@ class DemoStrategy(Strategy):
         for symbol in self.to_sell:
             if ctx.pos('long', symbol) > 0:
                 ctx.sell(ctx[symbol].close, 1, symbol) 
-                #print "sell:", symbol
+                #print( "sell:", symbol)
 
         for symbol in self.candicates:
             if ctx.pos('long', symbol) == 0:
                 ctx.buy(ctx[symbol].close, 1, symbol) 
-                #print "buy:", symbol
+                #print( "buy:", symbol)
 
 
         self.candicates = []
@@ -49,7 +49,7 @@ class DemoStrategy(Strategy):
 
 
 
-def stock_search():
+if __name__ == '__main__':
     # 
     set_symbols(['*.SH'])
     algo = DemoStrategy('A1')

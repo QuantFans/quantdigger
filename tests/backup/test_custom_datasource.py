@@ -16,7 +16,7 @@ class DemoStrategy(TradingStrategy):
     """ 策略实例 """
     def __init__(self, exe):
         super(DemoStrategy, self).__init__(exe)
-        print 'start: ', self.datetime[0]
+        print( 'start: ', self.datetime[0])
 
         #self.mabase = MA(self, self.close, 100,'mabase', 'r', '1')
         self.mabig = MA(self, self.close, 20,'mabig', 'b', '1')
@@ -40,12 +40,12 @@ class DemoStrategy(TradingStrategy):
                 self.buy('long', price, quantity, contract = code)
                 self.buy_price = price
                 self.num_cont += 1
-                #print 'buy', self.datetime[0].date(), price, quantity
+                #print('buy', self.datetime[0].date(), price, quantity)
         elif self.position() > 0 and self.masmall < self.mabig:
             price = self.close[0]
             self.sell('long', price, self.position())
-            #print 'sel', self.datetime[0].date(), price, self.position()
-            #print '---'
+            #print( 'sel', self.datetime[0].date(), price, self.position())
+            #print( '---')
             if price > self.buy_price:
                 self.num_win += 1
 
@@ -56,9 +56,9 @@ if __name__ == '__main__':
                             datasource=ds163.CachedStock163Source('163cache'))
     algo = DemoStrategy(simulator)
     simulator.run()
-    #print 'close: ', algo.close.data
-    #print 'close length: ', algo.close.length_history
-    print 'total: %s, win: %s' % (algo.num_cont, algo.num_win)
+    #print( 'close: ', algo.close.data)
+    #print( 'close length: ', algo.close.length_history)
+    print( 'total: %s, win: %s' % (algo.num_cont, algo.num_win))
 
     # 显示回测结果
     a = {}
@@ -67,6 +67,6 @@ if __name__ == '__main__':
         for trans in algo.blotter.transactions:
             deals.update_positions(a, b, trans);
     except Exception, e:
-        print e
+        print( e)
     plotting.plot_result(simulator.data[pcon], algo._indicators, b, algo.blotter)
 

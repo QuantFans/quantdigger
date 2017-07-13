@@ -21,14 +21,14 @@ def max_return(nbarprice, islong):
             elif ith_price < low:
                 low = ith_price
                 maxdiffs.append(high-low)
-                #print low
+                #print( low)
         return max(maxdiffs) if maxdiffs else 0
     else:
         for ith_price in nbarprice:
             if ith_price < low:
                 low = ith_price
                 high = -1000000
-                #print low
+                #print( low)
             elif ith_price > high:
                 high = ith_price
                 maxdiffs.append(high-low)
@@ -360,7 +360,7 @@ class AnalyzeFrame(object):
             self.axes, self.cursors = simple_entry_analyze(self.fig, self.data, self.nbar)
         #elif op == "hm":
             #axes, cursors = follow_entry_analyze(fig, data)
-            #print "hm" 
+            #print( "hm" )
         self.fig.canvas.draw()
 
 

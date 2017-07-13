@@ -72,7 +72,7 @@ class DemoStrategy2(Strategy):
     def on_exit(self, ctx):
         return
 
-def mongotest():
+if __name__ == '__main__':
     import timeit
     ConfigUtil.set({
         'source': 'mongodb',

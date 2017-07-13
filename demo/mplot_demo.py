@@ -2,7 +2,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 
 from quantdigger.widgets.mplotwidgets import widgets
 from quantdigger.widgets.mplotwidgets.mplots import Candles

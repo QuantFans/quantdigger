@@ -248,7 +248,7 @@ class TestMainFunction(unittest.TestCase):
                 return
 
             def on_symbol(self, ctx):
-                # print ctx.strategy, ctx.pcontract
+                # print( ctx.strategy, ctx.pcontract)
                 on_symbol['combination'].add((str(ctx.pcontract), ctx.strategy))
                 on_symbol['step_num'] += 1
 
@@ -367,5 +367,5 @@ class TestDefaultPContract(unittest.TestCase):
         run()
 
 
-def test_engine():
+if __name__ == '__main__':
     unittest.main()

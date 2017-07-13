@@ -117,7 +117,7 @@ def plot_curves(data, colors=[], lws =[], names=[]):
     if names:
         assert(len(data) == len(names))
     # 画资金曲线
-    # print curve.equity
+    # print( curve.equity)
     fig2 = plt.figure()
     lns = []
     ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))

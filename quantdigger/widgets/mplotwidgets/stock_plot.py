@@ -45,17 +45,17 @@ class EventHandler(object):
 
     def on_pick(self, event):
         '''docstring for on_motion'''
-        print "888888"
-        print str(event.mouseevent.xdata)
-        #print event.artist
+        print( "888888")
+        print( str(event.mouseevent.xdata))
+        #print( event.artist)
 
     def on_move(self, event):
         '''docstring for on_motion'''
         if isinstance(event.xdata, np.float64):
             i = int(event.xdata)/1
             if self.pre_x != i:
-                print self.data.index[i]
-                print self.data[i]
+                print( self.data.index[i])
+                print( self.data[i])
                 c = pd.to_datetime(self.data.index[i])\
                       .strftime("%Y-%m-%d %H:%M:%S") + "\n" + "hh"
                 self.fig.axes[2].set_xlabel(c)
@@ -188,7 +188,7 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst,
     ax1 = fig.add_axes(rect3, facecolor=axescolor)
     ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
     if nbar > 0:
-        print "**66666"
+        print( "**66666")
         # plot ax1
         profits_more.plot(ax=ax1, kind='bar', grid = False, use_index = False, label=u"%s根最优"%nbar)
         risks.plot(ax=ax1, kind='bar', grid = False, use_index = False, color = 'y', label=u"%s根最差"%nbar)
@@ -278,7 +278,7 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
     MAE.order().plot(ax=ax21,style='r', grid=False, use_index=False, label=u'最大不利偏移')
     exit_profit[exit_profit<0].plot(ax=ax21, style='y', grid=False, use_index=False, label=u'亏损分布')
     worst = MAE.min()
-    print u"最大不利偏移: %s" % worst
+    print( u"最大不利偏移: %s" % worst)
     bb = exit_profit[exit_profit<0]
     aa = [worst]*len(bb)
     ax21.fill_between(range(len(exit_profit[exit_profit<0])), aa, bb, where=bb<aa, color='red')

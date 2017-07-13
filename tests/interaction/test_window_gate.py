@@ -27,28 +27,28 @@ class TestWindowGateCallBackend(object):
 
     #def test_get_all_contracts(self):
         #ret = self.gate.sync_call("get_all_contracts")
-        #print "***********" 
-        ##print json.loads(ret)
-        #print ret
-        #print "***********" 
+        #print( "***********" )
+        ##print( json.loads(ret))
+        #print( ret)
+        #print("***********" )
 
     def test_get_all_contracts(self):
         ret = self.gate.get_all_contracts()
-        print "***********" 
-        print ret
-        print "***********" 
+        print( "***********" )
+        print( ret)
+        print( "***********" )
 
     def test_get_all_pcontracts(self):
         ret = self.gate.get_all_pcontracts()
-        print "***********" 
-        print ret
-        print "***********" 
+        print( "***********" )
+        print(ret)
+        print("***********" )
 
     #def test_get_pcontract(self):
         #ret = self.shell.sync_call("get_pcontract", {
             #'str_pcontract': 'BB.TEST-1.MINUTE'
             #})
-        #print json.loads(ret).keys()
+        #print( json.loads(ret).keys())
         #return
 
 

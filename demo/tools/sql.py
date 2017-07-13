@@ -86,18 +86,18 @@ def sql2csv(db, cursor):
 start = timeit.default_timer()
 read_csv(os.getcwd())
 stop = timeit.default_timer()
-print (stop - start ) * 1000
-print "---------"
+print( (stop - start ) * 1000)
+print( "---------")
 db.commit()
 
 start = timeit.default_timer()
 open = close = high = low = []
 for row in c.execute('SELECT id, datetime, open FROM AA_SHFE'):
-    print row
-print get_tables(c)
+    print( row)
+print( get_tables(c))
 
 stop = timeit.default_timer()
-print (stop - start ) * 1000
+print( (stop - start ) * 1000)
 
 get_tables(c)
 db.commit()

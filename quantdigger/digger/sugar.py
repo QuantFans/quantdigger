@@ -17,14 +17,14 @@ def max_return(nbarprice, islong):
             elif ith_price < low:
                 low = ith_price
                 maxdiffs.append(high-low)
-                #print low
+                #print( low)
         return max(maxdiffs) if maxdiffs else 0
     else:
         for ith_price in nbarprice:
             if ith_price < low:
                 low = ith_price
                 high = -1000000
-                #print low
+                #print( low)
             elif ith_price > high:
                 high = ith_price
                 maxdiffs.append(high-low)
@@ -125,17 +125,17 @@ def process_signal(signal, price_data, n=10, intraday=False):
     data['islong'] = islongs
     data['entry_n'] = entry_Nlist
     data['exit_n'] = exit_Nlist
-    print "Data Preprocessing Done!"
+    print( "Data Preprocessing Done!")
     return data
 
 
 def load_datas(n, intraday, signal_fname, price_fname):
-    ''' 一次可加载多个数据''' 
+    # 一次可加载多个数据
 
     signal = pd.read_csv(signal_fname, index_col=0, parse_dates=True).sort_index()
     price_data = pd.read_csv(price_fname, index_col=0, parse_dates=True).sort_index()
     return process_signal(signal, price_data, n, intraday)
-    #print data
+    #print( data)
     #assert(False)
 
 
