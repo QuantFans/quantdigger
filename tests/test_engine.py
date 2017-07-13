@@ -105,7 +105,7 @@ class TestSeries(unittest.TestCase):
         self.assertFalse(source.equals(target), "系统时间序列变量反测试出错")
 
         # ctx.curbar，用户普通变量测试
-        for i in xrange(0, len(user_vars['curbar_list'])):
+        for i in range(0, len(user_vars['curbar_list'])):
             self.assertTrue(i + 1 == user_vars['curbar_list'][i])
         self.assertTrue(len(user_vars['numseries'])==len(open) and len(open)>0, '系列变量长度不一致')
         logger.info('-- 用户普通变量测试成功 --')
@@ -117,7 +117,7 @@ class TestSeries(unittest.TestCase):
         dt1980 = datetime.datetime(1980, 1, 1)
         dt1000 = datetime.datetime(1000, 1, 1)
         dt3000 = datetime.datetime(3000, 1, 1)
-        for i in xrange(0, len(numseries)):
+        for i in range(0, len(numseries)):
             # 用户序列变量自动追加测试成功
             if i < 99:
                 self.assertTrue(numseries[i] == NumberSeries.DEFAULT_VALUE, '用户数字序列变量测试失败!')
@@ -130,7 +130,7 @@ class TestSeries(unittest.TestCase):
                 self.assertTrue(dtseries[i] == dt3000, '用户时间序列变量测试失败!')
 
         # 序列变量回溯测试
-        for i in xrange(0, len(open)):
+        for i in range(0, len(open)):
             if i - 3 >= 0:
                 self.assertTrue(open3[i] == open[i - 3], "系统序列变量回溯测试失败！")
                 self.assertTrue(dt3[i] == dt[i - 3], "系统序列变量回溯测试失败！")
@@ -248,7 +248,7 @@ class TestMainFunction(unittest.TestCase):
                 return
 
             def on_symbol(self, ctx):
-                # print( ctx.strategy, ctx.pcontract)
+                # print(ctx.strategy, ctx.pcontract)
                 on_symbol['combination'].add((str(ctx.pcontract), ctx.strategy))
                 on_symbol['step_num'] += 1
 

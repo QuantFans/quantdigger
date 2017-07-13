@@ -68,7 +68,7 @@ class EventEngine:
 
     def start(self):
         """引擎启动"""
-        #print( self._routes)
+        #print(self._routes)
         self._active = True
 
     def stop(self):
@@ -147,7 +147,7 @@ class QueueEventEngine(EventEngine):
 
     def emit(self, event):
         #"""向事件队列中存入事件"""
-        #print( self._queue.qsize())
+        #print(self._queue.qsize())
         self._queue.put(event)
 
     def start(self):

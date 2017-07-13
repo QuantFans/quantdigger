@@ -29,7 +29,7 @@ class TestShell(object):
 
 
     def test_get_all_contracts(self):
-        print( shell.get_all_contracts())
+        print(shell.get_all_contracts())
 
 
 
@@ -37,7 +37,7 @@ class TestShell(object):
         #ret = self.shell.sync_call("get_pcontract", {
             #'str_pcontract': 'BB.TEST-1.MINUTE'
             #})
-        #print( json.loads(ret).keys())
+        #print(json.loads(ret).keys())
         #return
 
 

@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     run()
     stop = timeit.default_timer()
-    print( "运行耗时: %d秒" % ((stop - start )))
+    print("运行耗时: %d秒" % ((stop - start )))
     AnalyzeFrame(profile)
     plt.show()
 

@@ -69,7 +69,7 @@ def tick2period(code, period, start, end):
         df1.fillna(method='bfill', inplace=True, axis=1)
         df1['volume'] = df2.values
         dfout = pd.concat([dfout, df1])
-    # print( dfout)
+    # print(dfout)
     # assert(False)
     return dfout
 

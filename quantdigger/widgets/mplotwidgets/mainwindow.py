@@ -108,9 +108,9 @@ class MainWindow(object):
             self.frame.load_data(data)
             self.candle_widget.plot_with_plotter('candles', data)
             self.frame.draw_widgets()
-            print( "next" , str(pcon), "**" )
+            print("next" , str(pcon), "**" )
         else:
-            print( "stop_next" )
+            print("stop_next" )
 
     def on_previous_contract(self, event):
         if self._cur_contract_index - 1 >= 0:
@@ -122,9 +122,9 @@ class MainWindow(object):
             self.frame.load_data(data)
             self.candle_widget.plot_with_plotter('candles', data)
             self.frame.draw_widgets()
-            print( "prev" , str(pcon), "**" )
+            print("prev" , str(pcon), "**" )
         else:
-            print( "stop_pre" )
+            print("stop_pre" )
 
 
 

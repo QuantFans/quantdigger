@@ -215,9 +215,9 @@ class Transaction(object):
             self.order = order
         self.volume_multiple = order.volume_multiple
         self.compute_commission()
-        #print( "********************" )
-        #print( self.datetime, self.price, self.quantity, self.volume_multiple, ratio)
-        #print( "********************" )
+        #print("********************" )
+        #print(self.datetime, self.price, self.quantity, self.volume_multiple, ratio)
+        #print("********************" )
         #assert False
 
     def compute_commission(self):
@@ -333,7 +333,7 @@ class Order(object):
             self.volume_multiple
 
     def print_order(self):
-        #print( "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.direction))
+        #print("Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.direction))
         pass
 
     def __hash__(self):

@@ -22,9 +22,9 @@ def test_zmq_eventengine():
     import time
     
     def simpletest(event):
-        print( str(datetime.now()), event.route)
+        print(str(datetime.now()), event.route)
     
-    print( 'test_zmq_eventengine.....' )
+    print('test_zmq_eventengine.....' )
     ee = ZMQEventEngine()
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
@@ -54,7 +54,7 @@ def test_eventengine():
     import time
     
     def simpletest(event):
-        print( str(datetime.now()), event.route)
+        print(str(datetime.now()), event.route)
     
     ee = QueueEventEngine()
     timer = Timer(ee)
@@ -81,13 +81,13 @@ def test_rpc():
     """""" 
     def server_print_hello(args):
         time.sleep(4) # 4秒处理时间
-        print( "server_print_hello")
-        print( "args: ", args)
+        print("server_print_hello")
+        print("args: ", args)
         return 'data_sever_print_hello' 
 
     def client_print_hello(args):
-        print( "client_print_hello")
-        print( "args: ", args)
+        print("client_print_hello")
+        print("args: ", args)
 
     # ------------------
     def test_call():
@@ -105,16 +105,16 @@ def test_rpc():
         server = EventRPCServer(ee, 'test')
         server.register("server_print_hello", server_print_hello)
         ee.start()
-        print( client.sync_call("server_print_hello", { 'msg': 'sync_client'}, timeout), "**" )
+        print(client.sync_call("server_print_hello", { 'msg': 'sync_client'}, timeout), "**" )
         ee.stop()
         return
 
     test_sync_call(1)
-    print( "*****************" )
+    print("*****************" )
     test_sync_call(10)
-    print( "*****************" )
+    print("*****************" )
     ee = test_call()
-    print( "********************" )
+    print("********************" )
 
 
     try:
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 #class TestEventEngine(unittest.TestCase):
     #def test_get_qichats(self):
         #ret = get_qichats()
-        #print( ret)
+        #print(ret)
         #self.assertTrue(ret)
 
 

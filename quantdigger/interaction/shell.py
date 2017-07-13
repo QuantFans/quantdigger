@@ -30,14 +30,14 @@ class Shell(BackendInterface, UIInterface):
 
     def get_all_contracts(self):
         ret = self._backend.sync_call("get_all_contracts")
-        print( "****" )
-        print( ret)
-        print( "****" )
+        print("****" )
+        print(ret)
+        print("****" )
         #"""docstring for get_all_contracts""" 
-        #print( "------------------" )
-        #print( "get-all-contracts" )
-        #print( pcontract)
-        #print( "------------------" )
+        #print("------------------" )
+        #print("get-all-contracts" )
+        #print(pcontract)
+        #print("------------------" )
         #return "world" 
     def show_data(self, strpcontract):
         """docstring for load_pcontract""" 
@@ -65,7 +65,7 @@ class Shell(BackendInterface, UIInterface):
 
     def plot(self):
         """docstring for plo""" 
-        print( "plot" )
+        print("plot" )
 
 
 shell = Shell()

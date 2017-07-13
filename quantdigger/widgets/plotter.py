@@ -48,7 +48,7 @@ def sub_interval(start, end, array):
     
     >>> array = [0,1,3, 4, 5, 6, 8]
     >>> rst = sub_interval(2, 5, array)
-    >>> print( array[rst[0]: rst[1]])
+    >>> print(array[rst[0]: rst[1]])
     """
     i = bisect.bisect_left(array, start)
     if i != len(array):

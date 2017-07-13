@@ -111,10 +111,10 @@ class TechnicalBase(Plotter):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
         if isinstance(self.values, dict):
             self.series = OrderedDict()
-            for key, value in self.values.iteritems():
+            for key, value in self.values.items():
                 self.series[key] = series.NumberSeries(
                     value, self.name, self, float('nan'))
-            for key, value in self.series.iteritems():
+            for key, value in self.series.items():
                 setattr(self, key, value)
             self.is_multiple = True
         else:
@@ -191,8 +191,8 @@ class TechnicalBase(Plotter):
     def __getitem__(self, index):
         # 解析多元值, 返回series
         # python 3.x 有这种机制？
-        # print( self.name, index)
-        # print( self.series[0].data)
+        # print(self.name, index)
+        # print(self.series[0].data)
         if self.is_multiple:
             return self.series[index]
         # 返回单变量的值。

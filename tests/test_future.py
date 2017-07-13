@@ -24,7 +24,7 @@ buy3 = datetime.datetime.strptime("09:03:00", "%H:%M:%S").time()
 sell1 = datetime.datetime.strptime("14:57:00", "%H:%M:%S").time()
 sell2 = datetime.datetime.strptime("14:58:00", "%H:%M:%S").time()
 sell3 = datetime.datetime.strptime("15:00:00", "%H:%M:%S").time()
-fname = os.path.join(os.getcwd(), 'tests', 'data', '1MINUTE', 'TEST', 'FUTURE.csv')
+fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'FUTURE.csv')
 source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
 
@@ -426,7 +426,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     cashes = []
     UNIT = 1
     poscost = 0
-    for dt, price in data.close.iteritems():
+    for dt, price in data.close.items():
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
             poscost = (poscost*quantity + price*(1+settings['future_commission'])*UNIT)/ (quantity+UNIT)
@@ -453,7 +453,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
         cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         #if close_profit != 0 or pos_profit != 0:
-            #print( close_profit, pos_profit, equities[-1])
+            #print(close_profit, pos_profit, equities[-1])
             #assert False
     return equities, cashes, dts
 
@@ -469,7 +469,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     cashes = []
     UNIT = 2
     poscost = 0
-    for dt, price in data.close.iteritems():
+    for dt, price in data.close.items():
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
             poscost = (poscost*quantity + price*(1-settings['future_commission'])*UNIT)/ (quantity+UNIT)
@@ -509,30 +509,30 @@ def entries_maked_nextbar(data):
     predt = data.index[0]
     prelow = data.low[0]
 
-    for  dt, low in data.low.iteritems():
+    for  dt, low in data.low.items():
         if dt.date() == predt.date() and dt.time() < sell1 and prelow - low >= OFFSET:
             buy_entries.append(predt)
         prelow = low
         predt = dt
 
-    for  dt, high in data.high.iteritems():
+    for  dt, high in data.high.items():
         if dt.date() == predt.date() and dt.time() < sell1 and high - prehigh >= OFFSET:
             short_entries.append(predt)
-            #print( predt, low-prelow)
+            #print(predt, low-prelow)
         prehigh = high
         predt = dt
 
-    for dt, high in data.high.iteritems():
+    for dt, high in data.high.items():
         if dt.time() > buy3 and high - prehigh >= OFFSET:
             sell_entries.append(predt)
-            #print( predt, high-prehigh)
+            #print(predt, high-prehigh)
         prehigh = high
         predt = dt
 
-    for  dt, low in data.low.iteritems():
+    for  dt, low in data.low.items():
         if dt.time() > buy3 and prelow - low >= OFFSET:
             cover_entries.append(predt)
-            #print( predt, low-prelow)
+            #print(predt, low-prelow)
         prelow = low
         predt = dt
     return buy_entries, sell_entries, short_entries, cover_entries
@@ -552,7 +552,7 @@ def holdings_buy_maked_nextbar(data, buy_entries, capital, long_margin, volume_m
     poscost = 0
     preclose = 0
     UNIT = 1
-    for dt, low in data.low.iteritems():
+    for dt, low in data.low.items():
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
@@ -589,7 +589,7 @@ def holdings_short_maked_nextbar(data, buy_entries, capital, short_margin, volum
     preclose = 0
     close_profit = 0    # 累计平仓盈亏
     UNIT = 1
-    for dt, high in data.high.iteritems():
+    for dt, high in data.high.items():
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
@@ -624,7 +624,7 @@ def holdings_sell_maked_nextbar(data, sell_entries, capital, long_margin, volume
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), sell_entries)
     bprice = None
     prehigh = data.high[0]
-    for dt, high in data.high.iteritems():
+    for dt, high in data.high.items():
         close = data.close[dt]
         if dt.time() == buy1:
             bprice = close * (1+settings['future_commission'])
@@ -662,7 +662,7 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), cover_entries)
     bprice = None
     prelow = data.low[0]
-    for dt, low in data.low.iteritems():
+    for dt, low in data.low.items():
         close = data.close[dt]
         if dt.time() == buy1:
             bprice = close * (1-settings['future_commission'])

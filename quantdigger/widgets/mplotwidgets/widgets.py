@@ -356,7 +356,7 @@ class FrameWidget(AxesWidget):
 
     def _update_observer(self, obname):
         #"通知进度条改变宽度"
-        #for name, obj in self.observers.iteritems():
+        #for name, obj in self.observers.items():
             #if name == obname and obname == "slider":
                 #obj.update(obj.val, self.wdlength)
                 #break
@@ -514,9 +514,9 @@ class TechnicalWidget(object):
             self._w_width -= self._w_width/2
             self._w_width= max(self._w_width, self._w_width_min)
         elif event.key == u"super+up":
-            print( event.key, "**", type(event.key) )
+            print(event.key, "**", type(event.key) )
         elif event.key == u"super+down":
-            print( event.key, "**", type(event.key) )
+            print(event.key, "**", type(event.key) )
             # @TODO page upper down
 
         middle = (self._w_left+self._w_right)/2

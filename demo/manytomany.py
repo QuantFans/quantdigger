@@ -72,4 +72,4 @@ if __name__ == '__main__':
     print('group A', finance.summary_stats(curve1, 252*4*60))
     # 打印组合2的统计信息
     curve2 = finance.create_equity_curve(comb2.all_holdings())
-    print( 'group B', finance.summary_stats(curve2, 252*4*60))
+    print('group B', finance.summary_stats(curve2, 252*4*60))
