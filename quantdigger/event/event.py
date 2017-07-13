@@ -70,7 +70,7 @@ class Event(object):
 
     @classmethod
     def message_header(self, route):
-        return b'<%s&' % route
+        return b'<%s&' % bytes(route,encoding='utf-8')
 
 
 class SignalEvent(Event):

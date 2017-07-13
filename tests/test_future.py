@@ -111,7 +111,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                 elif ctx.curbar == 7:
                     assert(ctx.pos() == 0 and '持仓测试失败!')
                     assert(len(ctx.open_orders) == 2 and '撤单测试失败！')
-                    order = filter(lambda x: x.side == TradeSide.PING, ctx.open_orders)[0]
+                    order = list(filter(lambda x: x.side == TradeSide.PING, ctx.open_orders))[0]
                     ctx.cancel(order)
                 elif ctx.curbar == 8:
                     assert(len(ctx.open_orders) == 1 and '撤单测试失败！')

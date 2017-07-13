@@ -206,7 +206,7 @@ class ZMQEventEngine(EventEngine):
     def emit(self, event):
         """ client or event"""
         msg = Event.event_to_message(event)
-        self._emit_event_socket.send(msg)
+        self._emit_event_socket.send_string(msg)
         return
 
     def start(self):
