@@ -46,7 +46,7 @@ class Stg1(Strategy):
         pass
 
 
-def stg_demo():
+if __init__ == "__main__":
     import timeit
     start = timeit.default_timer()
     #ConfigUtil.set(source='tushare')

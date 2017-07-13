@@ -6,6 +6,7 @@ zmq
 logbook
 numpy
 pandas
+pymongo
 matplotlib
 python-dateutil
 TA-Lib
