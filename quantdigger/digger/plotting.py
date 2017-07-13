@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import matplotlib
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 from quantdigger.widgets.mplotwidgets import widgets, mplots
