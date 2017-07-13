@@ -6,7 +6,7 @@ from matplotlib.ticker import Formatter
 import matplotlib.ticker as mticker
 import numpy as np
 
-from quantdigger.util import gen_log as log
+from quantdigger.util.log import gen_log as log
 
 
 def slider_strtime_format(delta):
@@ -247,10 +247,10 @@ class Slider(AxesWidget):
 
     def _update_observer(self, event):
         """ 通知相关窗口更新数据 """
-        for name, obj in self.observers.iteritems():
+        for name, obj in self.observers.items():
             try:
                 obj.on_slider(self.val, event)
-            except Exception, e:
+            except Exception as e:
                 print(e)
 
 
@@ -461,7 +461,7 @@ class TechnicalWidget(object):
                 self.axes.append(plotter.ax)
                 #self._cursor_axes[ith_subwidget] = plotter.ax
                 self._cursor = MultiCursor(self._fig.canvas,
-                        self._cursor_axes.values(),
+                        list(self._cursor_axes.values()),
                                             color='r', lw=2, horizOn=False,
                                             vertOn=True)
         self._subwidgets[ith_subwidget] = widget
@@ -514,9 +514,9 @@ class TechnicalWidget(object):
             self._w_width -= self._w_width/2
             self._w_width= max(self._w_width, self._w_width_min)
         elif event.key == u"super+up":
-            print event.key, "**", type(event.key) 
+            print( event.key, "**", type(event.key) )
         elif event.key == u"super+down":
-            print event.key, "**", type(event.key) 
+            print( event.key, "**", type(event.key) )
             # @TODO page upper down
 
         middle = (self._w_left+self._w_right)/2
@@ -647,7 +647,7 @@ class TechnicalWidget(object):
 
     def _xticks_to_display(self, start, end, delta):
         xticks = []
-        for i in xrange(start, end):
+        for i in range(start, end):
             if i >= 1:
                 if delta.days >= 1:
                     if self._data.index[i].month != self._data.index[i-1].month:

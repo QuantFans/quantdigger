@@ -199,10 +199,10 @@ if __name__ == '__main__':
 
     def print_hello(data):
         """""" 
-        print "***************"
-        print "print_hello" 
-        print "args: ", data
-        print "return: ", 123
+        print("***************")
+        print( "print_hello" )
+        print( "args: ", data)
+        print( "return: ", 123)
         return "123"
     server_engine = ZMQEventEngine('test')
     server_engine.start()

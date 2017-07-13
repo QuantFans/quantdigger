@@ -1,60 +1,39 @@
-QuantDigger 0.5.0
+QuantDigger 0.5.0 (Python 3.5)
 ==================
 
-QuantDigger是一个基于python的量化回测框架。它借鉴了主流商业软件（比如TB, 金字塔）简洁的策略语法，同时
-避免了它们内置编程语言的局限性，使用通用语言python做为策略开发工具。和 zipline_ , pyalgotrade_ 相比，
-QuantDigger的策略语法更接近策略开发人员的习惯。目前的功能包括：股票回测，期货回测。 支持选股，套利，择时, 组合策略。自带了一个基于matplotlib编写的简单的策略和k线显示界面，能满足广大量化爱好者 基本的回测需求。设计上也兼顾了实盘交易，未来如果有时间，也会加入交易接口。开发人员都是量化爱好者，也欢迎感兴趣的新朋友加入开发, 我的QQ交流群：334555399。使用中遇到任何问题，欢迎提个[issue](https://github.com/QuantFans/quantdigger/issues)。
 
-除了开发人员，也特别感谢以下朋友给的建议：
-
-北京的 vodkabuaa_
-
-国元证券的王林峰
-
-tushare_ 库的作者 Jimmy_
-
-深大的邓志浩
-
-
-文档
------
-wiki文档_
-
-
-安装
------
-
-克隆github代码后本地安装(推荐)
-   
-  ::
-       
-      git clone https://github.com/QuantFans/quantdigger.git
-      cd quantdigger
-      python setupscripts\install.py  (windows, 会根据情况安装pip, 及依赖包)
-      python setupscripts/install.py  (linux或mac, 会根据情况安装pip, 及依赖包)
+* qink:
+    在原来0.5.0版的基础上改为支持Python3.5    2017-07-13
 
 
 依赖库
 -------
+* Python (仅在3.5上进行测试, **2.7请找原版**)
 * matplotlib 
 * numpy
 * logbook
 * pandas 
-* progressbar
-* python-dateutil 
+* progressbar2
+* zmq
+* BeautifulSoup4 (tushare需要)
+* lxml (tushare需要)
+* tushare_ (一个非常强大的股票信息抓取工具)
+* python-dateutil(可选)
 * pyqt (可选)
-* Python (2.7.8+, **暂不支持3.x**)
-* tushare_ (可选, 一个非常强大的股票信息抓取工具)
-* TA-Lib
 * Pyqt (可选)
 * IPython (可选)
+* TA-Lib
 
-* 如果要安装tushare必须先安装`lxml`库, `pip install lxml --upgrade`.
+* 可以用pip安装依赖库:
+    >>> pip install -r requirements.txt --upgrade
+* 如果出现pypi源超时情况:
+    >>> pip install -r requirements.txt --upgrade -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
 
-如果出现pypi源超时情况,可以通过命令方式进行安装依赖库:
-
-     pip2 -r requirements/requirements.txt --upgrade -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
-
+* TA-Lib 通过pip直接安装可能会出错，
+    * 到 http://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib 下载相应版本然后通过命令安装，如
+        >>> pip install TA_Lib-0.4.10-cp35-cp35m-win_amd64.whl
+    * Anaconda用户可以用
+        >>> conda install -c quantopian ta-lib
 
 
 策略组合DEMO
@@ -184,6 +163,9 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 
 版本
 ~~~~
+**0.5.0 版本 2017-07-13**
+
+* 在原来0.5.0版的基础上改为支持Python3.5
 
 **0.5.0 版本 2017-01-08**
 

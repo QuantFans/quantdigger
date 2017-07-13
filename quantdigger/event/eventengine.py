@@ -7,11 +7,11 @@
 # @date 2016-05-17
 
 import abc
-import thread
+import _thread
 import time
 import zmq
 
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from time import sleep
 from threading import Thread, Condition, Lock
 
@@ -126,7 +126,7 @@ class EventEngine:
         for handler in self._routes[event.route]:
             try:
                 log.debug("处理事件%s" % event.route)
-                thread.start_new_thread(handler, (event,))
+                _thread.start_new_thread(handler, (event,))
                 #handler(event)
             except Exception as e:
                 log.error(e)
@@ -267,7 +267,7 @@ if __name__ == '__main__':
     import time, datetime, sys
 
     def simpletest(event):
-        print str(datetime.datetime.now()), event
+        print(str(datetime.datetime.now()), event)
 
     ee = ZMQEventEngine('test')
     ee.register(Event.TIMER, simpletest)

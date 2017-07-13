@@ -29,7 +29,7 @@ def plot_init(method):
         #
         default.update(method_args)
         # 属性创建
-        for key, value in default.iteritems():
+        for key, value in default.items():
             setattr(self, key, value)
         # 运行构造函数
         rst = method(self, *args, **kwargs)
@@ -182,5 +182,6 @@ class Plotter(object):
                 temp = zip(self._xdata, self.values)
                 sdata = sorted(temp, key=lambda x: x[0])
                 temp = zip(*sdata)
-                self._xdata = list(temp[0])
-                self.values = list(temp[1])
+                l_temp = list(temp)
+                self._xdata = l_temp[0]
+                self.values = l_temp[1]

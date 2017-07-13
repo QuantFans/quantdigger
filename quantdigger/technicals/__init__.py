@@ -1,2 +1,2 @@
-from common import *
-from base import TechnicalBase
+from . import common
+from . import base

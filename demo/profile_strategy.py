@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# @file plot_strategy.py
+# @file profile_strategy.py
 # @brief 策略运行和图表展示
 # @author wondereamer
 # @version 0.2
@@ -47,7 +47,7 @@ class DemoStrategy(Strategy):
         return
 
 
-if __name__ == '__main__':
+def profile_strategy():
     import timeit
     from quantdigger.digger.analyze import AnalyzeFrame
     import matplotlib.pyplot as plt
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     run()
     stop = timeit.default_timer()
-    print "运行耗时: %d秒" % ((stop - start ))
+    print( "运行耗时: %d秒" % ((stop - start )))
     AnalyzeFrame(profile)
     plt.show()
 

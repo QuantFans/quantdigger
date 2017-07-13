@@ -1,3 +1,8 @@
+requests
+BeautifulSoup4
+lxml
+tushare
+zmq
 logbook
 numpy>=1.10.0
 pandas>=1.7.1

@@ -29,7 +29,7 @@ def override_attributes(method):
         try:
             for attr in arg_names:
                 obj_attrs[attr] = getattr(self, attr)
-        except Exception, e:
+        except Exception as e:
             print(e)
             print("构造函数和绘图函数的绘图属性参数不匹配。")
         obj_attrs.update(method_args)
@@ -90,13 +90,13 @@ class Candles(object):
                      (i-delta, close),
                      (i+delta, close),
                      (i+delta, open))
-                    for i, open, close in zip(xrange(len(self.data)),
+                    for i, open, close in zip(range(len(self.data)),
                                               self.data.open,
                                               self.data.close)
                     if open != -1 and close != -1]
         rangeSegments = [((i, low), (i, high))
                          for i, low, high in zip(
-                                 xrange(len(self.data)),
+                                 range(len(self.data)),
                                  self.data.low,
                                  self.data.high)
                          if low != -1]
@@ -180,7 +180,7 @@ class TradingSignalPos(object):
     def __init__(self, price_data, deals, name="Signal", c=None, lw=2):
         self.signal = []
         self.colors = []
-        price_data['row'] = [i for i in xrange(0, len(price_data))]
+        price_data['row'] = [i for i in range(0, len(price_data))]
         for deal in deals:
             # ((x0, y0), (x1, y1))
             p = ((price_data.row[deal.open_datetime], deal.open_price),

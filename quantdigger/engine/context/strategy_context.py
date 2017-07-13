@@ -7,7 +7,7 @@
 # @date 2016-11-27
 
 import copy
-import Queue
+import queue
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.exchange import Exchange
 from quantdigger.event import Event, EventsPool, SignalEvent, OnceEvent
@@ -62,7 +62,7 @@ class StrategyContext(object):
             # 事件处理。
             try:
                 event = self.events_pool.get()
-            except Queue.Empty:
+            except queue.Empty:
                 assert(False)
             except IndexError:
                 break

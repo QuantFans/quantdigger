@@ -6,7 +6,7 @@
 # @version 0.3
 # @date 2016-05-26
 
-from dsutil import get_setting_datasource
+from . import dsutil
 from quantdigger.datastruct import PContract, Contract
 
 
@@ -19,7 +19,7 @@ class DataManager(object):
     DEFAULT_DT_END = '2100-1-1'
 
     def __init__(self):
-        self._src = get_setting_datasource()
+        self._src = dsutil.get_setting_datasource()
         Contract.info = self._src.get_contracts()
 
     def get_bars(self, strpcon,

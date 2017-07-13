@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
 
-from stock_plot import *
+from . import stock_plot
 
 def max_return(nbarprice, islong):
     '''docstring for maxreturn''' 
@@ -127,7 +127,7 @@ def process_data(n, intraday, tradeinfo, price_data):
     data['exit_nbar_best'] = exit_nbar_bests
     data['exit_nbar_worst'] = exit_nbar_worsts
     data['islong'] = islongs
-    print "Data Preprocessing Done!"
+    print( "Data Preprocessing Done!")
     #data.to_csv("d:\\rst.csv")
     return data
 
@@ -175,19 +175,19 @@ def summary(data):
                       colLabels=columns,
                       loc='center right', fontsize=14)
     plt.text(12,3.4,'Table Title',size=8)
-    print "******************************************" 
-    print u"总盈利: " + str(data_win.exit_profit.sum() * 300)
-    print u"总亏损: " + str(data_lose.exit_profit.sum() * 300)
-    print u"总利润: " + str((data.exit_profit.sum()) * 300)
-    print "******************************************" 
-    print u"交易次数: " + str(total_num)
-    print u"盈利次数: " + str(len(data_win))
-    print u"亏损次数: " + str(len(data_lose))
-    print u"平均利润 :%s" % str(data_win.exit_profit.sum()/ total_num*300)
-    print u"盈亏比: " + str(abs(data_win.exit_profit.sum()/len(data_win) / (data_lose.exit_profit.sum()/len(data_lose))))
-    print u"胜率: " + str(len(data_win)/float(total_num)*100) + "%" 
-    print u"平均持仓周期: " + str(av_period)
-    print "******************************************" 
+    print( "******************************************" )
+    print( u"总盈利: " + str(data_win.exit_profit.sum() * 300))
+    print( u"总亏损: " + str(data_lose.exit_profit.sum() * 300))
+    print( u"总利润: " + str((data.exit_profit.sum()) * 300))
+    print( "******************************************" )
+    print( u"交易次数: " + str(total_num))
+    print( u"盈利次数: " + str(len(data_win)))
+    print( u"亏损次数: " + str(len(data_lose)))
+    print( u"平均利润 :%s" % str(data_win.exit_profit.sum()/ total_num*300))
+    print( u"盈亏比: " + str(abs(data_win.exit_profit.sum()/len(data_win) / (data_lose.exit_profit.sum()/len(data_lose)))))
+    print( u"胜率: " + str(len(data_win)/float(total_num)*100) + "%" )
+    print( u"平均持仓周期: " + str(av_period))
+    print( "******************************************" )
 
 
 def simple_entry_analyze(fig, data, n):
@@ -216,7 +216,7 @@ def entry_analyze(fig, data, n):
     try:
         entry_nbar_best = data2['entry_nbar_best']
         entry_nbar_worst = data2['entry_nbar_worst']
-    except Exception, e:
+    except Exception as e:
         entry_nbar_best = []
         entry_nbar_worst = []
         
@@ -235,7 +235,7 @@ def exit_analyze(fig, data, n):
         profits_more = exit_nbar_best - exit_profit
         risks = exit_nbar_worst - exit_profit
         return  plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, risks, n)
-    except Exception, e:
+    except Exception as e:
         return [], []
 
 
@@ -243,7 +243,7 @@ def scatter_analyze(fig, data):
     '''交易分布鸟瞰图''' 
     data_win = data[data.exit_profit>0]
     data_lose = data[data.exit_profit<0]
-    return  plot_scatter(fig, data_win.period.tolist(), data_win.exit_profit.tolist(),
+    return  stock_plot.plot_scatter(fig, data_win.period.tolist(), data_win.exit_profit.tolist(),
                             data_lose.period.tolist(),
                             data_lose.exit_profit.tolist(), 30)
 
@@ -251,7 +251,7 @@ def scatter_analyze(fig, data):
 
 # Entry analyze
 def summary_analyze(fig, data, n, type_):
-    print "prepare plotting.." 
+    print( "prepare plotting.." )
 
     cursors = []
     # ordered by profits
@@ -269,18 +269,18 @@ def summary_analyze(fig, data, n, type_):
         exit_nbar_worst = data['exit_nbar_worst']
         profits_more = exit_nbar_best - exit_profit
         risks = exit_nbar_worst - exit_profit
-    except Exception, e:
+    except Exception as e:
         entry_nbar_best = pd.Series()
         entry_nbar_worst = pd.Series()
         exit_nbar_best = pd.Series()
         exit_nbar_worst = pd.Series()
         profits_more = pd.Series()
         risks = pd.Series()
-        print "No nbar!" 
+        print( "No nbar!" )
     rtns = data['return']
     data_win = data[data.exit_profit>0]
     data_lose = data[data.exit_profit<=0]
-    print "begin plotting.." 
+    print( "begin plotting.." )
     # summary
     #cursors.append(cursor)
 
@@ -305,8 +305,8 @@ class AnalyzeFrame(object):
         self.cursors = []
         self.data = process_data(n, intraday,
                     self.get_tradeinfo(profile), profile.data())
-        #print self.data.columns
-        #print self.data[0:3]
+        #print( self.data.columns)
+        #print( self.data[0:3])
         #assert False
         self.axes = []
         self.rax = plt.axes([0, 0.5, 0.08, 0.15])
@@ -344,17 +344,17 @@ class AnalyzeFrame(object):
         for c in self.cursors:
             del c
         if op == "scatter":
-            print "scatter_analyze" 
+            print( "scatter_analyze" )
             self.axes, self.cursors = scatter_analyze(self.fig, self.data)
         elif op == "summary":
             self.axes, self.cursors = summary_analyze(self.fig, self.data, self.nbar, 1)
         elif op == "summary2":
             self.axes, self.cursors = summary_analyze(self.fig, self.data, self.nbar, 2)
         elif op == "entry":
-            print "entry_analyze" 
+            print( "entry_analyze" )
             self.axes, self.cursors = entry_analyze(self.fig, self.data, self.nbar)
         elif op == "exit":
-            print "exit_analyze" 
+            print( "exit_analyze" )
             self.axes, self.cursors = exit_analyze(self.fig, self.data, self.nbar)
         elif op == "simple":
             self.axes, self.cursors = simple_entry_analyze(self.fig, self.data, self.nbar)
@@ -367,5 +367,5 @@ class AnalyzeFrame(object):
 if __name__ == '__main__':
     a = AnalyzeFrame('_djtrend2_IF000' , 10, False)
     plt.show()
-    print "ok" 
+    print( "ok" )
 

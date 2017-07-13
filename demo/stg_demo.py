@@ -46,7 +46,7 @@ class Stg1(Strategy):
         pass
 
 
-if __name__ == '__main__':
+def stg_demo():
     import timeit
     start = timeit.default_timer()
     #ConfigUtil.set(source='tushare')
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     profile = add_strategy([Stg1('S1')], {'captial': 500000.0})
     run()
     stop = timeit.default_timer()
-    print 'using time: %d seconds' % (stop - start)
+    print( 'using time: %d seconds' % (stop - start))
 
     from quantdigger.digger import finance, plotting
     s = 0

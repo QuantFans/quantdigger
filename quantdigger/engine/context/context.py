@@ -31,7 +31,7 @@ class Context(object):
         self._cur_strategy_context = None
         self._cur_data_context = None
         self._data_contexts = {}       # str(PContract): DataContext
-        for key, value in data.iteritems():
+        for key, value in data.items():
             self._data_contexts[key] = value
             self._data_contexts[key.split('-')[0]] = value
             self._data_contexts[key.split('.')[0]] = value

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 from quantdigger.widgets.mplotwidgets import widgets, mplots
 from quantdigger.widgets.mplotwidgets.mplots import Candles
-from quantdigger.technicals import Line, LineWithX, Volume
+from quantdigger.technicals.common import Line, LineWithX, Volume
 
 
 def xticks_to_display(data_length):
@@ -23,7 +23,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     """
         显示回测结果。
     """
-    print "plotting.."
+    print( "plotting..")
     fig = plt.figure()
     frame = widgets.TechnicalWidget(fig, price_data)
     axes = frame.init_layout(
@@ -45,7 +45,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
         curve = Line(curve)
         subwidget1.add_plotter(curve, True)
     # 添加指标
-    for name, indic in indicators.iteritems():
+    for name, indic in indicators.items():
         subwidget1.add_plotter(indic, False)
 
     # 绘制第2个窗口
@@ -59,7 +59,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     if marks:
         if marks[0]:
             # plot lines
-            for name, values in marks[0].iteritems():
+            for name, values in marks[0].items():
                 v = values[0]
                 ith_ax = v[0]
                 twinx = v[1]
@@ -82,7 +82,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
                     subwidgets[ith_ax].add_plotter(curve, twinx)
         if marks[1]:
             # plot texts
-            for name, values in marks[1].iteritems():
+            for name, values in marks[1].items():
                 for v in values:
                     ith_ax, x, y, text = v[0], v[1], v[2], v[3]
                     color, size, rotation = v[4], v[5], v[6]

@@ -81,7 +81,7 @@ class DemoStrategy2(Strategy):
         return
 
 
-if __name__ == '__main__':
+def plot_strategy():
     import timeit
     start = timeit.default_timer()
     #set_symbols(['BB.SHFE-1.Minute']) 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     run()
     stop = timeit.default_timer()
-    print "运行耗时: %d秒" % ((stop - start ))
+    print( "运行耗时: %d秒" % ((stop - start )))
 
     # 绘制k线，交易信号线
     from quantdigger.digger import finance, plotting
@@ -111,5 +111,5 @@ if __name__ == '__main__':
     ## 绘制净值曲线
     plotting.plot_curves([curve.networth])
     ## 打印统计信息
-    print finance.summary_stats(curve, 252)
+    print( finance.summary_stats(curve, 252))
     ## @TODO 直接单击的时候只有数直线

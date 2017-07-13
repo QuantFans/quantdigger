@@ -45,7 +45,7 @@ def tech_init(method):
         #
         default.update(method_args)
         # 属性创建
-        for key, value in default.iteritems():
+        for key, value in default.items():
             setattr(self, key, value)
         # 运行构造函数
         rst = method(self, *args, **kwargs)
@@ -105,7 +105,8 @@ class TechnicalBase(Plotter):
         self.data = self._args[0]
         # 数据转化成ta-lib能处理的格式
         #self._args[0] = ndarray(self._args[0])
-        apply(self._vector_algo, tuple(self._args))
+        # print(tuple(self._args))
+        self._vector_algo(self._args[0],self._args[1])
         if not hasattr(self, 'values'):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
         if isinstance(self.values, dict):

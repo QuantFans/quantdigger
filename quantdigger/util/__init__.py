@@ -6,12 +6,12 @@ import os
 import time
 import sys
 
-from log import gen_log
+from . import log
 
 logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
 dlogger = logbook.Logger('data')
-mlogger = gen_log
+mlogger = log.gen_log
 gen_logger = logbook.Logger('general')
 rlogger = logbook.Logger('runtime')
 
@@ -21,7 +21,7 @@ source_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__f
 
 def deprecated(f):
     def ff(*args, **kwargs):
-        print '{0} is deprecated!'.format(str(f))
+        print('{0} is deprecated!'.format(str(f)))
         return f(*args, **kwargs)
     return ff
 

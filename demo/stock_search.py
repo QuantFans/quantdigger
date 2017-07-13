@@ -49,7 +49,7 @@ class DemoStrategy(Strategy):
 
 
 
-if __name__ == '__main__':
+def stock_search():
     # 
     set_symbols(['*.SH'])
     algo = DemoStrategy('A1')

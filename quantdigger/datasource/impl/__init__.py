@@ -1,4 +1,4 @@
-import csv_source
-import tushare_source
-import mongodb_source
-import sqlite_source
+from . import csv_source
+from . import tushare_source
+from . import mongodb_source
+from . import sqlite_source
