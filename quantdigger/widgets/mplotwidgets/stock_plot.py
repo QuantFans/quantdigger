@@ -101,9 +101,9 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst,
     rect2 = [left, 0.3, width, 0.4]
     rect3 = [left, 0.1, width, 0.2]
 
-    ax1 = fig.add_axes(rect1, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
-    ax3 = fig.add_axes(rect3, axisbg=axescolor, sharex=ax1)
+    ax1 = fig.add_axes(rect1, facecolor=axescolor)
+    ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
+    ax3 = fig.add_axes(rect3, facecolor=axescolor, sharex=ax1)
     (entry_best-exit_profit).plot(ax=ax1, kind='bar', grid=False,
                                   use_index=False, label=u"ÓÅÊµ²î")
     entry_worst.plot(ax=ax1, kind='bar', grid=False,
@@ -185,8 +185,8 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst,
     rect2 = [left, 0.4, width, 0.4]
     rect3 = [left, 0.1, width, 0.3]
 
-    ax1 = fig.add_axes(rect3, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
+    ax1 = fig.add_axes(rect3, facecolor=axescolor)
+    ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
     if nbar > 0:
         print "**66666"
         # plot ax1

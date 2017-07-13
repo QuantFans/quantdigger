@@ -33,15 +33,14 @@ class ExecuteUnit(object):
             spec_date (dict): time range for specific pcontracts
         """
         self.finished_data = []
-        pcontracts = map(lambda x: x.upper(), pcontracts)
+        pcontracts = list(map(lambda x: x.upper(), pcontracts))
         self.pcontracts = pcontracts
         self._combs = []
         self._data_manager = DataManager()
         # str(PContract): DataWrapper
         if settings['source'] == 'csv':
             self.pcontracts = self._parse_pcontracts(self.pcontracts)
-        self._default_pcontract = list(self.pcontracts)[0]
-        print(self._default_pcontract)
+        self._default_pcontract = self.pcontracts[0]
         self._all_data, self._max_window = self._load_data(self.pcontracts,
                                                            dt_start,
                                                            dt_end,

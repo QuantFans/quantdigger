@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from datasource.test_csv import *
-from test_engine import *
-from test_future import *
-from test_stock import *
+from tests.datasource.test_csv import *
+from . import test_engine
+from . import test_future
+from . import test_stock
 from quantdigger import ConfigUtil
 
-if __name__ == '__main__':
+def csv_main():
     # 默认为csv
     assert(ConfigUtil.get('source') == 'csv')
     unittest.main()

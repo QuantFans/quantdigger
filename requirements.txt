@@ -4,9 +4,9 @@ lxml
 tushare
 zmq
 logbook
-numpy>=1.10.0
-pandas>=1.7.1
+numpy
+pandas
 matplotlib
-python-dateutil>=2.4.2
-TA-Lib>= 0.4.8
-progressbar2>=3.6.2
+python-dateutil
+TA-Lib
+progressbar2

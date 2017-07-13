@@ -78,9 +78,9 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
     rect1 = [left, 0.7, width, 0.2]#left, bottom, width, height
     rect2 = [left, 0.3, width, 0.4]
     rect3 = [left, 0.1, width, 0.2]
-    ax1 = fig.add_axes(rect1, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex = ax1)
-    ax3  = fig.add_axes(rect3, axisbg=axescolor, sharex = ax1)
+    ax1 = fig.add_axes(rect1, facecolor=axescolor)
+    ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex = ax1)
+    ax3  = fig.add_axes(rect3, facecolor=axescolor, sharex = ax1)
 
     (entry_best-exit_profit).plot(ax=ax1, kind='bar',
                                   grid=False, use_index=False,
@@ -159,8 +159,8 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
     rect2 = [left, 0.4, width, 0.4]
     rect3 = [left, 0.1, width, 0.3]
 
-    ax1 = fig.add_axes(rect3, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
+    ax1 = fig.add_axes(rect3, facecolor=axescolor)
+    ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
     if nbar > 0:
         # plot ax1
         profits_more.plot(ax=ax1, kind='bar', grid = False, use_index = False, label=u"%s bar more profits"%nbar)

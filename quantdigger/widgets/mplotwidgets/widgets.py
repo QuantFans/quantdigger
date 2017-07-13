@@ -566,12 +566,12 @@ class TechnicalWidget(object):
         self._slidder_upper = self._bottom + self._slider_height
         self._bigger_picture_lower = self._slidder_upper
         self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
-                                             self._slider_height], axisbg='gray')
+                                             self._slider_height], facecolor='gray')
         self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
                                                     self._width, self._bigger_picture_height],
                                                 zorder = 0, frameon=False,
                                                 #sharex=self._slider_ax,
-                                                axisbg='gray', alpha = '0.1' )
+                                                facecolor='gray', alpha = '0.1' )
         self._bigger_picture.set_xticklabels([]);
         self._bigger_picture.set_xticks([])
         self._bigger_picture.set_yticks([])
@@ -592,7 +592,7 @@ class TechnicalWidget(object):
             rect = [self._left, bottom, self._width, unit * ratio]
             if i > 0:
                 # 共享x轴
-                ax = self._fig.add_axes(rect, sharex=first_user_axes)  #axisbg=axescolor)
+                ax = self._fig.add_axes(rect, sharex=first_user_axes)  #facecolor=axescolor)
                 self._all_axes.append(ax)
             else:
                 first_user_axes = self._fig.add_axes(rect)

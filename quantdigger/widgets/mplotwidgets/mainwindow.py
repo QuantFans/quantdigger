@@ -56,8 +56,8 @@ class MainWindow(object):
         return
 
     def _create_toolbar(self):
-        axprev = self._fig.add_axes([0.1, 0.92, 0.07, 0.075], axisbg='gray')
-        axnext = self._fig.add_axes([0.2, 0.92, 0.07, 0.075], axisbg='gray')
+        axprev = self._fig.add_axes([0.1, 0.92, 0.07, 0.075], facecolor='gray')
+        axnext = self._fig.add_axes([0.2, 0.92, 0.07, 0.075], facecolor='gray')
         self.btn_next = Button(axnext, '1Day')
         self.btn_prev = Button(axprev, '1Min')
 

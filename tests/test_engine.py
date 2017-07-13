@@ -487,5 +487,5 @@ class TestPContractsWithSameContract(unittest.TestCase):
         run()
 
 
-if __name__ == '__main__':
+def test_engine():
     unittest.main()
