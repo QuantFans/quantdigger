@@ -2,7 +2,7 @@
 import subprocess
 import time
 import os
-from quantdigger.util import gen_log as log
+from quantdigger.util import gen_logger as log
 from quantdigger.util import project_dir
 
 ui_path = os.path.join(project_dir, "quantdigger", "widgets", "mplotwidgets", "mainwindow.py" )
@@ -23,6 +23,6 @@ shell = subprocess.call('ipython --config=%s' % shell_path, shell=True)
 ###notebook = subprocess.call('jupyter notebook --config=shell.py', shell=True)
 ###prin(t mainwindow.pid)
 
-raw_input("Any key to quit quantdigger.")
+input("Any key to quit quantdigger.")
 subprocess.Popen.kill(mainwindow)
 subprocess.Popen.kill(backend)
