@@ -6,12 +6,12 @@ import os
 import time
 import sys
 
-from . import log
+from .log import gen_log
 
 logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
 dlogger = logbook.Logger('data')
-mlogger = log.gen_log
+mlogger = gen_log
 gen_logger = logbook.Logger('general')
 rlogger = logbook.Logger('runtime')
 
