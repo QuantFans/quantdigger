@@ -9,12 +9,12 @@ with open("README.rst", "r", "utf-8") as f:
 setup(
     name="QuantDigger",
     version="0.5.0",
-    description="量化交易Python回测系统,python 3.5版",
+    description="量化交易Python回测系统,python",
     long_description=readme,
     author="QuantFans",
     author_email="dingjie.wang@foxmail.com",
     license="MIT",
-    url="https://github.com/qink1986/quantdigger",
+    url="https://github.com/QuantFans/quantdigger",
     packages=find_packages(exclude=['tests', 'demo', "requirements", "images", "setupscripts"]),
     include_package_data=True,
     install_requires=[
