@@ -207,7 +207,7 @@ class ExecuteUnit(object):
         logger.info("loading data...")
         pbar = progressbar.ProgressBar().start()
         pcontracts = [PContract.from_string(s) for s in strpcons]
-        pcontracts = sorted(pcontracts, reverse=True)
+        pcontracts = sorted(pcontracts, key=PContract.__str__, reverse=True)
         for i, pcon in enumerate(pcontracts):
             strpcon = str(pcon)
             if strpcon in spec_date:

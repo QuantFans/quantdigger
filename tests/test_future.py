@@ -372,7 +372,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                     ctx.short(ctx['future2.TEST-1.Minute'].close, 2, 'future2.TEST') 
                 else:
                     if curtime == sell1:
-                        all_postions =  ctx.all_positions()
+                        all_postions =  list(ctx.all_positions())
                         assert(len(all_postions) == 2)
                         assert(all_postions[0].quantity == 6)
                         assert(all_postions[0].closable == 6)
