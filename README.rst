@@ -43,9 +43,9 @@ wiki文档_
 * TA-Lib
 
 * 可以用pip安装依赖库:
-    >>> pip install -r requirements\requirements.txt --upgrade
+    >>> pip install -r requirements/requirements.txt --upgrade
 * 如果出现pypi源超时情况:
-    >>> pip install -r requirements\requirements.txt --upgrade -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+    >>> pip install -r requirements/requirements.txt --upgrade -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
 
 * TA-Lib 通过pip直接安装可能会出错，
     * 到 http://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib 下载相应版本然后通过命令安装，如
