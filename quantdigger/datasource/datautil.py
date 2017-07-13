@@ -54,15 +54,15 @@ def tick2period(code, period, start, end):
         # remove non-trade time
         df1 = df1.truncate(before=date+' 9:30:01', after=date+' 11:30')
         df1 = df1.append(df3)
-        if np.isnan(df1.ix[0, 'close']):
+        if np.isnan(df1.loc[0, 'close']):
             # use last day's close as initial price if
             # there is no deal after open
             from datetime import timedelta
             # get enough days to ensure at least one trading day is involved
             aDay = timedelta(days=-10)
             pre = (pd.to_datetime(date) + aDay).strftime('%Y-%m-%d')
-            df1.ix[0, 'close'] = ts.get_hist_data(code, start=pre, end=date)\
-                                   .ix[-2, 'close']
+            df1.loc[0, 'close'] = ts.get_hist_data(code, start=pre, end=date)\
+                                   .loc[-2, 'close']
         # use price before if there is no deal during current period
         df1['close'].fillna(method='pad', inplace=True)
         # use close as open,high,low if there  is no deal during current period

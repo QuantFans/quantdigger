@@ -96,7 +96,7 @@ class TestSeries(unittest.TestCase):
             'volume': volume
         })
         target.index = dt
-        target = target.ix[:, ['open', 'close', 'high', 'low', 'volume']]
+        target = target.loc[:, ['open', 'close', 'high', 'low', 'volume']]
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'BB.csv')
         source = pd.read_csv(fname, parse_dates=True, index_col=0)
         self.assertTrue(source.equals(target), "系统时间序列变量正测试出错")
