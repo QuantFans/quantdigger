@@ -8,7 +8,7 @@ with open("README.rst", "r", "utf-8") as f:
 
 setup(
     name="QuantDigger",
-    version="0.5.0",
+    version="0.6.1",
     description="量化交易Python回测系统",
     long_description=readme,
     author="QuantFans",
