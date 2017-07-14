@@ -34,6 +34,7 @@ class TuShareSource(DatasourceAbstract):
         dts = _process_ts_dt(dt_start)
         dte = _process_ts_dt(dt_end)
         data = ts.get_k_data(code, start=dts, end=dte)
+        data.set_index('date',drop=True,inplace=True)
         data.index.names = ['datetime']
         return data.iloc[::-1]
 
