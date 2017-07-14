@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import datetime
 import os
 import time
@@ -69,7 +70,7 @@ def tick2period(code, period, start, end):
         df1.fillna(method='bfill', inplace=True, axis=1)
         df1['volume'] = df2.values
         dfout = pd.concat([dfout, df1])
-    # print(dfout)
+    # six.print_(dfout)
     # assert(False)
     return dfout
 
@@ -169,9 +170,9 @@ def import_from_csv(self, paths):
     for path in paths:
         if not path.endswith(".csv") and not path.endswith(".CSV"):
             # @TODO
-            print(path)
+            six.print_(path)
             raise Exception("错误的文件格式")
-        print("import: ", path)
+        six.print_("import: ", path)
         df = pd.read_csv(path, parse_dates='datetime')
         try:
             df['datetime'] = map(
@@ -196,9 +197,9 @@ def import_data(fpaths, ds):
     for path in fpaths:
         if not path.lower().endswith('.csv'):
             # @TODO
-            print(path)
+            six.print_(path)
             raise Exception("错误的文件格式")
-        print("import data: ", path)
+        six.print_("import data: ", path)
         df = pd.read_csv(path, parse_dates='datetime')
         try:
             df['datetime'] = map(

@@ -6,6 +6,7 @@
 # @version 0.15
 # @date 2015-06-13
 
+import six
 import inspect
 from matplotlib.axes import Axes
 import numpy as np
@@ -48,7 +49,7 @@ def sub_interval(start, end, array):
     
     >>> array = [0,1,3, 4, 5, 6, 8]
     >>> rst = sub_interval(2, 5, array)
-    >>> print(array[rst[0]: rst[1]])
+    >>> six.print_(array[rst[0]: rst[1]])
     """
     i = bisect.bisect_left(array, start)
     if i != len(array):

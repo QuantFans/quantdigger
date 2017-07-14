@@ -5,6 +5,8 @@
 # @author wondereamer
 # @version 0.1
 # @date 2016-05-25
+
+import six
 import unittest
 from quantdigger.event import (
     QueueEventEngine,
@@ -22,9 +24,9 @@ def test_zmq_eventengine():
     import time
     
     def simpletest(event):
-        print(str(datetime.now()), event.route)
+        six.print_(str(datetime.now()), event.route)
     
-    print('test_zmq_eventengine.....' )
+    six.print_('test_zmq_eventengine.....' )
     ee = ZMQEventEngine()
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
@@ -54,7 +56,7 @@ def test_eventengine():
     import time
     
     def simpletest(event):
-        print(str(datetime.now()), event.route)
+        six.print_(str(datetime.now()), event.route)
     
     ee = QueueEventEngine()
     timer = Timer(ee)
@@ -81,13 +83,13 @@ def test_rpc():
     """""" 
     def server_print_hello(args):
         time.sleep(4) # 4秒处理时间
-        print("server_print_hello")
-        print("args: ", args)
+        six.print_("server_print_hello")
+        six.print_("args: ", args)
         return 'data_sever_print_hello' 
 
     def client_print_hello(args):
-        print("client_print_hello")
-        print("args: ", args)
+        six.print_("client_print_hello")
+        six.print_("args: ", args)
 
     # ------------------
     def test_call():
@@ -105,16 +107,16 @@ def test_rpc():
         server = EventRPCServer(ee, 'test')
         server.register("server_print_hello", server_print_hello)
         ee.start()
-        print(client.sync_call("server_print_hello", { 'msg': 'sync_client'}, timeout), "**" )
+        six.print_(client.sync_call("server_print_hello", { 'msg': 'sync_client'}, timeout), "**" )
         ee.stop()
         return
 
     test_sync_call(1)
-    print("*****************" )
+    six.print_("*****************" )
     test_sync_call(10)
-    print("*****************" )
+    six.print_("*****************" )
     ee = test_call()
-    print("********************" )
+    six.print_("********************" )
 
 
     try:
@@ -136,7 +138,7 @@ if __name__ == '__main__':
 #class TestEventEngine(unittest.TestCase):
     #def test_get_qichats(self):
         #ret = get_qichats()
-        #print(ret)
+        #six.print_(ret)
         #self.assertTrue(ret)
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import six
 from matplotlib.widgets import AxesWidget
 from matplotlib.widgets import MultiCursor
 from matplotlib.ticker import Formatter
@@ -251,7 +252,7 @@ class Slider(AxesWidget):
             try:
                 obj.on_slider(self.val, event)
             except Exception as e:
-                print(e)
+                six.print_(e)
 
 
 class FrameWidget(AxesWidget):
@@ -514,9 +515,9 @@ class TechnicalWidget(object):
             self._w_width -= self._w_width/2
             self._w_width= max(self._w_width, self._w_width_min)
         elif event.key == u"super+up":
-            print(event.key, "**", type(event.key) )
+            six.print_(event.key, "**", type(event.key) )
         elif event.key == u"super+down":
-            print(event.key, "**", type(event.key) )
+            six.print_(event.key, "**", type(event.key) )
             # @TODO page upper down
 
         middle = (self._w_left+self._w_right)/2

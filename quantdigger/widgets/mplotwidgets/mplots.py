@@ -6,7 +6,7 @@
 # @version 2.0
 # @date 2015-10-19
 
-
+import six
 import numpy as np
 import inspect
 from matplotlib.colors import colorConverter
@@ -30,8 +30,8 @@ def override_attributes(method):
             for attr in arg_names:
                 obj_attrs[attr] = getattr(self, attr)
         except Exception as e:
-            print(e)
-            print("构造函数和绘图函数的绘图属性参数不匹配。")
+            six.print_(e)
+            six.print_("构造函数和绘图函数的绘图属性参数不匹配。")
         obj_attrs.update(method_args)
         return method(self, widget, **obj_attrs)
     return wrapper

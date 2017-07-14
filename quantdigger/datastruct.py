@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import six
 # from flufl.enum import Enum
 from datetime import timedelta
 from quantdigger.errors import PeriodTypeError
@@ -215,9 +215,9 @@ class Transaction(object):
             self.order = order
         self.volume_multiple = order.volume_multiple
         self.compute_commission()
-        #print("********************" )
-        #print(self.datetime, self.price, self.quantity, self.volume_multiple, ratio)
-        #print("********************" )
+        #six.print_("********************" )
+        #six.print_(self.datetime, self.price, self.quantity, self.volume_multiple, ratio)
+        #six.print_("********************" )
         #assert False
 
     def compute_commission(self):
@@ -333,7 +333,7 @@ class Order(object):
             self.volume_multiple
 
     def print_order(self):
-        #print("Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.direction))
+        #six.print_("Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.direction))
         pass
 
     def __hash__(self):

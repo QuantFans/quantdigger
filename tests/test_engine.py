@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import six
 import datetime
 import unittest
 import pandas as pd
@@ -248,7 +249,7 @@ class TestMainFunction(unittest.TestCase):
                 return
 
             def on_symbol(self, ctx):
-                # print(ctx.strategy, ctx.pcontract)
+                # six.print_(ctx.strategy, ctx.pcontract)
                 on_symbol['combination'].add((str(ctx.pcontract), ctx.strategy))
                 on_symbol['step_num'] += 1
 

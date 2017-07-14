@@ -5,6 +5,7 @@
 # @version 0.1
 # @date 2015-12-23
 
+import six
 from collections import OrderedDict
 import inspect
 import numpy as np
@@ -105,7 +106,7 @@ class TechnicalBase(Plotter):
         self.data = self._args[0]
         # 数据转化成ta-lib能处理的格式
         #self._args[0] = ndarray(self._args[0])
-        # print(tuple(self._args))
+        # six.print_(tuple(self._args))
         self._vector_algo(self._args[0],self._args[1])
         if not hasattr(self, 'values'):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
@@ -191,8 +192,8 @@ class TechnicalBase(Plotter):
     def __getitem__(self, index):
         # 解析多元值, 返回series
         # python 3.x 有这种机制？
-        # print(self.name, index)
-        # print(self.series[0].data)
+        # six.print_(self.name, index)
+        # six.print_(self.series[0].data)
         if self.is_multiple:
             return self.series[index]
         # 返回单变量的值。

@@ -6,6 +6,7 @@
 # @version 0.3
 # @date 2015-12-22
 
+import six
 import datetime
 import unittest
 import pandas as pd
@@ -453,7 +454,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
         cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         #if close_profit != 0 or pos_profit != 0:
-            #print(close_profit, pos_profit, equities[-1])
+            #six.print_(close_profit, pos_profit, equities[-1])
             #assert False
     return equities, cashes, dts
 
@@ -518,21 +519,21 @@ def entries_maked_nextbar(data):
     for  dt, high in data.high.items():
         if dt.date() == predt.date() and dt.time() < sell1 and high - prehigh >= OFFSET:
             short_entries.append(predt)
-            #print(predt, low-prelow)
+            #six.print_(predt, low-prelow)
         prehigh = high
         predt = dt
 
     for dt, high in data.high.items():
         if dt.time() > buy3 and high - prehigh >= OFFSET:
             sell_entries.append(predt)
-            #print(predt, high-prehigh)
+            #six.print_(predt, high-prehigh)
         prehigh = high
         predt = dt
 
     for  dt, low in data.low.items():
         if dt.time() > buy3 and prelow - low >= OFFSET:
             cover_entries.append(predt)
-            #print(predt, low-prelow)
+            #six.print_(predt, low-prelow)
         prelow = low
         predt = dt
     return buy_entries, sell_entries, short_entries, cover_entries

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # from flufl.enum import Enum
 import json
+import six
 
 
 # @TODO REMOVE EventsPool
@@ -70,7 +71,7 @@ class Event(object):
 
     @classmethod
     def message_header(self, route):
-        return b'<%s&' % bytes(route,encoding='utf-8')
+        return b'<%s&' % six.b(route)
 
 
 class SignalEvent(Event):

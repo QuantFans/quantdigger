@@ -6,12 +6,17 @@
 # @version 0.5
 # @date 2016-05-17
 
+import six
 import abc
-import _thread
+# import _thread
 import time
 import zmq
 
-from queue import Queue, Empty
+if six.PY3:
+    import queue
+else:
+    import Queue as queue
+
 from time import sleep
 from threading import Thread, Condition, Lock
 
@@ -68,7 +73,7 @@ class EventEngine:
 
     def start(self):
         """引擎启动"""
-        #print(self._routes)
+        #six.print_(self._routes)
         self._active = True
 
     def stop(self):
@@ -140,14 +145,14 @@ class QueueEventEngine(EventEngine):
     def __init__(self, name):
         # 事件队列
         EventEngine.__init__(self)
-        self._queue = Queue()
+        self._queue = queue.Queue()
         self._thread = Thread(target=self._run)
         self._thread.daemon = True
         self._name = name
 
     def emit(self, event):
         #"""向事件队列中存入事件"""
-        #print(self._queue.qsize())
+        #six.print_(self._queue.qsize())
         self._queue.put(event)
 
     def start(self):
@@ -169,7 +174,7 @@ class QueueEventEngine(EventEngine):
                 # self._active才会发挥作用。
                 event = self._queue.get(block=True, timeout=1)
                 self._process(event)
-            except Empty:
+            except queue.Empty:
                 pass
 
 
@@ -267,7 +272,7 @@ if __name__ == '__main__':
     import time, datetime, sys
 
     def simpletest(event):
-        print(str(datetime.datetime.now()), event)
+        six.print_(str(datetime.datetime.now()), event)
 
     ee = ZMQEventEngine('test')
     ee.register(Event.TIMER, simpletest)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ from quantdigger.technicals.common import Line, LineWithX, Volume
 
 
 def xticks_to_display(data_length):
-    # print(r.index[0].weekday())
+    # six.print_(r.index[0].weekday())
     interval = data_length / 5
     v = 0
     xticks = []
@@ -23,7 +24,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     """
         显示回测结果。
     """
-    print("plotting..")
+    six.print_("plotting..")
     fig = plt.figure()
     frame = widgets.TechnicalWidget(fig, price_data)
     axes = frame.init_layout(
@@ -117,7 +118,7 @@ def plot_curves(data, colors=[], lws =[], names=[]):
     if names:
         assert(len(data) == len(names))
     # 画资金曲线
-    # print(curve.equity)
+    # six.print_(curve.equity)
     fig2 = plt.figure()
     lns = []
     ax = fig2.add_axes((0.1, 0.1, 0.8, 0.8))

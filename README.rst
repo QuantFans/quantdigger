@@ -3,6 +3,7 @@ QuantDigger 0.5.0 (Python 3.6)
 
 * qink:
     2017-07-13:  在原来0.5.0版的基础上改为支持Python3.6
+    2017-07-14:  兼容Python 2和Python 3
     
 QuantDigger是一个基于python的量化回测框架。它借鉴了主流商业软件（比如TB, 金字塔）简洁的策略语法，同时
 避免了它们内置编程语言的局限性，使用通用语言python做为策略开发工具。和 zipline_ , pyalgotrade_ 相比，
@@ -26,7 +27,6 @@ wiki文档_
 
 依赖库
 -------
-* Python (仅在3.6上进行测试, **2.7请找原版**)
 * matplotlib 
 * numpy
 * logbook
@@ -135,7 +135,7 @@ wiki文档_
         # 绘制净值曲线
         plotting.plot_curves([curve.networth])
         # 打印统计信息
-        print(finance.summary_stats(curve, 252*4*60))
+        six.print_(finance.summary_stats(curve, 252*4*60))
 
 
 策略结果

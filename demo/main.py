@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import subprocess
 import time
 import os
@@ -21,7 +22,7 @@ time.sleep(1)
 log.info("启动ipython..")
 shell = subprocess.call('ipython --config=%s' % shell_path, shell=True)
 ###notebook = subprocess.call('jupyter notebook --config=shell.py', shell=True)
-###print(mainwindow.pid)
+###six.print_(mainwindow.pid)
 
 input("Any key to quit quantdigger.")
 subprocess.Popen.kill(mainwindow)

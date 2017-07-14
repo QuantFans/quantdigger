@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import pandas as pd
 import os
 import datetime as dt
@@ -17,14 +18,14 @@ def max_return(nbarprice, islong):
             elif ith_price < low:
                 low = ith_price
                 maxdiffs.append(high-low)
-                #print( low)
+                #six.print_(low)
         return max(maxdiffs) if maxdiffs else 0
     else:
         for ith_price in nbarprice:
             if ith_price < low:
                 low = ith_price
                 high = -1000000
-                #print( low)
+                #six.print_(low)
             elif ith_price > high:
                 high = ith_price
                 maxdiffs.append(high-low)
@@ -125,7 +126,7 @@ def process_signal(signal, price_data, n=10, intraday=False):
     data['islong'] = islongs
     data['entry_n'] = entry_Nlist
     data['exit_n'] = exit_Nlist
-    print( "Data Preprocessing Done!")
+    six.print_("Data Preprocessing Done!")
     return data
 
 
@@ -135,7 +136,7 @@ def load_datas(n, intraday, signal_fname, price_fname):
     signal = pd.read_csv(signal_fname, index_col=0, parse_dates=True).sort_index()
     price_data = pd.read_csv(price_fname, index_col=0, parse_dates=True).sort_index()
     return process_signal(signal, price_data, n, intraday)
-    #print( data)
+    #six.print_(data)
     #assert(False)
 
 

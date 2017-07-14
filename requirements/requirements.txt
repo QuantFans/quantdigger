@@ -3,6 +3,7 @@ BeautifulSoup4>=4.6
 lxml>=3.8
 tushare>=0.8.2
 pyzmq>=4.1.5
+six
 logbook>=0.12.5
 numpy>=1.13.1
 pandas>=0.20.2

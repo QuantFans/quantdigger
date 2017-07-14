@@ -5,6 +5,8 @@
 # @author wondereamer
 # @version 0.5
 # @date 2016-05-17
+
+import six
 import time
 from datetime import datetime
 from threading import Thread, Condition, Lock
@@ -41,7 +43,7 @@ class EventRPCClient(object):
                     mtime = self._sync_call_time
                 delta = (datetime.now()-mtime).seconds
                 if delta >= self._timeout:
-                    #print("timeout", self._timeout, delta)
+                    #six.print_("timeout", self._timeout, delta)
                     # 不可重入，保证self.rid就是超时的那个
                     with self._handlers_lock:
                         del self._handlers[self.rid]
@@ -199,10 +201,10 @@ if __name__ == '__main__':
 
     def print_hello(data):
         """""" 
-        print("***************")
-        print("print_hello" )
-        print("args: ", data)
-        print("return: ", 123)
+        six.print_("***************")
+        six.print_("print_hello" )
+        six.print_("args: ", data)
+        six.print_("return: ", 123)
         return "123"
     server_engine = ZMQEventEngine('test')
     server_engine.start()

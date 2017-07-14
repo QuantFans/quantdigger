@@ -6,6 +6,7 @@
 # @version 0.2
 # @date 2015-12-09
 
+import six
 #from quantdigger.engine.series import NumberSeries
 #from quantdigger.indicators.common import MA
 #from quantdigger.util import  pcontract
@@ -60,7 +61,7 @@ if __name__ == '__main__':
 
     run()
     stop = timeit.default_timer()
-    print("运行耗时: %d秒" % ((stop - start )))
+    six.print_("运行耗时: %d秒" % ((stop - start )))
     AnalyzeFrame(profile)
     plt.show()
 

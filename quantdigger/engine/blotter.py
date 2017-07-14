@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import copy
 from abc import ABCMeta, abstractmethod
 
@@ -162,7 +163,7 @@ class SimpleBlotter(Blotter):
                         order.order_margin(self._bars[order.contract].open)
             else:
                 logger.warn(errmsg)
-                # print(len(event.orders), len(new_orders))
+                # six.print_(len(event.orders), len(new_orders))
                 continue
         self.open_orders.update(new_orders)  # 改变对象的值，不改变对象地址。
         self._all_orders.extend(new_orders)
@@ -247,7 +248,7 @@ class SimpleBlotter(Blotter):
         elif order.side == TradeSide.KAI:
             new_price = self._bars[order.contract].open
             if self.holding['cash'] < order.order_margin(new_price):
-                # print(self.holding['cash'], new_price * order.quantity)
+                # six.print_(self.holding['cash'], new_price * order.quantity)
                 return '没有足够的资金开仓'
         return ''
 
