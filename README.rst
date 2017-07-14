@@ -1,9 +1,5 @@
-QuantDigger 0.5.0 (Python 3.6)
+QuantDigger 0.6.1
 ==================
-
-* qink:
-    2017-07-13:  在原来0.5.0版的基础上改为支持Python3.6
-    2017-07-14:  兼容Python 2和Python 3
     
 QuantDigger是一个基于python的量化回测框架。它借鉴了主流商业软件（比如TB, 金字塔）简洁的策略语法，同时
 避免了它们内置编程语言的局限性，使用通用语言python做为策略开发工具。和 zipline_ , pyalgotrade_ 相比，
@@ -62,11 +58,11 @@ wiki文档_
 
 .. code:: py
 
-
     #from quantdigger.engine.series import NumberSeries
     #from quantdigger.indicators.common import MA
     #from quantdigger.util import  pcontract
     from quantdigger import *
+    import six
 
     class DemoStrategy(Strategy):
         """ 策略A1 """
@@ -181,6 +177,11 @@ k线显示使用了系统自带的一个联动窗口控件，由蓝色的滑块�
 
 版本
 ~~~~
+**0.6.1 版本 2017-07-14**
+
+* 兼容Python 2和Python 3
+* 更改tushare数据接口，获取数据速度提升
+
 **0.5.0 版本 2017-07-13**
 
 * 在原来0.5.0版的基础上改为支持Python3.6
