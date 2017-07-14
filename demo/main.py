@@ -2,7 +2,7 @@
 import subprocess
 import time
 import os
-from quantdigger.util import gen_logger as log
+from quantdigger.util import gen_log as log
 from quantdigger.util import project_dir
 
 ui_path = os.path.join(project_dir, "quantdigger", "widgets", "mplotwidgets", "mainwindow.py" )
