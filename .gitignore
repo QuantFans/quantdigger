@@ -11,3 +11,4 @@ demo/work/*
 tests/work/
 
 _local_*
+demo/log
