@@ -106,7 +106,6 @@ class TechnicalBase(Plotter):
         self.data = self._args[0]
         # 数据转化成ta-lib能处理的格式
         #self._args[0] = ndarray(self._args[0])
-        # six.print_(tuple(self._args))
         self._vector_algo(self._args[0],self._args[1])
         if not hasattr(self, 'values'):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")

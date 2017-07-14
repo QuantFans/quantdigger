@@ -79,7 +79,6 @@ class Captial(object):
     :ivar equity: 当前权益
     :ivar cash: 可用资金
     """
-
     def __init__(self, dt, contract, type_, side, direction, price, quantity):
         self.broker_id = None
         self.account_id = None
@@ -200,7 +199,6 @@ class Transaction(object):
     :ivar price_type: 下单类型。
     :ivar hedge_type: 交易类型。
     """
-
     def __init__(self, order=None):
         if order:
             self.id = order.id
@@ -300,7 +298,6 @@ class Order(object):
         :ivar price_type: 下单类型。
         :ivar hedge_type: 交易类型。
     """
-
     def __init__(self, dt, contract, type_, side, direction,
                  price, quantity, hedge=HedgeType.SPEC, id=None):
         self.id = id if id else OrderID.next_order_id()
@@ -367,7 +364,7 @@ class Contract(object):
     info = None
 
     def __init__(self, str_contract):
-        # @TODO 修改参数为（code, exchange)
+        ## @TODO 修改参数为（code, exchange)
         info = str_contract.split('.')
         if len(info) == 2:
             code = info[0].upper()
@@ -388,7 +385,7 @@ class Contract(object):
         else:
             logger.error('Unknown exchange: {0}', self.exchange)
             assert(False)
-
+    
     @classmethod
     def from_string(cls, strcontract):
         return cls(strcontract)
@@ -421,8 +418,8 @@ class Contract(object):
     @classmethod
     def long_margin_ratio(cls, strcontract):
         try:
-            # @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
-            return cls.info.loc[strcontract.upper(), 'long_margin_ratio']
+            ## @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
+            return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -453,18 +450,18 @@ class Period(object):
     :ivar unit: 时间单位
     :ivar count: 数值
     """
-    # class Type(Enum):
-    #MilliSeconds = "MilliSeconds"
-    #Seconds = "Seconds"
-    #Minutes = "Minutes"
-    #Hours = "Hours"
-    #Days = "Days"
-    #Months = "Months"
-    #Seasons = "Seasons"
-    #Years = "Years"
+    #class Type(Enum):
+        #MilliSeconds = "MilliSeconds" 
+        #Seconds = "Seconds" 
+        #Minutes = "Minutes" 
+        #Hours = "Hours" 
+        #Days = "Days" 
+        #Months = "Months" 
+        #Seasons = "Seasons" 
+        #Years = "Years" 
     periods = {
-        "MILLISECOND": 0,
-        "SECOND": 1,
+        "MILLISECOND": 0, 
+        "SECOND" : 1,
         "MINUTE": 2,
         "HOUR": 3,
         "DAY": 4,
@@ -518,21 +515,19 @@ class Period(object):
             else:
                 return 0
 
-
 class PContract(object):
     """ 特定周期的合约。
 
     :ivar contract: 合约对象。
     :ivar period: 周期。
     """
-
     def __init__(self, contract, period):
         self.contract = contract
         self.period = period
 
-    # def __str__(self):
+    #def __str__(self):
         #""" return string like 'IF000.SHEF-10.Minutes'  """
-        # return "%s-%s" % (self.contract, self.period)
+        #return "%s-%s" % (self.contract, self.period)
 
     @classmethod
     def from_string(cls, strpcon):
@@ -557,20 +552,18 @@ class PContract(object):
 
     def __cmp__(self, r):
         if self.period < r.period:
-            return -1
+            return -1 
         elif self.period > r.period:
             return 1
         else:
             if self.contract < r.contract:
-                return -1
+                return -1 
             elif self.contract > r.contract:
                 return 1
             else:
                 return 0
 
-
 class PositionKey(object):
-
     def __init__(self, contract, direction):
         self.contract = contract
         self.direction = direction
@@ -606,7 +599,6 @@ class Position(object):
     :ivar cost: 成本价。
     :ivar direction: 开仓方向。
     """
-
     def __init__(self, trans):
         self.contract = trans.contract
         self.quantity = 0
@@ -659,8 +651,8 @@ class Position(object):
 
     def __str__(self):
         rst = " contract: %s\n direction: %s\n cost: %f\n quantity: %d\n closeable: %d\n" % \
-            (self.contract, Direction.type_to_str(self.direction),
-             self.cost, self.quantity, self.closable)
+                (self.contract, Direction.type_to_str(self.direction),
+                 self.cost, self.quantity, self.closable)
         return rst
 
 
@@ -674,7 +666,6 @@ class Bar(object):
     :ivar low: 最低价。
     :ivar volume: 成交量。
     """
-
     def __init__(self, dt, open, close, high, low, vol):
         self.datetime = dt
         self.open = open
@@ -693,7 +684,6 @@ class OneDeal(object):
     :ivar close_price: 平仓价格
     :ivar direction: 开仓方向
     """
-
     def __init__(self, buy_trans, sell_trans, quantity):
         self.open = buy_trans
         self.close = sell_trans
@@ -704,13 +694,13 @@ class OneDeal(object):
         direction = self.open.direction
         if direction == Direction.LONG:
             return (self.close.price - self.open.price) * self.open.quantity *\
-                self.open.order.volume_multiple
+                    self.open.order.volume_multiple
         else:
             return (self.open.price - self.close.price) * self.open.quantity *\
-                self.open.order.volume_multiple
+                    self.open.order.volume_multiple
 
     def __str__(self):
-        return "direction: %s\nentry_datetime: %s\nentry_price: %s\nexit_datetime: %s\nexit_price: %s\n" % (Direction.type_to_str(self.direction), self.open_datetime, self.open_price, self.close_datetime, self.close_price)
+        return "direction: %s\nentry_datetime: %s\nentry_price: %s\nexit_datetime: %s\nexit_price: %s\n" %(Direction.type_to_str(self.direction), self.open_datetime, self.open_price, self.close_datetime, self.close_price)
 
     @property
     def open_datetime(self):

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
 
-from . import stock_plot
+from .stock_plot import *
 
 def max_return(nbarprice, islong):
     '''docstring for maxreturn''' 
