@@ -33,7 +33,7 @@ class TuShareSource(DatasourceAbstract):
     def _load_data(self, code, dt_start, dt_end):
         dts = _process_ts_dt(dt_start)
         dte = _process_ts_dt(dt_end)
-        data = ts.get_h_data(code, start=dts, end=dte)
+        data = ts.get_k_data(code, start=dts, end=dte)
         data.index.names = ['datetime']
         return data.iloc[::-1]
 
