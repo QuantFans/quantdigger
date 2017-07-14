@@ -158,7 +158,8 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     equities = [] # 累计平仓盈亏
     dts = []
     cashes = []
-    for curdt, curprice in data.close.items():
+    dict_close = data.close.to_dict()
+    for curdt, curprice in dict_close.items():
         pos_profit = 0
         curtime = curdt.time()
         curdate = curdt.date()
@@ -213,7 +214,8 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     equities = [] # 累计平仓盈亏
     dts = []
     cashes = []
-    for curdt, curprice in data.close.items():
+    dict_close = data.close.to_dict()
+    for curdt, curprice in dict_close.items():
         pos_profit = 0
         curtime = curdt.time()
         curdate = curdt.date()
@@ -410,7 +412,8 @@ def buy_monday_sell_friday(data, capital, long_margin, volume_multiple):
     equities = {} # 累计平仓盈亏
     dts = []
     cashes = { }
-    for curdt, curprice in data.close.items():
+    dict_close = data.close.to_dict()
+    for curdt, curprice in dict_close.items():
         pos_profit = 0
         weekday = curdt.weekday()
         if weekday == 0:
