@@ -8,14 +8,15 @@
 
 import six
 import abc
-# import _thread
 import time
 import zmq
 
 if six.PY3:
     import queue
+    import _thread
 else:
     import Queue as queue
+    import thread as _thread
 
 from time import sleep
 from threading import Thread, Condition, Lock
@@ -146,8 +147,8 @@ class QueueEventEngine(EventEngine):
         # 事件队列
         EventEngine.__init__(self)
         self._queue = queue.Queue()
-        self._thread = Thread(target=self._run)
-        self._thread.daemon = True
+        self._thrd = Thread(target=self._run)
+        self._thrd.daemon = True
         self._name = name
 
     def emit(self, event):
@@ -158,13 +159,13 @@ class QueueEventEngine(EventEngine):
     def start(self):
         """引擎启动"""
         EventEngine.start(self)
-        self._thread.start()
+        self._thrd.start()
 
     def stop(self):
         """停止引擎"""
         EventEngine.stop(self)
         # 等待事件处理线程退出
-        #self._thread.join()
+        #self._thrd.join()
 
     def _run(self):
         """引擎运行"""
@@ -203,8 +204,8 @@ class ZMQEventEngine(EventEngine):
         self._client_recv_event_socket = self._context.socket(zmq.SUB)
         self._client_recv_event_socket.connect(event_protocol)
 
-        self._thread = Thread(target=self._run)
-        self._thread.daemon = True
+        self._thrd = Thread(target=self._run)
+        self._thrd.daemon = True
         self._queue_engine = QueueEventEngine(self._name)
         time.sleep(1)
 
@@ -218,14 +219,14 @@ class ZMQEventEngine(EventEngine):
         """引擎启动"""
         EventEngine.start(self)
         self._queue_engine.start()
-        self._thread.start()
+        self._thrd.start()
 
     def stop(self):
         """停止引擎"""
         EventEngine.stop(self)
         self._queue_engine.stop()
         self._context.destroy()
-        #self._thread.join()
+        #self._thrd.join()
 
     def register(self, route, handler):
         """ 接受指定的事件。 """
