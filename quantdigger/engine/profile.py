@@ -6,9 +6,9 @@
 # @version 0.4
 # @date 2016-12-18
 
-
-import copy
+import six
 from six.moves import range
+import copy
 from quantdigger.datastruct import (
     OneDeal,
     PositionKey,
@@ -31,7 +31,7 @@ class Profile(object):
         self._dcontexts = {}
         self._ith_comb = i   # 对应于第几个组合
         self._main_pcontract = strpcon
-        for key, value in dcontexts.items():
+        for key, value in six.iteritems(dcontexts):
             self._dcontexts[key] = value
 
     def name(self, j=None):

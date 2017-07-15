@@ -51,7 +51,7 @@ class ExecuteUnit(object):
         self.context = context.Context(self._all_data, self._max_window)
 
     def _init_strategies(self):
-        for pcon, dcontext in self._all_data.items():
+        for pcon, dcontext in six.iteritems(self._all_data):
             # switch context
             self.context.switch_to_pcontract(pcon)
             for i, combination in enumerate(self._combs):
@@ -70,13 +70,13 @@ class ExecuteUnit(object):
             code = strpcon.split('.')[0]
             if code == "*":
                 if strpcon == "*":  # '*'
-                    for key, value in exch_period2strpcon.items():
+                    for key, value in six.iteritems(exch_period2strpcon):
                         rst += value
                 else:
                     # "*.xxx"
                     # "*.xxx_period"
                     k = strpcon.split('.')[1]
-                    for key, value in exch_period2strpcon.items():
+                    for key, value in six.iteritems(exch_period2strpcon):
                         if '-' in k:
                             if k == key:
                                 rst += value
@@ -147,13 +147,13 @@ class ExecuteUnit(object):
         # todo 对单策略优化
         has_next = True
         # 遍历每个数据轮, 次数为数据的最大长度
-        for pcon, data in self._all_data.items():
+        for pcon, data in six.iteritems(self._all_data):
             self.context.switch_to_pcontract(pcon)
             self.context.rolling_forward()
         while True:
             self.context.on_bar = False
             # 遍历数据轮的所有合约
-            for pcon, data in self._all_data.items():
+            for pcon, data in six.iteritems(self._all_data):
                 self.context.switch_to_pcontract(pcon)
                 if self.context.time_aligned():
                     self.context.update_system_vars()
@@ -186,7 +186,7 @@ class ExecuteUnit(object):
                 pbar.update(self.context.ctx_curbar*100.0/self._max_window)
             #
             toremove = []
-            for pcon, data in self._all_data.items():
+            for pcon, data in six.iteritems(self._all_data):
                 self.context.switch_to_pcontract(pcon)
                 has_next = self.context.rolling_forward()
                 if not has_next:

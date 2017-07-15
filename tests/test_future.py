@@ -429,7 +429,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     UNIT = 1
     poscost = 0
     dict_close = data.close.to_dict()
-    for dt, price in dict_close.items():
+    for dt, price in six.iteritems(dict_close):
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
             poscost = (poscost*quantity + price*(1+settings['future_commission'])*UNIT)/ (quantity+UNIT)
@@ -473,7 +473,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     UNIT = 2
     poscost = 0
     dict_close = data.close.to_dict()
-    for dt, price in dict_close.items():
+    for dt, price in six.iteritems(dict_close):
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
             poscost = (poscost*quantity + price*(1-settings['future_commission'])*UNIT)/ (quantity+UNIT)
@@ -516,27 +516,27 @@ def entries_maked_nextbar(data):
     dict_low = data.low.to_dict()
     dict_high = data.high.to_dict()
 
-    for  dt, low in dict_low.items():
+    for  dt, low in six.iteritems(dict_low):
         if dt.date() == predt.date() and dt.time() < sell1 and prelow - low >= OFFSET:
             buy_entries.append(predt)
         prelow = low
         predt = dt
 
-    for  dt, high in dict_high.items():
+    for  dt, high in six.iteritems(dict_high):
         if dt.date() == predt.date() and dt.time() < sell1 and high - prehigh >= OFFSET:
             short_entries.append(predt)
             #six.print_(predt, low-prelow)
         prehigh = high
         predt = dt
 
-    for dt, high in dict_high.items():
+    for dt, high in six.iteritems(dict_high):
         if dt.time() > buy3 and high - prehigh >= OFFSET:
             sell_entries.append(predt)
             #six.print_(predt, high-prehigh)
         prehigh = high
         predt = dt
 
-    for  dt, low in dict_low.items():
+    for  dt, low in six.iteritems(dict_low):
         if dt.time() > buy3 and prelow - low >= OFFSET:
             cover_entries.append(predt)
             #six.print_(predt, low-prelow)
@@ -561,7 +561,7 @@ def holdings_buy_maked_nextbar(data, buy_entries, capital, long_margin, volume_m
     UNIT = 1
 
     dict_low = data.low.to_dict()
-    for dt, low in dict_low.items():
+    for dt, low in six.iteritems(dict_low):
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
@@ -600,7 +600,7 @@ def holdings_short_maked_nextbar(data, buy_entries, capital, short_margin, volum
     UNIT = 1
 
     dict_high = data.high.to_dict()
-    for dt, high in dict_high.items():
+    for dt, high in six.iteritems(dict_high):
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
@@ -637,7 +637,7 @@ def holdings_sell_maked_nextbar(data, sell_entries, capital, long_margin, volume
     prehigh = data.high[0]
 
     dict_high = data.high.to_dict()
-    for dt, high in dict_high.items():
+    for dt, high in six.iteritems(dict_high):
         close = data.close[dt]
         if dt.time() == buy1:
             bprice = close * (1+settings['future_commission'])
@@ -677,7 +677,7 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     prelow = data.low[0]
 
     dict_low = data.low.to_dict()
-    for dt, low in dict_low.items():
+    for dt, low in six.iteritems(dict_low):
         close = data.close[dt]
         if dt.time() == buy1:
             bprice = close * (1-settings['future_commission'])

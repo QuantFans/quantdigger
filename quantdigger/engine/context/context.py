@@ -6,6 +6,7 @@
 # @version 0.2
 # @date 2015-12-09
 
+import six
 import datetime
 
 from quantdigger.datastruct import (
@@ -31,7 +32,7 @@ class Context(object):
         self._cur_strategy_context = None
         self._cur_data_context = None
         self._data_contexts = {}       # str(PContract): DataContext
-        for key, value in data.items():
+        for key, value in six.iteritems(data):
             self._data_contexts[key] = value
             self._data_contexts[key.split('-')[0]] = value
             self._data_contexts[key.split('.')[0]] = value
@@ -50,7 +51,7 @@ class Context(object):
     def switch_to_strategy(self, ith_comb, ith_strategy):
         self._cur_strategy_context = self._strategy_contexts[ith_comb][ith_strategy]
         if self.on_bar:
-            for data_context in self._data_contexts.values():
+            for data_context in six.itervalues(self._data_contexts):
                 data_context.ith_comb, data_context.ith_strategy = ith_comb, ith_strategy
         else:
             self._cur_data_context.ith_comb, self._cur_data_context.ith_strategy = ith_comb, ith_strategy

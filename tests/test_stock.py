@@ -6,6 +6,7 @@
 # @version 0.3
 # @date 2015-01-06
 
+import six
 from six.moves import range
 import datetime
 import unittest
@@ -159,7 +160,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     dts = []
     cashes = []
     dict_close = data.close.to_dict()
-    for curdt, curprice in dict_close.items():
+    for curdt, curprice in six.iteritems(dict_close):
         pos_profit = 0
         curtime = curdt.time()
         curdate = curdt.date()
@@ -170,7 +171,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
             buy_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
-                for posdate, quantity in buy_quantity.items():
+                for posdate, quantity in six.iteritems(buy_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
                                         2*UNIT * volume_multiple
@@ -178,7 +179,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
                     elif posdate > curdate:
                         assert(False)
             elif curtime == sell2:
-                for posdate, quantity in buy_quantity.items():
+                for posdate, quantity in six.iteritems(buy_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
                                         UNIT * volume_multiple
@@ -188,7 +189,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
                         assert(False)
         if curdt == data.index[-1]:
             # 强平现有持仓
-            quantity = sum(buy_quantity.values())
+            quantity = sum(six.itervalues(buy_quantity))
             close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
                             quantity * volume_multiple
             buy_quantity.clear()
@@ -215,7 +216,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     dts = []
     cashes = []
     dict_close = data.close.to_dict()
-    for curdt, curprice in dict_close.items():
+    for curdt, curprice in six.iteritems(dict_close):
         pos_profit = 0
         curtime = curdt.time()
         curdate = curdt.date()
@@ -226,7 +227,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
             short_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
-                for posdate, quantity in short_quantity.items():
+                for posdate, quantity in six.iteritems(short_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
                                         2*UNIT * volume_multiple
@@ -234,7 +235,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
                     elif posdate > curdate:
                         assert(False)
             elif curtime == sell2:
-                for posdate, quantity in short_quantity.items():
+                for posdate, quantity in six.iteritems(short_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
                                         UNIT * volume_multiple
@@ -413,7 +414,7 @@ def buy_monday_sell_friday(data, capital, long_margin, volume_multiple):
     dts = []
     cashes = { }
     dict_close = data.close.to_dict()
-    for curdt, curprice in dict_close.items():
+    for curdt, curprice in six.iteritems(dict_close):
         pos_profit = 0
         weekday = curdt.weekday()
         if weekday == 0:

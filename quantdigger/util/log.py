@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import six
 import logging
 import sys
 from datetime import datetime
@@ -119,7 +120,7 @@ class LogFormatter(logging.Formatter):
             if (3, 0) < sys.version_info < (3, 2, 3):
                 fg_color = unicode_type(fg_color, "ascii")
 
-            for levelno, code in colors.items():
+            for levelno, code in six.iteritems(colors):
                 self._colors[levelno] = unicode_type(curses.tparm(fg_color, code), "ascii")
             self._normal = unicode_type(curses.tigetstr("sgr0"), "ascii")
         else:

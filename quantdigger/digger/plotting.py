@@ -47,7 +47,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
         curve = Line(curve)
         subwidget1.add_plotter(curve, True)
     # 添加指标
-    for name, indic in indicators.items():
+    for name, indic in six.iteritems(indicators):
         subwidget1.add_plotter(indic, False)
 
     # 绘制第2个窗口
@@ -61,7 +61,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
     if marks:
         if marks[0]:
             # plot lines
-            for name, values in marks[0].items():
+            for name, values in six.iteritems(marks[0]):
                 v = values[0]
                 ith_ax = v[0]
                 twinx = v[1]
@@ -84,7 +84,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
                     subwidgets[ith_ax].add_plotter(curve, twinx)
         if marks[1]:
             # plot texts
-            for name, values in marks[1].items():
+            for name, values in six.iteritems(marks[1]):
                 for v in values:
                     ith_ax, x, y, text = v[0], v[1], v[2], v[3]
                     color, size, rotation = v[4], v[5], v[6]

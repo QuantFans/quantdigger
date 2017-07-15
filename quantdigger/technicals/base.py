@@ -46,7 +46,7 @@ def tech_init(method):
         #
         default.update(method_args)
         # 属性创建
-        for key, value in default.items():
+        for key, value in six.iteritems(default):
             setattr(self, key, value)
         # 运行构造函数
         rst = method(self, *args, **kwargs)
@@ -111,10 +111,10 @@ class TechnicalBase(Plotter):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
         if isinstance(self.values, dict):
             self.series = OrderedDict()
-            for key, value in self.values.items():
+            for key, value in six.iteritems(self.values):
                 self.series[key] = series.NumberSeries(
                     value, self.name, self, float('nan'))
-            for key, value in self.series.items():
+            for key, value in six.iteritems(self.series):
                 setattr(self, key, value)
             self.is_multiple = True
         else:

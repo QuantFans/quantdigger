@@ -1,3 +1,4 @@
+import six
 class _HashObjectImpl(object):
     def __str__(self):
         keys = filter(lambda k: not k.startswith('__'), dir(self))
@@ -11,6 +12,6 @@ class HashObject(object):
     @staticmethod
     def new(**kwargs):
         obj = _HashObjectImpl()
-        for k, v in kwargs.items():
+        for k, v in six.iteritems(kwargs):
             setattr(obj, k, v)
         return obj

@@ -30,7 +30,7 @@ def plot_init(method):
         #
         default.update(method_args)
         # 属性创建
-        for key, value in default.items():
+        for key, value in six.iteritems(default):
             setattr(self, key, value)
         # 运行构造函数
         rst = method(self, *args, **kwargs)

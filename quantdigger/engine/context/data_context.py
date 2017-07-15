@@ -88,7 +88,7 @@ class DataContext(object):
         else:
             for tec in technicals:
                 if tec.is_multiple:
-                    for s in tec.series.values():
+                    for s in six.itervalues(tec.series):
                         s.update_curbar(self._curbar)
                 else:
                     for s in tec.series:

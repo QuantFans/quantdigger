@@ -249,7 +249,7 @@ class Slider(AxesWidget):
 
     def _update_observer(self, event):
         """ 通知相关窗口更新数据 """
-        for name, obj in self.observers.items():
+        for name, obj in six.iteritems(self.observers):
             try:
                 obj.on_slider(self.val, event)
             except Exception as e:
@@ -306,7 +306,7 @@ class FrameWidget(AxesWidget):
     def set_ylim(self, w_left, w_right):
         all_ymax = []
         all_ymin = []
-        for plotter in self.plotters.values():
+        for plotter in six.itervalues(self.plotters):
             if plotter.twinx:
                 continue
             ymax, ymin = plotter.y_interval(w_left, w_right)
@@ -358,7 +358,7 @@ class FrameWidget(AxesWidget):
 
     def _update_observer(self, obname):
         #"通知进度条改变宽度"
-        #for name, obj in self.observers.items():
+        #for name, obj in six.iteritems(self.observers):
             #if name == obname and obname == "slider":
                 #obj.update(obj.val, self.wdlength)
                 #break
@@ -457,7 +457,7 @@ class TechnicalWidget(object):
         """
         # 对新创建的Axes做相应的处理
         # 并且调整Cursor
-        for plotter in widget.plotters.values():
+        for plotter in six.itervalues(widget.plotters):
             if plotter.twinx:
                 plotter.ax.format_coord = self._format_coord
                 self.axes.append(plotter.ax)
@@ -540,7 +540,7 @@ class TechnicalWidget(object):
     def on_leave_axes(self, event):
         if event.inaxes is self._slider_ax:
             # 进入后会创建_slider_cursor,离开后复原
-            axes = [self.axes[i] for i in self._cursor_axes_index.values()]
+            axes = [self.axes[i] for i in six.itervalues(self._cursor_axes_index)]
             #axes = list(reversed(axes)) # 很奇怪，如果没有按顺序给出，显示会有问题。
             self._cursor = MultiCursor(self._fig.canvas, axes, color='r', lw=2, horizOn=False, vertOn=True)
             event.canvas.draw()
@@ -628,7 +628,7 @@ class TechnicalWidget(object):
     def _set_ylim(self, w_left, w_right):
         """ 设置当前显示窗口的y轴范围。
         """
-        for subwidget in self._subwidgets.values():
+        for subwidget in six.itervalues(self._subwidgets):
             subwidget.set_ylim(w_left, w_right)
         
     def _format_coord(self, x, y):
