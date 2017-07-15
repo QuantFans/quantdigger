@@ -8,6 +8,7 @@
 
 
 import copy
+from six.moves import range
 from quantdigger.datastruct import (
     OneDeal,
     PositionKey,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import six
+from six.moves import range
 import datetime
 import os
 import time

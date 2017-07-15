@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import six
+from six.moves import range
 import matplotlib
 matplotlib.use("TKAgg")
 from matplotlib.widgets import RadioButtons
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
 
-from .stock_plot import *
+from . import stock_plot
 
 def max_return(nbarprice, islong):
     '''docstring for maxreturn''' 

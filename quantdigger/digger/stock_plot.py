@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import six
+from six.moves import range
 import matplotlib
 matplotlib.use("TKAgg")
 from matplotlib.widgets import Cursor
@@ -111,7 +112,7 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
 
         ax3.legend(loc='upper left').get_frame().set_alpha(0.5)
 
-    for i in xrange(len(exit_profit)):
+    for i in range(len(exit_profit)):
         if(entry_best[i]>0 and exit_profit[i]>0): 
             px21 = ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
             px22 = ax2.bar(i, entry_best[i]-exit_profit[i], width=binwidth,
@@ -183,7 +184,7 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
                         )
 
         # plot ax2
-        for i in xrange(len(exit_profit)):
+        for i in range(len(exit_profit)):
             if(exit_nbar_best[i]>exit_profit[i] and exit_profit[i]>0): 
                 px21 = ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
                 px22 = ax2.bar(i, exit_nbar_best[i]-exit_profit[i], width=binwidth, color='red', bottom = exit_profit[i])
@@ -638,8 +639,8 @@ def candlestick2(ax, opens, closes, highs, lows, width=4,
     # missing they all are missing
 
     delta = width/2.
-    barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(xrange(len(opens)), opens, closes) if open != -1 and close!=-1 ]
-    rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(xrange(len(lows)), lows, highs) if low != -1 ]
+    barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(range(len(opens)), opens, closes) if open != -1 and close!=-1 ]
+    rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(range(len(lows)), lows, highs) if low != -1 ]
     r,g,b = colorConverter.to_rgb(colorup)
     colorup = r,g,b,alpha
     r,g,b = colorConverter.to_rgb(colordown)

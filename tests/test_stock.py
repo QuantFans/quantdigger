@@ -6,7 +6,7 @@
 # @version 0.3
 # @date 2015-01-06
 
-
+from six.moves import range
 import datetime
 import unittest
 import pandas as pd

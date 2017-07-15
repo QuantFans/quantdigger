@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import six
+from six.moves import range
 from matplotlib.widgets import AxesWidget
 from matplotlib.widgets import MultiCursor
 from matplotlib.ticker import Formatter

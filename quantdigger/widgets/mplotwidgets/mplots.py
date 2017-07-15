@@ -7,6 +7,7 @@
 # @date 2015-10-19
 
 import six
+from six.moves import range
 import numpy as np
 import inspect
 from matplotlib.colors import colorConverter

@@ -1,4 +1,5 @@
 import six
+from six.moves import range
 from rpc import EventRPCClient
 from eventengine import ZMQEventEngine
 import time

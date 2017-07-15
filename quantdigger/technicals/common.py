@@ -5,6 +5,8 @@
 # @author wondereamer
 # @version 0.1
 # @date 2015-12-23
+
+from six.moves import range
 import talib
 import matplotlib.finance as finance
 

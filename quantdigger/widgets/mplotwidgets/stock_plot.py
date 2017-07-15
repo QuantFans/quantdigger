@@ -7,6 +7,7 @@
 # @date 2015-10-19
 
 import six
+from six.moves import range
 import matplotlib
 matplotlib.use("TKAgg")
 from matplotlib.widgets import Cursor

@@ -7,6 +7,7 @@
 # @date 2015-12-22
 
 import six
+from six.moves import range
 import datetime
 import unittest
 import pandas as pd
