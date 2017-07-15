@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from six.moves import input
 import subprocess
 import time
 import os
