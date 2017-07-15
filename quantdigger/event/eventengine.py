@@ -7,16 +7,11 @@
 # @date 2016-05-17
 
 import six
+from six.moves import queue, _thread
+
 import abc
 import time
 import zmq
-
-if six.PY3:
-    import queue
-    import _thread
-else:
-    import Queue as queue
-    import thread as _thread
 
 from time import sleep
 from threading import Thread, Condition, Lock

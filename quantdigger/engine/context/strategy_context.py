@@ -6,8 +6,8 @@
 # @version 0.1
 # @date 2016-11-27
 
+from six.moves import queue
 import copy
-import six
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.exchange import Exchange
 from quantdigger.event import Event, EventsPool, SignalEvent, OnceEvent
@@ -17,10 +17,6 @@ from quantdigger.datastruct import (
     Direction,
     PositionKey,
 )
-if six.PY3:
-    import queue
-else:
-    import Queue as queue
 
 class StrategyContext(object):
     """ 策略组合
