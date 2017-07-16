@@ -45,7 +45,7 @@ def process_data(n, intraday, tradeinfo, price_data):
     """
     '''''' 
     PRICE = 'close'  # related to visible price of trading
-    data = pd.DataFrame(tradeinfo.ix[:,0:2])  # subframe
+    data = pd.DataFrame(tradeinfo.loc[:,0:2])  # subframe
     high_profits = []
     low_profits = []
     exit_profits = []
@@ -60,22 +60,22 @@ def process_data(n, intraday, tradeinfo, price_data):
     for i in range(len(tradeinfo)):
         startt = tradeinfo.index[i]   # entry_datetime
         startpos = price_data.index.searchsorted(startt)
-        onetrade = tradeinfo.ix[i, :]  # trade i info
+        onetrade = tradeinfo.loc[i, :]  # trade i info
         endt = onetrade['exit_datetime']   # specific line i, columns 'exit_datetime'
         endpos = price_data.index.searchsorted(endt)
         tradingdf = price_data.truncate(before=startt, after = endt) # price[startt, endt]
         # high/low
         # @NOTE need more work
         if len(tradingdf) > 1:
-            hp = tradingdf.ix[:-1, :][PRICE].max()  # last 'close' is invisible
-            lp = tradingdf.ix[:-1, :][PRICE].min() 
-            t = tradingdf.ix[:-1, :][PRICE].tolist()
+            hp = tradingdf.loc[:-1, :][PRICE].max()  # last 'close' is invisible
+            lp = tradingdf.loc[:-1, :][PRICE].min() 
+            t = tradingdf.loc[:-1, :][PRICE].tolist()
             t.append(float(onetrade['exit_price']))   #
             returns.append(max_return(t, onetrade['islong']))
         else:
             # buy and sell in the same bar
-            hp = tradingdf.ix[:, :][PRICE].max()
-            lp = tradingdf.ix[:, :][PRICE].min()
+            hp = tradingdf.loc[:, :][PRICE].max()
+            lp = tradingdf.loc[:, :][PRICE].min()
             if onetrade['islong']:
                 returns.append(max(onetrade['entry_price']-onetrade['exit_price'], 0))
             else:
@@ -110,15 +110,15 @@ def process_data(n, intraday, tradeinfo, price_data):
             exit_end = endpos + 1 + n
         islongs.append(onetrade['islong'])
         if onetrade['islong']:
-            entry_nbar_bests.append(price_data.ix[entry_begin: entry_end, PRICE].max() - onetrade['entry_price'])
-            entry_nbar_worsts.append(price_data.ix[entry_begin: entry_end, PRICE].min() - onetrade['entry_price'])
-            exit_nbar_bests.append(price_data.ix[exit_begin: exit_end, PRICE].max() - onetrade['entry_price'])
-            exit_nbar_worsts.append(price_data.ix[exit_begin: exit_end, PRICE].min() - onetrade['entry_price'])
+            entry_nbar_bests.append(price_data.loc[entry_begin: entry_end, PRICE].max() - onetrade['entry_price'])
+            entry_nbar_worsts.append(price_data.loc[entry_begin: entry_end, PRICE].min() - onetrade['entry_price'])
+            exit_nbar_bests.append(price_data.loc[exit_begin: exit_end, PRICE].max() - onetrade['entry_price'])
+            exit_nbar_worsts.append(price_data.loc[exit_begin: exit_end, PRICE].min() - onetrade['entry_price'])
         else:
-            entry_nbar_bests.append(onetrade['entry_price'] - price_data.ix[entry_begin: entry_end, PRICE].min())
-            entry_nbar_worsts.append(onetrade['entry_price'] - price_data.ix[entry_begin: entry_end, PRICE].max())
-            exit_nbar_bests.append(onetrade['entry_price'] - price_data.ix[exit_begin: exit_end, PRICE].min())
-            exit_nbar_worsts.append(onetrade['entry_price'] - price_data.ix[exit_begin: exit_end, PRICE].max())
+            entry_nbar_bests.append(onetrade['entry_price'] - price_data.loc[entry_begin: entry_end, PRICE].min())
+            entry_nbar_worsts.append(onetrade['entry_price'] - price_data.loc[entry_begin: entry_end, PRICE].max())
+            exit_nbar_bests.append(onetrade['entry_price'] - price_data.loc[exit_begin: exit_end, PRICE].min())
+            exit_nbar_worsts.append(onetrade['entry_price'] - price_data.loc[exit_begin: exit_end, PRICE].max())
 
     data['high_profit'] = high_profits
     data['low_profit'] = low_profits

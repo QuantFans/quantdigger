@@ -54,21 +54,21 @@ def process_signal(signal, price_data, n=10, intraday=False):
     for i in range(len(data)):
         startt = signal.index[i]
         startpos = price_data.index.searchsorted(startt)
-        endt = signal.ix[i, ['exit_datetime']][0]
+        endt = signal.loc[i, ['exit_datetime']][0]
         endpos = price_data.index.searchsorted(endt)
         tradingdf = price_data.truncate(before=startt, after = endt) # 当笔交易间的价格数据
 
-        onetrade = signal.ix[i, :]
+        onetrade = signal.loc[i, :]
         # high/low
         if len(tradingdf) > 1:
-            hp = tradingdf.ix[:-1, :][PRICE].max()
-            lp = tradingdf.ix[:-1, :][PRICE].min()
-            t = tradingdf.ix[:-1, :][PRICE].tolist()
+            hp = tradingdf.loc[:-1, :][PRICE].max()
+            lp = tradingdf.loc[:-1, :][PRICE].min()
+            t = tradingdf.loc[:-1, :][PRICE].tolist()
             t.append(float(onetrade['exit_price']))
             returns.append(max_return(t, onetrade['islong'])) # 当笔交易区间内的最大回测
         else:
-            hp = tradingdf.ix[:, :][PRICE].max()
-            lp = tradingdf.ix[:, :][PRICE].min()
+            hp = tradingdf.loc[:, :][PRICE].max()
+            lp = tradingdf.loc[:, :][PRICE].min()
             if onetrade['islong']:
                 returns.append(max(onetrade['entry_price']-onetrade['exit_price'], 0))  # 同一根bar上买和卖
             else:
@@ -103,8 +103,8 @@ def process_signal(signal, price_data, n=10, intraday=False):
         exit_Nlist.append(exit_end - exit_begin)
         islongs.append(onetrade['islong'])
 
-        position_prices = price_data.ix[entry_begin: entry_end, PRICE]
-        exit_prices = price_data.ix[exit_begin: exit_end, PRICE]
+        position_prices = price_data.loc[entry_begin: entry_end, PRICE]
+        exit_prices = price_data.loc[exit_begin: exit_end, PRICE]
         if onetrade['islong']:
             entry_nbar_bests.append(position_prices.max() - onetrade['entry_price'])
             entry_nbar_worsts.append(position_prices.min() - onetrade['entry_price'])
