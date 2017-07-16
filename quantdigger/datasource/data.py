@@ -33,3 +33,7 @@ class DataManager(object):
 
     def get_code2strpcon(self):
         return self._src.get_code2strpcon()
+
+    def get_contracts(self):
+        return self._src.get_contracts()
+
