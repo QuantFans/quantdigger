@@ -326,7 +326,8 @@ class TestTimeAlign(unittest.TestCase):
 
         # on_symbol
         fname = os.path.join(os.getcwd(), 'data', 'diffPeriodOnSymbol.txt')
-        lines = [line.rstrip('\n') for line in open(fname)]
+        with open(fname) as f:
+            lines = [line.rstrip('\n') for line in f]
         assert(len(lines) > 0)
         count = 0
         for line in lines:

@@ -419,7 +419,7 @@ class Contract(object):
     def long_margin_ratio(cls, strcontract):
         try:
             ## @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
-            return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
+            return cls.info.loc[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1

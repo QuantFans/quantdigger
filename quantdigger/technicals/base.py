@@ -32,7 +32,7 @@ def tech_init(method):
         并且触发向量计算。
     """
     def wrapper(self, *args, **kwargs):
-        magic = inspect.getargspec(method)
+        magic = inspect.getfullargspec(method)
         arg_names = magic.args[1:]
         # 默认参数
         default = dict(
