@@ -134,7 +134,7 @@ class SimpleBlotter(Blotter):
         # 强平功能，使交易继续下去。
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
-            for key in self.positions.iterkeys():
+            for key in six.iterkeys(self.positions):
                 if not key.contract.is_stock:
                     # @NOTE  只要有一个是期货，在资金不足的时候就得追加保证金
                     raise Exception('需要追加保证金!')
