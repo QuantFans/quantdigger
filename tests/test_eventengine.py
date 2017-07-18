@@ -8,14 +8,10 @@
 
 import six
 import unittest
-from quantdigger.event import (
-    QueueEventEngine,
-    ZMQEventEngine,
-    EventRPCClient,
-    Event,
-    Timer,
-    EventRPCServer
-)
+from quantdigger.event.event import Event
+from quantdigger.event.rpc import EventRPCClient, EventRPCServer
+from quantdigger.event.eventengine import QueueEventEngine, ZMQEventEngine, Timer
+
 
 def test_zmq_eventengine():
     """测试函数"""
@@ -27,7 +23,7 @@ def test_zmq_eventengine():
         six.print_(str(datetime.now()), event.route)
     
     six.print_('test_zmq_eventengine.....' )
-    ee = ZMQEventEngine()
+    ee = ZMQEventEngine('test_zmq_eventengine')
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
     ee.start()
