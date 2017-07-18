@@ -12,7 +12,7 @@ from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface
 from quantdigger.util import mlogger as log
 from quantdigger.datasource.data import DataManager
-from quantdigger.datastruct import PContract
+from quantdigger.datastruct import Contract, PContract
 from quantdigger.interaction.serialize import (
     serialize_pcontract_bars,
     serialize_all_pcontracts,
@@ -26,6 +26,7 @@ class Backend(BackendInterface):
     SERVER_FOR_SHELL = "backend4shell" 
     def __init__(self):
         log.info("Init Backend..")
+        self._dm = DataManager()
         self._engine = ZMQEventEngine('Backend')
         self._engine.start()
 
@@ -49,11 +50,17 @@ class Backend(BackendInterface):
         self._engine.stop()
 
     def get_all_contracts(self):
+        def _mk_contract(code, exchage):
+            s = '%s.%s' % (code, exchage)
+            return Contract(s)
         # 模拟接口
-        data = ['CC.SHFE-1.MINUTE', 'BB.SHFE-1.MINUTE']
-        pcons =  [PContract.from_string(d) for d in data]
-        contracts =  [pcon.contract for pcon in pcons]
+        df = self._dm.get_contracts()
+        contracts = [str(_mk_contract(row['code'], row['exchange'])) for _, row in df.iterrows()]
         return serialize_all_contracts(contracts)
+        #data = ['CC.SHFE-1.MINUTE', 'BB.SHFE-1.MINUTE']
+        #pcons =  [PContract.from_string(d) for d in data]
+        #contracts =  [pcon.contract for pcon in pcons]
+        #return serialize_all_contracts(contracts)
 
     def get_all_pcontracts(self):
         # 模拟接口
@@ -62,8 +69,7 @@ class Backend(BackendInterface):
         return serialize_all_pcontracts(pcontracts)
 
     def get_pcontract(self, str_pcontract):
-        dm = DataManager()
-        da = dm.get_bars(str_pcontract)
+        da = self._dm.get_bars(str_pcontract)
         return serialize_pcontract_bars(str_pcontract, da.data)
 
     def run_strategy(self, name):
