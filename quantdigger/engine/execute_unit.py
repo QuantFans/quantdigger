@@ -35,7 +35,7 @@ class ExecuteUnit(object):
             spec_date (dict): time range for specific pcontracts
         """
         self.finished_data = []
-        pcontracts = map(lambda x: x.upper(), pcontracts)
+        pcontracts = list(map(lambda x: x.upper(), pcontracts))
         self.pcontracts = pcontracts
         self._combs = []
         self._data_manager = DataManager()
