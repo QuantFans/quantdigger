@@ -6,6 +6,7 @@
 # @version 0.1
 # @date 2016-08-07
 
+import six
 import sys
 import unittest
 
@@ -29,7 +30,7 @@ class TestShell(object):
 
 
     def test_get_all_contracts(self):
-        print shell.get_all_contracts()
+        six.print_(shell.get_all_contracts())
 
 
 
@@ -37,7 +38,7 @@ class TestShell(object):
         #ret = self.shell.sync_call("get_pcontract", {
             #'str_pcontract': 'BB.TEST-1.MINUTE'
             #})
-        #print json.loads(ret).keys()
+        #six.print_(json.loads(ret).keys())
         #return
 
 

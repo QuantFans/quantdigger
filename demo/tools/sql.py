@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import os
 import sqlite3
 import time
@@ -51,7 +52,7 @@ def read_csv(path):
             filepath = path + os.sep + file
             if filepath.endswith(".csv"):
                 fname =  file.split('-')[0]
-                print("import: ", fname)
+                six.print_("import: ", fname)
                 #df = pd.read_csv(filepath, parse_dates={'datetime': ['date', 'time']},
                 df = pd.read_csv(filepath, parse_dates='datetime',
                                  index_col='datetime')
@@ -86,18 +87,18 @@ def sql2csv(db, cursor):
 start = timeit.default_timer()
 read_csv(os.getcwd())
 stop = timeit.default_timer()
-print (stop - start ) * 1000
-print "---------"
+six.print_((stop - start ) * 1000)
+six.print_("---------")
 db.commit()
 
 start = timeit.default_timer()
 open = close = high = low = []
 for row in c.execute('SELECT id, datetime, open FROM AA_SHFE'):
-    print row
-print get_tables(c)
+    six.print_(row)
+six.print_(get_tables(c))
 
 stop = timeit.default_timer()
-print (stop - start ) * 1000
+six.print_((stop - start ) * 1000)
 
 get_tables(c)
 db.commit()

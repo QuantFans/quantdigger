@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+import six
 from quantdigger.configutil import ConfigUtil
 from quantdigger.infras.ioc import *
 from quantdigger.util import dlogger as logger
@@ -17,7 +19,7 @@ class _DatasourceTrunk(IoCTrunk):
 
     def construct(self):
         a = [ConfigUtil.get(k, None) for k in self.args]
-        ka = {k: ConfigUtil.get(name, None) for k, name in self.kwargs.items()}
+        ka = {k: ConfigUtil.get(name, None) for k, name in six.iteritems(self.kwargs)}
         return self.cls(*a, **ka)
 
 

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import six
+from six.moves import range
 import datetime
 import os
 import time
@@ -54,22 +56,22 @@ def tick2period(code, period, start, end):
         # remove non-trade time
         df1 = df1.truncate(before=date+' 9:30:01', after=date+' 11:30')
         df1 = df1.append(df3)
-        if np.isnan(df1.ix[0, 'close']):
+        if np.isnan(df1.loc[0, 'close']):
             # use last day's close as initial price if
             # there is no deal after open
             from datetime import timedelta
             # get enough days to ensure at least one trading day is involved
             aDay = timedelta(days=-10)
             pre = (pd.to_datetime(date) + aDay).strftime('%Y-%m-%d')
-            df1.ix[0, 'close'] = ts.get_hist_data(code, start=pre, end=date)\
-                                   .ix[-2, 'close']
+            df1.loc[0, 'close'] = ts.get_hist_data(code, start=pre, end=date)\
+                                   .loc[-2, 'close']
         # use price before if there is no deal during current period
         df1['close'].fillna(method='pad', inplace=True)
         # use close as open,high,low if there  is no deal during current period
         df1.fillna(method='bfill', inplace=True, axis=1)
         df1['volume'] = df2.values
         dfout = pd.concat([dfout, df1])
-    # print dfout
+    # six.print_(dfout)
     # assert(False)
     return dfout
 
@@ -169,9 +171,9 @@ def import_from_csv(self, paths):
     for path in paths:
         if not path.endswith(".csv") and not path.endswith(".CSV"):
             # @TODO
-            print(path)
+            six.print_(path)
             raise Exception("错误的文件格式")
-        print("import: ", path)
+        six.print_("import: ", path)
         df = pd.read_csv(path, parse_dates='datetime')
         try:
             df['datetime'] = map(
@@ -196,9 +198,9 @@ def import_data(fpaths, ds):
     for path in fpaths:
         if not path.lower().endswith('.csv'):
             # @TODO
-            print(path)
+            six.print_(path)
             raise Exception("错误的文件格式")
-        print("import data: ", path)
+        six.print_("import data: ", path)
         df = pd.read_csv(path, parse_dates='datetime')
         try:
             df['datetime'] = map(

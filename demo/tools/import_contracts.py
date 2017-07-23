@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import pandas as pd
 from quantdigger import ConfigUtil
 from quantdigger.datasource import ds_impl
@@ -71,7 +72,7 @@ def import_contracts(decode=False):
             }
     return rst
 
-print("import contracts..")
+six.print_("import contracts..")
 contracts = import_contracts()
 csv_ds = ds_impl.csv_source.CsvSource('../data')
 csv_ds.import_contracts(contracts)

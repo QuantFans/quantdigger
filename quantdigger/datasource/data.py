@@ -6,7 +6,7 @@
 # @version 0.3
 # @date 2016-05-26
 
-from dsutil import get_setting_datasource
+from .dsutil import get_setting_datasource
 from quantdigger.datastruct import PContract, Contract
 
 
@@ -33,3 +33,7 @@ class DataManager(object):
 
     def get_code2strpcon(self):
         return self._src.get_code2strpcon()
+
+    def get_contracts(self):
+        return self._src.get_contracts()
+

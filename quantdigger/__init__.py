@@ -7,7 +7,7 @@ from quantdigger.engine.series import NumberSeries, DateTimeSeries
 from quantdigger.technicals.common import *
 from quantdigger.util import rlogger, deprecated
 
-__version__ = '0.4.0'
+__version__ = '0.6.1'
 
 
 @deprecated

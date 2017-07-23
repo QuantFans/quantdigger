@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import six
 # from flufl.enum import Enum
 from datetime import timedelta
 from quantdigger.errors import PeriodTypeError
@@ -213,14 +213,14 @@ class Transaction(object):
             self.order = order
         self.volume_multiple = order.volume_multiple
         self.compute_commission()
-        #print "********************" 
-        #print self.datetime, self.price, self.quantity, self.volume_multiple, ratio
-        #print "********************" 
+        #six.print_("********************" )
+        #six.print_(self.datetime, self.price, self.quantity, self.volume_multiple, ratio)
+        #six.print_("********************" )
         #assert False
 
     def compute_commission(self):
         ratio = settings['stock_commission'] if self.contract.is_stock else\
-                     settings['future_commission']
+            settings['future_commission']
         self.commission = self.price * self.quantity * \
             self.volume_multiple * ratio
 
@@ -232,14 +232,17 @@ class Transaction(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
     def __str__(self):
         rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s" % \
-        (self.id, self.contract, Direction.type_to_str(self.direction),
-        self.price, self.quantity, TradeSide.type_to_str(self.side),
-        self.datetime, PriceType.type_to_str(self.price_type),
-        HedgeType.type_to_str(self.hedge_type))
+            (self.id, self.contract, Direction.type_to_str(self.direction),
+             self.price, self.quantity, TradeSide.type_to_str(self.side),
+             self.datetime, PriceType.type_to_str(self.price_type),
+             HedgeType.type_to_str(self.hedge_type))
         return rst
 
 
@@ -327,8 +330,7 @@ class Order(object):
             self.volume_multiple
 
     def print_order(self):
-        #print "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % \
-            #(self.symbol, self.order_type, self.quantity, self.direction)
+        #six.print_("Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.direction))
         pass
 
     def __hash__(self):
@@ -340,10 +342,10 @@ class Order(object):
 
     def __str__(self):
         rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n long_margin_ratio: %f" % \
-        (self.id, self.contract, Direction.type_to_str(self.direction),
-        self.price, self.quantity, TradeSide.type_to_str(self.side),
-        self.datetime, PriceType.type_to_str(self.price_type),
-        HedgeType.type_to_str(self.hedge_type), self.long_margin_ratio)
+            (self.id, self.contract, Direction.type_to_str(self.direction),
+             self.price, self.quantity, TradeSide.type_to_str(self.side),
+             self.datetime, PriceType.type_to_str(self.price_type),
+             HedgeType.type_to_str(self.hedge_type), self.long_margin_ratio)
         return rst
 
     def __eq__(self, r):
@@ -400,7 +402,10 @@ class Contract(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
     def __cmp__(self, r):
         return str(self) < str(r)
@@ -414,7 +419,7 @@ class Contract(object):
     def long_margin_ratio(cls, strcontract):
         try:
             ## @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
-            return cls.info.ix[strcontract.upper(), 'long_margin_ratio']
+            return cls.info.loc[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -423,7 +428,7 @@ class Contract(object):
     @classmethod
     def short_margin_ratio(cls, strcontract):
         try:
-            return cls.info.ix[strcontract.upper(), 'short_margin_ratio']
+            return cls.info.loc[strcontract.upper(), 'short_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -432,7 +437,7 @@ class Contract(object):
     @classmethod
     def volume_multiple(cls, strcontract):
         try:
-            return cls.info.ix[strcontract.upper(), 'volume_multiple']
+            return cls.info.loc[strcontract.upper(), 'volume_multiple']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -490,7 +495,7 @@ class Period(object):
         }
         try:
             u = m[self.unit]
-            kwargs = {u: 1}
+            kwargs = {u: self.count}
             return timedelta(**kwargs)
         except KeyError:
             raise Exception('unit "%s" is not supported' % self.unit)
@@ -537,7 +542,10 @@ class PContract(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
     def __str__(self):
         return '%s-%s' % (str(self.contract), str(self.period))
@@ -575,7 +583,10 @@ class PositionKey(object):
             return self._hash
 
     def __eq__(self, r):
-        return self._hash == r._hash
+        try:
+            return self._hash == r._hash
+        except AttributeError:
+            return hash(self) == hash(r)
 
 
 class Position(object):

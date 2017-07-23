@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
+import six
+from six.moves import range
 from matplotlib.widgets import AxesWidget
 from matplotlib.widgets import MultiCursor
 from matplotlib.ticker import Formatter
 import matplotlib.ticker as mticker
 import numpy as np
 
-from quantdigger.util import gen_log as log
+from quantdigger.util.log import gen_log as log
 
 
 def slider_strtime_format(delta):
@@ -247,11 +249,11 @@ class Slider(AxesWidget):
 
     def _update_observer(self, event):
         """ 通知相关窗口更新数据 """
-        for name, obj in self.observers.iteritems():
+        for name, obj in six.iteritems(self.observers):
             try:
                 obj.on_slider(self.val, event)
-            except Exception, e:
-                print(e)
+            except Exception as e:
+                six.print_(e)
 
 
 class FrameWidget(AxesWidget):
@@ -304,7 +306,7 @@ class FrameWidget(AxesWidget):
     def set_ylim(self, w_left, w_right):
         all_ymax = []
         all_ymin = []
-        for plotter in self.plotters.values():
+        for plotter in six.itervalues(self.plotters):
             if plotter.twinx:
                 continue
             ymax, ymin = plotter.y_interval(w_left, w_right)
@@ -356,7 +358,7 @@ class FrameWidget(AxesWidget):
 
     def _update_observer(self, obname):
         #"通知进度条改变宽度"
-        #for name, obj in self.observers.iteritems():
+        #for name, obj in six.iteritems(self.observers):
             #if name == obname and obname == "slider":
                 #obj.update(obj.val, self.wdlength)
                 #break
@@ -455,13 +457,13 @@ class TechnicalWidget(object):
         """
         # 对新创建的Axes做相应的处理
         # 并且调整Cursor
-        for plotter in widget.plotters.values():
+        for plotter in six.itervalues(widget.plotters):
             if plotter.twinx:
                 plotter.ax.format_coord = self._format_coord
                 self.axes.append(plotter.ax)
                 #self._cursor_axes[ith_subwidget] = plotter.ax
                 self._cursor = MultiCursor(self._fig.canvas,
-                        self._cursor_axes.values(),
+                        list(self._cursor_axes.values()),
                                             color='r', lw=2, horizOn=False,
                                             vertOn=True)
         self._subwidgets[ith_subwidget] = widget
@@ -514,9 +516,9 @@ class TechnicalWidget(object):
             self._w_width -= self._w_width/2
             self._w_width= max(self._w_width, self._w_width_min)
         elif event.key == u"super+up":
-            print event.key, "**", type(event.key) 
+            six.print_(event.key, "**", type(event.key) )
         elif event.key == u"super+down":
-            print event.key, "**", type(event.key) 
+            six.print_(event.key, "**", type(event.key) )
             # @TODO page upper down
 
         middle = (self._w_left+self._w_right)/2
@@ -538,7 +540,7 @@ class TechnicalWidget(object):
     def on_leave_axes(self, event):
         if event.inaxes is self._slider_ax:
             # 进入后会创建_slider_cursor,离开后复原
-            axes = [self.axes[i] for i in self._cursor_axes_index.values()]
+            axes = [self.axes[i] for i in six.itervalues(self._cursor_axes_index)]
             #axes = list(reversed(axes)) # 很奇怪，如果没有按顺序给出，显示会有问题。
             self._cursor = MultiCursor(self._fig.canvas, axes, color='r', lw=2, horizOn=False, vertOn=True)
             event.canvas.draw()
@@ -566,12 +568,12 @@ class TechnicalWidget(object):
         self._slidder_upper = self._bottom + self._slider_height
         self._bigger_picture_lower = self._slidder_upper
         self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
-                                             self._slider_height], axisbg='gray')
+                                             self._slider_height], facecolor='gray')
         self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
                                                     self._width, self._bigger_picture_height],
                                                 zorder = 0, frameon=False,
                                                 #sharex=self._slider_ax,
-                                                axisbg='gray', alpha = '0.1' )
+                                                facecolor='gray', alpha = '0.1' )
         self._bigger_picture.set_xticklabels([]);
         self._bigger_picture.set_xticks([])
         self._bigger_picture.set_yticks([])
@@ -592,7 +594,7 @@ class TechnicalWidget(object):
             rect = [self._left, bottom, self._width, unit * ratio]
             if i > 0:
                 # 共享x轴
-                ax = self._fig.add_axes(rect, sharex=first_user_axes)  #axisbg=axescolor)
+                ax = self._fig.add_axes(rect, sharex=first_user_axes)  #facecolor=axescolor)
                 self._all_axes.append(ax)
             else:
                 first_user_axes = self._fig.add_axes(rect)
@@ -626,7 +628,7 @@ class TechnicalWidget(object):
     def _set_ylim(self, w_left, w_right):
         """ 设置当前显示窗口的y轴范围。
         """
-        for subwidget in self._subwidgets.values():
+        for subwidget in six.itervalues(self._subwidgets):
             subwidget.set_ylim(w_left, w_right)
         
     def _format_coord(self, x, y):
@@ -647,7 +649,7 @@ class TechnicalWidget(object):
 
     def _xticks_to_display(self, start, end, delta):
         xticks = []
-        for i in xrange(start, end):
+        for i in range(start, end):
             if i >= 1:
                 if delta.days >= 1:
                     if self._data.index[i].month != self._data.index[i-1].month:

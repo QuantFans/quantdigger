@@ -6,6 +6,7 @@
 # @version 0.15
 # @date 2015-06-13
 
+import six
 import inspect
 from matplotlib.axes import Axes
 import numpy as np
@@ -29,7 +30,7 @@ def plot_init(method):
         #
         default.update(method_args)
         # 属性创建
-        for key, value in default.iteritems():
+        for key, value in six.iteritems(default):
             setattr(self, key, value)
         # 运行构造函数
         rst = method(self, *args, **kwargs)
@@ -48,7 +49,7 @@ def sub_interval(start, end, array):
     
     >>> array = [0,1,3, 4, 5, 6, 8]
     >>> rst = sub_interval(2, 5, array)
-    >>> print array[rst[0]: rst[1]]
+    >>> six.print_(array[rst[0]: rst[1]])
     """
     i = bisect.bisect_left(array, start)
     if i != len(array):
@@ -182,5 +183,6 @@ class Plotter(object):
                 temp = zip(self._xdata, self.values)
                 sdata = sorted(temp, key=lambda x: x[0])
                 temp = zip(*sdata)
-                self._xdata = list(temp[0])
-                self.values = list(temp[1])
+                l_temp = list(temp)
+                self._xdata = l_temp[0]
+                self.values = l_temp[1]

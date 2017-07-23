@@ -8,7 +8,7 @@ from quantdigger.widgets.mplotwidgets import widgets
 from quantdigger.widgets.mplotwidgets.mplots import Candles
 from quantdigger.technicals.common import MA, Volume
 
-price_data = pd.read_csv('./data/IF000.csv', index_col=0, parse_dates=True)
+price_data = pd.read_csv('data/IF000.csv', index_col=0, parse_dates=True)
 fig = plt.figure()
 
 frame = widgets.TechnicalWidget(fig, price_data)

@@ -1,7 +1,8 @@
+import six
 def overload_setter(setter):
 
     def multiple_set(d):
-        for k, v in d.items():
+        for k, v in six.iteritems(d):
             setter(k, v)
 
     def new_setter(*args, **kwargs):

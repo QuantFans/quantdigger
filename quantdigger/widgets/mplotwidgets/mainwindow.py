@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import six
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -56,8 +57,8 @@ class MainWindow(object):
         return
 
     def _create_toolbar(self):
-        axprev = self._fig.add_axes([0.1, 0.92, 0.07, 0.075], axisbg='gray')
-        axnext = self._fig.add_axes([0.2, 0.92, 0.07, 0.075], axisbg='gray')
+        axprev = self._fig.add_axes([0.1, 0.92, 0.07, 0.075], facecolor='gray')
+        axnext = self._fig.add_axes([0.2, 0.92, 0.07, 0.075], facecolor='gray')
         self.btn_next = Button(axnext, '1Day')
         self.btn_prev = Button(axprev, '1Min')
 
@@ -108,9 +109,9 @@ class MainWindow(object):
             self.frame.load_data(data)
             self.candle_widget.plot_with_plotter('candles', data)
             self.frame.draw_widgets()
-            print "next" , str(pcon), "**" 
+            six.print_("next" , str(pcon), "**" )
         else:
-            print "stop_next" 
+            six.print_("stop_next" )
 
     def on_previous_contract(self, event):
         if self._cur_contract_index - 1 >= 0:
@@ -122,9 +123,9 @@ class MainWindow(object):
             self.frame.load_data(data)
             self.candle_widget.plot_with_plotter('candles', data)
             self.frame.draw_widgets()
-            print "prev" , str(pcon), "**" 
+            six.print_("prev" , str(pcon), "**" )
         else:
-            print "stop_pre" 
+            six.print_("stop_pre" )
 
 
 

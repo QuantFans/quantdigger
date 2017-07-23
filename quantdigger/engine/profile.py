@@ -6,7 +6,8 @@
 # @version 0.4
 # @date 2016-12-18
 
-
+import six
+from six.moves import range
 import copy
 from quantdigger.datastruct import (
     OneDeal,
@@ -30,7 +31,7 @@ class Profile(object):
         self._dcontexts = {}
         self._ith_comb = i   # 对应于第几个组合
         self._main_pcontract = strpcon
-        for key, value in dcontexts.iteritems():
+        for key, value in six.iteritems(dcontexts):
             self._dcontexts[key] = value
 
     def name(self, j=None):
@@ -141,11 +142,11 @@ class Profile(object):
         pcon = strpcon if strpcon else self._main_pcontract
         if j is not None:
             return {v.name: v for v in self._dcontexts[pcon].
-                    technicals[self._ith_comb][j].itervalues()}
+                    technicals[self._ith_comb][j].values()}
         rst = {}
         for j in range(0, len(self._blts)):
             t = {v.name: v for v in self._dcontexts[pcon].
-                 technicals[self._ith_comb][j].itervalues()}
+                 technicals[self._ith_comb][j].values()}
             rst.update(t)
         return rst
 

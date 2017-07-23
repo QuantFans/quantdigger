@@ -21,12 +21,13 @@ class TestCsvSource(unittest.TestCase):
         target = data_manager.get_bars(
             'BB.TEST-1.Minute', _DT_START, _DT_END).data
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'CC.csv')
+        logger.info('-- CSV数据路径: ' + fname + ' --')
         source = pd.read_csv(
-            fname, parse_dates='datetime', index_col='datetime')
+            fname, parse_dates=['datetime'], index_col='datetime')
         self.assertFalse(source.equals(target), '本地数据接口负测试失败！')
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'BB.csv')
         source = pd.read_csv(
-            fname, parse_dates='datetime', index_col='datetime')
+            fname, parse_dates=['datetime'], index_col='datetime')
         self.assertTrue(source.equals(target), '本地数据接口正测试失败！')
         logger.info('-- 本地数据接口测试成功 --')
         ConfigUtil.set(source=source_bak)

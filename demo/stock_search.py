@@ -6,6 +6,7 @@
 # @version 0.2
 # @date 2015-12-09
 
+import six
 from quantdigger import *
 
 class DemoStrategy(Strategy):
@@ -31,12 +32,12 @@ class DemoStrategy(Strategy):
         for symbol in self.to_sell:
             if ctx.pos('long', symbol) > 0:
                 ctx.sell(ctx[symbol].close, 1, symbol) 
-                #print "sell:", symbol
+                #six.print_("sell:", symbol)
 
         for symbol in self.candicates:
             if ctx.pos('long', symbol) == 0:
                 ctx.buy(ctx[symbol].close, 1, symbol) 
-                #print "buy:", symbol
+                #six.print_("buy:", symbol)
 
 
         self.candicates = []
@@ -44,7 +45,7 @@ class DemoStrategy(Strategy):
         return
 
     def on_exit(self, ctx):
-        print("策略运行结束．")
+        six.print_("策略运行结束．")
         return
 
 

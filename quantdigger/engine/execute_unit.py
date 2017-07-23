@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+
+import six
 from collections import OrderedDict
 from datetime import datetime
-from progressbar import ProgressBar
+import progressbar
 from quantdigger.config import settings
 from quantdigger.datasource.data import DataManager
-from quantdigger.engine.context import Context, DataContext, StrategyContext
+from quantdigger.engine.context import context, data_context, strategy_context
 from quantdigger.engine.profile import Profile
 from quantdigger.util import elogger as logger
 from quantdigger.util import deprecated
@@ -33,7 +35,7 @@ class ExecuteUnit(object):
             spec_date (dict): time range for specific pcontracts
         """
         self.finished_data = []
-        pcontracts = map(lambda x: x.upper(), pcontracts)
+        pcontracts = list(map(lambda x: x.upper(), pcontracts))
         self.pcontracts = pcontracts
         self._combs = []
         self._data_manager = DataManager()
@@ -46,10 +48,10 @@ class ExecuteUnit(object):
                                                            dt_end,
                                                            n,
                                                            spec_date)
-        self.context = Context(self._all_data, self._max_window)
+        self.context = context.Context(self._all_data, self._max_window)
 
     def _init_strategies(self):
-        for pcon, dcontext in self._all_data.iteritems():
+        for pcon, dcontext in six.iteritems(self._all_data):
             # switch context
             self.context.switch_to_pcontract(pcon)
             for i, combination in enumerate(self._combs):
@@ -68,13 +70,13 @@ class ExecuteUnit(object):
             code = strpcon.split('.')[0]
             if code == "*":
                 if strpcon == "*":  # '*'
-                    for key, value in exch_period2strpcon.iteritems():
+                    for key, value in six.iteritems(exch_period2strpcon):
                         rst += value
                 else:
                     # "*.xxx"
                     # "*.xxx_period"
                     k = strpcon.split('.')[1]
-                    for key, value in exch_period2strpcon.iteritems():
+                    for key, value in six.iteritems(exch_period2strpcon):
                         if '-' in k:
                             if k == key:
                                 rst += value
@@ -129,7 +131,7 @@ class ExecuteUnit(object):
             if settings:
                 iset = {'capital': settings['capital'] * settings['ratio'][i]}
                 # logger.debug(iset)
-            ctxs.append(StrategyContext(s.name, iset))
+            ctxs.append(strategy_context.StrategyContext(s.name, iset))
         self.context.add_strategy_context(ctxs)
         return Profile(ctxs,
                        self._all_data,
@@ -141,17 +143,17 @@ class ExecuteUnit(object):
         # 初始化策略自定义时间序列变量
         logger.info("runing strategies...")
         self._init_strategies()
-        pbar = ProgressBar().start()
+        pbar = progressbar.ProgressBar().start()
         # todo 对单策略优化
         has_next = True
         # 遍历每个数据轮, 次数为数据的最大长度
-        for pcon, data in self._all_data.iteritems():
+        for pcon, data in six.iteritems(self._all_data):
             self.context.switch_to_pcontract(pcon)
             self.context.rolling_forward()
         while True:
             self.context.on_bar = False
             # 遍历数据轮的所有合约
-            for pcon, data in self._all_data.iteritems():
+            for pcon, data in six.iteritems(self._all_data):
                 self.context.switch_to_pcontract(pcon)
                 if self.context.time_aligned():
                     self.context.update_system_vars()
@@ -168,7 +170,7 @@ class ExecuteUnit(object):
             # 遍历组合策略每轮数据的最后处理
             tick_test = settings['tick_test']
             for i, combination in enumerate(self._combs):
-                # print self.context.ctx_datetime, "--"
+                # six.print_(self.context.ctx_datetime, "--")
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
                     # 确保交易状态是基于开盘时间的。
@@ -177,14 +179,14 @@ class ExecuteUnit(object):
                     if not tick_test:
                         # 保证有可能在当根Bar成交
                         self.context.process_trading_events(at_baropen=False)
-            # print self.context.ctx_datetime
+            # six.print_(self.context.ctx_datetime)
             self.context.ctx_datetime = datetime(2100, 1, 1)
             self.context.ctx_curbar += 1
             if self.context.ctx_curbar <= self._max_window:
                 pbar.update(self.context.ctx_curbar*100.0/self._max_window)
             #
             toremove = []
-            for pcon, data in self._all_data.iteritems():
+            for pcon, data in six.iteritems(self._all_data):
                 self.context.switch_to_pcontract(pcon)
                 has_next = self.context.rolling_forward()
                 if not has_next:
@@ -205,9 +207,9 @@ class ExecuteUnit(object):
         all_data = OrderedDict()
         max_window = -1
         logger.info("loading data...")
-        pbar = ProgressBar().start()
+        pbar = progressbar.ProgressBar().start()
         pcontracts = [PContract.from_string(s) for s in strpcons]
-        pcontracts = sorted(pcontracts, reverse=True)
+        pcontracts = sorted(pcontracts, key=PContract.__str__, reverse=True)
         for i, pcon in enumerate(pcontracts):
             strpcon = str(pcon)
             if strpcon in spec_date:
@@ -220,7 +222,7 @@ class ExecuteUnit(object):
                 wrapper = self._data_manager.get_bars(strpcon, dt_start, dt_end)
             if len(wrapper) == 0:
                 continue
-            all_data[strpcon] = DataContext(wrapper)
+            all_data[strpcon] = data_context.DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
             pbar.update(i*100.0/len(strpcons))
             # progressbar.log('')

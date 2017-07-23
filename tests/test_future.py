@@ -6,6 +6,8 @@
 # @version 0.3
 # @date 2015-12-22
 
+import six
+from six.moves import range
 import datetime
 import unittest
 import pandas as pd
@@ -111,7 +113,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                 elif ctx.curbar == 7:
                     assert(ctx.pos() == 0 and '持仓测试失败!')
                     assert(len(ctx.open_orders) == 2 and '撤单测试失败！')
-                    order = filter(lambda x: x.side == TradeSide.PING, ctx.open_orders)[0]
+                    order = list(filter(lambda x: x.side == TradeSide.PING, ctx.open_orders))[0]
                     ctx.cancel(order)
                 elif ctx.curbar == 8:
                     assert(len(ctx.open_orders) == 1 and '撤单测试失败！')
@@ -372,7 +374,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                     ctx.short(ctx['future2.TEST-1.Minute'].close, 2, 'future2.TEST') 
                 else:
                     if curtime == sell1:
-                        all_postions =  ctx.all_positions()
+                        all_postions =  list(ctx.all_positions())
                         assert(len(all_postions) == 2)
                         assert(all_postions[0].quantity == 6)
                         assert(all_postions[0].closable == 6)
@@ -426,7 +428,8 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     cashes = []
     UNIT = 1
     poscost = 0
-    for dt, price in data.close.iteritems():
+    dict_close = data.close.to_dict()
+    for dt, price in six.iteritems(dict_close):
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
             poscost = (poscost*quantity + price*(1+settings['future_commission'])*UNIT)/ (quantity+UNIT)
@@ -453,7 +456,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
         cashes.append(equities[-1]-posmargin)
         dts.append(dt)
         #if close_profit != 0 or pos_profit != 0:
-            #print close_profit, pos_profit, equities[-1]
+            #six.print_(close_profit, pos_profit, equities[-1])
             #assert False
     return equities, cashes, dts
 
@@ -469,7 +472,8 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     cashes = []
     UNIT = 2
     poscost = 0
-    for dt, price in data.close.iteritems():
+    dict_close = data.close.to_dict()
+    for dt, price in six.iteritems(dict_close):
         curtime = dt.time()
         if curtime in [buy1, buy2, buy3]:
             poscost = (poscost*quantity + price*(1-settings['future_commission'])*UNIT)/ (quantity+UNIT)
@@ -509,30 +513,33 @@ def entries_maked_nextbar(data):
     predt = data.index[0]
     prelow = data.low[0]
 
-    for  dt, low in data.low.iteritems():
+    dict_low = data.low.to_dict()
+    dict_high = data.high.to_dict()
+
+    for  dt, low in six.iteritems(dict_low):
         if dt.date() == predt.date() and dt.time() < sell1 and prelow - low >= OFFSET:
             buy_entries.append(predt)
         prelow = low
         predt = dt
 
-    for  dt, high in data.high.iteritems():
+    for  dt, high in six.iteritems(dict_high):
         if dt.date() == predt.date() and dt.time() < sell1 and high - prehigh >= OFFSET:
             short_entries.append(predt)
-            #print predt, low-prelow
+            #six.print_(predt, low-prelow)
         prehigh = high
         predt = dt
 
-    for dt, high in data.high.iteritems():
+    for dt, high in six.iteritems(dict_high):
         if dt.time() > buy3 and high - prehigh >= OFFSET:
             sell_entries.append(predt)
-            #print predt, high-prehigh
+            #six.print_(predt, high-prehigh)
         prehigh = high
         predt = dt
 
-    for  dt, low in data.low.iteritems():
+    for  dt, low in six.iteritems(dict_low):
         if dt.time() > buy3 and prelow - low >= OFFSET:
             cover_entries.append(predt)
-            #print predt, low-prelow
+            #six.print_(predt, low-prelow)
         prelow = low
         predt = dt
     return buy_entries, sell_entries, short_entries, cover_entries
@@ -552,7 +559,9 @@ def holdings_buy_maked_nextbar(data, buy_entries, capital, long_margin, volume_m
     poscost = 0
     preclose = 0
     UNIT = 1
-    for dt, low in data.low.iteritems():
+
+    dict_low = data.low.to_dict()
+    for dt, low in six.iteritems(dict_low):
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
@@ -589,7 +598,9 @@ def holdings_short_maked_nextbar(data, buy_entries, capital, short_margin, volum
     preclose = 0
     close_profit = 0    # 累计平仓盈亏
     UNIT = 1
-    for dt, high in data.high.iteritems():
+
+    dict_high = data.high.to_dict()
+    for dt, high in six.iteritems(dict_high):
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
@@ -624,7 +635,9 @@ def holdings_sell_maked_nextbar(data, sell_entries, capital, long_margin, volume
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), sell_entries)
     bprice = None
     prehigh = data.high[0]
-    for dt, high in data.high.iteritems():
+
+    dict_high = data.high.to_dict()
+    for dt, high in six.iteritems(dict_high):
         close = data.close[dt]
         if dt.time() == buy1:
             bprice = close * (1+settings['future_commission'])
@@ -662,7 +675,9 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), cover_entries)
     bprice = None
     prelow = data.low[0]
-    for dt, low in data.low.iteritems():
+
+    dict_low = data.low.to_dict()
+    for dt, low in six.iteritems(dict_low):
         close = data.close[dt]
         if dt.time() == buy1:
             bprice = close * (1-settings['future_commission'])

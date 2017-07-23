@@ -6,7 +6,7 @@
 # @version 0.2
 # @date 2015-12-09
 
-
+from six.moves import range
 import pandas as pd
 import numpy as np
 

@@ -1,12 +1,13 @@
-
 # -*- coding: utf8 -*-
+
+import six
 import datetime
 import logbook
 import os
 import time
 import sys
 
-from log import gen_log
+from .log import gen_log
 
 logbook.StreamHandler(sys.stdout).push_application()
 elogger = logbook.Logger('engine')
@@ -21,7 +22,7 @@ source_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__f
 
 def deprecated(f):
     def ff(*args, **kwargs):
-        print '{0} is deprecated!'.format(str(f))
+        six.print_('{0} is deprecated!'.format(str(f)))
         return f(*args, **kwargs)
     return ff
 
