@@ -11,8 +11,8 @@ from quantdigger.datasource.source import SourceWrapper
 def _merge_data(arr):
     return pd.concat(arr)\
              .reset_index()\
-             .drop_duplicates('datetime', take_last=True)\
-             .set_index('datetime').sort()
+             .drop_duplicates('datetime', keep='last')\
+             .set_index('datetime').sort_index()
 
 
 def _missing_range(delta, dt_start, dt_end, cached_start, cached_end):
@@ -102,7 +102,7 @@ class LocalFsCache(CacheAbstract):
     def _save_meta(self):
         self._check_base_path()
         with open(self._meta_path(), 'wb') as f:
-            pickle.dump(self._meta, f)
+            pickle.dump(self._meta, f, protocol=2)
 
     def _update_meta(self, key, range_lst):
         starts, ends = map(lambda t: list(t), zip(*range_lst))

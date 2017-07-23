@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import six
 from quantdigger.event.rpc import EventRPCClient
 from quantdigger.event.eventengine import ZMQEventEngine
 from quantdigger.interaction.interface import BackendInterface, UIInterface
@@ -30,14 +31,14 @@ class Shell(BackendInterface, UIInterface):
 
     def get_all_contracts(self):
         ret = self._backend.sync_call("get_all_contracts")
-        print "****" 
-        print ret
-        print "****" 
+        six.print_("****" )
+        six.print_(ret)
+        six.print_("****" )
         #"""docstring for get_all_contracts""" 
-        #print "------------------" 
-        #print "get-all-contracts" 
-        #print pcontract
-        #print "------------------" 
+        #six.print_("------------------" )
+        #six.print_("get-all-contracts" )
+        #six.print_(pcontract)
+        #six.print_("------------------" )
         #return "world" 
     def show_data(self, strpcontract):
         """docstring for load_pcontract""" 
@@ -65,7 +66,7 @@ class Shell(BackendInterface, UIInterface):
 
     def plot(self):
         """docstring for plo""" 
-        print "plot" 
+        six.print_("plot" )
 
 
 shell = Shell()

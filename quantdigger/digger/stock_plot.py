@@ -1,4 +1,6 @@
-# -*- coding: gbk -*-
+Ôªø# -*- coding: utf-8 -*-
+import six
+from six.moves import range
 import matplotlib
 matplotlib.use("TKAgg")
 from matplotlib.widgets import Cursor
@@ -35,35 +37,35 @@ class EventHandler(object):
     
     def on_pick(self, event):
         '''docstring for on_motion''' 
-        print "888888" 
-        print str(event.mouseevent.xdata)
-        #print event.artist
+        six.print_("888888" )
+        six.print_(str(event.mouseevent.xdata))
+        #six.print_(event.artist)
 
     def on_move(self, event):
         '''docstring for on_motion''' 
         if isinstance(event.xdata, np.float64):
             i = int(event.xdata)/1
             if self.pre_x != i:
-                print self.data.index[i]
-                print self.data[i]
+                six.print_(self.data.index[i])
+                six.print_(self.data[i])
                 c = pd.to_datetime(self.data.index[i]).strftime("%Y-%m-%d %H:%M:%S") + "\n" + "hh" 
                 self.fig.axes[2].set_xlabel(c)
                 self.pre_x = i
 
 
 def plot_simple_entry(fig, entry_nbar_best, entry_nbar_worst, nbar):
-    fig.canvas.set_window_title(u'»Î≥°–≈œ¢')
+    fig.canvas.set_window_title('ÂÖ•Âú∫‰ø°ÊÅØ')
     ax1 = fig.add_subplot(1, 1, 1)
     entry_nbar_best = entry_nbar_best.order()
     entry_nbar_worst = entry_nbar_worst.reindex(entry_nbar_best.index)
     if len(entry_nbar_best)>0:
         entry_nbar_best.plot(ax=ax1, kind='bar', 
                             color='red', grid=False, 
-                            use_index=False, label=u"%s bar best"%nbar)
-        #ax1.bar(range(len(entry_nbar_best)), entry_nbar_best, color='r', label=u"%s∏˘◊Ó”≈"%nbar)
+                            use_index=False, label="%s bar best"%nbar)
+        #ax1.bar(range(len(entry_nbar_best)), entry_nbar_best, color='r', label="%sÊ†πÊúÄ‰ºò"%nbar)
         entry_nbar_worst.plot(ax=ax1, kind='bar', 
                               color='y', grid=False,
-                              use_index=False, label=u"%s bar worst"%nbar)
+                              use_index=False, label="%s bar worst"%nbar)
 
         ax1.legend(loc='upper left').get_frame().set_alpha(0.5)
         ax1.set_xticklabels([])
@@ -72,45 +74,45 @@ def plot_simple_entry(fig, entry_nbar_best, entry_nbar_worst, nbar):
 
 
 def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry_nbar_worst, nbar, binwidth=1):
-    fig.canvas.set_window_title(u'»Î≥°–≈œ¢')
+    fig.canvas.set_window_title('ÂÖ•Âú∫‰ø°ÊÅØ')
     axescolor  = '#f6f6f6'  # the axes background color
     left, width = 0.1, 0.8
     rect1 = [left, 0.7, width, 0.2]#left, bottom, width, height
     rect2 = [left, 0.3, width, 0.4]
     rect3 = [left, 0.1, width, 0.2]
-    ax1 = fig.add_axes(rect1, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex = ax1)
-    ax3  = fig.add_axes(rect3, axisbg=axescolor, sharex = ax1)
+    ax1 = fig.add_axes(rect1, facecolor=axescolor)
+    ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex = ax1)
+    ax3  = fig.add_axes(rect3, facecolor=axescolor, sharex = ax1)
 
     (entry_best-exit_profit).plot(ax=ax1, kind='bar',
                                   grid=False, use_index=False,
-                                  label=u"best possible profit")
+                                  label="best possible profit")
 
     entry_worst.plot(ax=ax1, kind='bar', grid=False,
                      use_index=False, color='y',
-                     label=u"max risk offset")
+                     label="max risk offset")
 
     if nbar>0:
         entry_nbar_best.plot(ax=ax3, kind='bar',
                             color='red', grid=False,
-                            use_index=False, label=u"%s entry best"%nbar)
+                            use_index=False, label="%s entry best"%nbar)
 
         entry_nbar_worst.plot(ax=ax3, kind='bar', color='y',
                               grid=False, use_index=False,
-                              label=u"%s entry worst"%nbar)
+                              label="%s entry worst"%nbar)
 
         temp = entry_nbar_worst[entry_nbar_worst<0]
         ax3.plot(range(len(entry_nbar_best)),
                 [temp.mean()]*len(entry_nbar_best),
-                'y--', label=u"av risk: %s"%temp.mean())
+                'y--', label="av risk: %s"%temp.mean())
 
         temp = entry_nbar_best[entry_nbar_best>0]
         ax3.plot(range(len(entry_nbar_best)), [temp.mean()]*len(entry_nbar_best), 
-                    'r--', label=u'av best: %s'%temp.mean() )
+                    'r--', label='av best: %s'%temp.mean() )
 
         ax3.legend(loc='upper left').get_frame().set_alpha(0.5)
 
-    for i in xrange(len(exit_profit)):
+    for i in range(len(exit_profit)):
         if(entry_best[i]>0 and exit_profit[i]>0): 
             px21 = ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
             px22 = ax2.bar(i, entry_best[i]-exit_profit[i], width=binwidth,
@@ -123,17 +125,17 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
             ax2.bar(i, entry_best[i], width=binwidth, color='red')
             ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
 
-    ax2.legend((px21[0], px22[0]), (u'actual profit', u'entry_best profit'), loc='upper left').get_frame().set_alpha(0.5)
+    ax2.legend((px21[0], px22[0]), ('actual profit', 'entry_best profit'), loc='upper left').get_frame().set_alpha(0.5)
     ax1.legend(loc='upper left').get_frame().set_alpha(0.5)
-    #ax1.set_ylabel(u"Ωª“◊«¯º‰ƒ⁄µƒ≤Ó÷µ")
-    #ax2.set_ylabel(u"Ωª“◊«¯º‰ƒ⁄µƒ”Ø¿˚")
+    #ax1.set_ylabel("‰∫§ÊòìÂå∫Èó¥ÂÜÖÁöÑÂ∑ÆÂÄº")
+    #ax2.set_ylabel("‰∫§ÊòìÂå∫Èó¥ÂÜÖÁöÑÁõàÂà©")
     for ax in ax1, ax2, ax3:
         ax.set_xticklabels([])
         ax.axhline(color='k')
 
     ax3.set_xlabel("")
-    #ax1.set_title(u"»Î≥°œ‡πÿ–≈œ¢", fontproperties=font_big)
-    ax1.set_title(u"entry info")
+    #ax1.set_title("ÂÖ•Âú∫Áõ∏ÂÖ≥‰ø°ÊÅØ", fontproperties=font_big)
+    ax1.set_title("entry info")
     c1 = Cursor(ax2, useblit=True, color='red', linewidth=1, vertOn = True, horizOn = True)
     multi = MultiCursor(fig.canvas, fig.axes, color='r', lw=1, horizOn=False, vertOn=True)
 
@@ -153,26 +155,26 @@ def plot_entry(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry
 
 
 def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, risks, nbar, binwidth=1):
-    fig.canvas.set_window_title(u'exit info')
+    fig.canvas.set_window_title('exit info')
     axescolor  = '#f6f6f6'  # the axes background color
     left, width = 0.1, 0.8
     rect2 = [left, 0.4, width, 0.4]
     rect3 = [left, 0.1, width, 0.3]
 
-    ax1 = fig.add_axes(rect3, axisbg=axescolor)
-    ax2 = fig.add_axes(rect2, axisbg=axescolor, sharex=ax1)
+    ax1 = fig.add_axes(rect3, facecolor=axescolor)
+    ax2 = fig.add_axes(rect2, facecolor=axescolor, sharex=ax1)
     if nbar > 0:
         # plot ax1
-        profits_more.plot(ax=ax1, kind='bar', grid = False, use_index = False, label=u"%s bar more profits"%nbar)
-        risks.plot(ax=ax1, kind='bar', grid = False, use_index = False, color = 'y', label=u"%s bar risks"%nbar)
+        profits_more.plot(ax=ax1, kind='bar', grid = False, use_index = False, label="%s bar more profits"%nbar)
+        risks.plot(ax=ax1, kind='bar', grid = False, use_index = False, color = 'y', label="%s bar risks"%nbar)
 
         temp = risks[risks<0]
         ax1.plot(range(len(temp)), [temp.mean()]*len(temp), 'y--',
-                label=u"av risk: %s"%temp.mean())
+                label="av risk: %s"%temp.mean())
 
         temp = profits_more[profits_more>0]
         ax1.plot(range(len(temp)), [temp.mean()]*len(temp), 'r--', 
-                label=u"av profits more: %s"%temp.mean())
+                label="av profits more: %s"%temp.mean())
 
         ax1.legend(loc='upper left').get_frame().set_alpha(0.5)
         ax1.annotate(str(np.mean(risks)), xy=(len(exit_profit)/2, np.mean(risks)),  xycoords='data',
@@ -182,7 +184,7 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
                         )
 
         # plot ax2
-        for i in xrange(len(exit_profit)):
+        for i in range(len(exit_profit)):
             if(exit_nbar_best[i]>exit_profit[i] and exit_profit[i]>0): 
                 px21 = ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
                 px22 = ax2.bar(i, exit_nbar_best[i]-exit_profit[i], width=binwidth, color='red', bottom = exit_profit[i])
@@ -198,13 +200,13 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
             else:
                 ax2.bar(i, exit_nbar_best[i], width=binwidth, color='red')
                 ax2.bar(i, exit_profit[i], width=binwidth, color='blue')
-        ax2.legend((px21[0], px22[0]), (u'actual profit', u'more profits'),loc='upper left').get_frame().set_alpha(0.5)
+        ax2.legend((px21[0], px22[0]), ('actual profit', 'more profits'),loc='upper left').get_frame().set_alpha(0.5)
         for ax in ax1, ax2:
             ax.axhline(color='k')
             ax.set_xticklabels([])
 
         ax1.set_xlabel("")
-        #ax2.set_title(u"≥ˆ≥°œ‡πÿ–≈œ¢", fontproperties=font_big)
+        #ax2.set_title("Âá∫Âú∫Áõ∏ÂÖ≥‰ø°ÊÅØ", fontproperties=font_big)
         multi = MultiCursor(fig.canvas, fig.axes, color='r', lw=1, horizOn=False, vertOn=True)
         return [ax1, ax2], [multi]
     else:
@@ -213,7 +215,7 @@ def plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, r
 
 def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, entry_nbar_worst, 
                     exit_nbar_best, exit_nbar_worst, profits_more, risks, NBAR):
-    fig.canvas.set_window_title(u'summary')
+    fig.canvas.set_window_title('summary')
     ax11 = fig.add_subplot(3, 2, 1)
     ax12 = fig.add_subplot(3, 2, 2)
     ax21 = fig.add_subplot(3, 2, 3)
@@ -226,13 +228,13 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
     shift = pd.Series([0]*len(exit_profit[exit_profit<=0]))
     temp = pd.concat([shift, exit_profit[exit_profit>0]])
     temp.index = range(len(temp))
-    temp.plot(ax=ax11,  grid=False, use_index=False, style="r", label=u'profit')
+    temp.plot(ax=ax11,  grid=False, use_index=False, style="r", label='profit')
     ax11.fill_between(range(len(temp)), [0]*len(temp), temp.tolist(), facecolor='r')
     temp = 0 - exit_profit[exit_profit<=0]
     temp.index = range(len(temp))
-    ax11.plot(temp, 'y', label=u'lost')
+    ax11.plot(temp, 'y', label='lost')
     ax11.fill_between(range(len(temp)), [0]*len(temp), temp.tolist(), facecolor='y')
-    ax11.plot(range(len(entry_worst)), entry_worst, 'b', label=u'entry_worst')
+    ax11.plot(range(len(entry_worst)), entry_worst, 'b', label='entry_worst')
     ax11.axhline(color='black')
     ax11.legend(loc='upper left').get_frame().set_alpha(0.5)
 
@@ -246,9 +248,9 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
     binwidth = abs(exit_profit.min()/9)
     bins = np.arange(exit_profit.min(), exit_profit.max() + binwidth, binwidth)
     ax12.hist(exit_profit[exit_profit>0], bins=bins, color = 'red' ,
-            normed=False, label=u'profit distribution')
+            normed=False, label='profit distribution')
     ax12.hist(exit_profit[exit_profit<0], bins=bins, color = 'y' , normed=False,
-            label=u'lost distribution')
+            label='lost distribution')
     plot_contribution(ax12, bins, exit_profit, 'bo--')
     ax12.legend(loc='upper left').get_frame().set_alpha(0.5)
     #ax12.set_yscale('log')
@@ -256,12 +258,12 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
 
     # MAE
     MAE = entry_worst.reindex(exit_profit[exit_profit>0].index)
-    MAE.order().plot(ax=ax21,style='r', grid=False, use_index=False, label=u'entry_worst of profit')
+    MAE.order().plot(ax=ax21,style='r', grid=False, use_index=False, label='entry_worst of profit')
 
-    exit_profit[exit_profit<0].plot(ax=ax21, style='y', grid=False, use_index=False, label=u'lose distribution')
+    exit_profit[exit_profit<0].plot(ax=ax21, style='y', grid=False, use_index=False, label='lose distribution')
 
     worst = MAE.min()
-    print u"◊Ó¥Û≤ª¿˚∆´“∆: %s" % worst
+    six.print_("ÊúÄÂ§ß‰∏çÂà©ÂÅèÁßª: %s" % worst)
     bb = exit_profit[exit_profit<0]
     aa = [worst]*len(bb)
     ax21.fill_between(range(len(exit_profit[exit_profit<0])), aa, bb, where=bb<aa, color='red')
@@ -271,10 +273,10 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
 
     # Potential Profits When Lose
     temp = entry_best.reindex(exit_profit[exit_profit<0].index)
-    ax22.plot(temp.tolist(), color='r', label=u"best profit of lose" )
+    ax22.plot(temp.tolist(), color='r', label="best profit of lose" )
     ax22.fill_between(range(len(temp)), temp.tolist(), [0]*len(temp), facecolor='r')
-    ax22.plot(temp.order().tolist(), color='b', label=u"ordered bpol" )
-    ax22.plot(exit_profit[exit_profit<0].tolist(), color='y', label=u'lose')
+    ax22.plot(temp.order().tolist(), color='b', label="ordered bpol" )
+    ax22.plot(exit_profit[exit_profit<0].tolist(), color='y', label='lose')
     ax22.set_ylim((min(exit_profit.min(), MAE.min())-10, temp.max()+10))
     ax22.legend(loc='upper left').get_frame().set_alpha(0.5)
     ax22.axhline(0, c='black')
@@ -282,17 +284,17 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
     if NBAR > 0:
         # Entry N Bar
         enbest = entry_nbar_best.reindex(entry_nbar_best[entry_nbar_best>0].index).order()
-        enbest.plot(ax=ax31,style='r', grid=False, use_index=False, label=u"%s bar mean best: %s"%(NBAR, entry_nbar_best[entry_nbar_best>0].mean()))
+        enbest.plot(ax=ax31,style='r', grid=False, use_index=False, label="%s bar mean best: %s"%(NBAR, entry_nbar_best[entry_nbar_best>0].mean()))
         enworst = (0-entry_nbar_worst.reindex(entry_nbar_worst[entry_nbar_worst<0].index).order(ascending=False))
         enworst.plot(ax=ax31, style='y', grid=False, use_index=False, 
-                label=u"%s bar mean worst: %s"%(NBAR, entry_nbar_worst[entry_nbar_worst<0].mean()))
+                label="%s bar mean worst: %s"%(NBAR, entry_nbar_worst[entry_nbar_worst<0].mean()))
         ax31.axhline(0, c='black')
         ax31.legend(loc='upper left').get_frame().set_alpha(0.5)
         # Exit N Bar
         profits_more.reindex(profits_more[profits_more>0].index).order().plot(ax=ax32,style='r',
-                grid=False, use_index=False, label=u"%s bar mean best: %s"%(NBAR, profits_more[profits_more>0].mean()))
+                grid=False, use_index=False, label="%s bar mean best: %s"%(NBAR, profits_more[profits_more>0].mean()))
         (0-risks.reindex(risks[risks<0].index).order(ascending=False)).plot(ax=ax32, style='y',
-                grid=False, use_index=False, label=u"%s bar mean worst: %s"%(NBAR,risks[risks<0].mean()))
+                grid=False, use_index=False, label="%s bar mean worst: %s"%(NBAR,risks[risks<0].mean()))
         ax32.legend(loc='upper left').get_frame().set_alpha(0.5)
 
     #
@@ -300,19 +302,19 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
     map(lambda x: x.set_xticklabels([]), [ax11, ax21, ax22, ax31, ax32])
     map(lambda x: x.set_xlabel(""), [ax11, ax12, ax21, ax22, ax31, ax32])
     map(lambda x: x.set_ylabel(""), [ax11, ax12, ax21, ax22, ax31, ax32])
-    #ax11.set_xlabel(u"”Ø¿˚∑÷≤º", fontproperties=font_big)
-    #ax12.set_ylabel(u"”Ø¿˚Õ≥º∆", fontproperties=font_big)
-    #ax21.set_xlabel(u"◊Ó¥Û≤ª¿˚∆´“∆∫Õø˜À", fontproperties=font_big)
-    #ax22.set_xlabel(u"ø˜ÀΩª“◊µƒ«±‘⁄”Ø¿˚ø’º‰", fontproperties=font_big)
-    #ax31.set_xlabel(u"Ω¯≥°∫Û%s∏˘"%NBAR, fontproperties=font_big)
-    #ax32.set_xlabel(u"¿Î≥°∫Û%s∏˘"%NBAR, fontproperties=font_big)
+    #ax11.set_xlabel("ÁõàÂà©ÂàÜÂ∏É", fontproperties=font_big)
+    #ax12.set_ylabel("ÁõàÂà©ÁªüËÆ°", fontproperties=font_big)
+    #ax21.set_xlabel("ÊúÄÂ§ß‰∏çÂà©ÂÅèÁßªÂíå‰∫èÊçü", fontproperties=font_big)
+    #ax22.set_xlabel("‰∫èÊçü‰∫§ÊòìÁöÑÊΩúÂú®ÁõàÂà©Á©∫Èó¥", fontproperties=font_big)
+    #ax31.set_xlabel("ËøõÂú∫Âêé%sÊ†π"%NBAR, fontproperties=font_big)
+    #ax32.set_xlabel("Á¶ªÂú∫Âêé%sÊ†π"%NBAR, fontproperties=font_big)
 
-    ax11.set_xlabel(u"profit distribution")
-    ax12.set_ylabel(u"profit statics")
-    ax21.set_xlabel(u"◊Ó¥Û≤ª¿˚∆´“∆∫Õø˜À")
-    ax22.set_xlabel(u"ø˜ÀΩª“◊µƒ«±‘⁄”Ø¿˚ø’º‰")
-    ax31.set_xlabel(u"Ω¯≥°∫Û%s∏˘"%NBAR)
-    ax32.set_xlabel(u"¿Î≥°∫Û%s∏˘"%NBAR)
+    ax11.set_xlabel("profit distribution")
+    ax12.set_ylabel("profit statics")
+    ax21.set_xlabel("ÊúÄÂ§ß‰∏çÂà©ÂÅèÁßªÂíå‰∫èÊçü")
+    ax22.set_xlabel("‰∫èÊçü‰∫§ÊòìÁöÑÊΩúÂú®ÁõàÂà©Á©∫Èó¥")
+    ax31.set_xlabel("ËøõÂú∫Âêé%sÊ†π"%NBAR)
+    ax32.set_xlabel("Á¶ªÂú∫Âêé%sÊ†π"%NBAR)
 
     cursors = []
     for ax in [ax11, ax12, ax21, ax22, ax31, ax32]:
@@ -323,7 +325,7 @@ def plot_summary(fig, exit_profit, entry_best, entry_worst, entry_nbar_best, ent
 
 def plot_scatter(fig, x, y, x2, y2, binnum):
     '''docstring for plot_test''' 
-    fig.canvas.set_window_title(u'Ωª“◊ƒÒÓ´Õº')
+    fig.canvas.set_window_title('‰∫§ÊòìÈ∏üÁû∞Âõæ')
     # definitions for the axes 
     left, width = 0.1, 0.65
     bottom, height = 0.1, 0.65
@@ -367,12 +369,12 @@ def plot_scatter(fig, x, y, x2, y2, binnum):
     #axScatter.set_ylim((-ymin-10, ymax+10))
     axHistx.set_xlim( axScatter.get_xlim() )
     axHisty.set_ylim( axScatter.get_ylim() )
-    #axHisty.set_xlabel(u"”Øø˜∑÷≤º", fontproperties = font_big)
-    #axHistx.set_ylabel(u"÷‹∆⁄∑÷≤º", fontproperties = font_big)
-    #axScatter.set_xlabel(u"”Øø˜∫Õ÷‹∆⁄∑÷≤º", fontproperties = font_big)
-    axHisty.set_xlabel(u"Profit Distribution")
-    axHistx.set_ylabel(u"Period Distribution")
-    axScatter.set_xlabel(u"Profit and Period Distribution")
+    #axHisty.set_xlabel("Áõà‰∫èÂàÜÂ∏É", fontproperties = font_big)
+    #axHistx.set_ylabel("Âë®ÊúüÂàÜÂ∏É", fontproperties = font_big)
+    #axScatter.set_xlabel("Áõà‰∫èÂíåÂë®ÊúüÂàÜÂ∏É", fontproperties = font_big)
+    axHisty.set_xlabel("Profit Distribution")
+    axHistx.set_ylabel("Period Distribution")
+    axScatter.set_xlabel("Profit and Period Distribution")
 
     axScatter.grid(True)
     axHistx.grid(True)
@@ -384,7 +386,7 @@ def plot_scatter(fig, x, y, x2, y2, binnum):
 def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entry_nbar_worsts, 
                     exit_nbar_bests, exit_nbar_worsts, profits_mores, risks, colors, names, NBAR):
     fig = plt.figure(facecolor='white')
-    fig.canvas.set_window_title(u'ª≠Õºª„◊‹“ª')
+    fig.canvas.set_window_title('ÁîªÂõæÊ±áÊÄª‰∏Ä')
     ax11 = fig.add_subplot(3, 2, 1)
     ax12 = fig.add_subplot(3, 2, 2)
     ax21 = fig.add_subplot(3, 2, 3)
@@ -409,10 +411,10 @@ def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entr
         shift = pd.Series([0]*len(exit_profit[exit_profit<=0]))
         temp = pd.concat([shift, exit_profit[exit_profit>0]])
         temp.index = range(len(temp))
-        temp.plot(ax=ax11,  grid=False, use_index=False, style=c, label=u'%s”Ø¿˚'%nm)
+        temp.plot(ax=ax11,  grid=False, use_index=False, style=c, label='%sÁõàÂà©'%nm)
         temp = 0 - exit_profit[exit_profit<=0]
-        ax11.plot(temp.tolist(), c, label=u'%sø˜À'%nm)
-        ax11.plot(entry_worst.tolist(), c, label=u'%s◊Ó≤Ó∆´“∆'%nm)
+        ax11.plot(temp.tolist(), c, label='%s‰∫èÊçü'%nm)
+        ax11.plot(entry_worst.tolist(), c, label='%sÊúÄÂ∑ÆÂÅèÁßª'%nm)
         #ax11.set_xscale('log')
 
 
@@ -424,56 +426,56 @@ def plot_compare(exit_profits, entry_bests, entry_worsts, entry_nbar_bests, entr
         n = pd.Series(a[0])
         bins = pd.Series(a[1][:-1])
         temp = bins[bins>0]
-        ax12.plot(temp.tolist(), n.reindex(temp.index).tolist(), c, label=u'%s”Ø¿˚∑÷≤º'%nm)
+        ax12.plot(temp.tolist(), n.reindex(temp.index).tolist(), c, label='%sÁõàÂà©ÂàÜÂ∏É'%nm)
         temp = bins[bins<0]
-        ax12.plot(temp.tolist(), n.reindex(temp.index).tolist(), '%s--'%c, label=u'%sø˜À∑÷≤º'%nm)
+        ax12.plot(temp.tolist(), n.reindex(temp.index).tolist(), '%s--'%c, label='%s‰∫èÊçüÂàÜÂ∏É'%nm)
         ax12.legend(loc='upper left').get_frame().set_alpha(0.5)
         
 
         # MAE
         MAE = entry_worst.reindex(exit_profit[exit_profit>0].index)
-        MAE.order().plot(ax=ax21,style=c, grid=False, use_index=False, label=u'%s◊Ó¥Û≤ª¿˚∆´“∆'%nm)
-        exit_profit[exit_profit<0].plot(ax=ax21, style='%s--'%c, grid=False, use_index=False, label=u'%sø˜À∑÷≤º'%nm)
+        MAE.order().plot(ax=ax21,style=c, grid=False, use_index=False, label='%sÊúÄÂ§ß‰∏çÂà©ÂÅèÁßª'%nm)
+        exit_profit[exit_profit<0].plot(ax=ax21, style='%s--'%c, grid=False, use_index=False, label='%s‰∫èÊçüÂàÜÂ∏É'%nm)
 
         # Potential Profits When Lose
         temp = entry_best.reindex(exit_profit[exit_profit<0].index)
-        ax22.plot(temp.tolist(), c, label=u"%s◊Ó”≈”Ø¿˚" % nm)
-        ax22.plot(temp.order().tolist(), '%s--'%c, label=u"%s”––Ú◊Ó”≈”Ø¿˚" % nm)
-        ax22.plot(exit_profit[exit_profit<0].tolist(), '%s--'%c, label=u'%s µº ø˜À'%nm)
+        ax22.plot(temp.tolist(), c, label="%sÊúÄ‰ºòÁõàÂà©" % nm)
+        ax22.plot(temp.order().tolist(), '%s--'%c, label="%sÊúâÂ∫èÊúÄ‰ºòÁõàÂà©" % nm)
+        ax22.plot(exit_profit[exit_profit<0].tolist(), '%s--'%c, label='%sÂÆûÈôÖ‰∫èÊçü'%nm)
 
         if len(entry_nbar_best)>0:
             # Entry N Bar
             entry_nbar_best.reindex(entry_nbar_best[entry_nbar_best>0].index).order().plot(ax=ax31,style=c,
-                    grid=False, use_index=False, label=u"%s%s∏˘◊Ó”≈∆Ωæ˘: %s"%(nm, NBAR, entry_nbar_best[entry_nbar_best>0].mean()))
+                    grid=False, use_index=False, label="%s%sÊ†πÊúÄ‰ºòÂπ≥Âùá: %s"%(nm, NBAR, entry_nbar_best[entry_nbar_best>0].mean()))
             (0-entry_nbar_worst.reindex(entry_nbar_worst[entry_nbar_worst<0].index).order(ascending=False)).plot(ax=ax31, style='%s--'%c,
-                    grid=False, use_index=False, label=u"%s%s∏˘◊Ó≤Ó∆Ωæ˘: %s"%(nm, NBAR, entry_nbar_worst[entry_nbar_worst<0].mean()))
+                    grid=False, use_index=False, label="%s%sÊ†πÊúÄÂ∑ÆÂπ≥Âùá: %s"%(nm, NBAR, entry_nbar_worst[entry_nbar_worst<0].mean()))
 
             # Exit N Bar
             profits_more.reindex(profits_more[profits_more>0].index).order().plot(ax=ax32,style=c,
-                    grid=False, use_index=False, label=u"%s%s∏˘◊Ó”≈∆Ωæ˘: %s"%(nm,NBAR, profits_more[profits_more>0].mean()))
+                    grid=False, use_index=False, label="%s%sÊ†πÊúÄ‰ºòÂπ≥Âùá: %s"%(nm,NBAR, profits_more[profits_more>0].mean()))
             (0-risk.reindex(risk[risk<0].index).order(ascending=False)).plot(ax=ax32, style='%s--'%c,
-                    grid=False, use_index=False, label=u"%s%s∏˘◊Ó≤Ó∆Ωæ˘: %s"%(nm,NBAR,risk[risk<0].mean()))
+                    grid=False, use_index=False, label="%s%sÊ†πÊúÄÂ∑ÆÂπ≥Âùá: %s"%(nm,NBAR,risk[risk<0].mean()))
 
     #
     #ax31.xaxis_date()
     map(lambda x: x.set_xticklabels([]), [ax11, ax21, ax22, ax31, ax32])
     map(lambda x: x.set_xlabel(""), [ax11, ax12, ax21, ax22, ax31, ax32])
     map(lambda x: x.set_ylabel(""), [ax11, ax12, ax21, ax22, ax31, ax32])
-    #ax11.set_xlabel(u"”Ø¿˚∑÷≤º", fontproperties=font_big)
-    #ax12.set_ylabel(u"”Ø¿˚Õ≥º∆", fontproperties=font_big)
-    ax11.set_xlabel(u"”Ø¿˚∑÷≤º")
-    ax12.set_ylabel(u"”Ø¿˚Õ≥º∆")
+    #ax11.set_xlabel("ÁõàÂà©ÂàÜÂ∏É", fontproperties=font_big)
+    #ax12.set_ylabel("ÁõàÂà©ÁªüËÆ°", fontproperties=font_big)
+    ax11.set_xlabel("ÁõàÂà©ÂàÜÂ∏É")
+    ax12.set_ylabel("ÁõàÂà©ÁªüËÆ°")
     ax12.axvline(color='black')
     ax21.legend(loc='upper left').get_frame().set_alpha(0.5)
-    #ax21.set_xlabel(u"◊Ó¥Û≤ª¿˚∆´“∆∫Õø˜À", fontproperties=font_big)
-    #ax22.set_xlabel(u"ø˜ÀΩª“◊µƒ«±‘⁄”Ø¿˚ø’º‰", fontproperties=font_big)
-    #ax31.set_xlabel(u"Ω¯≥°∫Û%s∏˘"%NBAR, fontproperties=font_big)
-    #ax32.set_xlabel(u"¿Î≥°∫Û%s∏˘"%NBAR, fontproperties=font_big)
+    #ax21.set_xlabel("ÊúÄÂ§ß‰∏çÂà©ÂÅèÁßªÂíå‰∫èÊçü", fontproperties=font_big)
+    #ax22.set_xlabel("‰∫èÊçü‰∫§ÊòìÁöÑÊΩúÂú®ÁõàÂà©Á©∫Èó¥", fontproperties=font_big)
+    #ax31.set_xlabel("ËøõÂú∫Âêé%sÊ†π"%NBAR, fontproperties=font_big)
+    #ax32.set_xlabel("Á¶ªÂú∫Âêé%sÊ†π"%NBAR, fontproperties=font_big)
 
-    ax21.set_xlabel(u"◊Ó¥Û≤ª¿˚∆´“∆∫Õø˜À")
-    ax22.set_xlabel(u"ø˜ÀΩª“◊µƒ«±‘⁄”Ø¿˚ø’º‰")
-    ax31.set_xlabel(u"Ω¯≥°∫Û%s∏˘"%NBAR)
-    ax32.set_xlabel(u"¿Î≥°∫Û%s∏˘"%NBAR)
+    ax21.set_xlabel("ÊúÄÂ§ß‰∏çÂà©ÂÅèÁßªÂíå‰∫èÊçü")
+    ax22.set_xlabel("‰∫èÊçü‰∫§ÊòìÁöÑÊΩúÂú®ÁõàÂà©Á©∫Èó¥")
+    ax31.set_xlabel("ËøõÂú∫Âêé%sÊ†π"%NBAR)
+    ax32.set_xlabel("Á¶ªÂú∫Âêé%sÊ†π"%NBAR)
     ax11.axhline(color='black')
     ax11.legend(loc='upper left').get_frame().set_alpha(0.5)
     ax22.legend(loc='upper left').get_frame().set_alpha(0.5)
@@ -539,27 +541,27 @@ def plot_contribution(ax, bins, v, style):
 def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
                     exit_nbar_best, exit_nbar_worst, nbar):
     ''' 
-    ren: ◊Ó¥Ûªÿ≤‚
+    ren: ÊúÄÂ§ßÂõûÊµã
     '''
     cursors = []
     winrtn = rtn.reindex(data_win.index)
     losertn = rtn.reindex(data_lose.index)
-    fig.canvas.set_window_title(u'Summary2')
+    fig.canvas.set_window_title('Summary2')
     ax11 = fig.add_subplot(2, 2, 1)
-    ax11.plot(range(len(losertn)), losertn.tolist(), 'yo--', label=u'lost return')
-    ax11.plot(len(losertn)+np.arange(len(winrtn)), winrtn.tolist(), 'ro--', label=u'win return')
+    ax11.plot(range(len(losertn)), losertn.tolist(), 'yo--', label='lost return')
+    ax11.plot(len(losertn)+np.arange(len(winrtn)), winrtn.tolist(), 'ro--', label='win return')
     ax11.plot(rtn.order().tolist(), 'b')
 
     ax11.legend(loc='upper left').get_frame().set_alpha(0.5)
     cursors.append(Cursor(ax11, useblit=True, color='red', linewidth=1, 
                                 vertOn = True, horizOn = True))
-    #ax11.set_xlabel(u'ªÿ≥∑', fontproperties=font_big)
-    ax11.set_xlabel(u'max return')
+    #ax11.set_xlabel('ÂõûÊí§', fontproperties=font_big)
+    ax11.set_xlabel('max return')
 
     ax12 = fig.add_subplot(2, 2, 2)
     binwidth = (rtn.max() - rtn.min()) / 30
     bins = np.arange(rtn.min(), rtn.max() + binwidth, binwidth)
-    rst = ax12.hist(rtn, bins=bins, color = 'y' , normed=False, label=u'Return Distribution')
+    rst = ax12.hist(rtn, bins=bins, color = 'y' , normed=False, label='Return Distribution')
     n, bins = rst[0], rst[1]
     plot_contribution(ax12, bins, rtn, 'bo--')
     ax12.legend(loc='upper left').get_frame().set_alpha(0.5)
@@ -568,11 +570,11 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
 
     #ax21 = fig.add_subplot(3, 2, 3)
     #ds = entry_best.reindex(data_lose.index)-data_lose['exit_profit']
-    #ax21.plot(range(len(ds)), ds, 'yo--', label=u'ø˜ÀªÿÕ¬')
+    #ax21.plot(range(len(ds)), ds, 'yo--', label='‰∫èÊçüÂõûÂêê')
     #dl = (entry_best.reindex(data_win.index)-data_win['exit_profit']).tolist()
-    #ax21.plot(len(ds)+np.arange(len(dl)), dl, 'ro--', label=u'”Ø¿˚ªÿÕ¬')
+    #ax21.plot(len(ds)+np.arange(len(dl)), dl, 'ro--', label='ÁõàÂà©ÂõûÂêê')
     #ax21.set_xticklabels([])
-    #ax21.set_xlabel(u'ªÿÕ¬', fontproperties=font_big)
+    #ax21.set_xlabel('ÂõûÂêê', fontproperties=font_big)
     #ax21.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
     #cursors.append(Cursor(ax21, useblit=True, color='red', linewidth=1, 
                                 #vertOn = True, horizOn = True))
@@ -583,7 +585,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
     #binwidth = (diff.max() - diff.min()) / 30
     ##diff.plot(ax=ax22, kind='kde', color='b', label="")
     #bins = np.arange(diff.min(), diff.max() + binwidth, binwidth)
-    #rst = ax22.hist(diff, bins=bins, color = 'y' , normed=False, label=u'ªÿÕ¬∑÷≤º')
+    #rst = ax22.hist(diff, bins=bins, color = 'y' , normed=False, label='ÂõûÂêêÂàÜÂ∏É')
     #n, bins = rst[0], rst[1]
     #plot_contribution(ax22, bins, diff, 'bo--')
     #ax22.legend(prop=font, loc='upper left').get_frame().set_alpha(0.5)
@@ -601,7 +603,7 @@ def plot_summary2(fig, rtn, entry_best, data_win, data_lose, exit_profit,
         ww = (exit_nbar_worst.reindex(data_win.index)-data_win['exit_profit']).reindex(bw.index)
         ax31.plot(len(bl)+np.arange(len(bw)), bw.tolist(), 'r')
         ax31.plot(len(bl)+np.arange(len(ww)), ww.tolist(), 'k')
-        ax31.fill_between(len(bl)+np.arange(len(ww)), bw, ww, facecolor='r', label=u'hello')
+        ax31.fill_between(len(bl)+np.arange(len(ww)), bw, ww, facecolor='r', label='hello')
 
         ax31.plot(range(len(bl)), data_lose['exit_profit'].abs().reindex(bl.index), 'b')
         cursors.append(Cursor(ax31, useblit=True, color='red', linewidth=1, 
@@ -637,8 +639,8 @@ def candlestick2(ax, opens, closes, highs, lows, width=4,
     # missing they all are missing
 
     delta = width/2.
-    barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(xrange(len(opens)), opens, closes) if open != -1 and close!=-1 ]
-    rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(xrange(len(lows)), lows, highs) if low != -1 ]
+    barVerts = [ ( (i-delta, open), (i-delta, close), (i+delta, close), (i+delta, open) ) for i, open, close in zip(range(len(opens)), opens, closes) if open != -1 and close!=-1 ]
+    rangeSegments = [ ((i, low), (i, high)) for i, low, high in zip(range(len(lows)), lows, highs) if low != -1 ]
     r,g,b = colorConverter.to_rgb(colorup)
     colorup = r,g,b,alpha
     r,g,b = colorConverter.to_rgb(colordown)

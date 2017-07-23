@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import os
 
 import pandas as pd
@@ -14,12 +15,12 @@ def import_contracts():
     return df
 
 
-print("import contracts info..")
+six.print_("import contracts info..")
 contracts = import_contracts()
 
 set_config({'source': 'csv'})
 locd.import_contracts(contracts)
-print("import bars..")
+six.print_("import bars..")
 fpaths = []
 for path, dirs, files in os.walk('./work'):
     for file in files:
@@ -31,7 +32,7 @@ import_data(fpaths, locd)
 set_config({'source': 'sqlite'})
 locd.import_contracts(contracts)
 
-print("import bars..")
+six.print_("import bars..")
 fpaths = []
 for path, dirs, files in os.walk('./work'):
     for file in files:

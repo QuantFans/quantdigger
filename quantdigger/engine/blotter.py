@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 import copy
 from abc import ABCMeta, abstractmethod
 
@@ -93,7 +94,7 @@ class SimpleBlotter(Blotter):
                         order.contract, order.direction)]
                     pos.closable += order.quantity
             self.open_orders.clear()
-            for key, pos in self.positions.iteritems():
+            for key, pos in six.iteritems(self.positions):
                 pos.closable += pos.today
                 pos.today = 0
         self._datetime = dt
@@ -110,7 +111,7 @@ class SimpleBlotter(Blotter):
         order_margin = 0.0
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
-        for key, pos in self.positions.iteritems():
+        for key, pos in six.iteritems(self.positions):
             bar = self._bars[key.contract]
             new_price = bar.open if at_baropen else bar.close
             pos_profit += pos.profit(new_price)
@@ -133,7 +134,7 @@ class SimpleBlotter(Blotter):
         # 强平功能，使交易继续下去。
         dh['cash'] = dh['equity'] - margin - order_margin
         if dh['cash'] < 0:
-            for key in self.positions.iterkeys():
+            for key in six.iterkeys(self.positions):
                 if not key.contract.is_stock:
                     # @NOTE  只要有一个是期货，在资金不足的时候就得追加保证金
                     raise Exception('需要追加保证金!')
@@ -162,7 +163,7 @@ class SimpleBlotter(Blotter):
                         order.order_margin(self._bars[order.contract].open)
             else:
                 logger.warn(errmsg)
-                # print len(event.orders), len(new_orders)
+                # six.print_(len(event.orders), len(new_orders))
                 continue
         self.open_orders.update(new_orders)  # 改变对象的值，不改变对象地址。
         self._all_orders.extend(new_orders)
@@ -247,7 +248,7 @@ class SimpleBlotter(Blotter):
         elif order.side == TradeSide.KAI:
             new_price = self._bars[order.contract].open
             if self.holding['cash'] < order.order_margin(new_price):
-                # print self.holding['cash'], new_price * order.quantity
+                # six.print_(self.holding['cash'], new_price * order.quantity)
                 return '没有足够的资金开仓'
         return ''
 
@@ -258,7 +259,7 @@ class SimpleBlotter(Blotter):
             price_type = self._all_transactions[-1].price_type
         else:
             price_type = PriceType.LMT
-        for pos in self.positions.values():
+        for pos in six.itervalues(self.positions):
             order = Order(
                 self._datetime,
                 pos.contract,

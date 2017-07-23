@@ -1,4 +1,7 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
+
+import six
+from six.moves import range
 import matplotlib
 matplotlib.use("TKAgg")
 from matplotlib.widgets import RadioButtons
@@ -6,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
 
-from stock_plot import *
+from . import stock_plot
 
 def max_return(nbarprice, islong):
     '''docstring for maxreturn''' 
@@ -21,14 +24,14 @@ def max_return(nbarprice, islong):
             elif ith_price < low:
                 low = ith_price
                 maxdiffs.append(high-low)
-                #print low
+                #six.print_(low)
         return max(maxdiffs) if maxdiffs else 0
     else:
         for ith_price in nbarprice:
             if ith_price < low:
                 low = ith_price
                 high = -1000000
-                #print low
+                #six.print_(low)
             elif ith_price > high:
                 high = ith_price
                 maxdiffs.append(high-low)
@@ -127,7 +130,7 @@ def process_data(n, intraday, tradeinfo, price_data):
     data['exit_nbar_best'] = exit_nbar_bests
     data['exit_nbar_worst'] = exit_nbar_worsts
     data['islong'] = islongs
-    print "Data Preprocessing Done!"
+    six.print_("Data Preprocessing Done!")
     #data.to_csv("d:\\rst.csv")
     return data
 
@@ -141,16 +144,16 @@ def summary(data):
     av_period = data['period'].mean()
     plt.figure()
     rows = [
-            u"Overall Profits: ", 
-            u"Overall Loss: ", 
-            u"Net Profits: ", 
-            u"Number of Transaction: ", 
-            u"Number of Winning Trades: ",
-            u"Number of Losing Trades: ",
-            u"Average Profit:",
-            u"AV Profits / AV Loss: ", 
-            u"Winning Percentage: ",
-            u"Stock Holding Period: " 
+            "Overall Profits: ", 
+            "Overall Loss: ", 
+            "Net Profits: ", 
+            "Number of Transaction: ", 
+            "Number of Winning Trades: ",
+            "Number of Losing Trades: ",
+            "Average Profit:",
+            "AV Profits / AV Loss: ", 
+            "Winning Percentage: ",
+            "Stock Holding Period: " 
            ]
 
     cell_text=[
@@ -175,19 +178,19 @@ def summary(data):
                       colLabels=columns,
                       loc='center right', fontsize=14)
     plt.text(12,3.4,'Table Title',size=8)
-    print "******************************************" 
-    print u"×ÜÓ¯Àû: " + str(data_win.exit_profit.sum() * 300)
-    print u"×Ü¿÷Ëð: " + str(data_lose.exit_profit.sum() * 300)
-    print u"×ÜÀûÈó: " + str((data.exit_profit.sum()) * 300)
-    print "******************************************" 
-    print u"½»Ò×´ÎÊý: " + str(total_num)
-    print u"Ó¯Àû´ÎÊý: " + str(len(data_win))
-    print u"¿÷Ëð´ÎÊý: " + str(len(data_lose))
-    print u"Æ½¾ùÀûÈó :%s" % str(data_win.exit_profit.sum()/ total_num*300)
-    print u"Ó¯¿÷±È: " + str(abs(data_win.exit_profit.sum()/len(data_win) / (data_lose.exit_profit.sum()/len(data_lose))))
-    print u"Ê¤ÂÊ: " + str(len(data_win)/float(total_num)*100) + "%" 
-    print u"Æ½¾ù³Ö²ÖÖÜÆÚ: " + str(av_period)
-    print "******************************************" 
+    six.print_("******************************************")
+    six.print_("æ€»ç›ˆåˆ©: " + str(data_win.exit_profit.sum() * 300))
+    six.print_("æ€»äºæŸ: " + str(data_lose.exit_profit.sum() * 300))
+    six.print_("æ€»åˆ©æ¶¦: " + str((data.exit_profit.sum()) * 300))
+    six.print_("******************************************")
+    six.print_("äº¤æ˜“æ¬¡æ•°: " + str(total_num))
+    six.print_("ç›ˆåˆ©æ¬¡æ•°: " + str(len(data_win)))
+    six.print_("äºæŸæ¬¡æ•°: " + str(len(data_lose)))
+    six.print_("å¹³å‡åˆ©æ¶¦: " + str(data_win.exit_profit.sum()/ total_num*300))
+    six.print_("ç›ˆäºæ¯”: " + str(abs(data_win.exit_profit.sum()/len(data_win) / (data_lose.exit_profit.sum()/len(data_lose)))))
+    six.print_("èƒœçŽ‡: " + str(len(data_win)/float(total_num)*100) + "%" )
+    six.print_("å¹³å‡æŒä»“å‘¨æœŸ: " + str(av_period))
+    six.print_("******************************************")
 
 
 def simple_entry_analyze(fig, data, n):
@@ -199,15 +202,15 @@ def simple_entry_analyze(fig, data, n):
 
 
 def entry_analyze(fig, data, n):
-    '''Èë³¡ÐÅÏ¢Í¼
+    '''ÃˆÃ«Â³Â¡ÃÃ…ÃÂ¢ÃÂ¼
     
-    ²ÎÊý£º
-        data: Êý¾Ý
+    Â²ÃŽÃŠÃ½Â£Âº
+        data: ÃŠÃ½Â¾Ã
     ''' 
     # ordered by profits
     data2 = data.sort_index(by='exit_profit')
 
-    data_long = data2[data2['islong'] ] # Èç¹ûÊÇµ¥¸ù¿ªÆ½£¬ÇÒ¿ªÆ½¼ÛÒ»Ñù£¬ÄÇÃ´´Ë·¨²»³ÉÁ¢
+    data_long = data2[data2['islong'] ] # ÃˆÃ§Â¹Ã»ÃŠÃ‡ÂµÂ¥Â¸Ã¹Â¿ÂªÃ†Â½Â£Â¬Ã‡Ã’Â¿ÂªÃ†Â½Â¼Ã›Ã’Â»Ã‘Ã¹Â£Â¬Ã„Ã‡ÃƒÂ´Â´Ã‹Â·Â¨Â²Â»Â³Ã‰ÃÂ¢
     data_short = data2[data2['islong'] == False]
 
     exit_profit = data2['exit_profit']
@@ -216,7 +219,7 @@ def entry_analyze(fig, data, n):
     try:
         entry_nbar_best = data2['entry_nbar_best']
         entry_nbar_worst = data2['entry_nbar_worst']
-    except Exception, e:
+    except Exception as e:
         entry_nbar_best = []
         entry_nbar_worst = []
         
@@ -225,7 +228,7 @@ def entry_analyze(fig, data, n):
 
 
 def exit_analyze(fig, data, n):
-    '''³ö³¡ÐÅÏ¢Í¼''' 
+    '''Â³Ã¶Â³Â¡ÃÃ…ÃÂ¢ÃÂ¼''' 
     # ordered by profits
     data2 = data.sort_index(by='exit_profit')
     exit_profit = data2['exit_profit']
@@ -235,15 +238,15 @@ def exit_analyze(fig, data, n):
         profits_more = exit_nbar_best - exit_profit
         risks = exit_nbar_worst - exit_profit
         return  plot_exit(fig, exit_profit, exit_nbar_best, exit_nbar_worst, profits_more, risks, n)
-    except Exception, e:
+    except Exception as e:
         return [], []
 
 
 def scatter_analyze(fig, data):
-    '''½»Ò×·Ö²¼Äñî«Í¼''' 
+    '''Â½Â»Ã’Ã—Â·Ã–Â²Â¼Ã„Ã±Ã®Â«ÃÂ¼''' 
     data_win = data[data.exit_profit>0]
     data_lose = data[data.exit_profit<0]
-    return  plot_scatter(fig, data_win.period.tolist(), data_win.exit_profit.tolist(),
+    return  stock_plot.plot_scatter(fig, data_win.period.tolist(), data_win.exit_profit.tolist(),
                             data_lose.period.tolist(),
                             data_lose.exit_profit.tolist(), 30)
 
@@ -251,12 +254,12 @@ def scatter_analyze(fig, data):
 
 # Entry analyze
 def summary_analyze(fig, data, n, type_):
-    print "prepare plotting.." 
+    six.print_("prepare plotting.." )
 
     cursors = []
     # ordered by profits
     data = data.sort_index(by='exit_profit')
-    data_long = data[data['islong']] # Èç¹ûÊÇµ¥¸ù¿ªÆ½£¬ÇÒ¿ªÆ½¼ÛÒ»Ñù£¬ÄÇÃ´´Ë·¨²»³ÉÁ¢
+    data_long = data[data['islong']] # ÃˆÃ§Â¹Ã»ÃŠÃ‡ÂµÂ¥Â¸Ã¹Â¿ÂªÃ†Â½Â£Â¬Ã‡Ã’Â¿ÂªÃ†Â½Â¼Ã›Ã’Â»Ã‘Ã¹Â£Â¬Ã„Ã‡ÃƒÂ´Â´Ã‹Â·Â¨Â²Â»Â³Ã‰ÃÂ¢
     data_short = data[data['islong'] == False]
 
     exit_profit = data['exit_profit']
@@ -269,18 +272,18 @@ def summary_analyze(fig, data, n, type_):
         exit_nbar_worst = data['exit_nbar_worst']
         profits_more = exit_nbar_best - exit_profit
         risks = exit_nbar_worst - exit_profit
-    except Exception, e:
+    except Exception as e:
         entry_nbar_best = pd.Series()
         entry_nbar_worst = pd.Series()
         exit_nbar_best = pd.Series()
         exit_nbar_worst = pd.Series()
         profits_more = pd.Series()
         risks = pd.Series()
-        print "No nbar!" 
+        six.print_("No nbar!" )
     rtns = data['return']
     data_win = data[data.exit_profit>0]
     data_lose = data[data.exit_profit<=0]
-    print "begin plotting.." 
+    six.print_("begin plotting.." )
     # summary
     #cursors.append(cursor)
 
@@ -300,13 +303,13 @@ class AnalyzeFrame(object):
     def __init__(self, profile, n=10, intraday=False):
         """ """
         self.fig = plt.figure(facecolor='white')
-        self.fig.canvas.set_window_title(u'future data analyze')
+        self.fig.canvas.set_window_title('future data analyze')
         self.nbar = n
         self.cursors = []
         self.data = process_data(n, intraday,
                     self.get_tradeinfo(profile), profile.data())
-        #print self.data.columns
-        #print self.data[0:3]
+        #six.print_(self.data.columns)
+        #six.print_(self.data[0:3])
         #assert False
         self.axes = []
         self.rax = plt.axes([0, 0.5, 0.08, 0.15])
@@ -344,28 +347,28 @@ class AnalyzeFrame(object):
         for c in self.cursors:
             del c
         if op == "scatter":
-            print "scatter_analyze" 
+            six.print_("scatter_analyze" )
             self.axes, self.cursors = scatter_analyze(self.fig, self.data)
         elif op == "summary":
             self.axes, self.cursors = summary_analyze(self.fig, self.data, self.nbar, 1)
         elif op == "summary2":
             self.axes, self.cursors = summary_analyze(self.fig, self.data, self.nbar, 2)
         elif op == "entry":
-            print "entry_analyze" 
+            six.print_("entry_analyze" )
             self.axes, self.cursors = entry_analyze(self.fig, self.data, self.nbar)
         elif op == "exit":
-            print "exit_analyze" 
+            six.print_("exit_analyze" )
             self.axes, self.cursors = exit_analyze(self.fig, self.data, self.nbar)
         elif op == "simple":
             self.axes, self.cursors = simple_entry_analyze(self.fig, self.data, self.nbar)
         #elif op == "hm":
             #axes, cursors = follow_entry_analyze(fig, data)
-            #print "hm" 
+            #six.print_("hm" )
         self.fig.canvas.draw()
 
 
 if __name__ == '__main__':
     a = AnalyzeFrame('_djtrend2_IF000' , 10, False)
     plt.show()
-    print "ok" 
+    six.print_("ok")
 

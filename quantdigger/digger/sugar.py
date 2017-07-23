@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+ï»¿# -*- coding: utf-8 -*-
+
+import six
+from six.moves import range
 import pandas as pd
 import os
 import datetime as dt
@@ -17,14 +20,14 @@ def max_return(nbarprice, islong):
             elif ith_price < low:
                 low = ith_price
                 maxdiffs.append(high-low)
-                #print low
+                #six.print_(low)
         return max(maxdiffs) if maxdiffs else 0
     else:
         for ith_price in nbarprice:
             if ith_price < low:
                 low = ith_price
                 high = -1000000
-                #print low
+                #six.print_(low)
             elif ith_price > high:
                 high = ith_price
                 maxdiffs.append(high-low)
@@ -51,46 +54,46 @@ def process_signal(signal, price_data, n=10, intraday=False):
     for i in range(len(data)):
         startt = signal.index[i]
         startpos = price_data.index.searchsorted(startt)
-        endt = signal.ix[i, ['exit_datetime']][0]
+        endt = signal.loc[i, ['exit_datetime']][0]
         endpos = price_data.index.searchsorted(endt)
-        tradingdf = price_data.truncate(before=startt, after = endt) # µ±±Ê½»Ò×¼äµÄ¼Û¸ñÊý¾Ý
+        tradingdf = price_data.truncate(before=startt, after = endt) # å½“ç¬”äº¤æ˜“é—´çš„ä»·æ ¼æ•°æ®
 
-        onetrade = signal.ix[i, :]
+        onetrade = signal.loc[i, :]
         # high/low
         if len(tradingdf) > 1:
-            hp = tradingdf.ix[:-1, :][PRICE].max()
-            lp = tradingdf.ix[:-1, :][PRICE].min()
-            t = tradingdf.ix[:-1, :][PRICE].tolist()
+            hp = tradingdf.loc[:-1, :][PRICE].max()
+            lp = tradingdf.loc[:-1, :][PRICE].min()
+            t = tradingdf.loc[:-1, :][PRICE].tolist()
             t.append(float(onetrade['exit_price']))
-            returns.append(max_return(t, onetrade['islong'])) # µ±±Ê½»Ò×Çø¼äÄÚµÄ×î´ó»Ø²â
+            returns.append(max_return(t, onetrade['islong'])) # å½“ç¬”äº¤æ˜“åŒºé—´å†…çš„æœ€å¤§å›žæµ‹
         else:
-            hp = tradingdf.ix[:, :][PRICE].max()
-            lp = tradingdf.ix[:, :][PRICE].min()
+            hp = tradingdf.loc[:, :][PRICE].max()
+            lp = tradingdf.loc[:, :][PRICE].min()
             if onetrade['islong']:
-                returns.append(max(onetrade['entry_price']-onetrade['exit_price'], 0))  # Í¬Ò»¸ùbarÉÏÂòºÍÂô
+                returns.append(max(onetrade['entry_price']-onetrade['exit_price'], 0))  # åŒä¸€æ ¹barä¸Šä¹°å’Œå–
             else:
                 returns.append(max(onetrade['exit_price']-onetrade['entry_price'], 0))
-        hp = onetrade['exit_price'] if onetrade['exit_price'] > hp else hp # ËãÈë½»Ò×¼Û¸ñ
+        hp = onetrade['exit_price'] if onetrade['exit_price'] > hp else hp # ç®—å…¥äº¤æ˜“ä»·æ ¼
         hp = onetrade['entry_price'] if onetrade['entry_price'] > hp else hp
         lp = onetrade['exit_price'] if onetrade['exit_price'] < lp else lp
         lp = onetrade['entry_price'] if onetrade['entry_price'] < lp else lp
         hp = hp - onetrade['entry_price']
         lp = lp - onetrade['entry_price']
-        high_profits.append(hp if onetrade['islong'] else 0-hp)  # ÀíÂÛ×î¸ßÀûÈó
-        low_profits.append(lp if onetrade['islong'] else 0-lp)   # ÀíÂÛ×îµÍÀûÈó
+        high_profits.append(hp if onetrade['islong'] else 0-hp)  # ç†è®ºæœ€é«˜åˆ©æ¶¦
+        low_profits.append(lp if onetrade['islong'] else 0-lp)   # ç†è®ºæœ€ä½Žåˆ©æ¶¦
         # exit
         ep = onetrade['exit_price'] - onetrade['entry_price']
-        exit_profits.append(ep if onetrade['islong'] else 0-ep)  # Êµ¼ÊÀûÈó
+        exit_profits.append(ep if onetrade['islong'] else 0-ep)  # å®žé™…åˆ©æ¶¦
         # period
-        periods.append(endpos - startpos + 1)        # ³Ö²ÖÖÜÆÚ
+        periods.append(endpos - startpos + 1)        # æŒä»“å‘¨æœŸ
 
-        # Èë³¡»ò³ö³¡ºón¸ùbarµÄ×îÓÅºÍ×î²îÊÕÒæ
+        # å…¥åœºæˆ–å‡ºåœºåŽnæ ¹barçš„æœ€ä¼˜å’Œæœ€å·®æ”¶ç›Š
         entry_begin = startpos
         exit_begin = endpos + 1
         if intraday:
             day_entry_end = price_data.index.searchsorted((pd.to_datetime(startt)+dt.timedelta(days=1)).strftime("%Y-%m-%d"))
             day_exit_end = price_data.index.searchsorted((pd.to_datetime(endt)+dt.timedelta(days=1)).strftime("%Y-%m-%d"))
-            # ²»¸ôÒ¹
+            # ä¸éš”å¤œ
             entry_end = min(startpos+n+1, day_entry_end)
             exit_end = min(endpos+1+n, day_exit_end)
         else:
@@ -100,8 +103,8 @@ def process_signal(signal, price_data, n=10, intraday=False):
         exit_Nlist.append(exit_end - exit_begin)
         islongs.append(onetrade['islong'])
 
-        position_prices = price_data.ix[entry_begin: entry_end, PRICE]
-        exit_prices = price_data.ix[exit_begin: exit_end, PRICE]
+        position_prices = price_data.loc[entry_begin: entry_end, PRICE]
+        exit_prices = price_data.loc[exit_begin: exit_end, PRICE]
         if onetrade['islong']:
             entry_nbar_bests.append(position_prices.max() - onetrade['entry_price'])
             entry_nbar_worsts.append(position_prices.min() - onetrade['entry_price'])
@@ -125,17 +128,17 @@ def process_signal(signal, price_data, n=10, intraday=False):
     data['islong'] = islongs
     data['entry_n'] = entry_Nlist
     data['exit_n'] = exit_Nlist
-    print "Data Preprocessing Done!"
+    six.print_("Data Preprocessing Done!")
     return data
 
 
 def load_datas(n, intraday, signal_fname, price_fname):
-    ''' Ò»´Î¿É¼ÓÔØ¶à¸öÊý¾Ý''' 
+    # ä¸€æ¬¡å¯åŠ è½½å¤šä¸ªæ•°æ®
 
     signal = pd.read_csv(signal_fname, index_col=0, parse_dates=True).sort_index()
     price_data = pd.read_csv(price_fname, index_col=0, parse_dates=True).sort_index()
     return process_signal(signal, price_data, n, intraday)
-    #print data
+    #six.print_(data)
     #assert(False)
 
 

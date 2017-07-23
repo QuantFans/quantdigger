@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import six
+from six.moves import range
 import datetime
 import unittest
 import pandas as pd
@@ -123,7 +125,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                 elif ctx.curbar == 7:
                     assert(ctx.pos() == 0 and '持仓测试失败!')
                     assert(len(ctx.open_orders) == 2 and '撤单测试失败！')
-                    order = filter(lambda x: x.side == TradeSide.PING, ctx.open_orders)[0]
+                    order = list(filter(lambda x: x.side == TradeSide.PING, ctx.open_orders))[0]
                     ctx.cancel(order)
                 elif ctx.curbar == 8:
                     assert(len(ctx.open_orders) == 1 and '撤单测试失败！')
@@ -553,7 +555,8 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     cashes = []
     unit = 2
     poscost = 0
-    for dt, price in data.close.iteritems():
+    dict_close = data.close.to_dict()
+    for dt, price in six.iteritems(dict_close):
         curtime = dt.time()
         if curtime in [bt1, bt2, bt3]:
             poscost = (poscost*quantity + price*(1-settings['future_commission'])*unit)/ (quantity+unit)
@@ -602,21 +605,21 @@ def entries_maked_nextbar(data):
     for  dt, high in data.high.iteritems():
         if dt.date() == predt.date() and dt.time() < st1 and high - prehigh >= OFFSET:
             short_entries.append(predt)
-            #print predt, low-prelow
+            #six.print_(predt, low-prelow)
         prehigh = high
         predt = dt
 
     for dt, high in data.high.iteritems():
         if dt.time() > bt3 and high - prehigh >= OFFSET:
             sell_entries.append(predt)
-            #print predt, high-prehigh
+            #six.print_(predt, high-prehigh)
         prehigh = high
         predt = dt
 
     for  dt, low in data.low.iteritems():
         if dt.time() > bt3 and prelow - low >= OFFSET:
             cover_entries.append(predt)
-            #print predt, low-prelow
+            #six.print_(predt, low-prelow)
         prelow = low
         predt = dt
     return buy_entries, sell_entries, short_entries, cover_entries
@@ -708,7 +711,9 @@ def holdings_sell_maked_nextbar(data, sell_entries, capital, long_margin, volume
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), sell_entries)
     bprice = None
     prehigh = data.high[0]
-    for dt, high in data.high.iteritems():
+
+    dict_high = data.high.to_dict()
+    for dt, high in six.iteritems(dict_high):
         close = data.close[dt]
         if dt.time() == bt1:
             bprice = close * (1+settings['future_commission'])
@@ -746,7 +751,9 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), cover_entries)
     bprice = None
     prelow = data.low[0]
-    for dt, low in data.low.iteritems():
+
+    dict_low = data.low.to_dict()
+    for dt, low in six.iteritems(dict_low):
         close = data.close[dt]
         if dt.time() == bt1:
             bprice = close * (1-settings['future_commission'])
