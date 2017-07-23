@@ -6,14 +6,12 @@
 # @version 0.3
 # @date 2015-01-06
 
-
+import six
 import datetime
 import unittest
 import pandas as pd
 import os
-import talib
-import numpy as np
-from quantdigger.datastruct import TradeSide, Contract
+from quantdigger.datastruct import  Contract
 from quantdigger import *
 from logbook import Logger
 logger = Logger('test')
@@ -31,68 +29,68 @@ source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
 class TestOneDataOneCombinationStock(unittest.TestCase):
     """ 测试股票单数据单组合的价格撮合，持仓查询／默认持仓查询，可用资金等交易接口 """
-        
+
     def test_case(self):
         t_cashes0, t_cashes1 = [], []
 
         class DemoStrategy1(Strategy):
             """ 限价只买多头仓位的策略 """
-            
+
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 pass
 
             def on_bar(self, ctx):
                 curtime = ctx.datetime[0].time()
                 if curtime in [buy1, buy2, buy3]:
-                    ctx.buy(ctx.close, 1) 
+                    ctx.buy(ctx.close, 1)
                 else:
                     if ctx.pos() >= 2 and curtime == sell1:
-                        ctx.sell(ctx.close, 2) 
+                        ctx.sell(ctx.close, 2)
                     elif ctx.pos() >= 1 and curtime == sell2:
-                        ctx.sell(ctx.close, 1) 
+                        ctx.sell(ctx.close, 1)
                 ## 前一根的交易信号在当前价格撮合后的可用资金
-                t_cashes0.append(ctx.test_cash()) 
+                t_cashes0.append(ctx.test_cash())
 
 
         class DemoStrategy2(Strategy):
             """ 限价买多卖空的策略 """
-            
+
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 pass
 
             def on_bar(self, ctx):
                 curtime = ctx.datetime[0].time()
                 if curtime in [buy1, buy2, buy3]:
-                    ctx.buy(ctx.close, 1) 
-                    ctx.short(ctx.close, 2) 
+                    ctx.buy(ctx.close, 1)
+                    ctx.short(ctx.close, 2)
                 else:
                     if curtime == sell1:
                         if ctx.pos() >= 3:
                             # quantity == 6, closable == 3
                             assert(ctx.pos() == 3 and '默认持仓查询测试失败！')
-                            ctx.sell(ctx.close, 2) 
+                            ctx.sell(ctx.close, 2)
                         if ctx.pos('short') >= 6:
                             assert(ctx.pos('short') == 6 and '默认持仓查询测试失败！')
-                            ctx.cover(ctx.close, 4) 
+                            ctx.cover(ctx.close, 4)
                     elif curtime == sell2:
                         if ctx.pos() >= 1:
-                            ctx.sell(ctx.close, 1) 
+                            ctx.sell(ctx.close, 1)
                         if ctx.pos('short') >= 2:
-                            ctx.cover(ctx.close, 2) 
-                t_cashes1.append(ctx.test_cash()) 
+                            ctx.cover(ctx.close, 2)
+                t_cashes1.append(ctx.test_cash())
 
 
         class DemoStrategy3(Strategy):
             """ 测试平仓未成交时的持仓，撤单后的持仓，撤单。 """
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 pass
 
             def on_bar(self, ctx):
                 return
-                
+
         set_symbols(['stock.TEST-1.Minute'])
         profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
             'capital': capital,
@@ -134,7 +132,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
             hd0 = all_holdings0[i]
             hd1 = all_holdings1[i]
             hd2 = all_holdings2[i]
-            self.assertTrue(hd['cash'] == hd0['cash']+hd1['cash']+hd2['cash'], 
+            self.assertTrue(hd['cash'] == hd0['cash']+hd1['cash']+hd2['cash'],
                             'all_holdings接口测试失败！')
             self.assertTrue(hd['commission'] == hd0['commission']+
                     hd1['commission']+hd2['commission'], 'all_holdings接口测试失败！')
@@ -149,7 +147,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
     """ 策略: 多头限价开仓且当根bar成交
         买入点: [buy1, buy2, buy3]
         当天卖出点: [sell1, sell2]
-    """ 
+    """
     assert(volume_multiple == 1 and long_margin == 1)
     UNIT = 1
     buy_quantity= { }
@@ -169,7 +167,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
             buy_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
-                for posdate, quantity in buy_quantity.iteritems():
+                for posdate, quantity in six.iteritems(buy_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
                                         2*UNIT * volume_multiple
@@ -177,7 +175,7 @@ def holdings_buy_maked_curbar(data, capital, long_margin, volume_multiple):
                     elif posdate > curdate:
                         assert(False)
             elif curtime == sell2:
-                for posdate, quantity in buy_quantity.iteritems():
+                for posdate, quantity in six.iteritems(buy_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit += (curprice*(1-settings['stock_commission'])-poscost) *\
                                         UNIT * volume_multiple
@@ -204,7 +202,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
     """ 策略: 多头限价开仓且当根bar成交
         买入点: [buy1, buy2, buy3]
         当天卖出点: [sell1, sell2]
-    """ 
+    """
     assert(volume_multiple == 1 and short_margin == 1)
     UNIT = 2
     short_quantity= { }
@@ -224,7 +222,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
             short_quantity[curdate] += UNIT
         else:
             if curtime == sell1:
-                for posdate, quantity in short_quantity.iteritems():
+                for posdate, quantity in six.iteritems(short_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
                                         2*UNIT * volume_multiple
@@ -232,7 +230,7 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
                     elif posdate > curdate:
                         assert(False)
             elif curtime == sell2:
-                for posdate, quantity in short_quantity.iteritems():
+                for posdate, quantity in six.iteritems(short_quantity):
                     if posdate < curdate and quantity > 0:
                         close_profit -= (curprice*(1+settings['stock_commission'])-poscost) *\
                                         UNIT * volume_multiple
@@ -258,33 +256,33 @@ def holdings_short_maked_curbar(data, capital, short_margin, volume_multiple):
 
 class TestMultiDataOneCombinationStock(unittest.TestCase):
     """ 测试日线交易接口 """
-        
+
     def test_case(self):
         t_cashes0, t_equity0 = {}, { }
         t_cashes1, t_equity1 = {}, { }
 
         class DemoStrategy1(Strategy):
             """ 限价只买多头仓位的策略 """
-            
+
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 ctx.tobuy = False
                 ctx.tosell = False
 
             def on_symbol(self, ctx):
-                """""" 
+                """"""
                 weekday = ctx.datetime[0].weekday()
                 if weekday == 0:
                     ctx.tobuy = True
                 elif weekday == 4:
                     ctx.tosell = True
-                
+
             def on_bar(self, ctx):
                 #weekday = ctx.datetime[0].weekday()
                 if ctx['600521'].tobuy:
-                    ctx.buy(ctx['600521'].close, 1) 
+                    ctx.buy(ctx['600521'].close, 1)
                 if ctx['600521'].tosell and ctx.pos(symbol='600521.SH')>0:
-                    ctx.sell(ctx['600521'].close, ctx.pos(symbol='600521.SH')) 
+                    ctx.sell(ctx['600521'].close, ctx.pos(symbol='600521.SH'))
                 ctx['600521'].tobuy = False
                 ctx['600521'].tosell = False
                 t_cashes0[ctx.datetime[0]] = ctx.test_cash()
@@ -299,15 +297,15 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 self.tosells = []
 
             def on_symbol(self, ctx):
-                """""" 
+                """"""
                 weekday = ctx.datetime[0].weekday()
                 if weekday == 0:
                     self.tobuys.append(ctx.symbol)
                 elif weekday == 4:
                     self.tosells.append(ctx.symbol)
-            
+
             def on_bar(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 ## @TODO all_positions
                 for symbol in self.tobuys:
                     ctx.buy(ctx[symbol].close, 1, symbol)
@@ -324,12 +322,12 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
         class DemoStrategy3(Strategy):
             """ 测试平仓未成交时的持仓，撤单后的持仓，撤单。 """
             def on_init(self, ctx):
-                """初始化数据""" 
+                """初始化数据"""
                 pass
 
             def on_bar(self, ctx):
                 return
-                
+
         set_symbols(['600521', '600522'])
         profile = add_strategy([DemoStrategy1('A1'), DemoStrategy2('A2'), DemoStrategy3('A3')], {
             'capital': capital,
@@ -376,16 +374,16 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
             equity = 0
             cash = 0
             if dt in s_equity0:
-                equity += s_equity0[dt] 
-                cash += s_cashes0[dt] 
+                equity += s_equity0[dt]
+                cash += s_cashes0[dt]
                 last_equity0 = s_equity0[dt]
                 last_cash0 = s_cashes0[dt]
             else:
                 equity += last_equity0
                 cash += last_cash0
             if dt in s_equity1:
-                equity += s_equity1[dt] 
-                cash += s_cashes1[dt] 
+                equity += s_equity1[dt]
+                cash += s_cashes1[dt]
                 last_equity1 = s_equity1[dt]
                 last_cash1 = s_cashes1[dt]
             else:
@@ -395,13 +393,13 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
             self.assertAlmostEqual(hd['cash'], cash)
             self.assertAlmostEqual(t_cashes1[dt], cash)
             self.assertAlmostEqual(t_equity1[dt], equity)
-                 
+
 
 def buy_monday_sell_friday(data, capital, long_margin, volume_multiple):
     """ 策略: 多头限价开仓且当根bar成交
         买入点: [buy1, buy2, buy3]
         当天卖出点: [sell1, sell2]
-    """ 
+    """
     assert(volume_multiple == 1 and long_margin == 1)
     UNIT = 1
     poscost = 0

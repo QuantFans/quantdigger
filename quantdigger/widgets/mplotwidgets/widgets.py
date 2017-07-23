@@ -143,9 +143,9 @@ class Slider(AxesWidget):
         self._data_length = valmax
 
         if self.valtext:
-            self.valtext.remove() 
+            self.valtext.remove()
         if self.poly:
-            self.poly.remove() 
+            self.poly.remove()
         # 滑动条的形状
         self.poly = self.ax.axvspan(valmax-self.width/2,valmax+self.width/2, 0, 1, **kwargs)
         #axhspan
@@ -286,9 +286,9 @@ class FrameWidget(AxesWidget):
     def add_plotter(self, plotter, twinx):
         """ 添加并绘制, 不允许重名的plotter """
         if plotter.name in self.plotters:
-            raise 
+            raise
         if not self.plotters:
-            twinx = False 
+            twinx = False
         if twinx:
             twaxes = self.ax.twinx()
             plotter.plot(twaxes)
@@ -505,7 +505,7 @@ class TechnicalWidget(object):
         pass
 
     def _clear(self):
-        """""" 
+        """"""
         return
 
     def on_keyrelease(self, event):
@@ -568,12 +568,12 @@ class TechnicalWidget(object):
         self._slidder_upper = self._bottom + self._slider_height
         self._bigger_picture_lower = self._slidder_upper
         self._slider_ax = self._fig.add_axes([self._left, self._slidder_lower, self._width,
-                                             self._slider_height], facecolor='gray')
+                                             self._slider_height])
         self._bigger_picture = self._fig.add_axes([self._left, self._bigger_picture_lower,
                                                     self._width, self._bigger_picture_height],
                                                 zorder = 0, frameon=False,
                                                 #sharex=self._slider_ax,
-                                                facecolor='gray', alpha = '0.1' )
+                                                alpha = '0.1' )
         self._bigger_picture.set_xticklabels([]);
         self._bigger_picture.set_xticks([])
         self._bigger_picture.set_yticks([])
@@ -617,7 +617,7 @@ class TechnicalWidget(object):
             [label.set_visible(False) for label in ax.get_xticklabels()]
         for i in range(0, len(self.axes)):
             self._cursor_axes_index[i] = i
-        
+
 
     def _update_widgets(self):
         """ 改变可视区域， 在坐标移动后被调用。"""
@@ -630,7 +630,7 @@ class TechnicalWidget(object):
         """
         for subwidget in six.itervalues(self._subwidgets):
             subwidget.set_ylim(w_left, w_right)
-        
+
     def _format_coord(self, x, y):
         """ 状态栏信息显示 """
         index = x

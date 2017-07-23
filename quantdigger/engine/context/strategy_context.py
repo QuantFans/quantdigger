@@ -6,8 +6,9 @@
 # @version 0.1
 # @date 2016-11-27
 
-from six.moves import queue
 import copy
+import six
+from six.moves import queue
 from quantdigger.engine.blotter import SimpleBlotter
 from quantdigger.engine.exchange import Exchange
 from quantdigger.event import Event, EventsPool, SignalEvent, OnceEvent
@@ -191,7 +192,7 @@ class StrategyContext(object):
         return self.blotter.open_orders
 
     def all_positions(self):
-        return self.blotter.positions.values()
+        return list(six.itervalues(self.blotter.positions))
 
     def position(self, contract, direction):
         try:

@@ -146,12 +146,6 @@ class TestOneDataOneCombination(unittest.TestCase):
         #plotting.plot_strategy(profile.data(), deals=profile.deals(0))
         # all_holdings, cash()
 
-
-
-
-
-
-
         all_holdings = profile.all_holdings()
         all_holdings0 = profile.all_holdings(0)
         all_holdings1 = profile.all_holdings(1)
@@ -238,7 +232,7 @@ class TestOneDataOneCombination(unittest.TestCase):
 
             def on_bar(self, ctx):
                 if ctx.datetime[0] in buy_entries:
-                    ctx.buy(ctx.low-OFFSET, 1)
+                    ctx.buy(ctx.low-OFFSET, 1) # 确保在下一根Bar成交
                 # 默认多头
                 elif ctx.pos() > 0 and ctx.datetime[0].time() == st1:
                     ctx.sell(ctx.close, ctx.pos())
@@ -306,6 +300,7 @@ class TestOneDataOneCombination(unittest.TestCase):
         for i, hd in enumerate(profile.all_holdings(0)):
             self.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
             self.assertAlmostEqual(hd['equity'], target[i])
+
         for i in range(0, len(cashes0)-1): # 最后一根强平了无法比较
             self.assertAlmostEqual(cashes0[i],cashes[i])
         # short
@@ -401,14 +396,16 @@ class TestOneDataOneCombination(unittest.TestCase):
                     ctx.short(ctx['future2.TEST-1.Minute'].close, 2, 'future2.TEST')
                 else:
                     if curtime == st1:
-                        all_postions =  ctx.all_positions()
-                        assert(len(all_postions) == 2)
-                        assert(all_postions[0].quantity == 6)
-                        assert(all_postions[0].closable == 6)
-                        assert(all_postions[0].direction == Direction.SHORT)
-                        assert(all_postions[1].quantity == 3)
-                        assert(all_postions[1].closable == 3)
-                        assert(all_postions[1].direction == Direction.LONG)
+                        for pos in ctx.all_positions():
+                            if str(pos.contract) == 'FUTURE.TEST':
+                                assert(pos.quantity == 3)
+                                assert(pos.closable == 3)
+                                assert(pos.direction == Direction.LONG)
+                            else:
+                                assert(pos.quantity == 6)
+                                assert(pos.closable == 6)
+                                assert(pos.direction == Direction.SHORT)
+
                         assert(ctx.pos('long', 'future.TEST') == 3 and '持仓测试失败！')
                         ctx.sell(ctx.close, 2)
                         assert(ctx.pos('short', 'future2.TEST') == 6 and '持仓测试失败！')
@@ -644,7 +641,7 @@ def holdings_buy_maked_nextbar(data, buy_entries, capital, long_margin, volume_m
     dts = []
     cashes = []
     prelow = data.low[0]
-    trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), buy_entries)
+    trans_entries = list(map(lambda x: x+datetime.timedelta(minutes = 1), buy_entries))
     quantity = 0
     poscost = 0
     preclose = 0
@@ -653,6 +650,7 @@ def holdings_buy_maked_nextbar(data, buy_entries, capital, long_margin, volume_m
         curtime = dt.time()
         close = data.close[dt]
         if dt in trans_entries:
+            # 交易成交时间点
             poscost = (poscost*quantity + (prelow-OFFSET)*(1+settings['future_commission'])*UNIT)/ (quantity+UNIT)
             quantity += UNIT
         elif curtime == st1 or dt == data.index[-1]:
@@ -680,7 +678,7 @@ def holdings_short_maked_nextbar(data, buy_entries, capital, short_margin, volum
     dts = []
     cashes = []
     prehigh = data.high[0]
-    trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), buy_entries)
+    trans_entries = list(map(lambda x: x+datetime.timedelta(minutes = 1), buy_entries))
     poscost = 0
     quantity = 0
     preclose = 0
@@ -718,7 +716,7 @@ def holdings_sell_maked_nextbar(data, sell_entries, capital, long_margin, volume
     cashes = []
     dts = []
     # 从平仓点计算平仓成交点
-    trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), sell_entries)
+    trans_entries = list(map(lambda x: x+datetime.timedelta(minutes = 1), sell_entries))
     bprice = None
     prehigh = data.high[0]
     for dt, high in data.high.iteritems():
@@ -756,7 +754,7 @@ def holdings_cover_maked_nextbar(data, cover_entries, capital, short_margin, vol
     equities = []
     cashes = []
     dts = []
-    trans_entries = map(lambda x: x+datetime.timedelta(minutes = 1), cover_entries)
+    trans_entries = list(map(lambda x: x+datetime.timedelta(minutes = 1), cover_entries))
     bprice = None
     prelow = data.low[0]
     for dt, low in data.low.iteritems():

@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 ##
 # @file test_interactive.py
-# @brief 
+# @brief
 # @author wondereamer
 # @version 0.1
 # @date 2016-08-07
 
+import six
 import json
 import time, sys
 import unittest
 
 from quantdigger.event.rpc import EventRPCClient
-from quantdigger.interaction.backend import backend
+from quantdigger.interaction.backend import Backend
+
+backend = Backend()
 
 class TestBackend(unittest.TestCase):
 
@@ -24,9 +27,9 @@ class TestBackend(unittest.TestCase):
     def test_get_all_contracts(self):
         ret = self.ui.sync_call("get_all_contracts")
         ret = self.shell.sync_call("get_all_contracts")
-        print "***********" 
-        print ret
-        print "***********" 
+        six.print_("***********" )
+        six.print_(ret)
+        six.print_("***********" )
 
     def test_get_pcontract(self):
         ret = self.ui.sync_call("get_pcontract", {
@@ -35,7 +38,7 @@ class TestBackend(unittest.TestCase):
         ret = self.shell.sync_call("get_pcontract", {
             'str_pcontract': 'BB.TEST-1.MINUTE'
             })
-        print json.loads(ret).keys()
+        six.print_(json.loads(ret).keys())
         return
 
 

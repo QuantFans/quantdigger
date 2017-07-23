@@ -49,7 +49,7 @@ class MainWindow(object):
             self._pcontracts_of_contract[pcon.contract] = d
 
     def show_data(self, str_pcontract):
-        """""" 
+        """"""
         pcon, data = self._gate.get_pcontract(str_pcontract)
         self.candle_widget.plot_with_plotter('candles', data)
         self._frame.load_data(data)
@@ -57,8 +57,8 @@ class MainWindow(object):
         return
 
     def _create_toolbar(self):
-        axprev = self._fig.add_axes([0.1, 0.92, 0.07, 0.075], facecolor='gray')
-        axnext = self._fig.add_axes([0.2, 0.92, 0.07, 0.075], facecolor='gray')
+        axprev = self._fig.add_axes([0.1, 0.92, 0.07, 0.075])
+        axnext = self._fig.add_axes([0.2, 0.92, 0.07, 0.075])
         self.btn_next = Button(axnext, '1Day')
         self.btn_prev = Button(axprev, '1Min')
 
