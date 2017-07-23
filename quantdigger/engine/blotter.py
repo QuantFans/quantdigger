@@ -105,9 +105,9 @@ class SimpleBlotter(Blotter):
         dh = {}
         dh['datetime'] = dt
         dh['commission'] = self.holding['commission']
-        pos_profit = 0
-        margin = 0
-        order_margin = 0
+        pos_profit = 0.0
+        margin = 0.0
+        order_margin = 0.0
         # 计算当前持仓历史盈亏。
         # 以close价格替代市场价格。
         for key, pos in self.positions.iteritems():
