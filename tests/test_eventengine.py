@@ -5,13 +5,15 @@
 # @author wondereamer
 # @version 0.1
 # @date 2016-05-25
-
-import six
 import unittest
-from quantdigger.event.event import Event
-from quantdigger.event.rpc import EventRPCClient, EventRPCServer
-from quantdigger.event.eventengine import QueueEventEngine, ZMQEventEngine, Timer
-
+from quantdigger.event import (
+    QueueEventEngine,
+    ZMQEventEngine,
+    EventRPCClient,
+    Event,
+    Timer,
+    EventRPCServer
+)
 
 def test_zmq_eventengine():
     """测试函数"""
@@ -20,10 +22,10 @@ def test_zmq_eventengine():
     import time
     
     def simpletest(event):
-        six.print_(str(datetime.now()), event.route)
+        print str(datetime.now()), event.route
     
-    six.print_('test_zmq_eventengine.....' )
-    ee = ZMQEventEngine('test_zmq_eventengine')
+    print 'test_zmq_eventengine.....' 
+    ee = ZMQEventEngine()
     ee.register(Event.TIMER, simpletest)
     timer = Timer(ee)
     ee.start()
@@ -52,7 +54,7 @@ def test_eventengine():
     import time
     
     def simpletest(event):
-        six.print_(str(datetime.now()), event.route)
+        print str(datetime.now()), event.route
     
     ee = QueueEventEngine()
     timer = Timer(ee)
@@ -79,13 +81,13 @@ def test_rpc():
     """""" 
     def server_print_hello(args):
         time.sleep(4) # 4秒处理时间
-        six.print_("server_print_hello")
-        six.print_("args: ", args)
+        print "server_print_hello"
+        print "args: ", args
         return 'data_sever_print_hello' 
 
     def client_print_hello(args):
-        six.print_("client_print_hello")
-        six.print_("args: ", args)
+        print "client_print_hello"
+        print "args: ", args
 
     # ------------------
     def test_call():
@@ -103,16 +105,16 @@ def test_rpc():
         server = EventRPCServer(ee, 'test')
         server.register("server_print_hello", server_print_hello)
         ee.start()
-        six.print_(client.sync_call("server_print_hello", { 'msg': 'sync_client'}, timeout), "**" )
+        print client.sync_call("server_print_hello", { 'msg': 'sync_client'}, timeout), "**" 
         ee.stop()
         return
 
     test_sync_call(1)
-    six.print_("*****************" )
+    print "*****************" 
     test_sync_call(10)
-    six.print_("*****************" )
+    print "*****************" 
     ee = test_call()
-    six.print_("********************" )
+    print "********************" 
 
 
     try:
@@ -134,7 +136,7 @@ if __name__ == '__main__':
 #class TestEventEngine(unittest.TestCase):
     #def test_get_qichats(self):
         #ret = get_qichats()
-        #six.print_(ret)
+        #print ret
         #self.assertTrue(ret)
 
 
