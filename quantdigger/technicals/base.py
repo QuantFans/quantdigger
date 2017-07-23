@@ -99,9 +99,7 @@ class TechnicalBase(Plotter):
         if not hasattr(self, '_args'):
             raise Exception("每个指标都必须有_args属性，代表指标计算的参数！")
         self.data = self._args[0]
-        # 数据转化成ta-lib能处理的格式
-        #self._args[0] = ndarray(self._args[0])
-        apply(self._vector_algo, tuple(self._args))
+        self._vector_algo(*tuple(self._args))
         if not hasattr(self, 'values'):
             raise Exception("每个指标都必须有value属性，代表指标计算结果！")
         if isinstance(self.values, dict):
