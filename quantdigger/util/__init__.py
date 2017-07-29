@@ -20,6 +20,13 @@ rlogger = logbook.Logger('runtime')
 project_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 source_dir = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
+
+if sys.version_info >= (3,):
+    py = 3
+else:
+    py = 2
+
+
 def deprecated(f):
     def ff(*args, **kwargs):
         six.print_('{0} is deprecated!'.format(str(f)))
@@ -37,34 +44,9 @@ gen_logger.level = logbook.INFO
 
 def time2int(t):
     """ datetime转化为unix毫秒时间。 """
-    epoch = int(time.mktime(t.timetuple())*1000)
+    epoch = int(time.mktime(t.timetuple()) * 1000)
     return epoch
 
 
 def int2time(tf):
-    return datetime.datetime.fromtimestamp(float(tf)/1000)
-
-
-#def pcontract(contract, period):
-    #""" 构建周期合约结构的便捷方式。
-    
-       #:param str contract: 合约如：'IF000.SHEF'
-       #:param str Period: 周期如：'10.Minute' 
-       #:return: 周期合约
-       #:rtype: PContract
-    #"""
-    #from quantdigger.datastruct import PContract, Contract, Period
-    #return PContract(Contract(contract),
-                     #Period(period))
-
-#def stock(code,period='1.Day'):
-    #""" 构建周期合约结构的便捷方式。
-    
-       #:param str code: 股票代码。
-       #:param str period: 回测周期。
-       #:return: 周期合约。
-       #:rtype: PContract
-    #"""
-    #from quantdigger.datastruct import PContract, Contract, Period
-    #return PContract(Contract('%s.stock' %  code),
-                     #Period(period))
+    return datetime.datetime.fromtimestamp(float(tf) / 1000)

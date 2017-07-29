@@ -3,11 +3,7 @@
 import json
 import six
 
-import sys
-if sys.version_info >= (3,):
-    py = 3
-else:
-    py = 2
+from quantdigger.util import py
 
 
 # @TODO REMOVE EventsPool
