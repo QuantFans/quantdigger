@@ -8,14 +8,14 @@ with open("README.rst", "r", "utf-8") as f:
 
 setup(
     name="QuantDigger",
-    version="0.6.1",
+    version="0.5.1",
     description="量化交易Python回测系统",
     long_description=readme,
     author="QuantFans",
     author_email="dingjie.wang@foxmail.com",
     license="MIT",
     url="https://github.com/QuantFans/quantdigger",
-    packages=find_packages(exclude=['tests', 'demo', "requirements", "images", "setupscripts"]),
+    packages=find_packages(exclude=['tests', 'demo', "requirements", "images"]),
     include_package_data=True,
     install_requires=[
         "tushare>=0.8.2",
