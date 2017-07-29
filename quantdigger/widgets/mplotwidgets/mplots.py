@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-##
-# @file mplots.py
-# @brief 绘制k线，交易信号连线。
-# @author wondereamer
-# @version 2.0
-# @date 2015-10-19
 
 import six
 from six.moves import range
@@ -75,7 +69,7 @@ class Candles(object):
     # note this code assumes if any value open, close, low, high is
     # missing they all are missing
     @override_attributes
-    def plot(self, widget, data, width=0.6, 
+    def plot(self, widget, data, width=0.6,
              colorup='r', colordown='g', lc='k', alpha=1):
 
         if self.lineCollection:
@@ -86,20 +80,19 @@ class Candles(object):
         self.set_yrange(data.low.values, data.high.values)
         self.data = data
         """docstring for plot"""
-        delta = self.width/2.
-        barVerts = [((i-delta, open),
-                     (i-delta, close),
-                     (i+delta, close),
-                     (i+delta, open))
+        delta = self.width / 2.
+        barVerts = [((i - delta, open),
+                     (i - delta, close),
+                     (i + delta, close),
+                     (i + delta, open))
                     for i, open, close in zip(range(len(self.data)),
                                               self.data.open,
                                               self.data.close)
                     if open != -1 and close != -1]
         rangeSegments = [((i, low), (i, high))
-                         for i, low, high in zip(
-                                 range(len(self.data)),
-                                 self.data.low,
-                                 self.data.high)
+                         for i, low, high in zip(range(len(self.data)),
+                                                 self.data.low,
+                                                 self.data.high)
                          if low != -1]
         r, g, b = colorConverter.to_rgb(self.colorup)
         colorup = r, g, b, self.alpha
@@ -118,31 +111,22 @@ class Candles(object):
         r, g, b = colorConverter.to_rgb(self.lc)
         linecolor = r, g, b, self.alpha
         self.lineCollection = LineCollection(rangeSegments,
-                                        colors=(linecolor,),
-                                        linewidths=lw,
-                                        antialiaseds=useAA,
-                                        zorder=0)
+                                             colors=(linecolor,),
+                                             linewidths=lw,
+                                             antialiaseds=useAA,
+                                             zorder=0)
 
         self.barCollection = PolyCollection(barVerts,
-                                       facecolors=colors,
-                                       edgecolors=colors,
-                                       antialiaseds=useAA,
-                                       linewidths=lw,
-                                       zorder=1)
-        #minx, maxx = 0, len(rangeSegments)
-        #miny = min([low for low in self.data.low if low !=-1])
-        #maxy = max([high for high in self.data.high if high != -1])
-        #corners = (minx, miny), (maxx, maxy)
-        #ax.update_datalim(corners)
+                                            facecolors=colors,
+                                            edgecolors=colors,
+                                            antialiaseds=useAA,
+                                            linewidths=lw,
+                                            zorder=1)
         widget.autoscale_view()
         # add these last
         widget.add_collection(self.barCollection)
         widget.add_collection(self.lineCollection)
-
-        #ax.plot(self.data.close, color = 'y')
-        #lineCollection, barCollection = None, None
         return self.lineCollection, self.barCollection
-
 
     def set_yrange(self, lower, upper=[]):
         self.upper = upper if len(upper) > 0 else lower
@@ -159,10 +143,6 @@ class Candles(object):
 class TradingSignal(object):
     """ 从信号坐标(时间， 价格)中绘制交易信号。 """
     def __init__(self, signal, name="Signal", c=None, lw=2):
-        #self.set_yrange(price)
-        #self.signal=signal
-        #self.c = c
-        #self.lw = lw
         self.signal = signal
         self.name = name
 

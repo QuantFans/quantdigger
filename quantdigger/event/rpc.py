@@ -1,10 +1,4 @@
 # encoding: UTF-8
-##
-# @file rpc.py
-# @brief 
-# @author wondereamer
-# @version 0.5
-# @date 2016-05-17
 
 import six
 import time
@@ -20,7 +14,7 @@ class EventRPCClient(object):
         self.EVENT_FROM_CLIENT = event_client if event_client else "EVENT_FROM_%s_CLIENT" % service.upper()
         self.EVENT_FROM_SERVER = event_server if event_server else "EVENT_FROM_%s_SERVER" % service.upper()
         self.rid = 0
-        self._handlers = { }
+        self._handlers = {}
         self._name = name
         self._handlers_lock = Lock()
         self._event_engine = event_engine
@@ -31,19 +25,19 @@ class EventRPCClient(object):
         self._timer_sleep = 1
         self._sync_call_time_lock = Lock()
         self._sync_call_time = datetime.now()
-        timer = Thread(target = self._run_timer)
+        timer = Thread(target=self._run_timer)
         timer.daemon = True
         timer.start()
 
     def _run_timer(self):
-        ## @TODO 用python自带的Event替代。
+        # @TODO 用python自带的Event替代。
         while True:
             if not self._timeout == 0:
                 with self._sync_call_time_lock:
                     mtime = self._sync_call_time
-                delta = (datetime.now()-mtime).seconds
+                delta = (datetime.now() - mtime).seconds
                 if delta >= self._timeout:
-                    #six.print_("timeout", self._timeout, delta)
+                    # print("timeout", self._timeout, delta)
                     # 不可重入，保证self.rid就是超时的那个
                     with self._handlers_lock:
                         del self._handlers[self.rid]
@@ -79,7 +73,7 @@ class EventRPCClient(object):
     def call(self, apiname, args, handler):
         """ 给定参数args，异步调用RPCServer的apiname服务,
         返回结果做为回调函数handler的参数。
-        
+
         Args:
             apiname (str): 服务API名称。
             args (dict): 给服务API的参数。
@@ -87,7 +81,7 @@ class EventRPCClient(object):
         """
         if not isinstance(args, dict):
             raise InvalidRPCClientArguments(argtype=type(args))
-        assert(not handler ==  None)
+        assert(handler is not None)
         log.debug('RPCClient [%s] sync_call: %s' % (self._name, apiname))
         self.rid += 1
         args['apiname'] = apiname
@@ -96,10 +90,10 @@ class EventRPCClient(object):
         with self._handlers_lock:
             self._handlers[self.rid] = handler
 
-    def sync_call(self, apiname, args={ }, timeout=5):
+    def sync_call(self, apiname, args={}, timeout=5):
         """ 给定参数args，同步调用RPCServer的apiname服务,
         返回该服务的处理结果。如果超时，返回None。
-        
+
         Args:
             apiname (str): 服务API名称。
             args (dict): 给服务API的参数。
@@ -117,11 +111,10 @@ class EventRPCClient(object):
             self._sync_call_time = datetime.now()
         self._timeout = timeout
         with self._handlers_lock:
-            self._handlers[self.rid] = None #
+            self._handlers[self.rid] = None
         self._event_engine.emit(Event(self.EVENT_FROM_CLIENT, args))
         self._waiting_server_data()
         ret = self._sync_ret
-        #self._sync_ret = None
         return ret
 
     def _waiting_server_data(self):
@@ -136,7 +129,7 @@ class EventRPCClient(object):
 class EventRPCServer(object):
     def __init__(self, event_engine, service, event_client=None, event_server=None):
         super(EventRPCServer, self).__init__()
-        self._routes = { }
+        self._routes = {}
         self._routes_lock = Lock()
         # server监听的client事件
         self.EVENT_FROM_CLIENT = event_client if event_client else "EVENT_FROM_%s_CLIENT" % service.upper()
@@ -149,16 +142,16 @@ class EventRPCServer(object):
 
     def register(self, route, handler):
         """ 注册服务函数。
-        
+
         Args:
             route (str): 服务名
             handler (function): 回调函数
-        
+
         Returns:
             Bool. 是否注册成功。
         """
         if route in self._routes:
-            return False 
+            return False
         with self._routes_lock:
             self._routes[route] = handler
         return True
@@ -179,19 +172,17 @@ class EventRPCServer(object):
         try:
             with self._routes_lock:
                 handler = self._routes[apiname]
-            ## @TODO async    
+            # @TODO async
             ret = handler(**args)
         except Exception as e:
             log.exception(e)
         else:
-            args = { 'ret': ret,
+            args = {'ret': ret,
                     'rid': rid
             }
             log.debug('RPCServer [%s] emit %s' % (self._name,
-                        str(self.EVENT_FROM_SERVER)))
-                        #str(Event(self.EVENT_FROM_SERVER, args))))
+                      str(self.EVENT_FROM_SERVER)))
             self._event_engine.emit(Event(self.EVENT_FROM_SERVER, args))
-
 
 
 if __name__ == '__main__':
@@ -200,9 +191,9 @@ if __name__ == '__main__':
     import sys
 
     def print_hello(data):
-        """""" 
+        """"""
         six.print_("***************")
-        six.print_("print_hello" )
+        six.print_("print_hello")
         six.print_("args: ", data)
         six.print_("return: ", 123)
         return "123"

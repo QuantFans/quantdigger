@@ -3,6 +3,12 @@
 import json
 import six
 
+import sys
+if sys.version_info >= (3,):
+    py = 3
+else:
+    py = 2
+
 
 # @TODO REMOVE EventsPool
 class EventsPool(object):
@@ -60,6 +66,8 @@ class Event(object):
 
     @classmethod
     def message_to_event(self, message):
+        if py == 3:
+            message = message.decode('utf8')
         route, args = message.split('&')
         route = route[1:]
         return Event(route=route, args=json.loads(args))

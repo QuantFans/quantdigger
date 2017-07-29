@@ -621,8 +621,8 @@ class TechnicalWidget(object):
 
     def _update_widgets(self):
         """ 改变可视区域， 在坐标移动后被调用。"""
-        self.axes[0].set_xlim((self._w_left, self._w_right))
-        self._set_ylim(self._w_left, self._w_right)
+        self.axes[0].set_xlim((int(self._w_left), int(self._w_right)))
+        self._set_ylim(int(self._w_left), int(self._w_right))
         self._fig.canvas.draw()
 
     def _set_ylim(self, w_left, w_right):

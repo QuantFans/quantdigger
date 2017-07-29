@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import matplotlib
-import matplotlib.pyplot as plt
 import pandas as pd
-matplotlib.use('TkAgg')
 
 from quantdigger.widgets.mplotwidgets import widgets
 from quantdigger.widgets.mplotwidgets.mplots import Candles
 from quantdigger.technicals.common import MA, Volume
+
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 price_data = pd.read_csv('data/IF000.csv', index_col=0, parse_dates=True)
 fig = plt.figure()

@@ -6,7 +6,6 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
-from quantdigger.technicals.common import MA, Volume
 from quantdigger.util import gen_logger as log
 from quantdigger.interaction.windowgate import WindowGate
 from quantdigger.widgets.mplotwidgets import widgets
@@ -34,7 +33,7 @@ class MainWindow(object):
         self._fig = plt.figure()
         self._gate = WindowGate(self)
         self._cur_contract_index = 0
-        self._pcontracts_of_contract = { } # {[], []}
+        self._pcontracts_of_contract = {} # {[], []}
         self._subwindows = []
         self._cur_period = 0
 
@@ -65,7 +64,7 @@ class MainWindow(object):
     def _create_technical_window(self):
         self.frame = widgets.TechnicalWidget(self._fig, price_data, height=0.85)
         axes = self.frame.init_layout(50, 4, 1)
-        ax_candles,  ax_volume = axes[0], axes[1]
+        ax_volume = axes[1]
         # at most 5 ticks, pruning the upper and lower so they don't overlap
         # with other ticks
         ax_volume.yaxis.set_major_locator(widgets.MyLocator(5, prune='both'))
@@ -102,7 +101,7 @@ class MainWindow(object):
     def on_next_contract(self, event):
         if self._cur_contract_index + 1 < len(self._pcontracts_of_contract.keys()):
             self._cur_contract_index += 1
-            contract = self._pcontracts_of_contract.keys()[self._cur_contract_index]
+            contract = list(self._pcontracts_of_contract.keys())[self._cur_contract_index]
 
             pcon = self._pcontracts_of_contract[contract][self._cur_period]
             pcon, data = self._gate.get_pcontract(str(pcon))
@@ -116,7 +115,7 @@ class MainWindow(object):
     def on_previous_contract(self, event):
         if self._cur_contract_index - 1 >= 0:
             self._cur_contract_index -= 1
-            contract = self._pcontracts_of_contract.keys()[self._cur_contract_index]
+            contract = list(self._pcontracts_of_contract.keys())[self._cur_contract_index]
 
             pcon = self._pcontracts_of_contract[contract][self._cur_period]
             pcon, data = self._gate.get_pcontract(str(pcon))
