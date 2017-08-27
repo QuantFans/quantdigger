@@ -8,6 +8,7 @@
 
 from .dsutil import get_setting_datasource
 from quantdigger.datastruct import PContract, Contract
+from quantdigger.util import gen_log as log
 
 
 class DataManager(object):
@@ -19,8 +20,11 @@ class DataManager(object):
     DEFAULT_DT_END = '2100-1-1'
 
     def __init__(self):
-        self._src = get_setting_datasource()
+        self._src, type_ = get_setting_datasource()
+        if Contract.source_type and Contract.source_type != type_:
+            log.warn("数据源发生了切换！之前可能以另外一个数据源调用Contract.xxx")
         Contract.info = self._src.get_contracts()
+        Contract.source_type = type_
 
     def get_bars(self, strpcon,
                  dt_start=DEFAULT_DT_START, dt_end=DEFAULT_DT_END):

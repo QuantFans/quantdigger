@@ -18,8 +18,6 @@ from quantdigger.datastruct import (
 )
 
 
-
-
 class Blotter(object):
     """
     订单管理。
@@ -121,7 +119,8 @@ class SimpleBlotter(Blotter):
         for order in self.open_orders:
             assert(order.price_type == PriceType.LMT)
             bar = self._bars[order.contract]
-            new_price = bar.open if at_baropen else bar.close
+            #new_price = bar.open if at_baropen else bar.close
+            new_price = order.price
             if order.side == TradeSide.KAI:
                 order_margin += order.order_margin(new_price)
         # 当前权益 = 初始资金 + 累积平仓盈亏 + 当前持仓盈亏 - 历史佣金总额

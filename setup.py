@@ -8,7 +8,7 @@ with open("README.rst", "r", "utf-8") as f:
 
 setup(
     name="QuantDigger",
-    version="0.5.1",
+    version="0.6.0",
     description="量化交易Python回测系统",
     long_description=readme,
     author="QuantFans",
@@ -29,6 +29,7 @@ setup(
         "pymongo>=3.1.1",
         "pyzmq>=4.1.5",
         "lxml>=3.5.0",
+        "six"
         #"cython>=0.23.4",
     ],
     classifiers=[

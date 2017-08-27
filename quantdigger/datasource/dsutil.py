@@ -29,4 +29,4 @@ resolve_datasource = resolve_from(_ds_container)
 
 def get_setting_datasource():
     ds_type = ConfigUtil.get('source')
-    return resolve_datasource(ds_type)
+    return resolve_datasource(ds_type), ds_type

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # @file profile.py
-# @brief 
+# @brief
 # @author wondereamer
 # @version 0.4
 # @date 2016-12-18
@@ -19,7 +19,7 @@ class Profile(object):
     """ 组合结果 """
     def __init__(self, scontexts, dcontexts, strpcon, i):
         """
-        
+
         Args:
             scontexts (list): 策略上下文集合
             dcontexts (list): 数据上下文集合
@@ -89,14 +89,17 @@ class Profile(object):
             return self._blts[j].all_holdings
         if len(self._blts) == 1:
             return self._blts[0].all_holdings
-        holdings = copy.deepcopy(self._blts[0].all_holdings)
-        for i, hd in enumerate(holdings):
+
+        if hasattr(self, '_all_holdings'):
+            return self._all_holdings
+        self._all_holdings = copy.deepcopy(self._blts[0].all_holdings)
+        for i, hd in enumerate(self._all_holdings):
             for blt in self._blts[1:]:
                 rhd = blt.all_holdings[i]
                 hd['cash'] += rhd['cash']
                 hd['commission'] += rhd['commission']
                 hd['equity'] += rhd['equity']
-        return holdings
+        return self._all_holdings
 
     def holding(self, j=None):
         """ 当前账号情况
@@ -111,14 +114,16 @@ class Profile(object):
             return self._blts[j].holding
         if len(self._blts) == 1:
             return self._blts[0].holding
-        holdings = copy.deepcopy(self._blts[0].holding)
+        if hasattr(self, '_holdings'):
+            return self._holdings
+        self._holdings = copy.deepcopy(self._blts[0].holding)
         for blt in self._blts[1:]:
             rhd = blt.holding
-            holdings['cash'] += rhd['cash']
-            holdings['commission'] += rhd['commission']
-            holdings['equity'] += rhd['equity']
-            holdings['history_profit'] += rhd['history_profit']
-        return holdings
+            self._holdings['cash'] += rhd['cash']
+            self._holdings['commission'] += rhd['commission']
+            self._holdings['equity'] += rhd['equity']
+            self._holdings['history_profit'] += rhd['history_profit']
+        return self._holdings
 
     def marks(self, j=None):
         """ 返回第j个策略的绘图标志集合 """

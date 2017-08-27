@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import six
 # from flufl.enum import Enum
 from datetime import timedelta
+from pandas import DataFrame
+from quantdigger.datasource.dsutil import get_setting_datasource
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
 from quantdigger.util import dlogger as logger
@@ -291,10 +292,10 @@ class Order(object):
         :ivar id: 报单编号
         :ivar contract: 合约。
         :ivar direction: 多空方向。
-        :ivar price: 成交价格。
+        :ivar price: 下单价格。
         :ivar quantity: 成交数量。
         :ivar side: 开平仓标志。
-        :ivar datetime: 成交时间
+        :ivar datetime: 下单时间
         :ivar price_type: 下单类型。
         :ivar hedge_type: 交易类型。
     """
@@ -362,6 +363,7 @@ class Contract(object):
     :ivar volume_multiple: 合约乘数。
     """
     info = None
+    source_type = None
 
     def __init__(self, str_contract):
         ## @TODO 修改参数为（code, exchange)
@@ -385,7 +387,15 @@ class Contract(object):
         else:
             logger.error('Unknown exchange: {0}', self.exchange)
             assert(False)
-    
+
+    @classmethod
+    def _get_info(cls):
+        if Contract.source_type:
+            return Contract.info
+        src, Contract.source_type = get_setting_datasource()
+        Contract.info = src.get_contracts()
+        return Contract.info
+
     @classmethod
     def from_string(cls, strcontract):
         return cls(strcontract)
@@ -419,7 +429,7 @@ class Contract(object):
     def long_margin_ratio(cls, strcontract):
         try:
             ## @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
-            return cls.info.loc[strcontract.upper(), 'long_margin_ratio']
+            return cls._get_info().loc[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -428,7 +438,7 @@ class Contract(object):
     @classmethod
     def short_margin_ratio(cls, strcontract):
         try:
-            return cls.info.loc[strcontract.upper(), 'short_margin_ratio']
+            return cls._get_info().loc[strcontract.upper(), 'short_margin_ratio']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -437,7 +447,7 @@ class Contract(object):
     @classmethod
     def volume_multiple(cls, strcontract):
         try:
-            return cls.info.loc[strcontract.upper(), 'volume_multiple']
+            return cls._get_info().loc[strcontract.upper(), 'volume_multiple']
         except KeyError:
             logger.warn("Can't not find contract: %s" % strcontract)
             return 1
@@ -451,16 +461,16 @@ class Period(object):
     :ivar count: 数值
     """
     #class Type(Enum):
-        #MilliSeconds = "MilliSeconds" 
-        #Seconds = "Seconds" 
-        #Minutes = "Minutes" 
-        #Hours = "Hours" 
-        #Days = "Days" 
-        #Months = "Months" 
-        #Seasons = "Seasons" 
-        #Years = "Years" 
+        #MilliSeconds = "MilliSeconds"
+        #Seconds = "Seconds"
+        #Minutes = "Minutes"
+        #Hours = "Hours"
+        #Days = "Days"
+        #Months = "Months"
+        #Seasons = "Seasons"
+        #Years = "Years"
     periods = {
-        "MILLISECOND": 0, 
+        "MILLISECOND": 0,
         "SECOND" : 1,
         "MINUTE": 2,
         "HOUR": 3,
@@ -552,12 +562,12 @@ class PContract(object):
 
     def __cmp__(self, r):
         if self.period < r.period:
-            return -1 
+            return -1
         elif self.period > r.period:
             return 1
         else:
             if self.contract < r.contract:
-                return -1 
+                return -1
             elif self.contract > r.contract:
                 return 1
             else:

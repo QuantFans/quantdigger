@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from datasource.test_csv import *
 from test_engine import *
-from test_future import *
-from test_stock import *
+from trading.test_future import *
+from trading.test_stock import *
 from quantdigger import ConfigUtil
 
 if __name__ == '__main__':
