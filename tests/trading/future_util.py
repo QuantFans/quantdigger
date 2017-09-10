@@ -47,38 +47,36 @@ def trade_closed_curbar(data, capital, long_margin, short_margin, volume_multipl
             poscost = (poscost * quantity + price *
                        (1 +direction * settings['future_commission']) * unit) / (quantity + unit)
             quantity += unit
+
+        elif curtime == st1:
+            assert(quantity == unit * 3)
+            open_close_profit = close_profit
+            open_quantity = quantity
+            close_profit += direction * (price *
+                                            (1 - direction * settings['future_commission']) -
+                                            poscost) * 2 * unit * volume_multiple
+            quantity -= 2 * unit
+        elif curtime == st2:
+            assert(quantity == unit * 1)
+            open_close_profit = close_profit
+            open_quantity = quantity
+            close_profit += direction * (price *
+                                            (1 - direction * settings['future_commission']) -
+                                            poscost) * unit * volume_multiple
+            quantity = 0
         else:
-            if curtime == st1:
-                assert(quantity == unit * 3)
-                open_close_profit = close_profit
-                open_quantity = quantity
-                close_profit += direction * (price *
-                                             (1 - direction * settings['future_commission']) -
-                                             poscost) * 2 * unit * volume_multiple
-                quantity -= 2 * unit
-            elif curtime == st2:
-                assert(quantity == unit * 1)
-                open_close_profit = close_profit
-                open_quantity = quantity
-                close_profit += direction * (price *
-                                             (1 - direction * settings['future_commission']) -
-                                             poscost) * unit * volume_multiple
-                quantity = 0
-            else:
-                # 非交易节点
-                open_quantity = quantity
-                open_poscost = poscost
-                open_close_profit = close_profit
+            # 非交易节点
+            open_quantity = quantity
+            open_poscost = poscost
+            open_close_profit = close_profit
 
         if dt == data.index[-1]:
             # 强平现有持仓
+            open_close_profit = close_profit
+            open_quantity = quantity
             close_profit += direction * (price *
                                          (1 - direction * settings['future_commission']) -
                                          poscost) * quantity * volume_multiple
-            open_close_profit += direction * (open_price *
-                                              (1 - direction * settings['future_commission']) -
-                                              open_poscost) * open_quantity * volume_multiple
-            open_quantity = quantity
             quantity = 0
 
         margin = long_margin if direction == 1 else short_margin
@@ -350,43 +348,43 @@ def market_trade_closed_curbar(data, capital, long_margin, short_margin,
                         (1 - settings['future_commission']) * 2) / (squantity + 2)
             lquantity += 1
             squantity += 2
-        else:
-            if curtime == st1:
-                # 平仓
-                assert(lquantity == 3)
-                open_close_profit = close_profit
-                open_lquantity = lquantity
-                open_squantity = squantity
-                open_lposcost = lposcost
-                open_sposcost = sposcost
-                close_profit += (low * (1 - settings['future_commission']) -
-                                 lposcost) * 2 * volume_multiple
-                lquantity = 1
-                assert(squantity == 6)
-                close_profit -= (high * (1 + settings['future_commission']) -
-                                 sposcost) * 4 * volume_multiple
-                squantity = 2
-            elif curtime == st2:
-                # 平仓
-                assert(lquantity == 1)
-                open_close_profit = close_profit
-                open_lquantity = lquantity
-                open_squantity = squantity
-                open_lposcost = lposcost
-                open_sposcost = sposcost
-                close_profit += (low * (1 - settings['future_commission']) -
-                                 lposcost) * volume_multiple
-                lquantity = 0
-                close_profit -= (high * (1 + settings['future_commission']) -
-                                 sposcost) * 2 * volume_multiple
-                squantity = 0
 
-            else:
-                open_close_profit = close_profit
-                open_lquantity = lquantity
-                open_squantity = squantity
-                open_lposcost = lposcost
-                open_sposcost = sposcost
+        elif curtime == st1:
+            # 平仓
+            assert(lquantity == 3)
+            open_close_profit = close_profit
+            open_lquantity = lquantity
+            open_squantity = squantity
+            open_lposcost = lposcost
+            open_sposcost = sposcost
+            close_profit += (low * (1 - settings['future_commission']) -
+                                lposcost) * 2 * volume_multiple
+            lquantity = 1
+            assert(squantity == 6)
+            close_profit -= (high * (1 + settings['future_commission']) -
+                                sposcost) * 4 * volume_multiple
+            squantity = 2
+        elif curtime == st2:
+            # 平仓
+            assert(lquantity == 1)
+            open_close_profit = close_profit
+            open_lquantity = lquantity
+            open_squantity = squantity
+            open_lposcost = lposcost
+            open_sposcost = sposcost
+            close_profit += (low * (1 - settings['future_commission']) -
+                                lposcost) * volume_multiple
+            lquantity = 0
+            close_profit -= (high * (1 + settings['future_commission']) -
+                                sposcost) * 2 * volume_multiple
+            squantity = 0
+
+        else:
+            open_close_profit = close_profit
+            open_lquantity = lquantity
+            open_squantity = squantity
+            open_lposcost = lposcost
+            open_sposcost = sposcost
 
         if dt == data.index[-1]:
             # 强平现有持仓
