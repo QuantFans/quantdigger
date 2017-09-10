@@ -174,7 +174,7 @@ class ExecuteUnit(object):
                 for j, s in enumerate(combination):
                     self.context.switch_to_strategy(i, j)
                     # 确保交易状态是基于开盘时间的。
-                    self.context.process_trading_events(at_baropen=True)
+                    # self.context.process_trading_events(at_baropen=True)
                     s.on_bar(self.context)
                     if not tick_test:
                         # 保证有可能在当根Bar成交
