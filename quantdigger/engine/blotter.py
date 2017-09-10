@@ -3,7 +3,7 @@ import six
 import copy
 from abc import ABCMeta, abstractmethod
 
-from quantdigger.util import elogger as logger
+from quantdigger.util import gen_log as logger
 from quantdigger.errors import TradingError
 from quantdigger.engine.api import SimulateTraderAPI
 from quantdigger.event import Event
@@ -82,7 +82,6 @@ class SimpleBlotter(Blotter):
     def update_datetime(self, dt):
         """ 在新的价格数据来的时候触发。 """
         if self._datetime is None:
-            self._datetime = dt
             self._start_date = dt
             self._init_state()
         elif self._datetime.date() != dt.date():
@@ -111,7 +110,10 @@ class SimpleBlotter(Blotter):
         # 以close价格替代市场价格。
         for key, pos in six.iteritems(self.positions):
             bar = self._bars[key.contract]
-            new_price = bar.open if at_baropen else bar.close
+            if not at_baropen or bar.datetime < dt:
+                new_price = bar.close
+            else:
+                new_price = bar.open
             pos_profit += pos.profit(new_price)
             # @TODO 用昨日结算价计算保证金
             margin += pos.position_margin(new_price)
@@ -269,11 +271,12 @@ class SimpleBlotter(Blotter):
                 pos.quantity
             )
             force_trans.append(Transaction(order))
+
         for trans in force_trans:
             self._update_holding(trans)
             self._update_positions(trans)
-        if force_trans:
-            self.update_status(trans.datetime, False)
+
+        self.update_status(self._datetime, False)
         self.positions = {}
         return
 

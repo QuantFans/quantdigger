@@ -95,7 +95,10 @@ class Profile(object):
         self._all_holdings = copy.deepcopy(self._blts[0].all_holdings)
         for i, hd in enumerate(self._all_holdings):
             for blt in self._blts[1:]:
-                rhd = blt.all_holdings[i]
+                try:
+                    rhd = blt.all_holdings[i]
+                except IndexError:
+                    rhd = rhd[-2]  # 是否强平导致长度不一
                 hd['cash'] += rhd['cash']
                 hd['commission'] += rhd['commission']
                 hd['equity'] += rhd['equity']

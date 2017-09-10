@@ -342,11 +342,11 @@ class Order(object):
             return self._hash
 
     def __str__(self):
-        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n long_margin_ratio: %f" % \
+        rst = " id: %s\n contract: %s\n direction: %s\n price: %f\n quantity: %d\n side: %s\n datetime: %s\n price_type: %s\n hedge_type: %s\n" % \
             (self.id, self.contract, Direction.type_to_str(self.direction),
              self.price, self.quantity, TradeSide.type_to_str(self.side),
              self.datetime, PriceType.type_to_str(self.price_type),
-             HedgeType.type_to_str(self.hedge_type), self.long_margin_ratio)
+             HedgeType.type_to_str(self.hedge_type))
         return rst
 
     def __eq__(self, r):
