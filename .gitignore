@@ -12,3 +12,4 @@ tests/work/
 
 _local_*
 demo/log
+__pycache__

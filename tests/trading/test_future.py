@@ -5,15 +5,22 @@ import pandas as pd
 import os
 
 from six.moves import range
-from future_util import (
+
+from quantdigger.datastruct import TradeSide, Contract, Direction
+from quantdigger import (
+    add_strategy,
+    set_symbols,
+    Strategy,
+    run
+)
+
+from .future_util import (
     trade_closed_curbar,
     in_closed_nextbar,
     out_closed_nextbar,
     entries_maked_nextbar,
     market_trade_closed_curbar,
     OFFSET,
-)
-from source import (
     capital,
     bt1,
     bt2,
@@ -21,15 +28,6 @@ from source import (
     st1,
     st2,
     st3,
-)
-
-from quantdigger.datastruct import TradeSide, Contract, Direction
-
-from quantdigger import (
-    add_strategy,
-    set_symbols,
-    Strategy,
-    run
 )
 
 fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'FUTURE.csv')

@@ -10,7 +10,10 @@ from quantdigger import (
     Strategy,
     run
 )
-from source import (
+
+from .stock_util import (
+    buy_monday_sell_friday,
+    trade_closed_curbar,
     capital,
     bt1,
     bt2,
@@ -18,18 +21,13 @@ from source import (
     st1,
     st2
 )
-from stock_util import (
-    buy_monday_sell_friday,
-    trade_closed_curbar,
-)
 
 fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'STOCK.csv')
 source = pd.read_csv(fname, parse_dates=True, index_col=0)
 
-
 class TestOneDataOneCombinationStock(unittest.TestCase):
     """
-    ctx.pos 可平仓位
+    ctx.pos 可平仓位, 当天买隔天卖，当天不能卖。
     """
 
     def test_case(self):
@@ -58,10 +56,11 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                 self.equities.append(ctx.equity())
 
             def test(self, test):
-                equities, cashes, open_equities, open_casheses, dts = trade_closed_curbar(source, capital*0.3, lmg, smg, multi, 1)
+                equities, cashes, open_equities, open_casheses, dts =\
+                    trade_closed_curbar(source, capital * 0.3, lmg, smg, multi, 1)
 
                 test.assertTrue(len(self.cashes) == len(cashes), 'cash接口测试失败！')
-                for i in range(0, len(self.cashes)): # 最后一根强平了无法比较
+                for i in range(0, len(self.cashes)):
                     test.assertAlmostEqual(self.cashes[i], open_casheses[i])
                     test.assertAlmostEqual(self.equities[i], open_equities[i])
 
@@ -69,7 +68,6 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                     test.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
                     test.assertAlmostEqual(hd['equity'], equities[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
-
 
         class DemoStrategy2(Strategy):
             """ 限价买多卖空的策略 """
@@ -110,7 +108,6 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                     test.assertAlmostEqual(self.cashes[i], cashes[i])
 
         class DemoStrategy3(Strategy):
-            """ 测试平仓未成交时的持仓，撤单后的持仓，撤单。 """
             def on_init(self, ctx):
                 """初始化数据"""
                 pass
@@ -189,7 +186,6 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 count = 0
                 all_holdings0 = profile.all_holdings(0)
                 for i, hd in enumerate(all_holdings0):
-                    # 刚好最后一根没持仓，无需考虑强平, 见weekday输出
                     dt = hd['datetime']
                     if dt in cashes:
                         test.assertAlmostEqual(hd['cash'], cashes[dt])
@@ -199,10 +195,9 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                         count += 1
                     else:
                         # 两支股票的混合，总数据长度和source不一样。
-                        test.assertAlmostEqual(all_holdings0[i-1]['cash'], hd['cash'])
-                        test.assertAlmostEqual(all_holdings0[i-1]['equity'], hd['equity'])
+                        test.assertAlmostEqual(all_holdings0[i - 1]['cash'], hd['cash'])
+                        test.assertAlmostEqual(all_holdings0[i - 1]['equity'], hd['equity'])
                 test.assertTrue(count == len(dts))
-
 
         class DemoStrategy2(Strategy):
             """ 选股，并且时间没对齐的日线数据。 """
@@ -235,7 +230,6 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 self.tosells = []
 
             def test(self, test, profile):
-                # test Strategy2
                 fname = os.path.join(os.getcwd(), 'data', '1DAY', 'SH', '600521.csv')
                 source = pd.read_csv(fname, parse_dates=True, index_col=0)
                 fname = os.path.join(os.getcwd(), 'data', '1DAY', 'SH', '600522.csv')
@@ -243,13 +237,12 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 equities0, cashes0, open_equities0, open_cashes0, dts = \
                     buy_monday_sell_friday(source, capital * 0.3 / 2, 1, 1)
                 equities1, cashes1, open_equities1, open_cashes1, dts = \
-                    buy_monday_sell_friday(source2, capital*0.3/2, 1, 1)
+                    buy_monday_sell_friday(source2, capital * 0.3 / 2, 1, 1)
                 last_equity0 = 0
-                last_equity1  = 0
+                last_equity1 = 0
                 last_cash0 = 0
                 last_cash1 = 0
                 for i, hd in enumerate(profile.all_holdings(1)):
-                    # 刚好最后一根没持仓，无需考虑强平, 见weekday输出
                     dt = hd['datetime']
                     equity = 0
                     cash = 0
@@ -271,14 +264,13 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                     if dt in equities1:
                         equity += equities1[dt]
                         cash += cashes1[dt]
-                        last_equity1  = equities1[dt]
+                        last_equity1 = equities1[dt]
                         last_cash1 = cashes1[dt]
                         open_equity += open_equities1[dt]
                         open_cash += open_cashes1[dt]
                     else:
                         equity += last_equity1
                         cash += last_cash1
-                        # 新的ctx.cash()将会以最近数据的收盘价为准。
                         open_equity += last_equity1
                         open_cash += last_cash1
 
@@ -286,7 +278,6 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                     test.assertAlmostEqual(hd['cash'], cash)
                     test.assertAlmostEqual(self._equities[dt], open_equity)
                     test.assertAlmostEqual(self._cashes[dt], open_cash)
-
 
         class DemoStrategy3(Strategy):
             """ 测试平仓未成交时的持仓，撤单后的持仓，撤单。 """
@@ -304,13 +295,11 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
         profile = add_strategy([b1, b2, b3], {
             'capital': capital,
             'ratio': [0.3, 0.3, 0.4]
-            })
+        }
+        )
         run()
         b1.test(self, profile)
         b2.test(self, profile)
-
-
-
 
 
 if __name__ == '__main__':
