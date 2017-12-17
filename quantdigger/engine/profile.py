@@ -15,6 +15,7 @@ from quantdigger.datastruct import (
     TradeSide,
 )
 
+
 class Profile(object):
     """ 组合结果 """
     def __init__(self, scontexts, dcontexts, strpcon, i):

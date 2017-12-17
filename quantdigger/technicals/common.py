@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-##
-# @file common.py
-# @brief
-# @author wondereamer
-# @version 0.1
-# @date 2015-12-23
 
-from six.moves import range
 import talib
 
-from quantdigger.technicals.base import \
-    TechnicalBase, ndarray, tech_init
+from quantdigger.technicals.base import (
+    TechnicalBase,
+    ndarray,
+    tech_init
+)
 from quantdigger.technicals.techutil import register_tech
 from quantdigger.widgets.plotter import Plotter, plot_init
 

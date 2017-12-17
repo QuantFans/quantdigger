@@ -21,7 +21,7 @@ def xticks_to_display(data_length):
     return xticks
 
 
-def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
+def plot_strategy(price_data, technicals={}, deals=[], curve=[], marks=[]):
     """
         显示回测结果。
     """
@@ -47,7 +47,7 @@ def plot_strategy(price_data, indicators={}, deals=[], curve=[], marks=[]):
         curve = Line(curve)
         subwidget1.add_plotter(curve, True)
     # 添加指标
-    for name, indic in six.iteritems(indicators):
+    for name, indic in six.iteritems(technicals):
         subwidget1.add_plotter(indic, False)
 
     # 绘制第2个窗口

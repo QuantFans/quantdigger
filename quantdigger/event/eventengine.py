@@ -1,10 +1,4 @@
 # encoding: UTF-8
-##
-# @file eventenvine.py
-# @brief
-# @author wondereamer
-# @version 0.5
-# @date 2016-05-17
 
 import six
 from six.moves import queue, _thread

@@ -19,6 +19,7 @@ from quantdigger.datastruct import (
     PositionKey,
 )
 
+
 class StrategyContext(object):
     """ 策略组合
 

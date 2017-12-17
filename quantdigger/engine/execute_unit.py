@@ -100,8 +100,6 @@ class ExecuteUnit(object):
                         elif strpcon == pcon.split('.')[0]:
                             # "xxx"
                             rst.append(pcon)
-                        #if strpcon in pcon:
-                            #rst.append(strpcon)
         return rst
 
     def add_comb(self, comb, settings):
@@ -120,7 +118,7 @@ class ExecuteUnit(object):
         if num_strategy == 1:
             settings['ratio'] = [1]
         elif num_strategy > 1 and 'ratio' not in settings:
-            settings['ratio'] = [1.0/num_strategy] * num_strategy
+            settings['ratio'] = [1.0 / num_strategy] * num_strategy
         assert('ratio' in settings)
         assert(len(settings['ratio']) == num_strategy)
         assert(sum(settings['ratio']) - 1.0 < 0.000001)
@@ -130,13 +128,12 @@ class ExecuteUnit(object):
             iset = {}
             if settings:
                 iset = {'capital': settings['capital'] * settings['ratio'][i]}
-                # logger.debug(iset)
             ctxs.append(strategy_context.StrategyContext(s.name, iset))
         self.context.add_strategy_context(ctxs)
         return Profile(ctxs,
                        self._all_data,
                        self.pcontracts[0],
-                       len(self._combs)-1)
+                       len(self._combs) - 1)
 
     def run(self):
         # @TODO max_window 可用来显示回测进度
@@ -183,7 +180,7 @@ class ExecuteUnit(object):
             self.context.ctx_datetime = datetime(2100, 1, 1)
             self.context.ctx_curbar += 1
             if self.context.ctx_curbar <= self._max_window:
-                pbar.update(self.context.ctx_curbar*100.0/self._max_window)
+                pbar.update(self.context.ctx_curbar * 100.0 / self._max_window)
             #
             toremove = []
             for pcon, data in six.iteritems(self._all_data):
@@ -224,7 +221,7 @@ class ExecuteUnit(object):
                 continue
             all_data[strpcon] = data_context.DataContext(wrapper)
             max_window = max(max_window, len(wrapper))
-            pbar.update(i*100.0/len(strpcons))
+            pbar.update(i * 100.0 / len(strpcons))
             # progressbar.log('')
         if n:
             assert(max_window <= n)
