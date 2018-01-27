@@ -3,7 +3,6 @@
 
 from quantdigger.event.rpc import EventRPCServer
 from quantdigger.event.eventengine import ZMQEventEngine
-from quantdigger.interaction.interface import BackendInterface
 from quantdigger.util import mlogger as log
 from quantdigger.datasource.data import DataManager
 from quantdigger.datastruct import Contract, PContract
@@ -14,7 +13,7 @@ from quantdigger.interaction.serialize import (
 )
 
 
-class Backend(BackendInterface):
+class Backend:
     SERVER_FOR_UI = 'backend4ui'
     SERVER_FOR_SHELL = "backend4shell"
 
@@ -38,13 +37,13 @@ class Backend(BackendInterface):
         server.register('get_strategies', self.get_strategies)
         server.register('run_strategy', self.run_strategy)
         server.register('run_technical', self.run_technical)
+        server.register('test_speed', self.test_speed)
 
     def stop(self):
         log.info('Backend stopped.')
         self._engine.stop()
 
     def get_all_contracts(self):
-        return "hello world!"
         def _mk_contract(code, exchage):
             s = '%s.%s' % (code, exchage)
             return Contract(s)
@@ -77,6 +76,9 @@ class Backend(BackendInterface):
 
     def get_strategies(self):
         return 'hello'
+
+    def test_speed(self):
+        return 'hello world!'
 
 
 if __name__ == '__main__':

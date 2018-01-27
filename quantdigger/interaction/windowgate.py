@@ -9,7 +9,6 @@
 from quantdigger.datastruct import PContract
 from quantdigger.event.rpc import EventRPCClient, EventRPCServer
 from quantdigger.event.eventengine import ZMQEventEngine
-from quantdigger.interaction.interface import BackendInterface
 from quantdigger.util import gen_logger as log
 from quantdigger.interaction.backend import Backend
 
@@ -20,7 +19,7 @@ from quantdigger.interaction.serialize import (
 )
 
 
-class WindowGate(BackendInterface):
+class WindowGate:
     SERVER_FOR_SHELL = "ui4shell"
 
     def __init__(self, widget):
