@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
 
+
 class BackendInterface(object):
     __metaclass__ = ABCMeta
 
@@ -35,9 +36,10 @@ class BackendInterface(object):
 
 class UIInterface(object):
     __metaclass__ = ABCMeta
+
     def __init__(self):
         pass
-    
+
     @abstractmethod
     def plot(self):
         pass

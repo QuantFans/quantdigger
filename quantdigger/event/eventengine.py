@@ -180,6 +180,7 @@ class ZMQEventEngine(EventEngine):
         try:
             self._broadcast_event_socket = self._context.socket(zmq.PUB)
             self._broadcast_event_socket.bind(event_protocol)
+
             self._server_recv_event_socket = self._context.socket(zmq.PULL)
             self._server_recv_event_socket.bind(register_protocol)
             self._is_server = True
@@ -190,6 +191,7 @@ class ZMQEventEngine(EventEngine):
 
         self._emit_event_socket = self._context.socket(zmq.PUSH)
         self._emit_event_socket.connect(register_protocol)
+
         self._client_recv_event_socket = self._context.socket(zmq.SUB)
         self._client_recv_event_socket.connect(event_protocol)
 
@@ -199,7 +201,6 @@ class ZMQEventEngine(EventEngine):
         time.sleep(1)
 
     def emit(self, event):
-        """ client or event"""
         msg = Event.event_to_message(event)
         self._emit_event_socket.send_string(msg)
         return

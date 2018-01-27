@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 # @file windowgate.py
-# @brief 
+# @brief
 # @author wondereamer
 # @version 0.5
 # @date 2016-07-10
@@ -22,6 +22,7 @@ from quantdigger.interaction.serialize import (
 
 class WindowGate(BackendInterface):
     SERVER_FOR_SHELL = "ui4shell"
+
     def __init__(self, widget):
         log.info("Init WindowGate..")
         self._engine = ZMQEventEngine('WindowGate')
@@ -43,8 +44,8 @@ class WindowGate(BackendInterface):
         self._widget.add_widget
 
     def add_technical(self, ith, technical):
-        """""" 
-        ## @TODO compute technical with backend,
+        """"""
+        # @TODO compute technical with backend,
         # display result from backend
         return
 
@@ -66,11 +67,11 @@ class WindowGate(BackendInterface):
     def get_pcontract(self, str_pcontract):
         ret = self._backend.sync_call('get_pcontract', {
             'str_pcontract': str_pcontract
-            })
+        })
         return deserialize_pcontract_bars(ret)
 
     def run_strategy(self, name):
-        """""" 
+        """"""
         return
 
     def run_technical(self, name):
