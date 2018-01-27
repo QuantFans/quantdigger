@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-##
-# @file backend.py
-# @brief
-# @author wondereamer
-# @version 0.5
-# @date 2016-07-10
 
 
 from quantdigger.event.rpc import EventRPCServer
@@ -50,6 +44,7 @@ class Backend(BackendInterface):
         self._engine.stop()
 
     def get_all_contracts(self):
+        return "hello world!"
         def _mk_contract(code, exchage):
             s = '%s.%s' % (code, exchage)
             return Contract(s)
