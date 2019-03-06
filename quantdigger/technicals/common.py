@@ -24,7 +24,6 @@ class MA(TechnicalBase):
 
     def _rolling_algo(self, data, n, i):
         """ 逐步运行函数。"""
-        ## @todo 因为用了向量化方法，速度降低
         return (talib.SMA(data, n)[i], )
 
     def _vector_algo(self, data, n):

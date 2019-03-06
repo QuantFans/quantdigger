@@ -7,11 +7,10 @@ import os
 from six.moves import range
 
 from quantdigger.datastruct import TradeSide, Contract, Direction
+from quantdigger.engine.profile import Profile
 from quantdigger import (
-    add_strategy,
-    set_symbols,
-    Strategy,
-    run
+    add_strategies,
+    Strategy
 )
 
 from .future_util import (
@@ -43,7 +42,7 @@ class TestOneDataOneCombination(unittest.TestCase):
     分钟线日内限价交易, 且当根bar成交。
     测试：
         Strategy1, Strategy2:
-           profile.all_holdings(x)
+           profiles.all_holdings(x)
            ctx.buy, ctx.sell
            ctx.cash(), ctx.equity()
 
@@ -55,7 +54,7 @@ class TestOneDataOneCombination(unittest.TestCase):
     """
 
     def test_case(self):
-        profile = None
+        profiles = None
 
         class DemoStrategy1(Strategy):
             """ 限价只买多头仓位的策略 """
@@ -90,13 +89,13 @@ class TestOneDataOneCombination(unittest.TestCase):
                                                                                               smg,
                                                                                               multi,
                                                                                               1)
-                for i, hd in enumerate(profile.all_holdings(0)):
+                for i, hd in enumerate(profiles[0].all_holdings()):
                     test.assertAlmostEqual(self.open_equity[i], open_equity[i])
                     test.assertAlmostEqual(self.open_cash[i], open_cashes[i])
                     test.assertAlmostEqual(hd['equity'], close_equity[i])
                     test.assertAlmostEqual(hd['cash'], close_cash[i])
                     test.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
-                    test.assertTrue(len(profile.all_holdings()) == len(close_equity) and
+                    test.assertTrue(len(profiles[0].all_holdings()) == len(close_equity) and
                                     len(close_equity) > 0, 'holdings接口测试失败！')
 
         class DemoStrategy2(Strategy):
@@ -137,15 +136,15 @@ class TestOneDataOneCombination(unittest.TestCase):
                 close_cash = [x + y for x, y in zip(c0, c1)]
                 open_equity = [x + y for x, y in zip(oe0, oe1)]
                 open_cash = [x + y for x, y in zip(oc0, oc1)]
-                test.assertTrue(len(close_equity) == len(profile.all_holdings(1)))
+                test.assertTrue(len(close_equity) == len(profiles[1].all_holdings()))
                 for i in range(len(close_equity)):
-                    hd = profile.all_holdings(1)[i]
+                    hd = profiles[1].all_holdings()[i]
                     test.assertAlmostEqual(self.open_equity[i], open_equity[i])
                     test.assertAlmostEqual(self.open_cash[i], open_cash[i])
                     test.assertAlmostEqual(hd['equity'], close_equity[i])
                     test.assertAlmostEqual(hd['cash'], close_cash[i])
                     test.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
-                    test.assertTrue(len(profile.all_holdings()) == len(close_equity) and
+                    test.assertTrue(len(profiles[0].all_holdings()) == len(close_equity) and
                                     len(close_equity) > 0, 'holdings接口测试失败！')
 
         class DemoStrategy3(Strategy):
@@ -175,7 +174,7 @@ class TestOneDataOneCombination(unittest.TestCase):
                     assert(len(ctx.all_positions()) == 1 and '持仓测试失败!')
                     assert(ctx.pos() == 0 and '持仓测试失败!')
                     assert(len(ctx.open_orders) == 2 and '撤单测试失败！')
-                    order = list(filter(lambda x: x.side == TradeSide.PING, ctx.open_orders))[0]
+                    order = list(filter(lambda x: x.side == TradeSide.CLOSE, ctx.open_orders))[0]
                     ctx.cancel(order)
                 elif ctx.curbar == 8:
                     assert(len(ctx.open_orders) == 1 and '撤单测试失败！')
@@ -190,22 +189,29 @@ class TestOneDataOneCombination(unittest.TestCase):
                     assert(ctx.pos() == 1 and '隔夜未成交订单清空测试失败')
                     assert(len(ctx.open_orders) == 0 and '隔夜未成交订单清空测试失败')
 
-        set_symbols(['future.TEST-1.Minute'])
         s1 = DemoStrategy1('A1')
         s2 = DemoStrategy2('A2')
         s3 = DemoStrategy3('A3')
-        profile = add_strategy([s1, s2, s3], {
-            'capital': capital,
-            'ratio': [0.3, 0.3, 0.4]
-        })
-
-        run()
+        profiles = add_strategies(['future.TEST-1.Minute'], [
+            {
+                'strategy': s1,
+                'capital': capital * 0.3,
+            },
+            {
+                'strategy': s2,
+                'capital': capital * 0.3,
+            },
+            {
+                'strategy': s3,
+                'capital': capital * 0.4,
+            },
+        ])
 
         # 绘制k线，交易信号线
         # from quantdigger.digger import finance, plotting
-        # plotting.plot_strategy(profile.data(), deals=profile.deals(0))
+        # plotting.plot_strategy(profiles.data(), deals=profiles.deals(0))
 
-        all_holdings = profile.all_holdings()
+        all_holdings = Profile.all_holdings_sum(profiles)
         self.assertTrue(len(source) > 0 and len(source) == len(all_holdings), '模拟器测试失败！')
         self.assertAlmostEqual(lmg, 0.4)
         self.assertAlmostEqual(smg, 0.4)
@@ -215,11 +221,11 @@ class TestOneDataOneCombination(unittest.TestCase):
         s2.test(self)
 
         # test all_holdings
-        for i in range(0, len(profile.all_holdings())):
+        for i in range(0, len(profiles[0].all_holdings())):
             hd = all_holdings[i]
-            hd0 = profile.all_holdings(0)[i]
-            hd1 = profile.all_holdings(1)[i]
-            hd2 = profile.all_holdings(2)[i]
+            hd0 = profiles[0].all_holdings()[i]
+            hd1 = profiles[1].all_holdings()[i]
+            hd2 = profiles[2].all_holdings()[i]
             self.assertTrue(hd['cash'] == hd0['cash'] + hd1['cash'] + hd2['cash'],
                             'all_holdings接口测试失败！')
             self.assertTrue(hd['commission'] == hd0['commission'] +
@@ -260,8 +266,8 @@ class TestOneDataOneCombination2(unittest.TestCase):
             def test(self, test):
                 equities, cashes, open_equities, open_cashes, dts =\
                     in_closed_nextbar(source, buy_entries, capital / 4, lmg, smg, multi, 1)
-                test.assertTrue(len(profile.all_holdings(0)) == len(equities) and len(equities) > 0, '模拟器测试失败！')
-                for i, hd in enumerate(profile.all_holdings(0)):
+                test.assertTrue(len(profiles[0].all_holdings()) == len(equities) and len(equities) > 0, '模拟器测试失败！')
+                for i, hd in enumerate(profiles[0].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
                     test.assertAlmostEqual(hd['equity'], equities[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
@@ -294,8 +300,8 @@ class TestOneDataOneCombination2(unittest.TestCase):
                 # short
                 equities, cashes, open_equities, open_cashes, dts =\
                     in_closed_nextbar(source, short_entries, capital / 4, lmg, smg, multi, -1)
-                test.assertTrue(len(profile.all_holdings(2)) == len(equities) and len(equities) > 0, '模拟器测试失败！')
-                for i, hd in enumerate(profile.all_holdings(2)):
+                test.assertTrue(len(profiles[2].all_holdings()) == len(equities) and len(equities) > 0, '模拟器测试失败！')
+                for i, hd in enumerate(profiles[2].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
                     test.assertAlmostEqual(hd['equity'], equities[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
@@ -328,9 +334,9 @@ class TestOneDataOneCombination2(unittest.TestCase):
             def test(self, test):
                 target, cashes, open_equities, open_cashes, dts =\
                     out_closed_nextbar(source, sell_entries, capital / 4, lmg, smg, multi, 1)
-                test.assertTrue(len(profile.all_holdings(1)) == len(target) and
+                test.assertTrue(len(profiles[1].all_holdings()) == len(target) and
                                 len(target) > 0, '模拟器测试失败！')
-                for i, hd in enumerate(profile.all_holdings(1)):
+                for i, hd in enumerate(profiles[1].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
                     test.assertAlmostEqual(hd['equity'], target[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
@@ -363,8 +369,8 @@ class TestOneDataOneCombination2(unittest.TestCase):
             def test(self, test):
                 target, cashes, open_equities, open_cashes, dts =\
                     out_closed_nextbar(source, cover_entries, capital / 4, lmg, smg, multi, -1)
-                test.assertTrue(len(profile.all_holdings(3)) == len(target) and len(target) > 0, '模拟器测试失败！')
-                for i, hd in enumerate(profile.all_holdings(3)):
+                test.assertTrue(len(profiles[3].all_holdings()) == len(target) and len(target) > 0, '模拟器测试失败！')
+                for i, hd in enumerate(profiles[3].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
                     test.assertAlmostEqual(hd['equity'], target[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
@@ -372,20 +378,33 @@ class TestOneDataOneCombination2(unittest.TestCase):
                     test.assertAlmostEqual(self.equities[i], open_equities[i])
                     test.assertAlmostEqual(self.cashes[i], open_cashes[i])
 
-        set_symbols(['future.TEST-1.Minute'])
         b1 = DemoStrategyBuy('B1')
         b2 = DemoStrategySell('B2')
         b3 = DemoStrategyShort('B3')
         b4 = DemoStrategyCover('B4')
-        profile = add_strategy([b1, b2, b3, b4], {'capital': capital, 'ratio': [0.25, 0.25, 0.25, 0.25]})
         buy_entries, sell_entries, short_entries, cover_entries = entries_maked_nextbar(source)
-        run()
-
+        profiles = add_strategies(['future.TEST-1.Minute'], [
+            {
+                'strategy': b1,
+                'capital': capital * 0.25,
+            },
+            {
+                'strategy': b2,
+                'capital': capital * 0.25,
+            },
+            {
+                'strategy': b3,
+                'capital': capital * 0.25,
+            },
+            {
+                'strategy': b4,
+                'capital': capital * 0.25,
+            },
+        ])
         b1.test(self)
         b2.test(self)
         b3.test(self)
         b4.test(self)
-        return
 
 
 class TestOneDataOneCombination3(unittest.TestCase):
@@ -428,7 +447,7 @@ class TestOneDataOneCombination3(unittest.TestCase):
             def test(self, test):
                 target, cashes, open_equities, open_cashes, dts =\
                     market_trade_closed_curbar(source, capital, lmg, smg, multi)
-                for i, hd in enumerate(profile.all_holdings()):
+                for i, hd in enumerate(profiles[0].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], '模拟器测试失败！')
                     test.assertAlmostEqual(hd['equity'], target[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
@@ -437,10 +456,13 @@ class TestOneDataOneCombination3(unittest.TestCase):
                     test.assertAlmostEqual(self.equities[i], open_equities[i])
                     test.assertAlmostEqual(self.cashes[i], open_cashes[i])
 
-        set_symbols(['future.TEST-1.Minute'])
         c1 = DemoStrategy('C1')
-        profile = add_strategy([c1], {'capital': capital})
-        run()
+        profiles = add_strategies(['future.TEST-1.Minute'], [
+            {
+                'strategy': c1,
+                'capital': capital,
+            }
+        ])
         c1.test(self)
 
 
@@ -506,15 +528,18 @@ class TestOneDataOneCombination4(unittest.TestCase):
                     test.assertAlmostEqual(self.cashes[i], open_cashes[i])
                     test.assertAlmostEqual(self.equities[i], open_equities[i])
 
-                for i, hd in enumerate(profile.all_holdings()):
+                for i, hd in enumerate(Profile.all_holdings_sum(profiles)):
                     test.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
                     test.assertAlmostEqual(hd['equity'], target[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
 
-        set_symbols(['future.TEST-1.Minute', 'future2.TEST-1.Minute'])
         d1 = DemoStrategy('D1')
-        profile = add_strategy([d1], {'capital': capital})
-        run()
+        profiles = add_strategies(['future.TEST-1.Minute', 'future2.TEST-1.Minute'], [
+            {
+                'strategy': d1,
+                'capital': capital,
+            }
+        ])
 
         d1.test(self)
 

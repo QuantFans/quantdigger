@@ -21,13 +21,13 @@ class CsvSource(DatasourceAbstract):
         dt_end = pd.to_datetime(dt_end)
         data = data[(dt_start <= data.index) & (data.index <= dt_end)]
         assert data.index.is_unique
-        return SourceWrapper(pcontract, data, len(data))
+        return data
 
     def get_last_bars(self, pcontract, n):
         data = self._load_bars(pcontract)
         data = data[-n:]
         assert data.index.is_unique
-        return SourceWrapper(pcontract, data, len(data))
+        return data
 
     def get_contracts(self):
         """ 获取所有合约的基本信息

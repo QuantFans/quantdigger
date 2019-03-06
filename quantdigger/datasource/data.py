@@ -8,7 +8,7 @@
 
 from .dsutil import get_setting_datasource
 from quantdigger.datastruct import PContract, Contract
-from quantdigger.util import gen_log as log
+from quantdigger.util import log
 
 
 class DataManager(object):

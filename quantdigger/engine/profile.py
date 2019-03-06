@@ -6,9 +6,10 @@
 # @version 0.4
 # @date 2016-12-18
 
-import six
 from six.moves import range
 import copy
+import pandas as pd
+
 from quantdigger.datastruct import (
     OneDeal,
     PositionKey,
@@ -18,149 +19,77 @@ from quantdigger.datastruct import (
 
 class Profile(object):
     """ 组合结果 """
-    def __init__(self, scontexts, dcontexts, strpcon, i):
+    def __init__(self, marks, blotter, data_ref):
         """
-
-        Args:
-            scontexts (list): 策略上下文集合
-            dcontexts (list): 数据上下文集合
-            strpcon (str): 主合约
-            i (int): 当前profile所对应的组合索引
         """
-        self._marks = [ctx.marks for ctx in scontexts]
-        self._blts = [ctx.blotter for ctx in scontexts]
-        self._dcontexts = {}
-        self._ith_comb = i   # 对应于第几个组合
-        self._main_pcontract = strpcon
-        for key, value in six.iteritems(dcontexts):
-            self._dcontexts[key] = value
+        self._marks = marks
+        self._blotter = blotter
+        self._data_ref = data_ref
 
-    def name(self, j=None):
-        if j is not None:
-            return self._blts[j].name
-        return self._blts[0].name
+    def name(self):
+        return self._blotter.name
 
-    def transactions(self, j=None):
-        """ 第j个策略的所有成交明细, 默认返回组合的成交明细。
-
-        Args:
-            j (int): 第j个策略
-
-        Returns:
-            list. [Transaction, ..]
+    def transactions(self) -> "[Transaction]":
+        """ 策略的所有成交明细
         """
-        if j is not None:
-            return self._blts[j].transactions
-        trans = []
-        for blt in self._blts:
-            trans.append(blt.transactions)
-        # @TODO 时间排序
-        return trans
+        return self._blotter.transactions
 
-    def deals(self, j=None):
-        """ 第j个策略的每笔交易(一开一平), 默认返回组合的每笔交易。
-
-        Args:
-            j (int): 第j个策略
+    def deals(self):
+        """ 策略的每笔交易(一开一平)。
 
         Returns:
             list. [OneDeal, ..]
         """
-        """ 交易信号对 """
         positions = {}
         deals = []
-        if j is not None:
-            for trans in self.transactions(j):
-                self._update_positions(positions, deals, trans)
-        else:
-            for i in range(0, len(self._blts)):
-                deals += self.deals(i)
+        for trans in self.transactions():
+            self._update_positions(positions, deals, trans)
         return deals
 
-    def all_holdings(self, j=None):
-        """ 第j个策略的账号历史, 默认返回组合的账号历史。
-
-        Args:
-            j (int): 第j个策略
+    def all_holdings(self):
+        """ 策略账号资金的历史。
 
         Returns:
             list. [{'cash', 'commission', 'equity', 'datetime'}, ..]
         """
-        if j is not None:
-            return self._blts[j].all_holdings
-        if len(self._blts) == 1:
-            return self._blts[0].all_holdings
+        return self._blotter.all_holdings
 
-        if hasattr(self, '_all_holdings'):
-            return self._all_holdings
-        self._all_holdings = copy.deepcopy(self._blts[0].all_holdings)
-        for i, hd in enumerate(self._all_holdings):
-            for blt in self._blts[1:]:
+    @staticmethod
+    def all_holdings_sum(profiles):
+        """
+        Returns:
+            list. [{'cash', 'commission', 'equity', 'datetime'}, ..]
+        """
+        all_holdings = copy.deepcopy(profiles[0].all_holdings())
+        for i, hd in enumerate(all_holdings):
+            for profile in profiles[1:]:
                 try:
-                    rhd = blt.all_holdings[i]
+                    rhd = profile.all_holdings()[i]
                 except IndexError:
                     rhd = rhd[-2]  # 是否强平导致长度不一
                 hd['cash'] += rhd['cash']
                 hd['commission'] += rhd['commission']
                 hd['equity'] += rhd['equity']
-        return self._all_holdings
+        return all_holdings
 
-    def holding(self, j=None):
+
+    def holding(self):
         """ 当前账号情况
-
-        Args:
-            j (int): 第j个策略
-
         Returns:
             dict. {'cash', 'commission', 'history_profit', 'equity' }
         """
-        if j is not None:
-            return self._blts[j].holding
-        if len(self._blts) == 1:
-            return self._blts[0].holding
-        if hasattr(self, '_holdings'):
-            return self._holdings
-        self._holdings = copy.deepcopy(self._blts[0].holding)
-        for blt in self._blts[1:]:
-            rhd = blt.holding
-            self._holdings['cash'] += rhd['cash']
-            self._holdings['commission'] += rhd['commission']
-            self._holdings['equity'] += rhd['equity']
-            self._holdings['history_profit'] += rhd['history_profit']
-        return self._holdings
+        return self._blotter.holding
 
-    def marks(self, j=None):
-        """ 返回第j个策略的绘图标志集合 """
-        if j is not None:
-            return self._marks[j]
-        return self._marks[0]
+    def marks(self):
+        return self._marks
 
-    def technicals(self, j=None, strpcon=None):
-        # @TODO test case
-        # @TODO 没必要针对不同的strpcon做分析
-        """ 返回第j个策略的指标, 默认返回组合的所有指标。
-
-        Args:
-            j (int): 第j个策略
-
-            strpcon (str): 周期合约
-
-        Returns:
-            dict. {指标名:指标}
-        """
-        pcon = strpcon if strpcon else self._main_pcontract
-        if j is not None:
-            return {v.name: v for v in self._dcontexts[pcon].
-                    technicals[self._ith_comb][j].values()}
-        rst = {}
-        for j in range(0, len(self._blts)):
-            t = {v.name: v for v in self._dcontexts[pcon].
-                 technicals[self._ith_comb][j].values()}
-            rst.update(t)
-        return rst
+    def technicals(self, strpcon=None):
+        if not strpcon:
+            strpcon = self._data_ref.default_pcontract
+        strpcon = strpcon.upper()
+        return self._data_ref.get_technicals(strpcon)
 
     def data(self, strpcon=None):
-        # @TODO execute_unit._parse_pcontracts()
         """ 周期合约数据, 只有向量运行才有意义。
 
         Args:
@@ -170,9 +99,17 @@ class Profile(object):
             pd.DataFrame. 数据
         """
         if not strpcon:
-            strpcon = self._main_pcontract
+            strpcon = self._data_ref.default_pcontract
         strpcon = strpcon.upper()
-        return self._dcontexts[strpcon].raw_data
+        original = self._data_ref.get_data(strpcon).original
+        df = pd.DataFrame({
+            'open': original.open.data,
+            'close': original.close.data,
+            'high': original.high.data,
+            'low': original.low.data,
+            'volume': original.volume.data
+        }, index=original.datetime.data)
+        return df
 
     def _update_positions(self, current_positions, deal_positions, trans):
         """ 根据交易明细计算开平仓对。 """
@@ -191,12 +128,12 @@ class Profile(object):
         assert trans.quantity > 0
         poskey = PositionKey(trans.contract, trans.direction)
         p = current_positions.setdefault(poskey, PositionsDetail())
-        if trans.side == TradeSide.KAI:
+        if trans.side == TradeSide.OPEN:
             # 开仓
             p.positions.append(trans)
             p.total += trans.quantity
 
-        elif trans.side == TradeSide.PING:
+        elif trans.side == TradeSide.CLOSE:
             # 平仓
             assert(len(p.positions) > 0 and '所平合约没有持仓')
             left_vol = trans.quantity

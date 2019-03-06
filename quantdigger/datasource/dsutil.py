@@ -3,7 +3,7 @@
 import six
 from quantdigger.configutil import ConfigUtil
 from quantdigger.infras.ioc import *
-from quantdigger.util import dlogger as logger
+from quantdigger.util import log
 
 _ds_container = IoCContainer()
 
@@ -14,8 +14,7 @@ class _DatasourceTrunk(IoCTrunk):
         super(_DatasourceTrunk, self).__init__(cls, args, kwargs)
 
     def on_register(self, name):
-        logger.info('register datasource: {cls} => {name}',
-                    cls=self.cls, name=name)
+        log.info('register datasource: {0} => {1}'.format(self.cls, name))
 
     def construct(self):
         a = [ConfigUtil.get(k, None) for k in self.args]

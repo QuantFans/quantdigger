@@ -1,3 +1,2 @@
-from .data_context import DataContext
-from .strategy_context import StrategyContext
+from .data_context import OriginalData
 from .context import Context

@@ -4,7 +4,7 @@ import six
 import time
 from datetime import datetime
 from threading import Thread, Condition, Lock
-from quantdigger.util import mlogger as log
+from quantdigger.util import log
 from quantdigger.errors import InvalidRPCClientArguments
 from quantdigger.event import Event
 

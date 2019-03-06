@@ -5,7 +5,7 @@ from pandas import DataFrame
 from quantdigger.datasource.dsutil import get_setting_datasource
 from quantdigger.errors import PeriodTypeError
 from quantdigger.config import settings
-from quantdigger.util import dlogger as logger
+from quantdigger.util import log
 
 
 class TradeSide(object):
@@ -17,8 +17,8 @@ class TradeSide(object):
     :ivar SELL: 多头平仓，4
     :ivar COVER_TODAY: 空头平今，5
     :ivar SELL_TODAY: 多头平今，6
-    :ivar KAI: 开仓，7
-    :ivar PING: 平仓，8
+    :ivar OPEN: 开仓，7
+    :ivar CLOSE: 平仓，8
     :ivar CANCEL: 撤单，9
     """
     BUY = 1
@@ -27,8 +27,8 @@ class TradeSide(object):
     SELL = 4
     COVER_TODAY = 5
     SELL_TODAY = 6
-    KAI = 7
-    PING = 8
+    OPEN = 7
+    CLOSE = 8
     CANCEL = 9
 
     @classmethod
@@ -43,8 +43,8 @@ class TradeSide(object):
             'SELL': 4,
             'COVER_TODAY': 5,
             'SELL_TODAY': 6,
-            'KAI': 7,
-            'PING': 8,
+            'OPEN': 7,
+            'CLOSE': 8,
             'CANCEL': 9
         }
         if isinstance(arg, str):
@@ -61,8 +61,8 @@ class TradeSide(object):
             cls.SELL: '多头平仓',
             cls.COVER_TODAY: '空头平今',
             cls.SELL_TODAY: '多头平今',
-            cls.KAI: '开仓',
-            cls.PING: '平仓',
+            cls.OPEN: '开仓',
+            cls.CLOSE: '平仓',
             cls.CANCEL: '撤单',
         }
         return type2str[type_]
@@ -372,8 +372,8 @@ class Contract(object):
             code = info[0].upper()
             exchange = info[1].upper()
         else:
-            logger.error('错误的合约格式: %s' % str_contract)
-            logger.exception()
+            log.error('错误的合约格式: %s' % str_contract)
+            log.exception()
         self.exchange = exchange
         self.code = code
         if self.exchange == 'SZ' or self.exchange == 'SH':
@@ -385,7 +385,7 @@ class Contract(object):
         elif self.exchange == 'TEST':
             self.is_stock = False
         else:
-            logger.error('Unknown exchange: {0}', self.exchange)
+            log.error('Unknown exchange: {0}', self.exchange)
             assert(False)
 
     @classmethod
@@ -431,7 +431,7 @@ class Contract(object):
             ## @todo 确保CONTRACTS.csv里面没有重复的项，否则有可能返回数组．
             return cls._get_info().loc[strcontract.upper(), 'long_margin_ratio']
         except KeyError:
-            logger.warn("Can't not find contract: %s" % strcontract)
+            log.warn("Can't not find contract: %s" % strcontract)
             return 1
             # assert(False)
 
@@ -440,7 +440,7 @@ class Contract(object):
         try:
             return cls._get_info().loc[strcontract.upper(), 'short_margin_ratio']
         except KeyError:
-            logger.warn("Can't not find contract: %s" % strcontract)
+            log.warn("Can't not find contract: %s" % strcontract)
             return 1
             # assert(False)
 
@@ -449,7 +449,7 @@ class Contract(object):
         try:
             return cls._get_info().loc[strcontract.upper(), 'volume_multiple']
         except KeyError:
-            logger.warn("Can't not find contract: %s" % strcontract)
+            log.warn("Can't not find contract: %s" % strcontract)
             return 1
             # assert(False)
 

@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-import six
 from six.moves import range
 import datetime
 import unittest
@@ -10,18 +9,17 @@ import talib
 import numpy as np
 from quantdigger.util.log import gen_log as logger
 from quantdigger import (
-    add_strategy,
+    add_strategies,
     NumberSeries,
     DateTimeSeries,
     MA,
     BOLL,
-    set_symbols,
     Strategy,
-    run
 )
 
 
 class TestSeries(unittest.TestCase):
+#class TestSeries(object):
     """
     测试：
     * 序列变量
@@ -30,15 +28,13 @@ class TestSeries(unittest.TestCase):
         3) 序列变量和数值的运算。ctx.open-0
         4) NumberSeries.DEFAULT_VALUE, DateTimeSeries.DEFAULT_VALUE
         5) open, close, high, low, volume, datetime等系统序列变量值。
-    * 普通变量。   ctx.curbar_list
-    * ctx.curbar。  ctx.curbar_list
+    * ctx.curbar。
     """
     def test_case(self):
         close, open, dt, high, low, volume = [], [], [], [], [], []
         open3, dt3 = [], []
         operator_test = []
         user_vars = {
-            'curbar_list': [],
             'numseries': [],
             'numseries3': [],
             'dtseries': [],
@@ -50,7 +46,6 @@ class TestSeries(unittest.TestCase):
                 ctx.ma3 = MA(ctx.close, 3)
                 ctx.numseries = NumberSeries()
                 ctx.dtseries = DateTimeSeries()
-                ctx.curbar_list = []
 
             def on_symbol(self, ctx):
                 # @TODO * /
@@ -74,15 +69,16 @@ class TestSeries(unittest.TestCase):
                 elif ctx.curbar >= 300:
                     ctx.dtseries.update(datetime.datetime(3000, 1, 1))
                     ctx.numseries.update(300)
-                ctx.curbar_list.append(ctx.curbar)
                 user_vars['numseries3'].append(ctx.numseries[3])
                 user_vars['numseries'].append(ctx.numseries[0])
                 user_vars['dtseries'].append(ctx.dtseries[0])
-                user_vars['curbar_list'] = ctx.curbar_list
 
-        set_symbols(['BB.TEST-1.Minute'])
-        add_strategy([DemoStrategy('A1')])
-        run()
+        add_strategies(['BB.TEST-1.Minute'], [
+            {
+                'strategy': DemoStrategy('A1'),
+                'capital': 1000000.0,
+            }
+        ])
 
         # 序列变量默认值
         self.assertTrue(NumberSeries.DEFAULT_VALUE == 0.0, "默认值测试失败")
@@ -107,8 +103,6 @@ class TestSeries(unittest.TestCase):
         self.assertFalse(source.equals(target), "系统时间序列变量反测试出错")
 
         # ctx.curbar，用户普通变量测试
-        for i in range(0, len(user_vars['curbar_list'])):
-            self.assertTrue(i + 1 == user_vars['curbar_list'][i])
         self.assertTrue(len(user_vars['numseries'])==len(open) and len(open)>0, '系列变量长度不一致')
         logger.info('-- 用户普通变量测试成功 --')
         logger.info('-- curbar测试成功 --')
@@ -145,6 +139,7 @@ class TestSeries(unittest.TestCase):
 
 
 class TestTechnical(unittest.TestCase):
+#class TestTechnical(object):
 
     def test_case(self):
         """
@@ -190,9 +185,12 @@ class TestTechnical(unittest.TestCase):
                 assert(isinstance(ctx.boll['lower'], NumberSeries))
                 assert(isinstance(ctx.ma, MA))
 
-        set_symbols(['BB.TEST-1.Minute'])
-        add_strategy([DemoStrategy('A1')])
-        run()
+        add_strategies(['BB.TEST-1.Minute'], [
+            {
+                'strategy': DemoStrategy('A1'),
+                'capital': 1000000.0,
+            }
+        ])
 
         # 单值指标运算和回溯测试
         source_ma = talib.SMA(np.asarray(close), 2)
@@ -226,6 +224,7 @@ class TestTechnical(unittest.TestCase):
 
 
 class TestMainFunction(unittest.TestCase):
+#class TestMainFunction(object):
     def test_case(self):
         """
         案例：两个策略组合，每个策略组合下分别有两个策略，每个组合运行于两个周期合约中。
@@ -251,19 +250,35 @@ class TestMainFunction(unittest.TestCase):
 
             def on_symbol(self, ctx):
                 # six.print_(ctx.strategy, ctx.pcontract)
-                on_symbol['combination'].add((str(ctx.pcontract), ctx.strategy))
+                on_symbol['combination'].add((str(ctx.pcontract),
+                                              ctx.strategy_name))
                 on_symbol['step_num'] += 1
 
             def on_bar(self, ctx):
-                on_bar['strategy'].append(ctx.strategy)
+                on_bar['strategy'].append(ctx.strategy_name)
 
             def on_exit(self, ctx):
-                on_exit['strategy'].append(ctx.strategy)
+                on_exit['strategy'].append(ctx.strategy_name)
 
-        set_symbols(['BB.TEST-1.Minute', 'AA.TEST-1.Minute'])
-        add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
-        add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
-        run()
+        add_strategies(['BB.TEST-1.Minute', 'AA.TEST-1.Minute'], [
+            {
+                'strategy': DemoStrategy('A1'),
+                'capital': 1000000.0 * 0.5,
+            },
+            {
+                'strategy': DemoStrategy('A2'),
+                'capital': 1000000.0 * 0.5,
+            },
+            {
+                'strategy': DemoStrategy('B1'),
+                'capital': 1000000.0 * 0.5,
+            },
+            {
+                'strategy': DemoStrategy('B2'),
+                'capital': 1000000.0 * 0.5,
+            }
+        ])
+
 
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'BB.csv')
         blen = len(pd.read_csv(fname))
@@ -284,13 +299,15 @@ class TestMainFunction(unittest.TestCase):
         # 测试on_symbol
         self.assertTrue(on_symbol['combination'] == sample, "on_symbol测试失败!")
         self.assertTrue(on_symbol['step_num'] == alen * 4 + blen * 4, "on_symbol测试失败!")
-        self.assertTrue(['A1', 'A2', 'B1', 'B2'] * max(blen, alen) == on_bar['strategy'],
-                        'on_bar测试失败！')
+        length = max(blen, alen)
+        target = ['A1'] * length + ['A2'] * length + ['B1'] * length + ['B2'] * length
+        self.assertTrue(target == on_bar['strategy'], 'on_bar测试失败！')
         self.assertTrue(['A1', 'A2', 'B1', 'B2'] == on_exit['strategy'], 'on_exit测试失败！')
         logger.info('-- 策略on_xxx主函数测试成功 --')
 
 
 class TestTimeAlign(unittest.TestCase):
+#class TestTimeAlign(object):
     """
         案例：不同时间长度和不同时间步频的数据下策略组合的合约时间对齐和数据引用。
         测试：合约名称大小写不敏感。
@@ -311,45 +328,54 @@ class TestTimeAlign(unittest.TestCase):
 
             def on_symbol(self, ctx):
                 on_symbol_timestep.append("%s %s %s %s" % (ctx.pcontract,
-                                          ctx.strategy, ctx.datetime, ctx.curbar))
+                                          ctx.strategy_name, ctx.datetime, ctx.curbar))
 
             def on_bar(self, ctx):
                 t = ctx['oneday.TEST-1.Minute']
-                on_bar_timestep.append("%s %s %s" % (t.pcontract, t.datetime, t.curbar))
+                on_bar_timestep.append("%s %s %s %s" % (t.pcontract,
+                                                        ctx.strategy_name,
+                                                        t.datetime,
+                                                        t.curbar))
                 t = ctx['TWODAY.TEST-5.Second']
-                on_bar_timestep.append("%s %s %s" % (t.pcontract, t.datetime, t.curbar))
+                on_bar_timestep.append("%s %s %s %s" % (t.pcontract,
+                                                        ctx.strategy_name,
+                                                        t.datetime,
+                                                        t.curbar))
 
-        set_symbols(['TWODAY.TEST-5.Second', 'oneday.TEST-1.Minute'])
-        add_strategy([DemoStrategy('A1'), DemoStrategy('A2')])
-        add_strategy([DemoStrategy('B1'), DemoStrategy('B2')])
-        run()
+        add_strategies(['TWODAY.TEST-5.Second', 'oneday.TEST-1.Minute'], [
+            {
+                'strategy': DemoStrategy('A1'),
+                'capital': 1000000.0 * 0.5,
+            },
+            {
+                'strategy': DemoStrategy('A2'),
+                'capital': 1000000.0 * 0.5,
+            },
+            {
+                'strategy': DemoStrategy('B1'),
+                'capital': 1000000.0 * 0.5,
+            },
+            {
+                'strategy': DemoStrategy('B2'),
+                'capital': 1000000.0 * 0.5,
+            }
+        ])
 
         # on_symbol
         fname = os.path.join(os.getcwd(), 'data', 'diffPeriodOnSymbol.txt')
         with open(fname) as f:
             lines = [line.rstrip('\n') for line in f]
-        assert(len(lines) > 0)
-        count = 0
-        for line in lines:
-            if line.startswith("*"):
-                continue
-            self.assertTrue(on_symbol_timestep[count] == line, "on_symbol时间对齐失败")
-            count += 1
+        self.assertTrue(on_symbol_timestep == lines, "on_symbol时间对齐失败")
 
         # on_bar
         fname = os.path.join(os.getcwd(), 'data', 'diffPeriodOnBar.txt')
         lines = [line.rstrip('\n') for line in open(fname)]
-        assert(len(lines) > 0)
-        count = 0
-        for line in lines:
-            if line.startswith("*"):
-                continue
-            self.assertTrue(on_bar_timestep[count] == line, "on_bar时间对齐失败")
-            count += 1
+        self.assertTrue(on_bar_timestep == lines, "on_bar时间对齐失败")
         logger.info('on_symbol, on_bar 时间对齐测试成功！')
 
 
 class TestDefaultPContract(unittest.TestCase):
+#class TestDefaultPContract(object):
 
     def test_case(self):
         class DemoStrategy(Strategy):
@@ -364,10 +390,13 @@ class TestDefaultPContract(unittest.TestCase):
                 assert(ctx.high == ctx['TWODAY.TEST-5.Second'].high)
                 assert(ctx.low == ctx['TWODAY.TEST-5.Second'].low)
 
-        set_symbols(['TWODAY.TEST-5.Second', 'TWODAY.TEST-1.Minute'])
-        add_strategy([DemoStrategy('A1')])
+        add_strategies(['TWODAY.TEST-5.Second', 'TWODAY.TEST-1.Minute'], [
+            {
+                'strategy': DemoStrategy('A1'),
+                'capital': 1000000.0 * 0.5,
+            }
+        ])
         logger.info("默认合约测试成功！")
-        run()
 
 
 if __name__ == '__main__':

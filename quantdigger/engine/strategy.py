@@ -2,28 +2,9 @@
 from quantdigger.engine.execute_unit import ExecuteUnit
 
 # 系统角色
-_simulator = None
 
 
-def set_symbols(pcontracts,
-                dt_start="1980-1-1",
-                dt_end="2100-1-1",
-                n=None,
-                spec_date={}):  # 'symbol':[,]
-    """
-    Args:
-        pcontracts (list): list of pcontracts(string)
-        dt_start (datetime/str): start time of all pcontracts
-        dt_end (datetime/str): end time of all pcontracts
-        n (int): last n bars
-        spec_date (dict): time range for specific pcontracts
-    """
-    global _simulator
-    _simulator = ExecuteUnit(pcontracts, dt_start, dt_end, n, spec_date)
-    return _simulator
-
-
-def add_strategy(algos, settings={}):
+def add_strategies(symbols, strategies):
     """ 一个组合中的策略
 
     Args:
@@ -32,14 +13,11 @@ def add_strategy(algos, settings={}):
     Returns:
         Profile. 组合结果
     """
-    rst = _simulator.add_comb(algos, settings)
-    # @TODO 为什么去掉测试test_engine_vector.py无法通过
-    settings.clear()
-    return rst
+    simulator = ExecuteUnit(symbols, "1980-1-1", "2100-1-1", None, {})
+    profiles = list(simulator.add_strategies(strategies))
+    simulator.run()
 
-
-def run():
-    _simulator.run()
+    return profiles
 
 
 class Strategy(object):
@@ -49,6 +27,14 @@ class Strategy(object):
 
     def on_init(self, ctx):
         """初始化数据"""
+        return
+
+    def on_symbol_init(self, ctx):
+        """初始化数据"""
+        return
+
+    def on_symbol_step(self, ctx):
+        """ 逐合约逐根k线运行 """
         return
 
     def on_symbol(self, ctx):
@@ -65,4 +51,4 @@ class Strategy(object):
         # 停在最后一根bar
         return
 
-__all__ = ['set_symbols', 'add_strategy', 'run', 'Strategy']
+__all__ = ['add_strategies', 'Strategy']

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from quantdigger.datasource.source import DatasourceAbstract
-from quantdigger.util import dlogger as logger
+from quantdigger.util import log
 from quantdigger.infras.object import HashObject
 
 
@@ -13,12 +13,12 @@ class CachedDatasource(DatasourceAbstract):
 
     def get_bars(self, pcontract, dt_start, dt_end):
         try:
-            logger.info('trying to load from cache')
+            log.info('trying to load from cache')
             return self.cache.get_bars(pcontract, dt_start, dt_end)
         except LoadCacheException as e:
-            logger.info('updating cache')
+            log.info('updating cache')
             missing_range = e.missing_range
-            logger.info('missing range: {0}', missing_range)
+            log.info('missing range: {0}', missing_range)
             missing_data = []
             for start, end in missing_range:
                 wrapper = self.datasource.get_bars(pcontract, start, end)
@@ -26,7 +26,7 @@ class CachedDatasource(DatasourceAbstract):
                                                    start=start,
                                                    end=end))
             self.cache.save_data(missing_data, pcontract)
-            logger.info('loading cache')
+            log.info('loading cache')
             return self.cache.get_bars(pcontract, dt_start, dt_end)
 
     def get_last_bars(self, pcontract, n):

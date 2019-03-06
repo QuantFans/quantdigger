@@ -6,7 +6,6 @@
 # @version 0.2
 # @date 2015-12-09
 
-import six
 from quantdigger import *
 
 class DemoStrategy(Strategy):
@@ -15,9 +14,9 @@ class DemoStrategy(Strategy):
         super(DemoStrategy, self).__init__(name)
         self.candicates = []
         self.to_sell = []
-    
+
     def on_init(self, ctx):
-        """初始化数据""" 
+        """初始化数据"""
         ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2)
         ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2)
 
@@ -31,13 +30,11 @@ class DemoStrategy(Strategy):
     def on_bar(self, ctx):
         for symbol in self.to_sell:
             if ctx.pos('long', symbol) > 0:
-                ctx.sell(ctx[symbol].close, 1, symbol) 
-                #six.print_("sell:", symbol)
+                ctx.sell(ctx[symbol].close, 1, symbol)
 
         for symbol in self.candicates:
             if ctx.pos('long', symbol) == 0:
-                ctx.buy(ctx[symbol].close, 1, symbol) 
-                #six.print_("buy:", symbol)
+                ctx.buy(ctx[symbol].close, 1, symbol)
 
 
         self.candicates = []
@@ -45,21 +42,23 @@ class DemoStrategy(Strategy):
         return
 
     def on_exit(self, ctx):
-        six.print_("策略运行结束．")
+        print("策略运行结束．")
         return
 
 
 
 if __name__ == '__main__':
-    # 
-    set_symbols(['*.SH'])
-    algo = DemoStrategy('A1')
-    profile = add_strategy([algo], { 'capital': 500000000.0 })
+    #
+    profiles = add_strategies(['*.SH'], [
+        {
+            'strategy': DemoStrategy('A1'),
+            'capital': 500000000.0
+        }
+    ])
 
-    run()
 
     from quantdigger.digger import finance, plotting
-    curve = finance.create_equity_curve(profile.all_holdings())
+    curve = finance.create_equity_curve(Profile.all_holdings_sum(profiles))
     #plotting.plot_strategy(profile.data('AA.SHFE-1.Minute'), profile.technicals(0),
                             #profile.deals(0), curve.equity.values)
     ## 绘制净值曲线

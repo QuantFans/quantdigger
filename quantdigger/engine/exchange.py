@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from quantdigger.datastruct import Transaction, PriceType, TradeSide, Direction
 from quantdigger.event import FillEvent
-from quantdigger.util import elogger as logger
+from quantdigger.util import log
 
 
 class Exchange(object):
@@ -33,17 +33,17 @@ class Exchange(object):
             try:
                 bar = bars[order.contract]
             except KeyError:
-                logger.error('所交易的合约[%s]数据不存在' % order.contract)
+                log.error('所交易的合约[%s]数据不存在' % order.contract)
                 continue
             transact = Transaction(order)
             if self._strict:
                 if at_baropen:
                     if order.price_type == PriceType.LMT:
                         price = bar.open
-                        if (order.side == TradeSide.KAI and \
+                        if (order.side == TradeSide.OPEN and \
                                  (order.direction == Direction.LONG and order.price >= price or \
                                  order.direction == Direction.SHORT and order.price <= price)) or \
-                           (order.side == TradeSide.PING and \
+                           (order.side == TradeSide.CLOSE and \
                                  (order.direction == Direction.LONG and order.price <= price or \
                                  order.direction == Direction.SHORT and order.price >= price)):
                                 transact.price = order.price
@@ -60,10 +60,10 @@ class Exchange(object):
                 else:
                     if order.price_type == PriceType.LMT:
                         # 限价单以最高和最低价格为成交的判断条件．
-                        if (order.side == TradeSide.KAI and \
+                        if (order.side == TradeSide.OPEN and \
                                  (order.direction == Direction.LONG and order.price >= bar.low or \
                                  order.direction == Direction.SHORT and order.price <= bar.high)) or \
-                           (order.side == TradeSide.PING and \
+                           (order.side == TradeSide.CLOSE and \
                                  (order.direction == Direction.LONG and order.price <= bar.high or \
                                  order.direction == Direction.SHORT and order.price >= bar.low)):
                                 transact.price = order.price
@@ -73,12 +73,12 @@ class Exchange(object):
                                 self.events.put(FillEvent(transact))
                     elif order.price_type == PriceType.MKT:
                         # 市价单以最高或最低价格为成交价格．
-                        if order.side == TradeSide.KAI:
+                        if order.side == TradeSide.OPEN:
                             if order.direction == Direction.LONG:
                                 transact.price = bar.high
                             else:
                                 transact.price = bar.low
-                        elif order.side == TradeSide.PING:
+                        elif order.side == TradeSide.CLOSE:
                             if order.direction == Direction.LONG:
                                 transact.price = bar.low
                             else:

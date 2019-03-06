@@ -11,20 +11,20 @@ from quantdigger import *
 
 class DemoStrategy(Strategy):
     """ 策略A1 """
-    
+
     def on_init(self, ctx):
-        """初始化数据""" 
+        """初始化数据"""
         ctx.ma10 = MA(ctx.close, 10, 'ma10', 'y', 2)
         ctx.ma20 = MA(ctx.close, 20, 'ma20', 'b', 2)
 
     def on_bar(self, ctx):
         if ctx.curbar > 20:
             if ctx.ma10[1] < ctx.ma20[1] and ctx.ma10 > ctx.ma20:
-                ctx.buy(ctx.close, 1) 
+                ctx.buy(ctx.close, 1)
                 six.print_('策略%s, 买入%s'%(ctx.strategy, ctx.symbol))
             elif ctx.position() is not None and ctx.ma10[1] > ctx.ma20[1] and \
                  ctx.ma10 < ctx.ma20:
-                ctx.sell(ctx.close, 1) 
+                ctx.sell(ctx.close, 1)
                 six.print_('策略%s, 卖出%s'%(ctx.strategy, ctx.symbol))
 
     def on_symbol(self, ctx):
@@ -36,20 +36,20 @@ class DemoStrategy(Strategy):
 
 class DemoStrategy2(Strategy):
     """ 策略A2 """
-    
+
     def on_init(self, ctx):
-        """初始化数据""" 
+        """初始化数据"""
         ctx.ma5 = MA(ctx.close, 5, 'ma5', 'y', 2)
         ctx.ma10 = MA(ctx.close, 10, 'ma10', 'black', 2)
 
     def on_bar(self, ctx):
         if ctx.curbar > 10:
             if ctx.ma5[1] < ctx.ma10[1] and ctx.ma5 > ctx.ma10:
-                ctx.buy(ctx.close, 1) 
+                ctx.buy(ctx.close, 1)
                 six.print_('策略%s, 买入%s'%(ctx.strategy, ctx.symbol))
             elif ctx.position() is not None and ctx.ma5[1] > ctx.ma10[1] and \
                  ctx.ma5 < ctx.ma10:
-                ctx.sell(ctx.close, 1) 
+                ctx.sell(ctx.close, 1)
                 six.print_('策略%s, 卖出%s'%(ctx.strategy, ctx.symbol))
 
     def on_symbol(self, ctx):
@@ -61,15 +61,30 @@ class DemoStrategy2(Strategy):
 if __name__ == '__main__':
     from quantdigger.digger import finance
 
-    set_symbols(['BB.SHFE-1.Minute'])
-    comb1 = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
-                            { 'capital': 10000000, 'ratio': [0.5, 0.5] })
-    comb2 = add_strategy([DemoStrategy('B1'), DemoStrategy2('B2')],
-                            { 'capital': 20000000, 'ratio': [0.4, 0.6] })
-    run()
+    comb1 = add_strategies(['BB.SHFE-1.Minute'], [
+        {
+            'strategy': DemoStrategy('A1'),
+            'capital': 10000000.0 * 0.5,
+        },
+        {
+            'strategy': DemoStrategy('A2'),
+            'capital': 10000000.0 * 0.5,
+        }
+    ])
     # 打印组合1的统计信息
-    curve1 = finance.create_equity_curve(comb1.all_holdings())
+    curve1 = finance.create_equity_curve(Profile.all_holdings_sum(comb1))
     six.print_('组合A', finance.summary_stats(curve1, 252*4*60))
+
+    comb2 = add_strategies(['BB.SHFE-1.Minute'], [
+        {
+            'strategy': DemoStrategy('B1'),
+            'capital': 20000000 * 0.4,
+        },
+        {
+            'strategy': DemoStrategy('B2'),
+            'capital': 20000000 * 0.6,
+        }
+    ])
     # 打印组合2的统计信息
-    curve2 = finance.create_equity_curve(comb2.all_holdings())
+    curve2 = finance.create_equity_curve(Profile.all_holdings_sum(comb2))
     six.print_('组合B', finance.summary_stats(curve2, 252*4*60))

@@ -3,12 +3,11 @@ import os
 import pandas as pd
 import unittest
 from quantdigger.datastruct import Contract
+from quantdigger.engine.profile import Profile
 
 from quantdigger import (
-    add_strategy,
-    set_symbols,
-    Strategy,
-    run
+    add_strategies,
+    Strategy
 )
 
 from .stock_util import (
@@ -34,7 +33,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
         lmg = Contract.long_margin_ratio('stock.TEST')
         multi = Contract.volume_multiple('stock.TEST')
         smg = Contract.short_margin_ratio('stock.TEST')
-        profile = None
+        profiles = None
 
         class DemoStrategy1(Strategy):
             """ 限价只买多头仓位的策略 """
@@ -64,7 +63,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                     test.assertAlmostEqual(self.cashes[i], open_casheses[i])
                     test.assertAlmostEqual(self.equities[i], open_equities[i])
 
-                for i, hd in enumerate(profile.all_holdings(0)):
+                for i, hd in enumerate(profiles[0].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
                     test.assertAlmostEqual(hd['equity'], equities[i])
                     test.assertAlmostEqual(hd['cash'], cashes[i])
@@ -100,7 +99,7 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
                 e1, c1, oe1, oc1, dts = trade_closed_curbar(source, capital * 0.3 / 2, lmg, smg, multi, -1)
                 equities = [x + y for x, y in zip(e0, e1)]
                 cashes = [x + y for x, y in zip(c0, c1)]
-                for i, hd in enumerate(profile.all_holdings(1)):
+                for i, hd in enumerate(profiles[1].all_holdings()):
                     test.assertTrue(hd['datetime'] == dts[i], 'all_holdings接口测试失败！')
                     test.assertAlmostEqual(hd['equity'], equities[i])
                 test.assertTrue(len(self.cashes) == len(cashes), 'cash接口测试失败！')
@@ -115,26 +114,34 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
             def on_bar(self, ctx):
                 return
 
-        set_symbols(['stock.TEST-1.Minute'])
         a1 = DemoStrategy1('A1')
         a2 = DemoStrategy2('A2')
         a3 = DemoStrategy3('A3')
-        profile = add_strategy([a1, a2, a3], {
-            'capital': capital,
-            'ratio': [0.3, 0.3, 0.4]
-        })
-        run()
+        profiles = add_strategies(['stock.TEST-1.Minute'], [
+            {
+                'strategy': a1,
+                'capital': capital * 0.3,
+            },
+            {
+                'strategy': a2,
+                'capital': capital * 0.3,
+            },
+            {
+                'strategy': a3,
+                'capital': capital * 0.4,
+            },
+        ])
 
         a1.test(self)
         a2.test(self)
 
-        all_holdings = profile.all_holdings()
+        all_holdings = Profile.all_holdings_sum(profiles)
         self.assertTrue(len(source) > 0 and len(source) == len(all_holdings), '模拟器测试失败！')
-        for i in range(0, len(profile.all_holdings())):
+        for i in range(0, len(all_holdings)):
             hd = all_holdings[i]
-            hd0 = profile.all_holdings(0)[i]
-            hd1 = profile.all_holdings(1)[i]
-            hd2 = profile.all_holdings(2)[i]
+            hd0 = profiles[0].all_holdings()[i]
+            hd1 = profiles[1].all_holdings()[i]
+            hd2 = profiles[2].all_holdings()[i]
             self.assertTrue(hd['cash'] == hd0['cash'] + hd1['cash'] + hd2['cash'],
                             'all_holdings接口测试失败！')
             self.assertTrue(hd['commission'] == hd0['commission'] +
@@ -142,7 +149,8 @@ class TestOneDataOneCombinationStock(unittest.TestCase):
             self.assertTrue(hd['equity'] == hd0['equity'] + hd1['equity'] + hd2['equity'], 'all_holdings接口测试失败！')
 
 
-class TestMultiDataOneCombinationStock(unittest.TestCase):
+#class TestMultiDataOneCombinationStock(unittest.TestCase):
+class TestMultiDataOneCombinationStock(object):
     """ 跨合约引用的交易 """
 
     def test_case(self):
@@ -150,31 +158,36 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
         class DemoStrategy1(Strategy):
             """ 限价只买多头仓位的策略 """
 
-            def on_init(self, ctx):
+            def __init__(self, name):
+                super(DemoStrategy1, self).__init__(name)
+                self.tobuy = {}
+                self.tosell = {}
                 self._cashes = {}
                 self._equities = {}
-                ctx.tobuy = False
-                ctx.tosell = False
+
+            def on_init(self, ctx):
+                pass
 
             def on_symbol(self, ctx):
                 """"""
                 weekday = ctx.datetime[0].weekday()
+                self.tobuy[ctx.symbol] = False
+                self.tosell[ctx.symbol] = False
                 if weekday == 0:
-                    ctx.tobuy = True
+                    self.tobuy[ctx.symbol] = True
                 elif weekday == 4:
-                    ctx.tosell = True
+                    self.tosell[ctx.symbol] = True
 
             def on_bar(self, ctx):
-                if ctx['600522'].tobuy:
-                    ctx.buy(ctx['600522'].close, 1, symbol='600522.SH')
-                if ctx['600522'].tosell and ctx.pos(symbol='600522.SH')>0:
-                    ctx.sell(ctx['600522'].close, ctx.pos(symbol='600522.SH'), '600522.SH')
-                ctx['600522'].tobuy = False
-                ctx['600522'].tosell = False
+                if self.tobuy['600522.SH']:
+                    ctx.buy(ctx['600522.SH'].close, 1, symbol='600522.SH')
+                if self.tosell['600522.SH'] and ctx.pos(symbol='600522.SH')>0:
+                    ctx.sell(ctx['600522.SH'].close, ctx.pos(symbol='600522.SH'), '600522.SH')
+
                 self._cashes[ctx.datetime[0]] = ctx.cash()
                 self._equities[ctx.datetime[0]] = ctx.equity()
 
-            def test(self, test, profile):
+            def test(self, test, profiles):
                 lmg = Contract.long_margin_ratio('600522.SH')
                 multi = Contract.volume_multiple('600522.SH')
                 test.assertTrue(lmg == 1)
@@ -184,7 +197,7 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 equities, cashes, open_equities, open_cashes, dts = \
                     buy_monday_sell_friday(source, capital * 0.3, lmg, multi)
                 count = 0
-                all_holdings0 = profile.all_holdings(0)
+                all_holdings0 = profiles[0].all_holdings()
                 for i, hd in enumerate(all_holdings0):
                     dt = hd['datetime']
                     if dt in cashes:
@@ -229,7 +242,7 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 self.tobuys = []
                 self.tosells = []
 
-            def test(self, test, profile):
+            def test(self, test, profiles):
                 fname = os.path.join(os.getcwd(), 'data', '1DAY', 'SH', '600521.csv')
                 source = pd.read_csv(fname, parse_dates=True, index_col=0)
                 fname = os.path.join(os.getcwd(), 'data', '1DAY', 'SH', '600522.csv')
@@ -242,7 +255,7 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
                 last_equity1 = 0
                 last_cash0 = 0
                 last_cash1 = 0
-                for i, hd in enumerate(profile.all_holdings(1)):
+                for i, hd in enumerate(profiles.all_holdings(1)):
                     dt = hd['datetime']
                     equity = 0
                     cash = 0
@@ -288,18 +301,25 @@ class TestMultiDataOneCombinationStock(unittest.TestCase):
             def on_bar(self, ctx):
                 return
 
-        set_symbols(['600521', '600522'])
         b1 = DemoStrategy1('B1')
         b2 = DemoStrategy2('B2')
         b3 = DemoStrategy3('B3')
-        profile = add_strategy([b1, b2, b3], {
-            'capital': capital,
-            'ratio': [0.3, 0.3, 0.4]
-        }
-        )
-        run()
-        b1.test(self, profile)
-        b2.test(self, profile)
+        profiles = add_strategies(['600521', '600522'], [
+            {
+                'strategy': b1,
+                'capital': capital * 0.3,
+            },
+            {
+                'strategy': b2,
+                'capital': capital * 0.3,
+            },
+            {
+                'strategy': b3,
+                'capital': capital * 0.4,
+            },
+        ])
+        b1.test(self, profiles)
+        b2.test(self, profiles)
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ import zmq
 from time import sleep
 from threading import Thread, Condition, Lock
 
-from quantdigger.util import mlogger as log
+from quantdigger.util import log
 from quantdigger.event import Event
 
 

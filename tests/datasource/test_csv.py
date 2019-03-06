@@ -19,7 +19,7 @@ class TestCsvSource(unittest.TestCase):
         ConfigUtil.set(source='csv')
         data_manager = DataManager()
         target = data_manager.get_bars(
-            'BB.TEST-1.Minute', _DT_START, _DT_END).data
+            'BB.TEST-1.Minute', _DT_START, _DT_END)
         fname = os.path.join(os.getcwd(), 'data', '1MINUTE', 'TEST', 'CC.csv')
         logger.info('-- CSV数据路径: ' + fname + ' --')
         source = pd.read_csv(

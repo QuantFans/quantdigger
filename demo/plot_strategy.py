@@ -6,9 +6,8 @@ from quantdigger import (
     DateTimeSeries,
     NumberSeries,
     set_config,
-    set_symbols,
-    add_strategy,
-    run
+    add_strategies,
+    Profile
 )
 
 
@@ -70,10 +69,16 @@ if __name__ == '__main__':
     import timeit
     start = timeit.default_timer()
     set_config({'source': 'csv'})
-    set_symbols(['BB.SHFE-1.Day'])
-    profile = add_strategy([DemoStrategy('A1'), DemoStrategy2('A2')],
-                           {'capital': 50000.0, 'ratio': [0.5, 0.5]})
-    run()
+    profiles = add_strategies(['BB.SHFE-1.Day'], [
+        {
+            'strategy': DemoStrategy('A1'),
+            'capital': 50000.0 * 0.5,
+        },
+        {
+            'strategy': DemoStrategy2('A2'),
+            'capital': 50000.0 * 0.5,
+        }
+    ])
     stop = timeit.default_timer()
     print("运行耗时: %d秒" % ((stop - start)))
 
@@ -81,12 +86,12 @@ if __name__ == '__main__':
     from quantdigger.digger import finance, plotting
     s = 0
     # 绘制策略A1, 策略A2, 组合的资金曲线
-    curve0 = finance.create_equity_curve(profile.all_holdings(0))
-    curve1 = finance.create_equity_curve(profile.all_holdings(1))
-    curve = finance.create_equity_curve(profile.all_holdings())
-    plotting.plot_strategy(profile.data(), profile.technicals(0),
-                           profile.deals(0), curve0.equity.values,
-                           profile.marks(0))
+    curve0 = finance.create_equity_curve(profiles[0].all_holdings())
+    curve1 = finance.create_equity_curve(profiles[1].all_holdings())
+    curve = finance.create_equity_curve(Profile.all_holdings_sum(profiles))
+    plotting.plot_strategy(profiles[0].data(), profiles[0].technicals(),
+                           profiles[0].deals(), curve0.equity.values,
+                           profiles[0].marks())
     # 绘制净值曲线
     plotting.plot_curves([curve.networth])
     # 打印统计信息
