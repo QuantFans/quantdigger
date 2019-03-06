@@ -171,7 +171,7 @@ class Volume(Plotter):
         self.values = ndarray(volume)
 
     def plot(self, widget):
-        import matplotlib.finance as finance
+        import mpl_finance as finance
         self.widget = widget
         finance.volume_overlay(widget, self.open, self.close, self.volume,
                                self.colorup, self.colordown, self.width)

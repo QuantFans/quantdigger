@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# @file plot_strategy.py
-# @brief 策略运行和图表展示
-# @author wondereamer
-# @version 0.2
-# @date 2015-12-09
-
-import six
 from quantdigger import (
     Strategy,
     MA,

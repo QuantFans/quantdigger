@@ -36,7 +36,7 @@ def func():
     return
 
 
-t = timeit('func()', 'from __main__ import func', number=1000)
+t = timeit('func()', 'from __main__ import func', number=100)
 print(t)
 
 subprocess.Popen.kill(backend)
